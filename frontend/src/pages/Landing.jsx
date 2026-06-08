@@ -425,6 +425,7 @@ function DemoQuiz() {
                   ? "bg-[#3D9970]/10 border-[#3D9970]/40"
                   : "bg-[#D9534F]/10 border-[#D9534F]/40"
               }`}
+              data-testid="demo-feedback"
             >
               <p className="font-display text-xl font-bold text-navy mb-1">
                 {selected === sample.correct ? "✅ Bonne réponse !" : "❌ Pas tout à fait..."}
