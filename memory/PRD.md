@@ -60,3 +60,11 @@ Source data: French senior quiz platform (6 categories, 8 activities, sample que
 - ✅ Hero landing mis à jour : « Huit univers, huit personnages », « 100+ questions », mention quadras + septuagénaires
 - ✅ Tests : 50/50 backend + 100% parcours frontend
 - ✅ Corrections éditoriales : q40_3 (L'Aventurier d'Indochine), q40_16 (Sous le Soleil à Saint-Tropez), cu8 (tablier de sapeur)
+
+## Implemented (2026-02-08, iteration 5) — 240 questions + randomisation
+- ✅ Pool de questions étendu : 100 → **240 questions** (30 par catégorie pour les 8 catégories)
+- ✅ Backend `GET /api/categories/{id}/questions` utilise MongoDB `$sample` aggregation pour retourner un sous-ensemble aléatoire à chaque appel (5 pour free, 20 pour premium)
+- ✅ Variété confirmée : 4 visites successives de `/app/quiz/chansons` produisent 4 premières questions différentes
+- ✅ Défi Famille bénéficie aussi de la randomisation (déjà via `random.shuffle` côté création — vérifié : 3 défis créés successivement = 2+ snapshots distincts)
+- ✅ Tests : **54/54 backend** (185+ cumulés), 100% frontend
+- ✅ Couverture pool : test vérifie que 15 appels successifs en premium révèlent les 30 IDs uniques par catégorie (donc seed complet)
