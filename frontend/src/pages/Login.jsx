@@ -81,6 +81,12 @@ export default function Login() {
               </div>
             )}
 
+            <div className="text-right">
+              <Link to="/forgot-password" data-testid="login-forgot-link" className="text-sm font-bold text-navy/70 hover:text-terracotta">
+                Mot de passe oublié ?
+              </Link>
+            </div>
+
             <button
               data-testid="login-submit"
               type="submit"

@@ -36,6 +36,7 @@ export default function Navbar({ variant = "landing" }) {
             <>
               <Link to="/app/dashboard" data-testid="nav-dashboard" className="px-4 py-2 text-lg font-semibold text-navy hover:text-terracotta transition">Mes quiz</Link>
               <Link to="/app/challenges" data-testid="nav-challenges" className="px-4 py-2 text-lg font-semibold text-navy hover:text-terracotta transition">Défi famille</Link>
+              <Link to="/app/account" data-testid="nav-account" className="px-4 py-2 text-lg font-semibold text-navy hover:text-terracotta transition">Mon compte</Link>
               {user.role === "admin" && (
                 <Link to="/app/admin/promo" data-testid="nav-admin-promo" className="px-4 py-2 text-lg font-semibold text-bordeaux hover:text-terracotta transition">Promos</Link>
               )}

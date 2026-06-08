@@ -15,6 +15,9 @@ import ChallengeNew from "@/pages/ChallengeNew";
 import ChallengeDetail from "@/pages/ChallengeDetail";
 import ChallengePlay from "@/pages/ChallengePlay";
 import AdminPromo from "@/pages/AdminPromo";
+import Account from "@/pages/Account";
+import ForgotPassword from "@/pages/ForgotPassword";
+import ResetPassword from "@/pages/ResetPassword";
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();
@@ -41,6 +44,16 @@ export default function App() {
           <Route path="/" element={<Landing />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
+          <Route
+            path="/app/account"
+            element={
+              <ProtectedRoute>
+                <Account />
+              </ProtectedRoute>
+            }
+          />
           <Route
             path="/app/dashboard"
             element={

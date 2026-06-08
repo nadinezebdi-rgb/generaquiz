@@ -1,0 +1,30 @@
+{
+  "summary": "Iteration 6: account/profile space + forgot/reset password (MOCKED email) + change password + account deletion. Added 12 new backend tests in /app/backend/tests/test_account.py — ALL PASSED. Full regression: 82/82 backend tests passing across backend_test.py + test_promo.py + test_account.py. Full UI end-to-end Playwright run completed the entire flow: register → /app/account (update name, wrong-pw error, correct-pw success) → logout → /login forgot link → /forgot-password (mocked reset_link visible + copy + use-link) → /reset-password (mismatch error + success + auto-redirect to /login) → login with new password → /app/account delete → redirect to /login. Every data-testid listed in the request is present and wired. No regressions.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {"ui_bugs": [], "integration_issues": [], "design_issues": []},
+  "test_report_links": [
+    "/app/backend/tests/test_account.py",
+    "/app/backend/tests/backend_test.py",
+    "/app/backend/tests/test_promo.py",
+    "/app/test_reports/pytest/pytest_account_results.xml",
+    "/app/test_reports/pytest/pytest_results.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "POST /api/auth/forgot-password correctly avoids user enumeration: unknown email returns {ok:true, message:...} only (no reset_token / reset_link / mocked field). Known email returns mocked:true + reset_token + reset_link. Verified by test_unknown_email_returns_generic_success_no_token + test_known_email_returns_mocked_token_and_link.",
+    "MOCKED behavior is explicit and discoverable: response field mocked:true and inline comment in server.py (~line 290) make this obvious for future swap with a real email provider. No accidental token leaks in unknown-email path.",
+    "TTL + unique indexes verified on password_reset_tokens collection: token is unique, expires_at has expireAfterSeconds=0 (test_indexes_present). Single-use enforcement (used:true flag) verified by reusing a consumed token → 400 'Lien déjà utilisé'.",
+    "Cascade on DELETE /api/auth/account confirmed: user document removed, attempts deleted, /me returns 401 with same cookies, login with deleted email returns 401. challenges.delete_many({creator_user_id}) is also called (covered by code path; no premium test user created here to avoid stale challenges in DB).",
+    "Frontend Account.jsx uses data-testid attributes for ALL interactive elements as specified (account-name, account-email[disabled], account-save-name, account-plan-free, account-upgrade, account-current-pw, account-new-pw, account-new-pw2, account-save-pw, account-pw-error, account-pw-success, account-logout, account-delete). Navbar exposes nav-account. Login exposes login-forgot-link. ForgotPassword exposes forgot-email/submit/result/reset-link/copy/use-link. ResetPassword exposes reset-pw1/pw2/submit/error/success.",
+    "Minor robustness: server PATCH /api/auth/profile and POST /api/auth/change-password wrap ObjectId(str(user['_id'])) defensively even though user['_id'] is already an ObjectId from get_current_user — harmless but unnecessary. No action needed.",
+    "Suggestion (out of scope): consider rate-limiting POST /api/auth/forgot-password by IP to prevent token-generation flood (each known email creates a Mongo document until TTL expires)."
+  ],
+  "updated_files": ["/app/backend/tests/test_account.py"],
+  "success_rate": {"backend": "100% (82/82 — 12 new account tests + 54 existing + 16 promo)", "frontend": "100% (full register→forgot→reset→login→change-pw→delete flow completed end-to-end with all data-testid present and reactive)"},
+  "test_credentials": "admin@quizdantan.fr / Admin2026!  (test users registered per-run with timestamped emails qa.acct.* / qa.ui.*)",
+  "seed_data_creation": "Test run creates ~3-4 disposable users (qa.acct.*, qa.idx.*, qa.ui.*) and a handful of password_reset_tokens records (auto-cleaned by 1h TTL). One user is deleted via /api/auth/account in the UI test. No persistent pollution.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Auth flows are now: register/login/logout/me + forgot-password (MOCKED — reset_token returned in response when email exists), reset-password (single-use, 400 on reuse), change-password (auth), PATCH profile (auth, name only), DELETE account (auth, cascades attempts + challenges). password_reset_tokens collection has TTL on expires_at (1h) and unique on token. To swap the MOCKED email for a real provider: change forgot_password() to send email instead of returning reset_token/reset_link/mocked. Frontend reads reset_link from response — when real email lands, update ForgotPassword.jsx to show only a success message (drop the link/copy/use-link buttons).",
+  "rca of the issue": "N/A — feature works end-to-end with no defects observed."
+}

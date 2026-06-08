@@ -180,6 +180,24 @@ class LoginRequest(BaseModel):
     password: str
 
 
+class ForgotPasswordRequest(BaseModel):
+    email: EmailStr
+
+
+class ResetPasswordRequest(BaseModel):
+    token: str = Field(min_length=8, max_length=128)
+    new_password: str = Field(min_length=6)
+
+
+class ChangePasswordRequest(BaseModel):
+    current_password: str = Field(min_length=1)
+    new_password: str = Field(min_length=6)
+
+
+class UpdateProfileRequest(BaseModel):
+    name: str = Field(min_length=1, max_length=80)
+
+
 class AttemptCreate(BaseModel):
     category_id: str
     score: int
@@ -246,6 +264,90 @@ async def logout(response: Response):
 @api.get("/auth/me")
 async def me(user: dict = Depends(get_current_user)):
     return user_to_public(user)
+
+
+@api.post("/auth/forgot-password")
+async def forgot_password(body: ForgotPasswordRequest):
+    """Always returns success (no user enumeration). If the user exists, generates
+    a reset token. Email delivery is MOCKED — the reset link is returned in the
+    response when the user exists (replace with email integration in production)."""
+    email = body.email.lower().strip()
+    user = await db.users.find_one({"email": email})
+    if not user:
+        return {"ok": True, "message": "Si ce compte existe, un lien a été envoyé."}
+    token = secrets.token_urlsafe(32)
+    expires_at = datetime.now(timezone.utc) + timedelta(hours=1)
+    await db.password_reset_tokens.insert_one({
+        "token": token,
+        "user_id": str(user["_id"]),
+        "email": email,
+        "expires_at": expires_at,
+        "used": False,
+        "created_at": datetime.now(timezone.utc),
+    })
+    reset_link = f"{FRONTEND_URL}/reset-password?token={token}"
+    logger.info(f"[RESET] {email} -> {reset_link}")
+    # MOCKED: return token directly so user can complete the flow without email service
+    return {
+        "ok": True,
+        "message": "Lien de réinitialisation généré.",
+        "reset_token": token,
+        "reset_link": reset_link,
+        "mocked": True,
+    }
+
+
+@api.post("/auth/reset-password")
+async def reset_password(body: ResetPasswordRequest):
+    record = await db.password_reset_tokens.find_one({"token": body.token})
+    if not record:
+        raise HTTPException(status_code=400, detail="Lien invalide ou expiré")
+    if record.get("used"):
+        raise HTTPException(status_code=400, detail="Lien déjà utilisé")
+    expires = record.get("expires_at")
+    if isinstance(expires, datetime):
+        if expires.tzinfo is None:
+            expires = expires.replace(tzinfo=timezone.utc)
+        if expires < datetime.now(timezone.utc):
+            raise HTTPException(status_code=400, detail="Lien expiré")
+    new_hash = hash_password(body.new_password)
+    await db.users.update_one(
+        {"_id": ObjectId(record["user_id"])},
+        {"$set": {"password_hash": new_hash}},
+    )
+    await db.password_reset_tokens.update_one(
+        {"_id": record["_id"]}, {"$set": {"used": True, "used_at": datetime.now(timezone.utc)}}
+    )
+    return {"ok": True, "message": "Mot de passe réinitialisé. Vous pouvez vous connecter."}
+
+
+@api.post("/auth/change-password")
+async def change_password(body: ChangePasswordRequest, user: dict = Depends(get_current_user)):
+    if not verify_password(body.current_password, user["password_hash"]):
+        raise HTTPException(status_code=400, detail="Mot de passe actuel incorrect")
+    new_hash = hash_password(body.new_password)
+    await db.users.update_one({"_id": ObjectId(str(user["_id"]))}, {"$set": {"password_hash": new_hash}})
+    return {"ok": True, "message": "Mot de passe mis à jour"}
+
+
+@api.patch("/auth/profile")
+async def update_profile(body: UpdateProfileRequest, user: dict = Depends(get_current_user)):
+    await db.users.update_one(
+        {"_id": ObjectId(str(user["_id"]))}, {"$set": {"name": body.name.strip()}}
+    )
+    fresh = await db.users.find_one({"_id": ObjectId(str(user["_id"]))})
+    return user_to_public(fresh)
+
+
+@api.delete("/auth/account")
+async def delete_account(user: dict = Depends(get_current_user), response: Response = None):
+    user_id = str(user["_id"])
+    await db.users.delete_one({"_id": ObjectId(user_id)})
+    await db.attempts.delete_many({"user_id": user_id})
+    await db.challenges.delete_many({"creator_user_id": user_id})
+    if response is not None:
+        clear_auth_cookies(response)
+    return {"ok": True}
 
 
 # ---------------------------------------------------------------------------
@@ -743,6 +845,8 @@ async def startup():
     await db.challenges.create_index("token", unique=True)
     await db.challenges.create_index([("creator_user_id", 1), ("created_at", -1)])
     await db.promo_codes.create_index("code", unique=True)
+    await db.password_reset_tokens.create_index("token", unique=True)
+    await db.password_reset_tokens.create_index("expires_at", expireAfterSeconds=0)
 
     # Seed categories
     for cat in CATEGORIES:
