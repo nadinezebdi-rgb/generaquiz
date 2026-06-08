@@ -17,9 +17,9 @@ CATEGORY_IDS = [
 ]
 
 EXPECTED_COUNTS = {
-    "annees-50-60": 10, "chansons": 10, "cinema": 10,
-    "objets-antan": 10, "histoire-france": 10, "cuisine-terroir": 10,
-    "culture-40-ans": 20, "culture-70-ans": 20,
+    "annees-50-60": 30, "chansons": 30, "cinema": 30,
+    "objets-antan": 30, "histoire-france": 30, "cuisine-terroir": 30,
+    "culture-40-ans": 30, "culture-70-ans": 30,
 }
 
 EXPECTED_MASCOTS = {
@@ -216,12 +216,18 @@ class TestQuizQuestions:
         assert data["category"]["mascot_name"] == "Pierre le Sage"
 
     def test_premium_user_gets_up_to_20(self, admin_session):
-        # chansons has 10 seeded; premium gets all 10
+        # chansons has 30 seeded; premium gets 20 random subset
         r = admin_session.get(f"{API}/categories/chansons/questions")
         assert r.status_code == 200
         data = r.json()
         assert data["is_premium"] is True
-        assert len(data["questions"]) == 10
+        assert len(data["questions"]) == 20
+        # unique ids
+        ids = [q["id"] for q in data["questions"]]
+        assert len(set(ids)) == 20
+        # all belong to chansons
+        for q in data["questions"]:
+            assert q["category_id"] == "chansons"
 
     def test_premium_culture_40_ans_returns_20(self, admin_session):
         r = admin_session.get(f"{API}/categories/culture-40-ans/questions")
@@ -249,6 +255,44 @@ class TestQuizQuestions:
     def test_invalid_category(self, admin_session):
         r = admin_session.get(f"{API}/categories/does-not-exist/questions")
         assert r.status_code == 404
+
+    def test_randomization_free_user_chansons(self, free_user_session):
+        """5 successive calls should yield at least 4 distinct sets (random $sample)."""
+        sets = []
+        for _ in range(5):
+            r = free_user_session.get(f"{API}/categories/chansons/questions")
+            assert r.status_code == 200
+            data = r.json()
+            assert len(data["questions"]) == 5
+            sets.append(tuple(sorted(q["id"] for q in data["questions"])))
+        distinct = len(set(sets))
+        assert distinct >= 4, f"Expected >=4 distinct sets in 5 calls, got {distinct}: {sets}"
+
+    def test_randomization_premium_admin_chansons(self, admin_session):
+        """Premium 20-of-30: 5 successive calls should yield at least 4 distinct sets."""
+        sets = []
+        for _ in range(5):
+            r = admin_session.get(f"{API}/categories/chansons/questions")
+            assert r.status_code == 200
+            data = r.json()
+            assert len(data["questions"]) == 20
+            sets.append(tuple(sorted(q["id"] for q in data["questions"])))
+        distinct = len(set(sets))
+        assert distinct >= 4, f"Expected >=4 distinct premium sets, got {distinct}"
+
+    def test_total_pool_30_per_category(self, admin_session):
+        """Aggregate IDs across many calls to verify the pool is exactly 30 per category."""
+        for cid in CATEGORY_IDS:
+            all_ids = set()
+            for _ in range(15):  # 15 calls of 20 random => high prob to cover all 30
+                r = admin_session.get(f"{API}/categories/{cid}/questions")
+                assert r.status_code == 200
+                for q in r.json()["questions"]:
+                    all_ids.add(q["id"])
+                    assert q["category_id"] == cid
+                if len(all_ids) == 30:
+                    break
+            assert len(all_ids) == 30, f"{cid}: only saw {len(all_ids)} unique question ids in pool"
 
 
 # -------- Attempts & stats --------
@@ -432,12 +476,18 @@ class TestChallenges:
         r = admin_session.post(f"{API}/challenges", json={"category_id": "cinema", "num_questions": 4})
         assert r.status_code == 200
         token = r.json()["token"]
-        # Get correct answers from admin (premium) via authenticated endpoint /challenges/mine OR by reading questions
-        # Strategy: admin can read seed answers via /categories/{id}/questions
-        # But challenge questions are randomly chosen subset; we must map by id
-        all_qs = admin_session.get(f"{API}/categories/cinema/questions").json()["questions"]
-        by_id = {q["id"]: q["correct_index"] for q in all_qs}
+        # Build complete id->correct_index map by calling endpoint until we see all 30
+        by_id = {}
+        for _ in range(20):
+            resp = admin_session.get(f"{API}/categories/cinema/questions").json()
+            for q in resp["questions"]:
+                by_id[q["id"]] = q["correct_index"]
+            if len(by_id) == 30:
+                break
         public = requests.get(f"{API}/challenges/{token}").json()
+        # Make sure every challenge question is in our map
+        for q in public["questions"]:
+            assert q["id"] in by_id, f"missing id {q['id']} in pool"
         correct = [by_id[q["id"]] for q in public["questions"]]
         rp = requests.post(f"{API}/challenges/{token}/participate",
                            json={"name": "Champion", "answers": correct, "duration_seconds": 30})
@@ -448,6 +498,18 @@ class TestChallenges:
         top = body["leaderboard"][0]
         assert top["name"] == "Champion"
         assert top["score"] == body["total"]
+
+    def test_challenge_snapshot_randomized(self, admin_session):
+        """Two successive challenges on same category should yield different snapshots."""
+        snaps = []
+        for _ in range(3):
+            r = admin_session.post(f"{API}/challenges", json={"category_id": "chansons", "num_questions": 10})
+            assert r.status_code == 200
+            token = r.json()["token"]
+            pub = requests.get(f"{API}/challenges/{token}").json()
+            assert pub["total"] == 10
+            snaps.append(tuple(sorted(q["id"] for q in pub["questions"])))
+        assert len(set(snaps)) >= 2, f"Challenge snapshots not random: {snaps}"
 
     def test_list_mine_requires_auth(self):
         r = requests.get(f"{API}/challenges/mine")

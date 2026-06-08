@@ -264,7 +264,13 @@ async def get_questions(category_id: str, user: dict = Depends(get_current_user)
     cat = await db.categories.find_one({"id": category_id}, {"_id": 0})
     if not cat:
         raise HTTPException(status_code=404, detail="Catégorie introuvable")
-    qs = await db.questions.find({"category_id": category_id}, {"_id": 0}).to_list(limit)
+    # Random sample from the full pool for variety (Mongo $sample)
+    pipeline = [
+        {"$match": {"category_id": category_id}},
+        {"$sample": {"size": limit}},
+        {"$project": {"_id": 0}},
+    ]
+    qs = await db.questions.aggregate(pipeline).to_list(limit)
     return {"category": cat, "questions": qs, "is_premium": user.get("plan") == "premium"}
 
 
