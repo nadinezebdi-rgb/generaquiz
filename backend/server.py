@@ -877,6 +877,36 @@ async def startup():
         )
         logger.info("Admin password mis à jour")
 
+    # Seed default promo codes (idempotent: only insert if absent)
+    default_promos = [
+        {
+            "code": "FAMILLE2026",
+            "label": "Code famille — accès Premium à vie",
+            "duration_days": LIFETIME_DAYS,
+            "max_uses": None,  # unlimited
+            "expires_at": None,
+            "active": True,
+        },
+        {
+            "code": "DECOUVERTE30",
+            "label": "Essai 30 jours — 50 utilisations",
+            "duration_days": 30,
+            "max_uses": 50,
+            "expires_at": None,
+            "active": True,
+        },
+    ]
+    for promo in default_promos:
+        if not await db.promo_codes.find_one({"code": promo["code"]}):
+            await db.promo_codes.insert_one({
+                **promo,
+                "used_count": 0,
+                "redeemed_by": [],
+                "created_at": datetime.now(timezone.utc).isoformat(),
+                "created_by": "system",
+            })
+            logger.info(f"Promo seedé : {promo['code']}")
+
 
 @app.on_event("shutdown")
 async def shutdown():
