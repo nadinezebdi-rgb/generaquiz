@@ -51,8 +51,17 @@ export default function Dashboard() {
                 </Link>
               )}
               {isPremium && (
-                <div className="inline-flex items-center gap-2 bg-mustard text-navy font-bold px-4 py-2 rounded-full">
-                  <Crown className="w-5 h-5" /> Membre Premium
+                <div className="flex flex-wrap gap-3">
+                  <div className="inline-flex items-center gap-2 bg-mustard text-navy font-bold px-4 py-2 rounded-full">
+                    <Crown className="w-5 h-5" /> Membre Premium
+                  </div>
+                  <Link
+                    to="/app/challenges/new"
+                    data-testid="dashboard-new-challenge"
+                    className="inline-flex items-center gap-2 bg-terracotta hover:bg-terracotta-dark text-white font-bold px-5 py-2 rounded-full shadow-warm transition"
+                  >
+                    Lancer un défi famille <ArrowRight className="w-4 h-4" />
+                  </Link>
                 </div>
               )}
             </div>

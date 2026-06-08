@@ -10,6 +10,10 @@ import Dashboard from "@/pages/Dashboard";
 import QuizPlayer from "@/pages/QuizPlayer";
 import Pricing from "@/pages/Pricing";
 import Success from "@/pages/Success";
+import Challenges from "@/pages/Challenges";
+import ChallengeNew from "@/pages/ChallengeNew";
+import ChallengeDetail from "@/pages/ChallengeDetail";
+import ChallengePlay from "@/pages/ChallengePlay";
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();
@@ -68,6 +72,31 @@ export default function App() {
               </ProtectedRoute>
             }
           />
+          <Route
+            path="/app/challenges"
+            element={
+              <ProtectedRoute>
+                <Challenges />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/app/challenges/new"
+            element={
+              <ProtectedRoute>
+                <ChallengeNew />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/app/challenges/:token"
+            element={
+              <ProtectedRoute>
+                <ChallengeDetail />
+              </ProtectedRoute>
+            }
+          />
+          <Route path="/defi/:token" element={<ChallengePlay />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>

@@ -220,3 +220,140 @@ class TestCheckout:
                                json={"package_id": "premium_yearly", "origin_url": BASE_URL})
         assert r.status_code == 200
         assert "stripe.com" in r.json()["url"]
+
+
+# -------- Défi Famille (Challenges) --------
+class TestChallenges:
+    def test_create_requires_auth(self):
+        r = requests.post(f"{API}/challenges", json={"category_id": "chansons", "num_questions": 4})
+        assert r.status_code == 401
+
+    def test_create_free_user_gets_402(self, free_user_session):
+        r = free_user_session.post(f"{API}/challenges", json={"category_id": "chansons", "num_questions": 4})
+        assert r.status_code == 402, f"expected 402, got {r.status_code} {r.text}"
+        assert "Premium" in r.json().get("detail", "")
+
+    def test_create_admin_premium(self, admin_session):
+        r = admin_session.post(f"{API}/challenges", json={"category_id": "chansons", "num_questions": 4})
+        assert r.status_code == 200, f"{r.status_code} {r.text}"
+        body = r.json()
+        assert "token" in body and len(body["token"]) >= 6
+        assert body["total"] == 4  # chansons pool has 4 questions
+        assert body["category"]["id"] == "chansons"
+        # save for downstream tests
+        pytest.shared_token = body["token"]
+
+    def test_create_invalid_category(self, admin_session):
+        r = admin_session.post(f"{API}/challenges", json={"category_id": "does-not-exist", "num_questions": 3})
+        assert r.status_code == 404
+
+    def test_create_num_questions_validation(self, admin_session):
+        # below min
+        r = admin_session.post(f"{API}/challenges", json={"category_id": "chansons", "num_questions": 1})
+        assert r.status_code == 422
+        # above max
+        r = admin_session.post(f"{API}/challenges", json={"category_id": "chansons", "num_questions": 50})
+        assert r.status_code == 422
+
+    def test_get_public_no_auth_hides_correct_index(self):
+        token = getattr(pytest, "shared_token", None)
+        assert token, "create test must run first"
+        # PUBLIC endpoint - use bare requests (no session/cookies)
+        r = requests.get(f"{API}/challenges/{token}")
+        assert r.status_code == 200
+        body = r.json()
+        assert body["token"] == token
+        assert body["category_id"] == "chansons"
+        assert body["creator_name"]
+        assert body["total"] == 4
+        assert isinstance(body["questions"], list)
+        # Anti-cheat: NO correct_index in any question
+        for q in body["questions"]:
+            assert "correct_index" not in q, f"LEAK: correct_index present in question {q.get('id')}"
+            assert "explanation" not in q, f"LEAK: explanation present in question {q.get('id')}"
+            assert "id" in q and "question" in q and "options" in q
+            assert len(q["options"]) == 4
+        # category meta
+        assert body.get("category_title")
+        assert body.get("category_mascot_image")
+
+    def test_get_unknown_token_404(self):
+        r = requests.get(f"{API}/challenges/nonexistent_token_xyz")
+        assert r.status_code == 404
+
+    def test_participate_public_no_auth(self):
+        token = getattr(pytest, "shared_token", None)
+        assert token
+        # fetch question count
+        meta = requests.get(f"{API}/challenges/{token}").json()
+        n = meta["total"]
+        # All zeros guess
+        payload = {"name": "Mamie Test", "answers": [0] * n, "duration_seconds": 42}
+        r = requests.post(f"{API}/challenges/{token}/participate", json=payload)
+        assert r.status_code == 200, f"{r.status_code} {r.text}"
+        body = r.json()
+        assert body["total"] == n
+        assert 0 <= body["score"] <= n
+        assert isinstance(body["detail"], list) and len(body["detail"]) == n
+        for d in body["detail"]:
+            assert "question_id" in d
+            assert "chosen" in d
+            assert "correct_index" in d  # detail must include for review
+            assert "is_correct" in d
+        assert isinstance(body["leaderboard"], list)
+        assert any(p["name"] == "Mamie Test" for p in body["leaderboard"])
+
+    def test_participate_wrong_answers_length_400(self):
+        token = getattr(pytest, "shared_token", None)
+        r = requests.post(f"{API}/challenges/{token}/participate",
+                          json={"name": "Bad", "answers": [0, 1], "duration_seconds": 5})
+        assert r.status_code == 400
+
+    def test_participate_unknown_token_404(self):
+        r = requests.post(f"{API}/challenges/nope_token/participate",
+                          json={"name": "X", "answers": [0, 0, 0, 0]})
+        assert r.status_code == 404
+
+    def test_participate_perfect_score(self, admin_session):
+        # Create a fresh challenge as admin then play it with the correct answers
+        r = admin_session.post(f"{API}/challenges", json={"category_id": "cinema", "num_questions": 4})
+        assert r.status_code == 200
+        token = r.json()["token"]
+        # Get correct answers from admin (premium) via authenticated endpoint /challenges/mine OR by reading questions
+        # Strategy: admin can read seed answers via /categories/{id}/questions
+        # But challenge questions are randomly chosen subset; we must map by id
+        all_qs = admin_session.get(f"{API}/categories/cinema/questions").json()["questions"]
+        by_id = {q["id"]: q["correct_index"] for q in all_qs}
+        public = requests.get(f"{API}/challenges/{token}").json()
+        correct = [by_id[q["id"]] for q in public["questions"]]
+        rp = requests.post(f"{API}/challenges/{token}/participate",
+                           json={"name": "Champion", "answers": correct, "duration_seconds": 30})
+        assert rp.status_code == 200
+        body = rp.json()
+        assert body["score"] == body["total"]
+        # leaderboard top entry is Champion (best score, lowest time)
+        top = body["leaderboard"][0]
+        assert top["name"] == "Champion"
+        assert top["score"] == body["total"]
+
+    def test_list_mine_requires_auth(self):
+        r = requests.get(f"{API}/challenges/mine")
+        assert r.status_code == 401
+
+    def test_list_mine_returns_creator_challenges(self, admin_session):
+        r = admin_session.get(f"{API}/challenges/mine")
+        assert r.status_code == 200
+        rows = r.json()
+        assert isinstance(rows, list)
+        assert len(rows) >= 1
+        # sorted desc by created_at
+        if len(rows) >= 2:
+            assert rows[0]["created_at"] >= rows[1]["created_at"]
+        # correct_index must NOT appear in any question
+        for ch in rows:
+            assert "total_questions" in ch
+            assert isinstance(ch.get("participants", []), list)
+            for q in ch.get("questions", []):
+                assert "correct_index" not in q
+                assert "explanation" not in q
+
