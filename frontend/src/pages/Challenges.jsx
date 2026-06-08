@@ -13,8 +13,12 @@ export default function Challenges() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (!user || user === false || user.plan !== "premium") {
+      setLoading(false);
+      return;
+    }
     api.get("/challenges/mine").then((r) => setItems(r.data)).catch(() => {}).finally(() => setLoading(false));
-  }, []);
+  }, [user]);
 
   const isPremium = user?.plan === "premium";
 

@@ -38,3 +38,9 @@ Source data: French senior quiz platform (6 categories, 8 activities, sample que
 - Plus de questions par catégorie (cible 40-70 par catégorie)
 - Customer portal Stripe (annulation, factures)
 - Mode sombre / mode contraste élevé pour seniors mal-voyants
+
+## Implemented (2026-02-08, iteration 2) — Défi Famille
+- ✅ Backend: collection `challenges`, endpoints POST /api/challenges (Premium-only), GET /api/challenges/mine, GET /api/challenges/{token} (public, anti-cheat: hides correct_index), POST /api/challenges/{token}/participate (public, server-side score calculation)
+- ✅ Frontend: /app/challenges (liste), /app/challenges/new (création + gating Premium), /app/challenges/{token} (lien partage WhatsApp/SMS/Email/copy + leaderboard live polling 5s), /defi/{token} (jeu public sans compte)
+- ✅ Anti-triche : `correct_index` jamais exposé au client, score calculé côté serveur
+- ✅ Tests : 38/38 backend (13 nouveaux pour challenges), tous parcours frontend validés
