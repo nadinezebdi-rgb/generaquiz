@@ -14,6 +14,7 @@ import Challenges from "@/pages/Challenges";
 import ChallengeNew from "@/pages/ChallengeNew";
 import ChallengeDetail from "@/pages/ChallengeDetail";
 import ChallengePlay from "@/pages/ChallengePlay";
+import AdminPromo from "@/pages/AdminPromo";
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();
@@ -97,6 +98,14 @@ export default function App() {
             }
           />
           <Route path="/defi/:token" element={<ChallengePlay />} />
+          <Route
+            path="/app/admin/promo"
+            element={
+              <ProtectedRoute>
+                <AdminPromo />
+              </ProtectedRoute>
+            }
+          />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>

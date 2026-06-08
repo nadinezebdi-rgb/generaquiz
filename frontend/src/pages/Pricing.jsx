@@ -4,13 +4,16 @@ import { api } from "@/lib/api";
 import { useAuth } from "@/contexts/AuthContext";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { Check, Crown, ArrowRight, Loader2 } from "lucide-react";
+import { Check, Crown, ArrowRight, Loader2, Ticket, Sparkles } from "lucide-react";
 
 export default function Pricing() {
-  const { user } = useAuth();
+  const { user, refresh } = useAuth();
   const [packages, setPackages] = useState([]);
   const [loadingId, setLoadingId] = useState(null);
   const [err, setErr] = useState("");
+  const [promoCode, setPromoCode] = useState("");
+  const [promoLoading, setPromoLoading] = useState(false);
+  const [promoMsg, setPromoMsg] = useState(null); // { type: 'success'|'error', text, isLifetime? }
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -46,6 +49,28 @@ export default function Pricing() {
     }
   };
 
+  const redeem = async (e) => {
+    e.preventDefault();
+    setPromoMsg(null); setPromoLoading(true);
+    try {
+      const { data } = await api.post("/promo/redeem", { code: promoCode.trim().toUpperCase() });
+      await refresh();
+      setPromoMsg({
+        type: "success",
+        text: data.is_lifetime
+          ? "Félicitations ! Vous avez désormais un accès Premium illimité 🎉"
+          : `Code accepté ! ${data.duration_days} jours de Premium ajoutés à votre compte.`,
+        isLifetime: data.is_lifetime,
+      });
+      setPromoCode("");
+      setTimeout(() => navigate("/app/dashboard"), 2500);
+    } catch (e2) {
+      setPromoMsg({ type: "error", text: e2.response?.data?.detail || "Code invalide" });
+    } finally {
+      setPromoLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen paper-bg">
       <Navbar variant="app" />
@@ -71,6 +96,57 @@ export default function Pricing() {
         {err && (
           <div className="bg-[#D9534F]/10 border-2 border-[#D9534F]/40 rounded-xl p-4 text-navy text-center mb-6" data-testid="pricing-error">
             {err}
+          </div>
+        )}
+
+        {/* ====== PROMO CODE REDEEM ====== */}
+        {user?.plan !== "premium" && (
+          <div className="bg-white border-4 border-mustard rounded-[28px] p-6 md:p-8 mb-8 shadow-soft" data-testid="promo-redeem-block">
+            <div className="flex flex-col md:flex-row md:items-center gap-5">
+              <div className="flex items-center gap-3 md:shrink-0">
+                <span className="w-14 h-14 rounded-2xl bg-mustard/40 flex items-center justify-center">
+                  <Ticket className="w-7 h-7 text-bordeaux" strokeWidth={2.5} />
+                </span>
+                <div>
+                  <h2 className="font-display text-2xl font-bold text-navy leading-tight">Vous avez un code ?</h2>
+                  <p className="text-navy/70 text-sm">Activez Premium sans paiement.</p>
+                </div>
+              </div>
+              <form onSubmit={redeem} className="flex-1 flex flex-col sm:flex-row gap-3 w-full">
+                <input
+                  data-testid="promo-redeem-input"
+                  type="text"
+                  value={promoCode}
+                  onChange={(e) => setPromoCode(e.target.value.toUpperCase())}
+                  placeholder="Saisissez votre code"
+                  className="flex-1 p-4 text-lg rounded-2xl border-2 border-cream-dark focus:border-navy bg-white min-h-[56px] font-mono uppercase"
+                  maxLength={40}
+                />
+                <button
+                  type="submit"
+                  data-testid="promo-redeem-submit"
+                  disabled={!promoCode.trim() || promoLoading}
+                  className="inline-flex items-center justify-center gap-2 bg-bordeaux hover:bg-[#5d262e] text-cream font-bold px-6 py-4 rounded-full min-h-[56px] disabled:opacity-60 transition"
+                >
+                  {promoLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Sparkles className="w-5 h-5" />}
+                  Activer
+                </button>
+              </form>
+            </div>
+            {promoMsg && (
+              <div
+                data-testid={`promo-redeem-${promoMsg.type}`}
+                className={`mt-5 rounded-2xl p-4 border-2 ${
+                  promoMsg.type === "success"
+                    ? "bg-[#3D9970]/10 border-[#3D9970]/40"
+                    : "bg-[#D9534F]/10 border-[#D9534F]/40"
+                }`}
+              >
+                <p className="text-navy font-medium">
+                  {promoMsg.type === "success" ? "✅ " : "❌ "}{promoMsg.text}
+                </p>
+              </div>
+            )}
           </div>
         )}
 

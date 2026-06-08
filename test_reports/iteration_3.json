@@ -1,0 +1,45 @@
+{
+  "summary": "Tested the new promo codes feature (admin CRUD + user redeem). 16/16 backend pytest cases pass and all 4 frontend UI scenarios pass (non-admin gating, pricing redeem, premium gating, admin CRUD UI). One minor UX observation: the promo-redeem-success message disappears almost immediately after refresh() because the parent promo-redeem-block is hidden when user.plan flips to 'premium' — functionally redeem works, but the user has very little time to read the success banner before the 2.5s navigate fires.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [
+      {
+        "component": "Pricing.jsx promo-redeem-success",
+        "issue": "Success banner is wrapped inside the promo-redeem-block which is conditionally rendered on user.plan !== 'premium'. After successful redeem, refresh() flips plan to premium → block (and therefore the success message) unmounts before user can read it. The 2.5s setTimeout navigates to /app/dashboard regardless, so end-user only sees the success message during the brief render gap (often <500ms depending on refresh timing). Consider rendering the success message outside the gated block, or keep the block mounted for a couple of seconds with a fade-out.",
+        "selector": "[data-testid=\"promo-redeem-success\"]",
+        "priority": "LOW"
+      }
+    ],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_promo.py",
+    "/app/test_reports/pytest/pytest_promo_results.xml"
+  ],
+  "action_items": [
+    "(Optional, low priority) Render the promo-redeem-success message OUTSIDE the `user?.plan !== 'premium'` conditional in /app/frontend/src/pages/Pricing.jsx so users can read the confirmation banner before navigation, or display a toast/snackbar that survives the gated block unmount."
+  ],
+  "critical_code_review_comments": [
+    "Backend: /api/promo/redeem returns 404 for both invalid AND deactivated codes — matches spec, but might be more debuggable if deactivated returned 410 with a distinct message. Spec explicitly requires 404 for deactivated so this is correct.",
+    "Backend: PromoCreate.duration_days uses ge=1, le=LIFETIME_DAYS (36500). The is_lifetime flag triggers at >=LIFETIME_DAYS — exact boundary works correctly.",
+    "Backend: PATCH /admin/promo/{id} toggles active blindly (not idempotent). Spec confirms toggle semantics so this is acceptable; consider adding an explicit body {active: bool} in a future iteration for clarity.",
+    "Frontend: AdminPromo.jsx — `copyCode` swallows clipboard errors silently with empty catch. In permission-denied environments user gets no feedback. Consider showing a fallback toast.",
+    "Frontend: Pricing.jsx — success message UX issue noted above (block unmounts before user reads message).",
+    "Backend: promo_codes collection has a unique index on `code` (good). Seeded codes FAMILLE2026 + YYW3W1-R confirmed present."
+  ],
+  "updated_files": [],
+  "success_rate": {
+    "backend": "100% (16/16)",
+    "frontend": "100% (4/4 scenarios: non-admin gating, invalid+valid redeem, premium gating, admin CRUD+toggle+delete)"
+  },
+  "test_credentials": "admin@quizdantan.fr / Admin2026!  ; free users registered on the fly each run",
+  "seed_data_creation": "Each pytest run creates ~5 temporary promo codes (TEST-, DUP, DEACT, MAX, UITEST...) and several throw-away user accounts. Codes are cleaned up via module-level fixture; users intentionally left in DB for traceability (do not affect functionality).",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Promo feature fully exercised. Backend file is /app/backend/tests/test_promo.py (run with REACT_APP_BACKEND_URL env var set). The seeded code FAMILLE2026 is the unlimited-uses lifetime code used in tests — any new user can redeem it. YYW3W1-R is 30-day, max 3 uses. Frontend nav-admin-promo color verified as rgb(114, 47, 55) (bordeaux). Premium gating works correctly on both pricing page (block hidden) and pricing buttons (disabled + 'Vous êtes Premium').",
+  "rca of the issue": "N/A — no critical issues found. The only minor UX observation has a clear RCA: the success banner is inside a conditionally-rendered block; calling refresh() updates user.plan to 'premium' which unmounts the entire block. Mitigation: move the success div out of the conditional render in Pricing.jsx or use a separate toast/portal."
+}
