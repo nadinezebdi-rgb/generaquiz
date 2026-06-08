@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
   Play, Users, Heart, Sparkles, Check, ArrowRight, Star,
-  Brain, Music, Film, Phone, Landmark, Utensils, BookOpen, Mail, Camera, Newspaper, Type, Activity,
+  Brain, Music, Film, Phone, Landmark, Utensils, BookOpen, Mail, Camera, Newspaper, Type, Activity, Book,
 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -20,7 +20,7 @@ const ACTIVITIES = [
   { id: "jeux-mots", title: "Jeux de Mots", desc: "Mots croisés, charades, mots mêlés.", icon: Type },
 ];
 
-const ICON_MAP = { tv: Film, music: Music, film: Film, phone: Phone, landmark: Landmark, utensils: Utensils };
+const ICON_MAP = { tv: Film, music: Music, film: Film, phone: Phone, landmark: Landmark, utensils: Utensils, sparkles: Sparkles, book: Book };
 
 export default function Landing() {
   const [categories, setCategories] = useState([]);
@@ -79,8 +79,8 @@ export default function Landing() {
 
             <div className="mt-12 grid grid-cols-3 gap-6 max-w-xl border-t-2 border-cream-dark pt-8">
               {[
-                { k: "316", v: "Quiz disponibles" },
-                { k: "8", v: "Activités" },
+                { k: "100+", v: "Questions" },
+                { k: "8", v: "Catégories" },
                 { k: "12K+", v: "Joueurs actifs" },
               ].map((s) => (
                 <div key={s.v}>
@@ -156,10 +156,11 @@ export default function Landing() {
           <div className="text-center max-w-3xl mx-auto mb-14">
             <span className="inline-block bg-mustard text-navy font-bold px-4 py-1 rounded-full text-sm mb-4">Choisissez votre thème</span>
             <h2 className="font-display text-4xl sm:text-5xl font-extrabold text-navy mb-4">
-              Six univers, six personnages
+              Huit univers, huit personnages
             </h2>
             <p className="text-xl text-navy/70 leading-relaxed">
-              Chaque catégorie a son ambassadeur caricaturé pour vous accompagner dans la découverte.
+              Chaque catégorie a son ambassadeur caricaturé pour vous accompagner dans la découverte —
+              avec deux nouvelles thématiques de culture générale pour les <strong>quadras</strong> et les <strong>septuagénaires</strong>.
             </p>
           </div>
 

@@ -13,7 +13,25 @@ ADMIN_PASSWORD = "Admin2026!"
 CATEGORY_IDS = [
     "annees-50-60", "chansons", "cinema",
     "objets-antan", "histoire-france", "cuisine-terroir",
+    "culture-40-ans", "culture-70-ans",
 ]
+
+EXPECTED_COUNTS = {
+    "annees-50-60": 10, "chansons": 10, "cinema": 10,
+    "objets-antan": 10, "histoire-france": 10, "cuisine-terroir": 10,
+    "culture-40-ans": 20, "culture-70-ans": 20,
+}
+
+EXPECTED_MASCOTS = {
+    "annees-50-60": "Robert le Téléspectateur",
+    "chansons": "Yvette la Chanteuse",
+    "cinema": "Marcel le Projectionniste",
+    "objets-antan": "Mémé Suzanne",
+    "histoire-france": "Maître Henri",
+    "cuisine-terroir": "Chef Bernard",
+    "culture-40-ans": "Sophie la Quadra",
+    "culture-70-ans": "Pierre le Sage",
+}
 
 
 # -------- Fixtures --------
@@ -47,13 +65,20 @@ class TestHealth:
         assert r.status_code == 200
         data = r.json()
         assert isinstance(data, list)
-        assert len(data) == 6
-        ids = {c["id"] for c in data}
-        assert ids == set(CATEGORY_IDS)
-        # required keys
+        assert len(data) == 8, f"expected 8 categories, got {len(data)}"
+        ids = [c["id"] for c in data]
+        assert ids == CATEGORY_IDS, f"order mismatch: {ids} vs {CATEGORY_IDS}"
+        # required keys + counts + mascot names
         for c in data:
-            for k in ("id", "title", "description", "color", "mascot_image", "mascot_name"):
+            for k in ("id", "title", "description", "color", "mascot_image", "mascot_name", "count"):
                 assert k in c, f"missing key {k} in category {c.get('id')}"
+            assert c["count"] == EXPECTED_COUNTS[c["id"]], f"{c['id']} count={c['count']} expected {EXPECTED_COUNTS[c['id']]}"
+            assert c["mascot_name"] == EXPECTED_MASCOTS[c["id"]]
+        # new categories specifics
+        cult40 = next(c for c in data if c["id"] == "culture-40-ans")
+        assert cult40["title"] == "Génération 40 ans"
+        cult70 = next(c for c in data if c["id"] == "culture-70-ans")
+        assert cult70["title"] == "Génération 70 ans"
 
     def test_packages_list(self):
         r = requests.get(f"{API}/packages")
@@ -74,6 +99,13 @@ class TestStaticMascots:
         assert r.status_code == 200, f"{cid} not 200"
         assert r.headers.get("content-type", "").startswith("image/")
         assert len(r.content) > 5000
+
+    @pytest.mark.parametrize("cid", ["culture-40-ans", "culture-70-ans"])
+    def test_new_mascot_image_is_png_and_large(self, cid):
+        r = requests.get(f"{API}/static/mascots/{cid}.png")
+        assert r.status_code == 200
+        assert r.headers.get("content-type", "") == "image/png"
+        assert len(r.content) > 100_000, f"{cid} size {len(r.content)} < 100KB"
 
 
 # -------- Auth --------
@@ -139,26 +171,80 @@ class TestQuizQuestions:
         assert r.status_code == 401
 
     def test_free_user_gets_5_max(self, free_user_session):
-        # category with only 4 seeded questions returns 4
+        # chansons now has 10 seeded questions; free user should get exactly 5
         r = free_user_session.get(f"{API}/categories/chansons/questions")
         assert r.status_code == 200
         data = r.json()
         assert data["is_premium"] is False
-        assert len(data["questions"]) <= 5
+        assert len(data["questions"]) == 5
         assert data["category"]["id"] == "chansons"
         # required question structure
         q = data["questions"][0]
         for k in ("id", "question", "options", "correct_index", "explanation"):
             assert k in q
         assert len(q["options"]) == 4
+        # correct_index range
+        for q in data["questions"]:
+            assert 0 <= q["correct_index"] <= 3
+
+    def test_free_user_annees_5060_returns_5(self, free_user_session):
+        # pool grew to 10 → free should be 5 (was 4 previously)
+        r = free_user_session.get(f"{API}/categories/annees-50-60/questions")
+        assert r.status_code == 200
+        data = r.json()
+        assert data["is_premium"] is False
+        assert len(data["questions"]) == 5
+
+    def test_free_user_culture_40_ans_returns_5(self, free_user_session):
+        r = free_user_session.get(f"{API}/categories/culture-40-ans/questions")
+        assert r.status_code == 200
+        data = r.json()
+        assert data["is_premium"] is False
+        assert len(data["questions"]) == 5
+        assert data["category"]["id"] == "culture-40-ans"
+        assert data["category"]["mascot_name"] == "Sophie la Quadra"
+        for q in data["questions"]:
+            assert 0 <= q["correct_index"] <= 3
+            assert "explanation" in q and q["explanation"]
+
+    def test_free_user_culture_70_ans_returns_5(self, free_user_session):
+        r = free_user_session.get(f"{API}/categories/culture-70-ans/questions")
+        assert r.status_code == 200
+        data = r.json()
+        assert data["is_premium"] is False
+        assert len(data["questions"]) == 5
+        assert data["category"]["mascot_name"] == "Pierre le Sage"
 
     def test_premium_user_gets_up_to_20(self, admin_session):
+        # chansons has 10 seeded; premium gets all 10
         r = admin_session.get(f"{API}/categories/chansons/questions")
         assert r.status_code == 200
         data = r.json()
         assert data["is_premium"] is True
-        # seed only has 4 for chansons; ensure limit is enforced upward not downward
-        assert len(data["questions"]) <= 20
+        assert len(data["questions"]) == 10
+
+    def test_premium_culture_40_ans_returns_20(self, admin_session):
+        r = admin_session.get(f"{API}/categories/culture-40-ans/questions")
+        assert r.status_code == 200
+        data = r.json()
+        assert data["is_premium"] is True
+        assert len(data["questions"]) == 20
+        # all correct_index 0..3 and explanation present
+        for q in data["questions"]:
+            assert 0 <= q["correct_index"] <= 3
+            assert q.get("explanation")
+        # unique ids
+        ids = [q["id"] for q in data["questions"]]
+        assert len(set(ids)) == 20
+
+    def test_premium_culture_70_ans_returns_20(self, admin_session):
+        r = admin_session.get(f"{API}/categories/culture-70-ans/questions")
+        assert r.status_code == 200
+        data = r.json()
+        assert data["is_premium"] is True
+        assert len(data["questions"]) == 20
+        for q in data["questions"]:
+            assert 0 <= q["correct_index"] <= 3
 
     def test_invalid_category(self, admin_session):
         r = admin_session.get(f"{API}/categories/does-not-exist/questions")
@@ -192,6 +278,21 @@ class TestAttempts:
     def test_attempts_require_auth(self):
         r = requests.post(f"{API}/attempts", json={"category_id": "chansons", "score": 1, "total": 1})
         assert r.status_code == 401
+
+    def test_attempt_with_new_category_culture_40(self, free_user_session):
+        payload = {"category_id": "culture-40-ans", "score": 4, "total": 5, "duration_seconds": 90}
+        r = free_user_session.post(f"{API}/attempts", json=payload)
+        assert r.status_code == 200
+        assert r.json().get("ok") is True
+        r2 = free_user_session.get(f"{API}/attempts")
+        assert any(x["category_id"] == "culture-40-ans" and x["score"] == 4 for x in r2.json())
+
+    def test_attempt_with_new_category_culture_70(self, free_user_session):
+        payload = {"category_id": "culture-70-ans", "score": 2, "total": 5, "duration_seconds": 70}
+        r = free_user_session.post(f"{API}/attempts", json=payload)
+        assert r.status_code == 200
+        r2 = free_user_session.get(f"{API}/attempts")
+        assert any(x["category_id"] == "culture-70-ans" and x["score"] == 2 for x in r2.json())
 
 
 # -------- Stripe checkout --------
@@ -238,10 +339,22 @@ class TestChallenges:
         assert r.status_code == 200, f"{r.status_code} {r.text}"
         body = r.json()
         assert "token" in body and len(body["token"]) >= 6
-        assert body["total"] == 4  # chansons pool has 4 questions
+        assert body["total"] == 4
         assert body["category"]["id"] == "chansons"
         # save for downstream tests
         pytest.shared_token = body["token"]
+
+    def test_create_admin_culture_40_ans_10q(self, admin_session):
+        r = admin_session.post(f"{API}/challenges", json={"category_id": "culture-40-ans", "num_questions": 10})
+        assert r.status_code == 200, f"{r.status_code} {r.text}"
+        body = r.json()
+        assert body["total"] == 10
+        assert body["category"]["id"] == "culture-40-ans"
+        assert len(body.get("questions", [])) == 10 or "token" in body
+        # ensure token resolves and snapshot has 10 questions
+        public = requests.get(f"{API}/challenges/{body['token']}").json()
+        assert public["total"] == 10
+        assert len(public["questions"]) == 10
 
     def test_create_invalid_category(self, admin_session):
         r = admin_session.post(f"{API}/challenges", json={"category_id": "does-not-exist", "num_questions": 3})
