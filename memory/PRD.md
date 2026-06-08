@@ -44,3 +44,10 @@ Source data: French senior quiz platform (6 categories, 8 activities, sample que
 - ✅ Frontend: /app/challenges (liste), /app/challenges/new (création + gating Premium), /app/challenges/{token} (lien partage WhatsApp/SMS/Email/copy + leaderboard live polling 5s), /defi/{token} (jeu public sans compte)
 - ✅ Anti-triche : `correct_index` jamais exposé au client, score calculé côté serveur
 - ✅ Tests : 38/38 backend (13 nouveaux pour challenges), tous parcours frontend validés
+
+## Implemented (2026-02-08, iteration 3) — Codes promo
+- ✅ Backend: collection `promo_codes`, endpoints `POST /api/admin/promo`, `GET /api/admin/promo`, `PATCH /api/admin/promo/{id}` (toggle), `DELETE /api/admin/promo/{id}` (admin-only via `get_admin_user` dependency), `POST /api/promo/redeem` (auth user). Validation : code unique, max_uses, expires_at, déduplication par utilisateur.
+- ✅ Frontend : page admin `/app/admin/promo` (création + liste + copier + activer/désactiver + supprimer), bloc de redeem sur `/app/pricing` (avec gestion success/error et message persistant pendant la redirection).
+- ✅ Durées : 7j / 30j / 90j / 1 an / illimité (36500 jours ≈ à vie).
+- ✅ Tests : 16/16 backend + 4/4 parcours frontend (création admin, gating non-admin, redeem free→Premium, gating Premium).
+- ✅ Seed démo : `FAMILLE2026` (à vie, illimité), `YYW3W1-R` (30j, 3 utilisations max).

@@ -99,52 +99,57 @@ export default function Pricing() {
           </div>
         )}
 
-        {/* ====== PROMO CODE REDEEM ====== */}
-        {user?.plan !== "premium" && (
+        {/* ====== PROMO CODE REDEEM (success message also shown to fresh-Premium users for ~2.5s) ====== */}
+        {(user?.plan !== "premium" || promoMsg?.type === "success") && (
           <div className="bg-white border-4 border-mustard rounded-[28px] p-6 md:p-8 mb-8 shadow-soft" data-testid="promo-redeem-block">
-            <div className="flex flex-col md:flex-row md:items-center gap-5">
-              <div className="flex items-center gap-3 md:shrink-0">
-                <span className="w-14 h-14 rounded-2xl bg-mustard/40 flex items-center justify-center">
-                  <Ticket className="w-7 h-7 text-bordeaux" strokeWidth={2.5} />
-                </span>
-                <div>
-                  <h2 className="font-display text-2xl font-bold text-navy leading-tight">Vous avez un code ?</h2>
-                  <p className="text-navy/70 text-sm">Activez Premium sans paiement.</p>
+            {user?.plan !== "premium" && (
+              <div className="flex flex-col md:flex-row md:items-center gap-5">
+                <div className="flex items-center gap-3 md:shrink-0">
+                  <span className="w-14 h-14 rounded-2xl bg-mustard/40 flex items-center justify-center">
+                    <Ticket className="w-7 h-7 text-bordeaux" strokeWidth={2.5} />
+                  </span>
+                  <div>
+                    <h2 className="font-display text-2xl font-bold text-navy leading-tight">Vous avez un code ?</h2>
+                    <p className="text-navy/70 text-sm">Activez Premium sans paiement.</p>
+                  </div>
                 </div>
+                <form onSubmit={redeem} className="flex-1 flex flex-col sm:flex-row gap-3 w-full">
+                  <input
+                    data-testid="promo-redeem-input"
+                    type="text"
+                    value={promoCode}
+                    onChange={(e) => setPromoCode(e.target.value.toUpperCase())}
+                    placeholder="Saisissez votre code"
+                    className="flex-1 p-4 text-lg rounded-2xl border-2 border-cream-dark focus:border-navy bg-white min-h-[56px] font-mono uppercase"
+                    maxLength={40}
+                  />
+                  <button
+                    type="submit"
+                    data-testid="promo-redeem-submit"
+                    disabled={!promoCode.trim() || promoLoading}
+                    className="inline-flex items-center justify-center gap-2 bg-bordeaux hover:bg-[#5d262e] text-cream font-bold px-6 py-4 rounded-full min-h-[56px] disabled:opacity-60 transition"
+                  >
+                    {promoLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Sparkles className="w-5 h-5" />}
+                    Activer
+                  </button>
+                </form>
               </div>
-              <form onSubmit={redeem} className="flex-1 flex flex-col sm:flex-row gap-3 w-full">
-                <input
-                  data-testid="promo-redeem-input"
-                  type="text"
-                  value={promoCode}
-                  onChange={(e) => setPromoCode(e.target.value.toUpperCase())}
-                  placeholder="Saisissez votre code"
-                  className="flex-1 p-4 text-lg rounded-2xl border-2 border-cream-dark focus:border-navy bg-white min-h-[56px] font-mono uppercase"
-                  maxLength={40}
-                />
-                <button
-                  type="submit"
-                  data-testid="promo-redeem-submit"
-                  disabled={!promoCode.trim() || promoLoading}
-                  className="inline-flex items-center justify-center gap-2 bg-bordeaux hover:bg-[#5d262e] text-cream font-bold px-6 py-4 rounded-full min-h-[56px] disabled:opacity-60 transition"
-                >
-                  {promoLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Sparkles className="w-5 h-5" />}
-                  Activer
-                </button>
-              </form>
-            </div>
+            )}
             {promoMsg && (
               <div
                 data-testid={`promo-redeem-${promoMsg.type}`}
-                className={`mt-5 rounded-2xl p-4 border-2 ${
+                className={`${user?.plan !== "premium" ? "mt-5" : ""} rounded-2xl p-4 border-2 ${
                   promoMsg.type === "success"
                     ? "bg-[#3D9970]/10 border-[#3D9970]/40"
                     : "bg-[#D9534F]/10 border-[#D9534F]/40"
                 }`}
               >
-                <p className="text-navy font-medium">
+                <p className="text-navy font-medium text-lg">
                   {promoMsg.type === "success" ? "✅ " : "❌ "}{promoMsg.text}
                 </p>
+                {promoMsg.type === "success" && (
+                  <p className="text-navy/60 text-sm mt-1">Redirection vers votre tableau de bord...</p>
+                )}
               </div>
             )}
           </div>
