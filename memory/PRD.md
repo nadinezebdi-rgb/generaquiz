@@ -68,3 +68,12 @@ Source data: French senior quiz platform (6 categories, 8 activities, sample que
 - ✅ Défi Famille bénéficie aussi de la randomisation (déjà via `random.shuffle` côté création — vérifié : 3 défis créés successivement = 2+ snapshots distincts)
 - ✅ Tests : **54/54 backend** (185+ cumulés), 100% frontend
 - ✅ Couverture pool : test vérifie que 15 appels successifs en premium révèlent les 30 IDs uniques par catégorie (donc seed complet)
+
+## Implemented (2026-02-08, iteration 6) — Espace compte + mot de passe oublié
+- ✅ Backend (5 nouveaux endpoints) : `POST /api/auth/forgot-password` (no user enumeration), `POST /api/auth/reset-password` (token single-use, TTL 1h), `POST /api/auth/change-password` (auth, vérifie current_password), `PATCH /api/auth/profile` (auth, update name), `DELETE /api/auth/account` (auth, cascade attempts + challenges)
+- ✅ Collection `password_reset_tokens` avec index TTL (expires_at) + unique (token)
+- ✅ Email **MOCKÉ** : le lien de reset est retourné dans la réponse (`reset_token`, `reset_link`, `mocked:true`) — à remplacer par Resend/SendGrid quand voulu
+- ✅ Frontend : 3 nouvelles pages — `/forgot-password`, `/reset-password?token=`, `/app/account` (profil + abonnement + changement mdp + suppression compte)
+- ✅ Login : lien "Mot de passe oublié ?" ajouté
+- ✅ Navbar : lien "Mon compte" pour utilisateurs connectés
+- ✅ Tests : **82/82 backend** (12 nouveaux), 100% parcours UI end-to-end (register → forgot → reset → change pw → delete)
