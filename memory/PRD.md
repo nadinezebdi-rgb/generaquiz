@@ -142,3 +142,18 @@ Source data: French senior quiz platform (6 categories, 8 activities, sample que
 - 🟡 P2 : Mode tournoi (Défi Famille en temps réel multi-joueurs)
 - 🟡 P2 : Système de badges / progression par catégorie
 - 🟡 P2 : Stats avancées : graphique progression hebdo, classement amis
+
+## Implemented (2026-02-08, iteration 13) — Quiz du Jour 🎯
+- ✅ **Nouvelle feature : Quiz du Jour** — 5 questions quotidiennes, MÊMES pour tous, déterministes (seed = hash SHA256 du date_key)
+- ✅ Mix multi-catégories : 5 catégories tirées au sort sur 8 chaque jour, 1 question par catégorie choisie
+- ✅ **Jouable SANS COMPTE** (CTA viral) — score local uniquement pour les anonymes
+- ✅ Pour les utilisateurs connectés : score sauvegardé + classement quotidien Top 10 + rang affiché
+- ✅ **1 soumission/user/jour** : index unique MongoDB `(user_id, date_key)` + HTTP 409 si re-submit
+- ✅ Endpoints : `GET /api/daily/quiz` (public), `POST /api/daily/submit` (auth), `GET /api/daily/leaderboard` (public + ranking si auth)
+- ✅ Frontend route publique : `/quiz-du-jour` (intro → playing → done) avec shuffle d'options (Fisher-Yates)
+- ✅ Écran de fin : trophy + rang + nudge Premium + share natif (`navigator.share`) avec fallback clipboard
+- ✅ CTA Landing : bandeau bordeaux/navy `landing-daily-cta`, lien navbar `nav-daily`/`nav-daily-auth`
+- ✅ Widget Dashboard : `dashboard-daily-cta` affiche le rang du jour si déjà joué, sinon "Jouer maintenant"
+- ✅ Stat landing mise à jour : **800+ Questions**
+- ✅ Tests : 13/13 backend pytest + 100% frontend E2E (anon + admin), aucune régression
+
