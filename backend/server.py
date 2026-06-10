@@ -361,8 +361,8 @@ async def list_categories():
 
 @api.get("/categories/{category_id}/questions")
 async def get_questions(category_id: str, user: dict = Depends(get_current_user)):
-    # Free users get 5 questions per quiz; Premium gets up to 20
-    limit = 20 if user.get("plan") == "premium" else 5
+    # Free users get 5 questions per quiz; Premium uses the full pool (up to 30)
+    limit = 30 if user.get("plan") == "premium" else 5
     cat = await db.categories.find_one({"id": category_id}, {"_id": 0})
     if not cat:
         raise HTTPException(status_code=404, detail="Catégorie introuvable")

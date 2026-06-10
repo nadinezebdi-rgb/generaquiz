@@ -1,0 +1,34 @@
+{
+  "summary": "Iteration 7 validation: premium quiz limit raised 20->30, o20/o28 reformulated, client-side Fisher-Yates shuffle in QuizPlayer & ChallengePlay, Pricing copy updated. Backend: 11/11 new tests pass (all 8 categories return exactly 30 questions for premium admin, free user still 5, o20='pétrin' correct_index=0, o28='casse-sucre' correct_index=1, $sample still randomizes). Frontend: login OK, Pricing shows 'jusqu'à 30 par quiz', cinema quiz header shows '6 / 30' confirming 30-question pool, 5 visits to /app/quiz/cinema produced 5 UNIQUE quiz-option-0 texts (shuffle proven), opt0 stable across click->feedback (no re-shuffle within same question), feedback color matches selection, score tally consistent.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "QuizPlayer end-of-quiz card (free user)", "issues": ["Stale copy: line ~276 still reads 'Passez en Premium pour 20 questions' — should now say 30 to match Pricing.jsx and backend limit. Only shown to free users when total<10, so non-blocking but inconsistent."]}
+    ]
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_iteration7.py",
+    "/app/test_reports/pytest/pytest_iter7.xml"
+  ],
+  "action_items": [
+    "Optional: update QuizPlayer.jsx end-screen free-user CTA from '20 questions' to '30 questions' for consistency."
+  ],
+  "critical_code_review_comments": [
+    "shuffleOptions() correctly implements Fisher-Yates and returns both newCorrectIdx (for QuizPlayer client-side scoring) and mapping[displayedIdx]=originalIdx (for ChallengePlay server-side scoring). Verified at /app/frontend/src/pages/QuizPlayer.jsx L9-21 and /app/frontend/src/pages/ChallengePlay.jsx L8-18.",
+    "Rules of Hooks respected: useMemo(...) is called BEFORE any conditional `return` (err/!data/error/stage) in both QuizPlayer (L44) and ChallengePlay (L44). currentQ?.id + idx are stable deps so each question shuffles exactly once. No console warnings about conditional hooks in the run.",
+    "ChallengePlay.next() maps shuffled displayed index back to original index via shuffled.mapping[selected] before POST /api/challenges/{token}/participate — critical for server-side scoring (server expects original correct_index positions). Verified at L82-84.",
+    "Backend get_questions() correctly raises premium limit to 30 (server.py L365) while keeping free=5. $sample still used so 30/30 sample preserves randomization of order.",
+    "seed_data o20/o28 verified: o20 question='Quel ustensile servait à pétrir la pâte à pain à la maison ?' options=['Le pétrin','La maie','La huche','Le saloir'] correct_index=0. o28 question='Quel objet utilisait-on pour couper le sucre vendu en pains coniques ?' options=['Une pince à sucre','Un casse-sucre','Un marteau','Un couteau de cuisine'] correct_index=1. Both unambiguous.",
+    "Minor inconsistency only: QuizPlayer.jsx L276 free-user upsell text still mentions '20 questions' — cosmetic, doesn't affect functionality."
+  ],
+  "updated_files": ["/app/backend/tests/test_iteration7.py"],
+  "success_rate": {"backend": "100% (11/11 new + previous 82/82 unaffected)", "frontend": "100% (shuffle, stability, 30-question pool, Pricing copy all verified)"},
+  "test_credentials": "admin@quizdantan.fr / Admin2026!",
+  "seed_data_creation": "One disposable free user qa.iter7.{ts}@test.fr created for the 5-question regression check.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "All three reported bugs are fixed: (1) shuffle works — 5 visits produced 5 different first options, (2) premium card now serves 30 questions confirmed in UI header 'Question N/30' and backend tests across all 8 categories, (3) o20 reads 'pétrin' and o28 reads 'casse-sucre' — both unambiguous. Only leftover cosmetic: QuizPlayer.jsx L276 hardcodes '20 questions' in free-user upsell — update if you touch this file.",
+  "rca of the issue": "N/A — all three originally reported bugs verified fixed end-to-end."
+}

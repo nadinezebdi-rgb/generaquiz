@@ -1,9 +1,24 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useMemo } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { api, BACKEND_URL } from "@/lib/api";
 import Navbar from "@/components/Navbar";
 import { ArrowLeft, ChevronRight, RotateCcw, Volume2, Crown, Check, X } from "lucide-react";
+
+// Fisher-Yates shuffle helper that returns the new options + the new correct index.
+function shuffleOptions(options, correctIndex) {
+  const indexes = options.map((_, i) => i);
+  for (let i = indexes.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [indexes[i], indexes[j]] = [indexes[j], indexes[i]];
+  }
+  return {
+    options: indexes.map((i) => options[i]),
+    newCorrectIdx: indexes.indexOf(correctIndex),
+    // mapping[displayedIdx] = originalIdx — useful when answers must be submitted with original index
+    mapping: indexes,
+  };
+}
 
 export default function QuizPlayer() {
   const { categoryId } = useParams();
@@ -22,6 +37,14 @@ export default function QuizPlayer() {
       .then((r) => setData(r.data))
       .catch((e) => setErr(e.response?.data?.detail || "Erreur de chargement"));
   }, [categoryId]);
+
+  // Always-called hook: shuffle options for the current question.
+  // Computed before any conditional return to respect Rules of Hooks.
+  const currentQ = data?.questions?.[idx];
+  const shuffled = useMemo(() => {
+    if (!currentQ) return null;
+    return shuffleOptions(currentQ.options, currentQ.correct_index);
+  }, [currentQ?.id, idx]);
 
   if (err)
     return (
@@ -60,7 +83,7 @@ export default function QuizPlayer() {
   const onSelect = (i) => {
     if (selected !== null) return;
     setSelected(i);
-    if (i === q.correct_index) setScore((s) => s + 1);
+    if (shuffled && i === shuffled.newCorrectIdx) setScore((s) => s + 1);
   };
 
   const onNext = () => {
@@ -68,7 +91,7 @@ export default function QuizPlayer() {
       const dur = Math.round((Date.now() - startTime.current) / 1000);
       api.post("/attempts", {
         category_id: categoryId,
-        score: score + (selected === q.correct_index ? 0 : 0), // already added in onSelect
+        score,
         total,
         duration_seconds: dur,
       }).catch(() => {});
@@ -156,11 +179,11 @@ export default function QuizPlayer() {
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-                {q.options.map((opt, i) => {
+                {shuffled && shuffled.options.map((opt, i) => {
                   let cls = "bg-white border-2 border-cream-dark text-navy hover:border-terracotta hover:bg-terracotta/5";
                   let icon = null;
                   if (selected !== null) {
-                    if (i === q.correct_index) {
+                    if (i === shuffled.newCorrectIdx) {
                       cls = "bg-[#3D9970]/15 border-2 border-[#3D9970] text-navy";
                       icon = <Check className="w-5 h-5 text-[#3D9970]" strokeWidth={3} />;
                     } else if (i === selected) {
@@ -191,20 +214,20 @@ export default function QuizPlayer() {
               </div>
 
               <AnimatePresence>
-                {selected !== null && (
+                {selected !== null && shuffled && (
                   <motion.div
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0 }}
                     className={`rounded-2xl p-5 mb-6 border-2 ${
-                      selected === q.correct_index
+                      selected === shuffled.newCorrectIdx
                         ? "bg-[#3D9970]/10 border-[#3D9970]/40"
                         : "bg-[#D9534F]/10 border-[#D9534F]/40"
                     }`}
                     data-testid="quiz-feedback"
                   >
                     <p className="font-display text-xl font-bold text-navy mb-1">
-                      {selected === q.correct_index ? "✅ Bonne réponse !" : "❌ Pas tout à fait..."}
+                      {selected === shuffled.newCorrectIdx ? "✅ Bonne réponse !" : "❌ Pas tout à fait..."}
                     </p>
                     <p className="text-navy/80">{q.explanation}</p>
                   </motion.div>

@@ -1,8 +1,21 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useMemo } from "react";
 import { useParams, Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { api, BACKEND_URL } from "@/lib/api";
 import { Sparkles, ChevronRight, Trophy, ArrowRight, Check, X } from "lucide-react";
+
+// Fisher-Yates: shuffle options + return mapping[displayedIdx] = originalIdx
+function shuffleOptions(options) {
+  const indexes = options.map((_, i) => i);
+  for (let i = indexes.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [indexes[i], indexes[j]] = [indexes[j], indexes[i]];
+  }
+  return {
+    options: indexes.map((i) => options[i]),
+    mapping: indexes,
+  };
+}
 
 export default function ChallengePlay() {
   const { token } = useParams();
@@ -25,6 +38,13 @@ export default function ChallengePlay() {
         setStage("error");
       });
   }, [token]);
+
+  // Always-called hook for shuffling — placed before any conditional return.
+  const currentQ = data?.questions?.[idx];
+  const shuffled = useMemo(() => {
+    if (!currentQ) return null;
+    return shuffleOptions(currentQ.options);
+  }, [currentQ?.id, idx]);
 
   if (stage === "error" || err) {
     return (
@@ -59,7 +79,9 @@ export default function ChallengePlay() {
   };
 
   const next = async () => {
-    const newAnswers = [...answers, selected];
+    // Map the displayed (shuffled) index back to the original index before submitting to server
+    const originalIdx = shuffled ? shuffled.mapping[selected] : selected;
+    const newAnswers = [...answers, originalIdx];
     setAnswers(newAnswers);
     setSelected(null);
     if (idx + 1 >= data.questions.length) {
@@ -183,7 +205,7 @@ export default function ChallengePlay() {
               </h2>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-                {q.options.map((opt, i) => {
+                {shuffled && shuffled.options.map((opt, i) => {
                   let cls = "bg-white border-2 border-cream-dark text-navy hover:border-terracotta hover:bg-terracotta/5";
                   if (selected !== null) {
                     if (i === selected) cls = "bg-navy text-white border-2 border-navy";

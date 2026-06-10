@@ -22,7 +22,7 @@ export default function Pricing() {
 
   const PERKS = {
     premium_monthly: [
-      "Questions illimitées (jusqu'à 20 par quiz)",
+      "Questions illimitées (jusqu'à 30 par quiz)",
       "Accès à toutes les activités",
       "Défis famille avec petits-enfants",
       "Lecture vocale des questions",
