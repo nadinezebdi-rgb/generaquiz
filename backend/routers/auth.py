@@ -13,7 +13,7 @@ from core import (
     hash_password, verify_password, create_access_token, create_refresh_token,
     set_auth_cookies, clear_auth_cookies, user_to_public, get_current_user, rate_limit,
     RegisterRequest, LoginRequest, ForgotPasswordRequest, ResetPasswordRequest,
-    ChangePasswordRequest, UpdateProfileRequest,
+    ChangePasswordRequest, UpdateProfileRequest, DailyEmailPrefRequest,
 )
 
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -165,12 +165,11 @@ async def update_profile(body: UpdateProfileRequest, user: dict = Depends(get_cu
 
 
 @router.patch("/preferences/daily-email")
-async def toggle_daily_email(body: dict, user: dict = Depends(get_current_user)):
+async def toggle_daily_email(body: DailyEmailPrefRequest, user: dict = Depends(get_current_user)):
     """Opt-in / opt-out of the morning Quiz du Jour email reminder."""
-    opt_in = bool(body.get("daily_email_optin", True))
     await db.users.update_one(
         {"_id": ObjectId(str(user["_id"]))},
-        {"$set": {"daily_email_optin": opt_in}},
+        {"$set": {"daily_email_optin": body.daily_email_optin}},
     )
     fresh = await db.users.find_one({"_id": ObjectId(str(user["_id"]))})
     return user_to_public(fresh)

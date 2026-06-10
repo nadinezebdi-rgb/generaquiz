@@ -187,6 +187,10 @@ class UpdateProfileRequest(BaseModel):
     name: str = Field(min_length=1, max_length=80)
 
 
+class DailyEmailPrefRequest(BaseModel):
+    daily_email_optin: bool
+
+
 class AttemptCreate(BaseModel):
     category_id: str
     score: int

@@ -157,3 +157,24 @@ Source data: French senior quiz platform (6 categories, 8 activities, sample que
 - ✅ Stat landing mise à jour : **800+ Questions**
 - ✅ Tests : 13/13 backend pytest + 100% frontend E2E (anon + admin), aucune régression
 
+
+## Implemented (2026-02-08, iteration 14) — Streaks 🔥 + Email matinal automatisé
+- ✅ **Streaks** (séries de jours consécutifs) calculées au moment de la soumission du Quiz du Jour
+  - 3 cas : première fois → 1 ; dernier=hier → +1 ; dernier ancien → RESET à 1, best préservé
+  - Champs persistés : `streak_current`, `streak_best`, `streak_last_date` sur le document user
+  - Exposés via `/api/auth/me` et retournés dans la réponse de `POST /api/daily/submit`
+- ✅ **UI Streaks** :
+  - Badge 🔥 dans le widget Dashboard (`data-testid=dashboard-streak-badge`)
+  - Bloc dédié sur l'écran de fin du Quiz du Jour (`daily-streak-block`) avec mention "Record !" si streak_current == streak_best
+  - Carte "Ma série & notifications" sur `/app/account` avec série actuelle + meilleure série + trophée 🏆 si >=7 jours
+- ✅ **Email matinal automatisé** via Resend :
+  - Scheduler APScheduler intégré à FastAPI (`/app/backend/daily_email.py`) déclenché à **09:00 Europe/Paris** chaque jour
+  - Envoi uniquement aux users opt-in qui n'ont PAS encore joué aujourd'hui
+  - Template HTML stylé (palette bordeaux/navy/mustard) avec badge streak + CTA "Jouer maintenant"
+  - Rate-limit pacing 4 req/s (Resend max 5/s)
+- ✅ **Opt-in/Opt-out** : `PATCH /api/auth/preferences/daily-email` (Pydantic-validated) + toggle UI sur Account (`account-email-optin-toggle`). Par défaut opt-in.
+- ✅ **Endpoint admin manuel** : `POST /api/admin/daily-email/trigger` (admin-only) pour déclencher l'envoi à la demande
+- ✅ Auto-refresh du contexte Auth après submit pour propager streak aux composants
+- ✅ Tests : 11/11 backend pytest + 100% frontend (3/3 flows E2E)
+- ✅ DB nettoyée : 49 users de test supprimés, reste 2 users légitimes (admin + nadine)
+
