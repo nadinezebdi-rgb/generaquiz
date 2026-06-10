@@ -273,7 +273,7 @@ export default function QuizPlayer() {
                 <div className="bg-mustard/30 border-2 border-mustard-dark rounded-2xl p-5 mb-6">
                   <p className="text-navy font-medium mb-3">
                     Vous jouez avec la formule Découverte (5 questions par quiz).
-                    Passez en <strong>Premium</strong> pour 20 questions et toutes les activités.
+                    Passez en <strong>Premium</strong> pour 30 questions et toutes les activités.
                   </p>
                   <Link
                     to="/app/pricing"
