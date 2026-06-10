@@ -101,3 +101,15 @@ Source data: French senior quiz platform (6 categories, 8 activities, sample que
 - ✅ Frontend `/forgot-password` réécrit : plus de bloc "démo lien", remplacé par écran "Vérifiez votre boîte mail" + bouton "Renvoyer"
 - ✅ Mode test Resend : seul `nadine.zebdi@gmail.com` (compte propriétaire) reçoit réellement l'email tant que le domaine n'est pas vérifié sur resend.com/domains
 - ✅ Tests : 5/5 backend (test_forgot_password.py), 100% frontend, vrai email Resend reçu (id=c9111f21-...)
+
+## Implemented (2026-02-08, iteration 10) — Refactor + rate-limit
+- ✅ **Refactor server.py 970→120 lignes** (88 % de réduction). Structure modulaire :
+  - `core.py` (218 lignes) : env, db, helpers, deps `get_current_user`/`get_admin_user`, rate-limiter factory, modèles Pydantic
+  - `routers/auth.py` (175 lignes) : register/login/logout/me/forgot/reset/change-pw/profile/delete + Resend
+  - `routers/quiz.py` (59 lignes) : categories/questions/attempts/stats
+  - `routers/payments.py` (91 lignes) : Stripe checkout/webhook/packages
+  - `routers/challenges.py` (97 lignes) : Défi Famille
+  - `routers/promo.py` (103 lignes) : promo redeem + admin CRUD
+- ✅ **Rate-limit IP-based in-memory** sur `/api/auth/forgot-password` (3 appels / 15 min, HTTP 429 + `Retry-After` au-delà)
+- ✅ Isolation par endpoint : `/auth/login` non impacté par le bucket forgot-password
+- ✅ Tests : 19/19 backend, 100 % frontend E2E, **zéro régression sur les 9 itérations précédentes**
