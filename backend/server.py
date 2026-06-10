@@ -333,8 +333,9 @@ async def forgot_password(body: ForgotPasswordRequest):
     generates a reset token and sends the reset link via email."""
     email = body.email.lower().strip()
     user = await db.users.find_one({"email": email})
+    generic = {"ok": True, "message": "Si ce compte existe, un email de réinitialisation a été envoyé.", "email_sent": False}
     if not user:
-        return {"ok": True, "message": "Si ce compte existe, un email de réinitialisation a été envoyé."}
+        return generic
     token = secrets.token_urlsafe(32)
     expires_at = datetime.now(timezone.utc) + timedelta(hours=1)
     await db.password_reset_tokens.insert_one({
@@ -348,7 +349,8 @@ async def forgot_password(body: ForgotPasswordRequest):
     reset_link = f"{FRONTEND_URL}/reset-password?token={token}"
     logger.info(f"[RESET] {email} -> {reset_link}")
     sent = await _send_reset_email(email, reset_link)
-    return {"ok": True, "message": "Si ce compte existe, un email de réinitialisation a été envoyé.", "email_sent": sent}
+    generic["email_sent"] = sent
+    return generic
 
 
 @api.post("/auth/reset-password")
