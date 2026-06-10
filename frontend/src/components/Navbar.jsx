@@ -15,6 +15,7 @@ export default function Navbar({ variant = "landing" }) {
         <nav className="hidden md:flex items-center gap-2">
           {variant === "landing" && (
             <>
+              <Link to="/quiz-du-jour" data-testid="nav-daily" className="px-4 py-2 text-lg font-semibold text-bordeaux hover:text-terracotta transition">Quiz du Jour ✨</Link>
               <a href="#categories" data-testid="nav-categories" className="px-4 py-2 text-lg font-semibold text-navy hover:text-terracotta transition">Catégories</a>
               <a href="#demo" data-testid="nav-demo" className="px-4 py-2 text-lg font-semibold text-navy hover:text-terracotta transition">Essai gratuit</a>
               <a href="#tarifs" data-testid="nav-pricing" className="px-4 py-2 text-lg font-semibold text-navy hover:text-terracotta transition">Tarifs</a>
@@ -23,6 +24,7 @@ export default function Navbar({ variant = "landing" }) {
 
           {user && user !== false ? (
             <>
+              <Link to="/quiz-du-jour" data-testid="nav-daily-auth" className="px-4 py-2 text-lg font-semibold text-bordeaux hover:text-terracotta transition">Quiz du Jour ✨</Link>
               <Link to="/app/dashboard" data-testid="nav-dashboard" className="px-4 py-2 text-lg font-semibold text-navy hover:text-terracotta transition">Mes quiz</Link>
               <Link to="/app/challenges" data-testid="nav-challenges" className="px-4 py-2 text-lg font-semibold text-navy hover:text-terracotta transition">Défi famille</Link>
               <Link to="/app/account" data-testid="nav-account" className="px-4 py-2 text-lg font-semibold text-navy hover:text-terracotta transition">Mon compte</Link>

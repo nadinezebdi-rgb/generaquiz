@@ -1,0 +1,31 @@
+{
+  "summary": "Iteration 12 — Validation complète de la feature 'Quiz du Jour'. Backend pytest 13/13 PASS (tests groupés en TestDailyQuizPublic, TestDailySubmitAuth, TestDailyAdminFlow, TestDailySubmitValidation, TestDailyLeaderboard). Frontend E2E OK : intro/playing/done en mode anon ET admin, navbar liens (nav-daily landing + nav-daily-auth app), bandeau Landing (landing-daily-cta), widget Dashboard (dashboard-daily-cta), classement avec surlignage 'Administrateur (vous)' visible sur l'écran de résultat. Déterminisme vérifié (2 appels successifs renvoient mêmes ids dans même ordre). Endpoints conformes : GET /api/daily/quiz public + is_authenticated/has_played, POST /api/daily/submit 200 (auth), 401 (anon), 409 (2e fois même jour), 422 (score invalide), GET /api/daily/leaderboard top10+my_rank/my_entry. Un nouveau user TEST_<uuid>@example.com avec score 5/5 prend bien la 1ère place, admin (4/5) descend à #2. Aucune régression observée.",
+  "backend_issues": { "critical": [], "minor": [] },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_daily_quiz.py",
+    "/app/test_reports/pytest/pytest_iter12_daily.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "routers/daily.py:_today_key — UTC+1 hardcodé (sans gestion DST). En été (CEST = UTC+2), la bascule de jour côté serveur se fera à 01:00 heure de Paris au lieu de minuit. Pour une fenêtre 'Quiz du Jour' strictement alignée sur le fuseau Europe/Paris, préférer zoneinfo.ZoneInfo('Europe/Paris'). Non bloquant mais à noter.",
+    "routers/daily.py:_pick_daily_questions — projection exclut _id mais conserve tous les autres champs dont correct_index + explanation. Comme l'endpoint est PUBLIC, n'importe quel client peut récupérer les réponses sans jouer. Ce n'est PAS un défaut anti-triche bloquant ici (le quiz est gratuit, le score est validé serveur), mais c'est différent de challenges.py qui masque correct_index/explanation côté participant. À envisager si l'on veut éviter l'auto-triche.",
+    "routers/daily.py:submit_daily — l'ordre d'évaluation est : Pydantic validation (422) AVANT le check dup (409). Donc un payload score=99 renvoie 422 même si le user a déjà joué — comportement attendu et testé.",
+    "Frontend DailyQuiz.jsx — shuffleOptions est appelé via useMemo avec dep [currentQ?.id, idx] : OK, l'ordre reste stable entre clic d'option et reveal. Le mapping displayedIdx→originalIdx est correctement comparé à correct_index dans pick().",
+    "Navbar.jsx — variant='landing' affiche nav-daily ET, si user connecté, AUSSI le bloc auth (donc en théorie 2 liens 'Quiz du Jour' sur la landing pour un user connecté). Cas marginal mais à vérifier visuellement (doublon potentiel sur /).",
+    "server.py — index unique (user_id, date_key) garantit bien l'unicité ; en cas de duplicate key MongoDB lèverait une exception 500 si le check find_one échoue (race). Pour robustesse on pourrait wrap insert_one dans try/except DuplicateKeyError → 409, mais non bloquant à ce trafic.",
+    "Aucun _id MongoDB ne fuit dans les réponses (projections {'_id': 0} appliquées partout)."
+  ],
+  "updated_files": ["/app/backend/tests/test_daily_quiz.py (new)"],
+  "success_rate": { "backend": "100% (13/13)", "frontend": "100% (anon flow + admin flow + navbar/landing/dashboard CTAs)" },
+  "test_credentials": "admin@generaquiz.fr / Admin2026! ; nouveau user TEST_daily_<uuid>@example.com / TestPass2026! créé par le test.",
+  "seed_data_creation": "Un user TEST_daily_<uuid>@example.com est créé par test_new_user_with_higher_score_takes_rank_1 et soumet 5/5/30s. Collection daily_attempts vidée AVANT le run via pymongo. À nettoyer si besoin : delete_many sur daily_attempts + users TEST_daily_*.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Pour rejouer la suite, vider daily_attempts AVANT (delete_many({})) sinon les tests admin échouent en 409 dès le 1er submit. Le test fait `requests.Session()` fraîche pour le test anon-leaderboard car /auth/login pose un cookie httpOnly access_token qui contamine la session. La date Europe/Paris est calculée en UTC+1 (pas de DST) — si la date système est en CEST l'été, ajuster le test si nécessaire.",
+  "rca of the issue": "N/A — aucun bug bloquant. Petite note : le seul test rouge initial (test_leaderboard_anon) venait du fait que la fixture `anon` module-scopée était réutilisée après le login admin et avait hérité du cookie access_token → corrigé par requests.Session() neuve dans ce test précis."
+}

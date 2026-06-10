@@ -25,6 +25,7 @@ from routers import quiz as quiz_router
 from routers import payments as payments_router
 from routers import challenges as challenges_router
 from routers import promo as promo_router
+from routers import daily as daily_router
 
 app = FastAPI(title="Quiz d'Antan API")
 api = APIRouter(prefix="/api")
@@ -41,6 +42,7 @@ api.include_router(quiz_router.router)
 api.include_router(payments_router.router)
 api.include_router(challenges_router.router)
 api.include_router(promo_router.router)
+api.include_router(daily_router.router)
 app.include_router(api)
 
 # CORS
@@ -72,6 +74,8 @@ async def startup():
     await db.promo_codes.create_index("code", unique=True)
     await db.password_reset_tokens.create_index("token", unique=True)
     await db.password_reset_tokens.create_index("expires_at", expireAfterSeconds=0)
+    await db.daily_attempts.create_index([("user_id", 1), ("date_key", 1)], unique=True)
+    await db.daily_attempts.create_index([("date_key", 1), ("score", -1), ("duration_seconds", 1)])
 
     # Seed categories + questions (refresh on every boot)
     for cat in CATEGORIES:

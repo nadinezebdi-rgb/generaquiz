@@ -55,7 +55,7 @@ export default function Landing() {
               en vous amusant !
             </h1>
             <p className="text-xl sm:text-2xl text-navy/80 leading-relaxed max-w-2xl mb-10">
-              Des quiz culturels et ludiques pour entretenir votre mémoire, explorer la France d'autrefois
+              Des quiz culturels et ludiques pour entretenir votre mémoire, explorer la France d&apos;autrefois
               et partager de bons moments avec vos petits-enfants.
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
@@ -79,7 +79,7 @@ export default function Landing() {
 
             <div className="mt-12 grid grid-cols-3 gap-6 max-w-xl border-t-2 border-cream-dark pt-8">
               {[
-                { k: "100+", v: "Questions" },
+                { k: "800+", v: "Questions" },
                 { k: "8", v: "Catégories" },
                 { k: "12K+", v: "Joueurs actifs" },
               ].map((s) => (
@@ -143,10 +143,70 @@ export default function Landing() {
           <div className="marquee-track inline-flex whitespace-nowrap font-display text-xl">
             {Array.from({ length: 2 }).map((_, i) => (
               <span key={i} className="mx-8">
-                ✦ Mémoire vive &nbsp;·&nbsp; Souvenirs partagés &nbsp;·&nbsp; Culture française &nbsp;·&nbsp; Jeux pour tous &nbsp;·&nbsp; Famille connectée &nbsp;·&nbsp; Plaisir d'apprendre &nbsp;·&nbsp;
+                ✦ Mémoire vive &nbsp;·&nbsp; Souvenirs partagés &nbsp;·&nbsp; Culture française &nbsp;·&nbsp; Jeux pour tous &nbsp;·&nbsp; Famille connectée &nbsp;·&nbsp; Plaisir d&apos;apprendre &nbsp;·&nbsp;
               </span>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* ============ DAILY QUIZ CTA ============ */}
+      <section className="py-12 lg:py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="relative bg-gradient-to-br from-bordeaux via-navy to-bordeaux rounded-[36px] p-8 md:p-12 shadow-warm overflow-hidden"
+          >
+            <div className="absolute -top-20 -right-20 w-72 h-72 rounded-full bg-mustard/20 blur-3xl pointer-events-none" />
+            <div className="absolute -bottom-20 -left-20 w-72 h-72 rounded-full bg-terracotta/20 blur-3xl pointer-events-none" />
+            <div className="relative grid md:grid-cols-2 gap-8 items-center">
+              <div className="text-white">
+                <div className="inline-flex items-center gap-2 bg-mustard text-navy font-bold px-4 py-2 rounded-full text-sm mb-5">
+                  <Sparkles className="w-4 h-4" /> Nouveauté · 100% gratuit
+                </div>
+                <h2 className="font-display text-4xl md:text-5xl font-extrabold mb-4 leading-tight">
+                  Le <span className="text-mustard italic">Quiz du Jour</span><br />vous attend !
+                </h2>
+                <p className="text-cream/90 text-lg mb-6 leading-relaxed">
+                  5 questions toutes catégories confondues, les mêmes pour tout le monde.
+                  Comparez votre score à celui des autres joueurs et tentez d&apos;entrer dans le Top 10 quotidien.
+                </p>
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <Link
+                    to="/quiz-du-jour"
+                    data-testid="landing-daily-cta"
+                    className="inline-flex items-center justify-center gap-2 bg-mustard hover:bg-mustard-dark text-navy font-bold text-lg px-8 py-4 rounded-full transition min-h-[60px]"
+                  >
+                    Jouer le Quiz du Jour <ArrowRight className="w-5 h-5" />
+                  </Link>
+                  <span className="inline-flex items-center justify-center gap-2 text-cream/80 text-sm">
+                    Pas besoin de compte — accès immédiat
+                  </span>
+                </div>
+              </div>
+              <div className="relative hidden md:block">
+                <div className="absolute -inset-4 bg-mustard/30 rounded-3xl rotate-2" />
+                <div className="relative bg-cream rounded-3xl p-6 text-navy">
+                  <div className="font-display text-sm font-bold uppercase tracking-wider text-navy/60 mb-3">Comment ça marche</div>
+                  <ul className="space-y-3">
+                    {[
+                      "5 questions tirées au sort chaque jour",
+                      "Mêmes questions pour tous les joueurs",
+                      "Classement quotidien Top 10",
+                      "Compte gratuit pour apparaître au classement",
+                    ].map((line) => (
+                      <li key={line} className="flex items-start gap-2.5">
+                        <Check className="w-5 h-5 text-terracotta shrink-0 mt-0.5" strokeWidth={3} />
+                        <span className="font-medium">{line}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </motion.div>
         </div>
       </section>
 

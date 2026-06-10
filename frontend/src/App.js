@@ -18,6 +18,7 @@ import AdminPromo from "@/pages/AdminPromo";
 import Account from "@/pages/Account";
 import ForgotPassword from "@/pages/ForgotPassword";
 import ResetPassword from "@/pages/ResetPassword";
+import DailyQuiz from "@/pages/DailyQuiz";
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();
@@ -46,6 +47,7 @@ export default function App() {
           <Route path="/register" element={<Register />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
+          <Route path="/quiz-du-jour" element={<DailyQuiz />} />
           <Route
             path="/app/account"
             element={
