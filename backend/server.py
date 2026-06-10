@@ -10,15 +10,16 @@ Modular structure:
 """
 from datetime import datetime, timezone, timedelta
 
-from fastapi import APIRouter, FastAPI
+from fastapi import APIRouter, Depends, FastAPI
 from fastapi.staticfiles import StaticFiles
 from starlette.middleware.cors import CORSMiddleware
 
 from core import (
     ROOT_DIR, FRONTEND_URL, ADMIN_EMAIL, ADMIN_PASSWORD, LIFETIME_DAYS,
-    client, db, logger, hash_password, verify_password,
+    client, db, logger, hash_password, verify_password, get_admin_user,
 )
 from seed_data import CATEGORIES, QUESTIONS
+from daily_email import start_daily_scheduler, stop_daily_scheduler, send_morning_emails
 
 from routers import auth as auth_router
 from routers import quiz as quiz_router
@@ -34,6 +35,12 @@ api = APIRouter(prefix="/api")
 @api.get("/")
 async def root():
     return {"status": "ok", "app": "Quiz d'Antan"}
+
+
+@api.post("/admin/daily-email/trigger")
+async def admin_trigger_daily_email(user: dict = Depends(get_admin_user)):
+    """Admin-only manual trigger for the morning email (used for testing and recovery)."""
+    return await send_morning_emails()
 
 
 # Mount routers under /api
@@ -118,7 +125,11 @@ async def startup():
                                              "created_by": "system"})
             logger.info(f"Promo seedé : {promo['code']}")
 
+    # Schedule morning Quiz du Jour reminder emails (09:00 Europe/Paris)
+    start_daily_scheduler()
+
 
 @app.on_event("shutdown")
 async def shutdown():
+    stop_daily_scheduler()
     client.close()

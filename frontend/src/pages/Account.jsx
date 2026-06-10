@@ -5,7 +5,7 @@ import { api, formatError } from "@/lib/api";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import {
-  User, Mail, Crown, Calendar, Lock, Loader2, Check, LogOut, Trash2, Save, ArrowRight,
+  User, Mail, Crown, Calendar, Lock, Loader2, Check, LogOut, Trash2, Save, ArrowRight, Bell, Flame,
 } from "lucide-react";
 
 export default function Account() {
@@ -21,6 +21,10 @@ export default function Account() {
   const [newPw2, setNewPw2] = useState("");
   const [savingPw, setSavingPw] = useState(false);
   const [pwMsg, setPwMsg] = useState(null); // {type, text}
+
+  const [emailOptin, setEmailOptin] = useState(user?.daily_email_optin !== false);
+  const [savingPref, setSavingPref] = useState(false);
+  const [prefMsg, setPrefMsg] = useState("");
 
   const [deleting, setDeleting] = useState(false);
 
@@ -61,6 +65,21 @@ export default function Account() {
   const handleLogout = async () => {
     await logout();
     navigate("/");
+  };
+
+  const togglePref = async (next) => {
+    setSavingPref(true); setPrefMsg("");
+    try {
+      await api.patch("/auth/preferences/daily-email", { daily_email_optin: next });
+      setEmailOptin(next);
+      if (refresh) refresh();
+      setPrefMsg(next ? "Vous recevrez l'email matinal" : "Notifications email désactivées");
+      setTimeout(() => setPrefMsg(""), 2500);
+    } catch (e2) {
+      setPrefMsg(formatError(e2.response?.data?.detail) || "Erreur");
+    } finally {
+      setSavingPref(false);
+    }
   };
 
   const handleDelete = async () => {
@@ -121,7 +140,7 @@ export default function Account() {
                   data-testid="account-email"
                 />
               </div>
-              <p className="text-xs text-navy/50 mt-1">L'email ne peut pas être modifié.</p>
+              <p className="text-xs text-navy/50 mt-1">L&apos;email ne peut pas être modifié.</p>
             </div>
 
             <div className="flex items-center gap-3">
@@ -174,6 +193,62 @@ export default function Account() {
               </Link>
             </div>
           )}
+        </div>
+
+        {/* ============ STREAK & NOTIFICATIONS CARD ============ */}
+        <div className="bg-white border-2 border-cream-dark rounded-[28px] p-6 md:p-8 mb-6" data-testid="account-streak-card">
+          <h2 className="font-display text-2xl font-bold text-navy mb-5 flex items-center gap-2">
+            <Flame className="w-6 h-6 text-terracotta" fill="currentColor" /> Ma série & notifications
+          </h2>
+
+          <div className="grid sm:grid-cols-2 gap-4 mb-6">
+            <div className="bg-gradient-to-br from-terracotta/10 to-mustard/20 border-2 border-terracotta/30 rounded-2xl p-5">
+              <div className="text-sm font-bold uppercase tracking-wider text-navy/60 mb-1">Série en cours</div>
+              <div className="font-display text-4xl font-extrabold text-bordeaux flex items-center gap-2">
+                {user.streak_current || 0}
+                <span className="text-base text-navy/60 font-normal">jour{(user.streak_current || 0) > 1 ? "s" : ""}</span>
+                {(user.streak_current || 0) >= 2 && <Flame className="w-7 h-7 text-terracotta" fill="currentColor" />}
+              </div>
+              {user.streak_last_date && (
+                <div className="text-xs text-navy/60 mt-1">Dernier quiz le {new Date(user.streak_last_date + "T00:00:00").toLocaleDateString("fr-FR", { day: "numeric", month: "long" })}</div>
+              )}
+            </div>
+            <div className="bg-cream border-2 border-cream-dark rounded-2xl p-5">
+              <div className="text-sm font-bold uppercase tracking-wider text-navy/60 mb-1">Meilleure série</div>
+              <div className="font-display text-4xl font-extrabold text-navy flex items-center gap-2">
+                {user.streak_best || 0}
+                <span className="text-base text-navy/60 font-normal">jour{(user.streak_best || 0) > 1 ? "s" : ""}</span>
+                {(user.streak_best || 0) >= 7 && <span title="Plus de 7 jours !" className="text-2xl">🏆</span>}
+              </div>
+              <div className="text-xs text-navy/60 mt-1">Votre record personnel</div>
+            </div>
+          </div>
+
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-t-2 border-cream-dark pt-5">
+            <div className="flex items-start gap-3 flex-1">
+              <Bell className="w-6 h-6 text-navy mt-0.5 shrink-0" />
+              <div>
+                <div className="font-bold text-navy">Rappel matinal du Quiz du Jour</div>
+                <p className="text-sm text-navy/60">
+                  Recevez un email à 9h chaque matin avec votre lien direct vers le Quiz du Jour.
+                </p>
+              </div>
+            </div>
+            <button
+              type="button"
+              role="switch"
+              aria-checked={emailOptin}
+              disabled={savingPref}
+              onClick={() => togglePref(!emailOptin)}
+              data-testid="account-email-optin-toggle"
+              className={`relative inline-flex h-8 w-14 shrink-0 items-center rounded-full transition-colors ${
+                emailOptin ? "bg-terracotta" : "bg-cream-dark"
+              } ${savingPref ? "opacity-60" : ""}`}
+            >
+              <span className={`inline-block h-6 w-6 transform rounded-full bg-white shadow transition-transform ${emailOptin ? "translate-x-7" : "translate-x-1"}`} />
+            </button>
+          </div>
+          {prefMsg && <p className="text-sm text-[#3D9970] font-medium mt-3" data-testid="account-pref-msg">{prefMsg}</p>}
         </div>
 
         {/* ============ MOT DE PASSE CARD ============ */}

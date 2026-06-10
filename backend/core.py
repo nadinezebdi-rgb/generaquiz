@@ -95,7 +95,11 @@ def clear_auth_cookies(response: Response) -> None:
 def user_to_public(u: dict) -> dict:
     return {"id": str(u["_id"]), "email": u["email"], "name": u.get("name", ""),
             "role": u.get("role", "user"), "plan": u.get("plan", "free"),
-            "plan_expires_at": u.get("plan_expires_at"), "created_at": u.get("created_at")}
+            "plan_expires_at": u.get("plan_expires_at"), "created_at": u.get("created_at"),
+            "streak_current": int(u.get("streak_current") or 0),
+            "streak_best": int(u.get("streak_best") or 0),
+            "streak_last_date": u.get("streak_last_date"),
+            "daily_email_optin": u.get("daily_email_optin", True)}
 
 
 # -------------------- auth dependencies --------------------

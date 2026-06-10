@@ -108,12 +108,36 @@ async def get_daily_quiz(request: Request):
 
 @router.post("/daily/submit")
 async def submit_daily(body: DailySubmit, user: dict = Depends(get_current_user)):
-    """Save the user's daily score. One submission per user per day."""
+    """Save the user's daily score, update streak. One submission per user per day."""
     date_key = _today_key()
     user_id = str(user["_id"])
     existing = await db.daily_attempts.find_one({"user_id": user_id, "date_key": date_key})
     if existing:
         raise HTTPException(status_code=409, detail="Vous avez déjà joué le Quiz du Jour aujourd'hui.")
+
+    # --- streak computation ---
+    last_date = user.get("streak_last_date")
+    current = int(user.get("streak_current") or 0)
+    best = int(user.get("streak_best") or 0)
+    today = date_key
+    yesterday = (datetime.now(timezone.utc) + timedelta(hours=1) - timedelta(days=1)).strftime("%Y-%m-%d")
+    if last_date == yesterday:
+        current += 1                       # streak continues
+    elif last_date == today:
+        current = max(current, 1)          # already counted today (shouldn't happen due to 409 above)
+    else:
+        current = 1                        # streak reset / start
+    if current > best:
+        best = current
+    await db.users.update_one(
+        {"_id": user["_id"]},
+        {"$set": {
+            "streak_current": current,
+            "streak_best": best,
+            "streak_last_date": today,
+        }},
+    )
+
     doc = {
         "user_id": user_id,
         "user_name": user.get("name") or user.get("email", "").split("@")[0],
@@ -124,7 +148,12 @@ async def submit_daily(body: DailySubmit, user: dict = Depends(get_current_user)
         "created_at": datetime.now(timezone.utc).isoformat(),
     }
     await db.daily_attempts.insert_one(doc)
-    return {"ok": True, "saved": True}
+    return {
+        "ok": True,
+        "saved": True,
+        "streak_current": current,
+        "streak_best": best,
+    }
 
 
 @router.get("/daily/leaderboard")

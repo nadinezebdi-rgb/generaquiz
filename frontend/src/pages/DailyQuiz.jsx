@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { api, formatError } from "@/lib/api";
 import { useAuth } from "@/contexts/AuthContext";
 import {
-  Sparkles, Trophy, ArrowRight, Check, X, Calendar, Crown, LogIn, Share2, Medal,
+  Sparkles, Trophy, ArrowRight, Check, X, Calendar, Crown, LogIn, Share2, Medal, Flame,
 } from "lucide-react";
 import Logo from "@/components/Logo";
 import { toast } from "sonner";
@@ -27,7 +27,7 @@ function rankBadge(rank) {
 }
 
 export default function DailyQuiz() {
-  const { user } = useAuth();
+  const { user, refresh } = useAuth();
   const navigate = useNavigate();
   const [data, setData] = useState(null);
   const [stage, setStage] = useState("intro"); // intro | playing | done
@@ -36,6 +36,7 @@ export default function DailyQuiz() {
   const [revealed, setRevealed] = useState(false);
   const [score, setScore] = useState(0);
   const [leaderboard, setLeaderboard] = useState(null);
+  const [submitResult, setSubmitResult] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const startTime = useRef(null);
 
@@ -69,9 +70,12 @@ export default function DailyQuiz() {
       if (user) {
         try {
           setSubmitting(true);
-          await api.post("/daily/submit", { score, duration_seconds: duration });
+          const resp = await api.post("/daily/submit", { score, duration_seconds: duration });
+          setSubmitResult(resp.data);
           const lb = await api.get("/daily/leaderboard");
           setLeaderboard(lb.data);
+          // Refresh /me so streak fields propagate to navbar/dashboard
+          if (refresh) refresh();
         } catch (e) {
           // 409 = already submitted today, that's fine
           if (e.response?.status !== 409) {
@@ -298,6 +302,18 @@ export default function DailyQuiz() {
                 {user ? (
                   <>
                     {submitting && <p className="text-navy/60 mb-4">Enregistrement du score…</p>}
+                    {submitResult?.streak_current >= 1 && (
+                      <div
+                        data-testid="daily-streak-block"
+                        className="inline-flex items-center gap-2 bg-terracotta text-white font-bold px-5 py-3 rounded-full text-lg mb-3 mr-3"
+                      >
+                        <Flame className="w-5 h-5" fill="currentColor" />
+                        Série de <strong>{submitResult.streak_current} jour{submitResult.streak_current > 1 ? "s" : ""}</strong> 🔥
+                        {submitResult.streak_current === submitResult.streak_best && submitResult.streak_current >= 2 && (
+                          <span className="ml-1 bg-white/20 px-2 py-0.5 rounded-full text-xs">Record !</span>
+                        )}
+                      </div>
+                    )}
                     {leaderboard?.my_rank && (
                       <div className="inline-flex items-center gap-2 bg-mustard text-navy font-bold px-5 py-3 rounded-full text-lg mb-6">
                         <Medal className="w-5 h-5" />

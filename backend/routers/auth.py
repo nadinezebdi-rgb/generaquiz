@@ -164,6 +164,18 @@ async def update_profile(body: UpdateProfileRequest, user: dict = Depends(get_cu
     return user_to_public(fresh)
 
 
+@router.patch("/preferences/daily-email")
+async def toggle_daily_email(body: dict, user: dict = Depends(get_current_user)):
+    """Opt-in / opt-out of the morning Quiz du Jour email reminder."""
+    opt_in = bool(body.get("daily_email_optin", True))
+    await db.users.update_one(
+        {"_id": ObjectId(str(user["_id"]))},
+        {"$set": {"daily_email_optin": opt_in}},
+    )
+    fresh = await db.users.find_one({"_id": ObjectId(str(user["_id"]))})
+    return user_to_public(fresh)
+
+
 @router.delete("/account")
 async def delete_account(user: dict = Depends(get_current_user), response: Response = None):
     user_id = str(user["_id"])

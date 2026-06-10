@@ -5,7 +5,7 @@ import { api, BACKEND_URL } from "@/lib/api";
 import { useAuth } from "@/contexts/AuthContext";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { ArrowRight, Crown, Trophy, Target, Zap, Sparkles, Calendar } from "lucide-react";
+import { ArrowRight, Crown, Trophy, Target, Zap, Sparkles, Calendar, Flame } from "lucide-react";
 
 export default function Dashboard() {
   const { user } = useAuth();
@@ -76,31 +76,46 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Quiz du Jour widget */}
-        <div className="mb-10 bg-gradient-to-br from-bordeaux to-navy text-white rounded-[28px] p-6 md:p-8 border-4 border-mustard shadow-warm flex flex-col md:flex-row items-start md:items-center gap-5">
-          <div className="bg-mustard text-navy rounded-2xl p-3 shrink-0">
-            <Calendar className="w-8 h-8" />
+        {/* Quiz du Jour widget with streak */}
+        <div className="mb-10 bg-gradient-to-br from-bordeaux to-navy text-white rounded-[28px] p-6 md:p-8 border-4 border-mustard shadow-warm" data-testid="dashboard-daily-widget">
+          <div className="flex flex-col md:flex-row items-start md:items-center gap-5">
+            <div className="bg-mustard text-navy rounded-2xl p-3 shrink-0">
+              <Calendar className="w-8 h-8" />
+            </div>
+            <div className="flex-1">
+              <div className="flex items-center gap-3 mb-1.5 flex-wrap">
+                <span className="text-mustard font-bold tracking-wide uppercase text-xs">Quiz du Jour</span>
+                {user?.streak_current > 0 && (
+                  <span
+                    data-testid="dashboard-streak-badge"
+                    className="inline-flex items-center gap-1.5 bg-terracotta text-white font-bold px-3 py-1 rounded-full text-xs"
+                    title={`Meilleure série : ${user.streak_best} jours`}
+                  >
+                    <Flame className="w-3.5 h-3.5" fill="currentColor" /> {user.streak_current} jour{user.streak_current > 1 ? "s" : ""} d&apos;affilée
+                  </span>
+                )}
+              </div>
+              <h3 className="font-display text-2xl md:text-3xl font-extrabold mb-1.5">
+                {daily?.my_entry
+                  ? `Score du jour : ${daily.my_entry.score}/${daily.my_entry.total} (rang #${daily.my_rank})`
+                  : "5 questions, 1 classement, 0 excuse !"}
+              </h3>
+              <p className="text-cream/80 text-base">
+                {daily?.my_entry
+                  ? `${daily.total_players} joueur${daily.total_players > 1 ? "s ont" : " a"} déjà joué aujourd'hui. Revenez demain pour de nouvelles questions !`
+                  : (user?.streak_current >= 2
+                      ? `Ne cassez pas votre série de ${user.streak_current} jours !`
+                      : "Jouez le Quiz du Jour et lancez votre série quotidienne.")}
+              </p>
+            </div>
+            <Link
+              to="/quiz-du-jour"
+              data-testid="dashboard-daily-cta"
+              className="inline-flex items-center gap-2 bg-mustard hover:bg-mustard-dark text-navy font-bold px-6 py-3 rounded-full transition shrink-0"
+            >
+              {daily?.my_entry ? "Voir le classement" : "Jouer maintenant"} <ArrowRight className="w-4 h-4" />
+            </Link>
           </div>
-          <div className="flex-1">
-            <div className="text-mustard font-bold tracking-wide uppercase text-xs mb-1">Quiz du Jour</div>
-            <h3 className="font-display text-2xl md:text-3xl font-extrabold mb-1.5">
-              {daily?.my_entry
-                ? `Score du jour : ${daily.my_entry.score}/${daily.my_entry.total} (rang #${daily.my_rank})`
-                : "5 questions, 1 classement, 0 excuse !"}
-            </h3>
-            <p className="text-cream/80 text-base">
-              {daily?.my_entry
-                ? `${daily.total_players} joueur${daily.total_players > 1 ? "s ont" : " a"} déjà joué aujourd'hui. Revenez demain pour de nouvelles questions !`
-                : "Jouez le Quiz du Jour et entrez dans le classement quotidien."}
-            </p>
-          </div>
-          <Link
-            to="/quiz-du-jour"
-            data-testid="dashboard-daily-cta"
-            className="inline-flex items-center gap-2 bg-mustard hover:bg-mustard-dark text-navy font-bold px-6 py-3 rounded-full transition shrink-0"
-          >
-            {daily?.my_entry ? "Voir le classement" : "Jouer maintenant"} <ArrowRight className="w-4 h-4" />
-          </Link>
         </div>
 
         {/* Categories grid */}
