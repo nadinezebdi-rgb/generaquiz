@@ -8,11 +8,13 @@ load_dotenv(ROOT_DIR / ".env")
 import os
 import logging
 import secrets
+import asyncio
 from datetime import datetime, timezone, timedelta
 from typing import List, Optional, Dict, Any, Annotated
 
 import bcrypt
 import jwt
+import resend
 from bson import ObjectId
 from fastapi import FastAPI, APIRouter, Depends, HTTPException, Request, Response
 from fastapi.staticfiles import StaticFiles
@@ -40,6 +42,11 @@ ADMIN_EMAIL = os.environ.get("ADMIN_EMAIL", "admin@quizdantan.fr")
 ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "Admin2026!")
 FRONTEND_URL = os.environ.get("FRONTEND_URL", "http://localhost:3000")
 STRIPE_API_KEY = os.environ.get("STRIPE_API_KEY", "sk_test_emergent")
+RESEND_API_KEY = os.environ.get("RESEND_API_KEY", "")
+SENDER_EMAIL = os.environ.get("SENDER_EMAIL", "onboarding@resend.dev")
+
+if RESEND_API_KEY:
+    resend.api_key = RESEND_API_KEY
 
 # Subscription packages (server-side defined for security)
 PACKAGES: Dict[str, Dict[str, Any]] = {
@@ -266,15 +273,68 @@ async def me(user: dict = Depends(get_current_user)):
     return user_to_public(user)
 
 
+def _build_reset_email_html(reset_link: str) -> str:
+    """Inline-styled HTML email for password reset (French)."""
+    return f"""<!DOCTYPE html>
+<html lang="fr"><head><meta charset="UTF-8"><title>Réinitialiser votre mot de passe</title></head>
+<body style="margin:0;padding:0;background-color:#F4F1DE;font-family:Arial,Helvetica,sans-serif;color:#1A2530;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#F4F1DE;padding:40px 20px;">
+    <tr><td align="center">
+      <table width="560" cellpadding="0" cellspacing="0" style="background-color:#FFFFFF;border-radius:24px;border:2px solid #E8E2C9;overflow:hidden;">
+        <tr><td style="background-color:#1E3A5F;padding:30px;text-align:center;">
+          <div style="display:inline-block;background-color:#E07A5F;width:48px;height:48px;border-radius:50%;line-height:48px;color:#FFFFFF;font-size:24px;font-weight:bold;">Q</div>
+          <h1 style="color:#F2CC8F;font-family:Georgia,serif;font-size:28px;margin:14px 0 0;">Quiz d'Antan</h1>
+        </td></tr>
+        <tr><td style="padding:40px 32px;">
+          <h2 style="font-family:Georgia,serif;font-size:24px;color:#1A2530;margin:0 0 16px;">Réinitialisation de votre mot de passe</h2>
+          <p style="font-size:16px;line-height:1.6;color:#334155;margin:0 0 20px;">Bonjour,</p>
+          <p style="font-size:16px;line-height:1.6;color:#334155;margin:0 0 20px;">Vous avez demandé à réinitialiser le mot de passe de votre compte <strong>Quiz d'Antan</strong>. Cliquez sur le bouton ci-dessous pour choisir un nouveau mot de passe :</p>
+          <table cellpadding="0" cellspacing="0" style="margin:28px auto;"><tr><td style="background-color:#E07A5F;border-radius:30px;">
+            <a href="{reset_link}" style="display:inline-block;padding:16px 36px;color:#FFFFFF;text-decoration:none;font-weight:bold;font-size:16px;font-family:Arial,sans-serif;">Réinitialiser mon mot de passe</a>
+          </td></tr></table>
+          <p style="font-size:14px;line-height:1.6;color:#64748B;margin:20px 0 8px;">Ou copiez-collez ce lien dans votre navigateur :</p>
+          <p style="font-size:13px;line-height:1.4;color:#1E3A5F;word-break:break-all;background-color:#F4F1DE;padding:12px;border-radius:8px;margin:0 0 24px;font-family:monospace;">{reset_link}</p>
+          <p style="font-size:14px;line-height:1.6;color:#64748B;margin:20px 0;">Ce lien est valable <strong>1 heure</strong>.</p>
+          <p style="font-size:14px;line-height:1.6;color:#64748B;margin:20px 0 0;">Si vous n'avez pas demandé cette réinitialisation, ignorez simplement cet email — votre mot de passe reste inchangé.</p>
+        </td></tr>
+        <tr><td style="background-color:#F4F1DE;padding:20px 32px;text-align:center;border-top:2px solid #E8E2C9;">
+          <p style="font-size:12px;color:#64748B;margin:0;">© Quiz d'Antan — La plateforme de jeux de mémoire pour seniors</p>
+        </td></tr>
+      </table>
+    </td></tr>
+  </table>
+</body></html>"""
+
+
+async def _send_reset_email(to_email: str, reset_link: str) -> bool:
+    """Send the password reset email via Resend (non-blocking). Returns True on success."""
+    if not RESEND_API_KEY:
+        logger.warning("RESEND_API_KEY not set — email not sent")
+        return False
+    params = {
+        "from": SENDER_EMAIL,
+        "to": [to_email],
+        "subject": "Réinitialisation de votre mot de passe — Quiz d'Antan",
+        "html": _build_reset_email_html(reset_link),
+    }
+    try:
+        result = await asyncio.to_thread(resend.Emails.send, params)
+        eid = result.get("id") if isinstance(result, dict) else result
+        logger.info(f"Reset email sent to {to_email} — id={eid}")
+        return True
+    except Exception as e:
+        logger.error(f"Failed to send reset email to {to_email}: {e}")
+        return False
+
+
 @api.post("/auth/forgot-password")
 async def forgot_password(body: ForgotPasswordRequest):
-    """Always returns success (no user enumeration). If the user exists, generates
-    a reset token. Email delivery is MOCKED — the reset link is returned in the
-    response when the user exists (replace with email integration in production)."""
+    """Always returns success (no user enumeration). If the user exists,
+    generates a reset token and sends the reset link via email."""
     email = body.email.lower().strip()
     user = await db.users.find_one({"email": email})
     if not user:
-        return {"ok": True, "message": "Si ce compte existe, un lien a été envoyé."}
+        return {"ok": True, "message": "Si ce compte existe, un email de réinitialisation a été envoyé."}
     token = secrets.token_urlsafe(32)
     expires_at = datetime.now(timezone.utc) + timedelta(hours=1)
     await db.password_reset_tokens.insert_one({
@@ -287,14 +347,8 @@ async def forgot_password(body: ForgotPasswordRequest):
     })
     reset_link = f"{FRONTEND_URL}/reset-password?token={token}"
     logger.info(f"[RESET] {email} -> {reset_link}")
-    # MOCKED: return token directly so user can complete the flow without email service
-    return {
-        "ok": True,
-        "message": "Lien de réinitialisation généré.",
-        "reset_token": token,
-        "reset_link": reset_link,
-        "mocked": True,
-    }
+    sent = await _send_reset_email(email, reset_link)
+    return {"ok": True, "message": "Si ce compte existe, un email de réinitialisation a été envoyé.", "email_sent": sent}
 
 
 @api.post("/auth/reset-password")
