@@ -1,0 +1,772 @@
+[
+  {
+    "question": "Quel célèbre général gaulois a affronté Jules César à Alésia en 52 avant J.-C. ?",
+    "options": [
+      "Brennus",
+      "Vercingétorix",
+      "Ambiorix",
+      "Clovis"
+    ],
+    "correct_index": 1,
+    "explanation": "Vercingétorix, chef arverne, a mené la résistance gauloise avant d'être vaincu par Jules César à Alésia."
+  },
+  {
+    "question": "En quelle année Clovis a-t-il été baptisé à Reims ?",
+    "options": [
+      "496",
+      "800",
+      "987",
+      "1066"
+    ],
+    "correct_index": 0,
+    "explanation": "Clovis, roi des Francs, s'est converti au christianisme et a été baptisé par l'évêque Rémi vers 496."
+  },
+  {
+    "question": "Quelle cathédrale a été le lieu traditionnel du sacre des rois de France ?",
+    "options": [
+      "Notre-Dame de Paris",
+      "Cathédrale de Reims",
+      "Cathédrale de Chartres",
+      "Basilique de Saint-Denis"
+    ],
+    "correct_index": 1,
+    "explanation": "La cathédrale de Reims a accueilli le sacre de la plupart des rois de France depuis le Moyen Âge."
+  },
+  {
+    "question": "Qui était François Ier ?",
+    "options": [
+      "Un empereur romain",
+      "Un roi de France de la Renaissance",
+      "Un révolutionnaire",
+      "Un pape"
+    ],
+    "correct_index": 1,
+    "explanation": "François Ier, roi de France de 1515 à 1547, est célèbre pour son mécénat artistique et la construction de châteaux de la Loire."
+  },
+  {
+    "question": "En quelle année Christophe Colomb a-t-il découvert l'Amérique ?",
+    "options": [
+      "1453",
+      "1492",
+      "1515",
+      "1598"
+    ],
+    "correct_index": 1,
+    "explanation": "Christophe Colomb a atteint les Amériques en 1492, marquant le début des grandes découvertes européennes."
+  },
+  {
+    "question": "Quel célèbre cardinal a été le principal ministre de Louis XIII ?",
+    "options": [
+      "Cardinal Mazarin",
+      "Cardinal de Richelieu",
+      "Cardinal de Fleury",
+      "Cardinal de Retz"
+    ],
+    "correct_index": 1,
+    "explanation": "Le cardinal de Richelieu a été le principal ministre de Louis XIII de 1624 à 1642, renforçant le pouvoir royal."
+  },
+  {
+    "question": "En quelle année la Révolution française a-t-elle commencé ?",
+    "options": [
+      "1785",
+      "1789",
+      "1793",
+      "1799"
+    ],
+    "correct_index": 1,
+    "explanation": "La Révolution française a débuté en 1789 avec la convocation des États généraux et la prise de la Bastille."
+  },
+  {
+    "question": "Qui était Robespierre ?",
+    "options": [
+      "Un roi de France",
+      "Un révolutionnaire de la Terreur",
+      "Un général de Napoléon",
+      "Un philosophe des Lumières"
+    ],
+    "correct_index": 1,
+    "explanation": "Maximilien de Robespierre était un leader révolutionnaire, figure centrale de la période de la Terreur (1793-1794)."
+  },
+  {
+    "question": "En quelle année Napoléon Bonaparte est-il devenu Premier Consul ?",
+    "options": [
+      "1789",
+      "1799",
+      "1804",
+      "1815"
+    ],
+    "correct_index": 1,
+    "explanation": "Napoléon a pris le pouvoir par le coup d'État du 18 Brumaire en 1799, devenant Premier Consul."
+  },
+  {
+    "question": "Quelle bataille de 1805 a marqué une victoire navale britannique contre la France ?",
+    "options": [
+      "Austerlitz",
+      "Trafalgar",
+      "Waterloo",
+      "Iéna"
+    ],
+    "correct_index": 1,
+    "explanation": "La bataille de Trafalgar (1805) a vu la victoire de l'amiral Nelson contre les flottes franco-espagnoles."
+  },
+  {
+    "question": "Quel code juridique Napoléon a-t-il promulgué en 1804 ?",
+    "options": [
+      "Code pénal",
+      "Code civil",
+      "Code rural",
+      "Code du travail"
+    ],
+    "correct_index": 1,
+    "explanation": "Le Code civil, aussi appelé Code Napoléon, a unifié le droit français et influence encore notre législation actuelle."
+  },
+  {
+    "question": "En quelle année la monarchie a-t-elle été abolie en France ?",
+    "options": [
+      "1789",
+      "1792",
+      "1804",
+      "1848"
+    ],
+    "correct_index": 1,
+    "explanation": "La monarchie a été abolie le 21 septembre 1792, proclamant la Première République française."
+  },
+  {
+    "question": "Quel roi est revenu au pouvoir en France après la chute de Napoléon en 1814 ?",
+    "options": [
+      "Louis XIV",
+      "Louis XV",
+      "Louis XVI",
+      "Louis XVIII"
+    ],
+    "correct_index": 3,
+    "explanation": "Louis XVIII, frère de Louis XVI, est monté sur le trône en 1814 lors de la Restauration monarchique."
+  },
+  {
+    "question": "En quelle année la Commune de Paris a-t-elle eu lieu ?",
+    "options": [
+      "1848",
+      "1870",
+      "1871",
+      "1889"
+    ],
+    "correct_index": 2,
+    "explanation": "La Commune de Paris a été une insurrection révolutionnaire de mars à mai 1871, réprimée dans le sang."
+  },
+  {
+    "question": "Qui a construit la Tour Eiffel ?",
+    "options": [
+      "Gustave Eiffel",
+      "Louis Pasteur",
+      "Victor Hugo",
+      "Georges Haussmann"
+    ],
+    "correct_index": 0,
+    "explanation": "Gustave Eiffel, ingénieur, a conçu et construit la tour qui porte son nom pour l'Exposition universelle de 1889."
+  },
+  {
+    "question": "Quelle affaire politique a divisé la France à la fin du XIXe siècle ?",
+    "options": [
+      "L'affaire Dreyfus",
+      "L'affaire du collier",
+      "L'affaire Stavisky",
+      "L'affaire des fiches"
+    ],
+    "correct_index": 0,
+    "explanation": "L'affaire Dreyfus (1894-1906) a opposé dreyfusards et antidreyfusards autour de la condamnation injuste du capitaine Alfred Dreyfus."
+  },
+  {
+    "question": "En quelle année la Première Guerre mondiale a-t-elle commencé ?",
+    "options": [
+      "1912",
+      "1914",
+      "1916",
+      "1918"
+    ],
+    "correct_index": 1,
+    "explanation": "La Première Guerre mondiale a débuté en août 1914 et s'est terminée en novembre 1918."
+  },
+  {
+    "question": "Quel traité a mis fin à la Première Guerre mondiale ?",
+    "options": [
+      "Traité de Versailles",
+      "Traité de Paris",
+      "Traité de Rome",
+      "Traité de Maastricht"
+    ],
+    "correct_index": 0,
+    "explanation": "Le traité de Versailles, signé le 28 juin 1919, a officiellement mis fin à la Première Guerre mondiale."
+  },
+  {
+    "question": "Qui était Philippe Pétain pendant la Seconde Guerre mondiale ?",
+    "options": [
+      "Chef de la Résistance",
+      "Maréchal de Vichy",
+      "Général allié",
+      "Ambassadeur de France"
+    ],
+    "correct_index": 1,
+    "explanation": "Le maréchal Pétain a dirigé le régime de Vichy, gouvernement collaborationniste de 1940 à 1944."
+  },
+  {
+    "question": "En quelle année la France a-t-elle été libérée de l'occupation allemande ?",
+    "options": [
+      "1942",
+      "1943",
+      "1944",
+      "1945"
+    ],
+    "correct_index": 2,
+    "explanation": "La libération de Paris a eu lieu en août 1944, suivie de la libération progressive du territoire français."
+  },
+  {
+    "question": "Quel homme politique a été premier ministre sous la IVe République avant de Gaulle ?",
+    "options": [
+      "Pierre Mendès France",
+      "Georges Pompidou",
+      "Jacques Chirac",
+      "François Mitterrand"
+    ],
+    "correct_index": 0,
+    "explanation": "Pierre Mendès France a été président du Conseil en 1954-1955, mettant fin à la guerre d'Indochine."
+  },
+  {
+    "question": "En quelle année la France a-t-elle signé le traité de Rome créant la CEE ?",
+    "options": [
+      "1951",
+      "1957",
+      "1963",
+      "1970"
+    ],
+    "correct_index": 1,
+    "explanation": "Le traité de Rome, signé en 1957, a créé la Communauté économique européenne (CEE), ancêtre de l'Union européenne."
+  },
+  {
+    "question": "Quelle crise politique a conduit au retour de De Gaulle au pouvoir en 1958 ?",
+    "options": [
+      "La guerre froide",
+      "La crise de Suez",
+      "La guerre d'Algérie",
+      "Mai 68"
+    ],
+    "correct_index": 2,
+    "explanation": "La crise politique provoquée par la guerre d'Algérie a mené au retour de De Gaulle et à la création de la Ve République."
+  },
+  {
+    "question": "En quelle année les femmes françaises ont-elles obtenu le droit de vote ?",
+    "options": [
+      "1920",
+      "1936",
+      "1944",
+      "1958"
+    ],
+    "correct_index": 2,
+    "explanation": "Les femmes françaises ont obtenu le droit de vote en 1944 et ont voté pour la première fois en 1945."
+  },
+  {
+    "question": "Quel président français a été élu en 1981, marquant l'alternance politique ?",
+    "options": [
+      "Valéry Giscard d'Estaing",
+      "François Mitterrand",
+      "Jacques Chirac",
+      "Georges Pompidou"
+    ],
+    "correct_index": 1,
+    "explanation": "François Mitterrand, premier président socialiste de la Ve République, a été élu en 1981, inaugurant l'alternance."
+  },
+  {
+    "question": "Quel roi de France est surnommé « Saint Louis » ?",
+    "options": [
+      "Louis IX",
+      "Louis XI",
+      "Louis XIV",
+      "Louis XVI"
+    ],
+    "correct_index": 0,
+    "explanation": "Louis IX, roi de 1226 à 1270, a été canonisé en 1297 pour sa piété et sa justice, devenant Saint Louis."
+  },
+  {
+    "question": "En quelle année Jeanne d'Arc a-t-elle été brûlée vive à Rouen ?",
+    "options": [
+      "1431",
+      "1429",
+      "1435",
+      "1440"
+    ],
+    "correct_index": 0,
+    "explanation": "Jeanne d'Arc fut capturée par les Bourguignons en 1430 et brûlée vive à Rouen le 30 mai 1431."
+  },
+  {
+    "question": "Qui était le premier roi de France ?",
+    "options": [
+      "Clovis",
+      "Charlemagne",
+      "Hugues Capet",
+      "Pépin le Bref"
+    ],
+    "correct_index": 0,
+    "explanation": "Clovis, roi des Francs de 481 à 511, est considéré comme le premier roi de France après son baptême."
+  },
+  {
+    "question": "Quelle bataille de 732 a stoppé l'avancée des Arabes en Europe ?",
+    "options": [
+      "Bataille de Poitiers",
+      "Bataille de Bouvines",
+      "Bataille de Valmy",
+      "Bataille de Marignan"
+    ],
+    "correct_index": 0,
+    "explanation": "Charles Martel a vaincu les troupes musulmanes à Poitiers en 732, stoppant leur progression en Europe occidentale."
+  },
+  {
+    "question": "Quel président français a inauguré le tunnel sous la Manche ?",
+    "options": [
+      "François Mitterrand",
+      "Jacques Chirac",
+      "Valéry Giscard d'Estaing",
+      "Georges Pompidou"
+    ],
+    "correct_index": 0,
+    "explanation": "François Mitterrand et la reine Elizabeth II ont inauguré le tunnel sous la Manche le 6 mai 1994."
+  },
+  {
+    "question": "Quelle guerre a opposé la France et l'Angleterre de 1337 à 1453 ?",
+    "options": [
+      "La guerre de Cent Ans",
+      "La guerre de Sept Ans",
+      "La guerre de Trente Ans",
+      "La guerre de Succession"
+    ],
+    "correct_index": 0,
+    "explanation": "La guerre de Cent Ans a duré 116 ans et s'est terminée par la victoire française en 1453."
+  },
+  {
+    "question": "Quel château royal est situé dans le Val de Loire ?",
+    "options": [
+      "Chambord",
+      "Versailles",
+      "Fontainebleau",
+      "Vincennes"
+    ],
+    "correct_index": 0,
+    "explanation": "Le château de Chambord, construit sous François Ier, est le plus grand château de la Loire."
+  },
+  {
+    "question": "En quelle année la France est-elle devenue une République pour la première fois ?",
+    "options": [
+      "1792",
+      "1789",
+      "1804",
+      "1848"
+    ],
+    "correct_index": 0,
+    "explanation": "La Première République a été proclamée le 21 septembre 1792 après l'abolition de la monarchie."
+  },
+  {
+    "question": "Qui a peint le plafond de la galerie des Glaces à Versailles ?",
+    "options": [
+      "Charles Le Brun",
+      "Nicolas Poussin",
+      "Jacques-Louis David",
+      "Eugène Delacroix"
+    ],
+    "correct_index": 0,
+    "explanation": "Charles Le Brun, peintre officiel de Louis XIV, a réalisé les fresques de la galerie des Glaces entre 1678 et 1684."
+  },
+  {
+    "question": "Quelle colonie française est devenue indépendante en 1960 lors de « l'année de l'Afrique » ?",
+    "options": [
+      "Le Sénégal",
+      "L'Algérie",
+      "Le Maroc",
+      "La Tunisie"
+    ],
+    "correct_index": 0,
+    "explanation": "En 1960, 14 colonies françaises d'Afrique dont le Sénégal ont accédé à l'indépendance."
+  },
+  {
+    "question": "Quel roi de France a ordonné la construction du Louvre médiéval ?",
+    "options": [
+      "Philippe Auguste",
+      "François Ier",
+      "Henri IV",
+      "Charles V"
+    ],
+    "correct_index": 0,
+    "explanation": "Philippe Auguste fit construire la forteresse du Louvre vers 1190 pour protéger Paris."
+  },
+  {
+    "question": "En quelle année la France a-t-elle adopté l'euro comme monnaie ?",
+    "options": [
+      "2002",
+      "1999",
+      "2000",
+      "2004"
+    ],
+    "correct_index": 0,
+    "explanation": "L'euro est devenu la monnaie fiduciaire en France le 1er janvier 2002, remplaçant le franc."
+  },
+  {
+    "question": "Quel général français a commandé les troupes alliées lors de la Première Guerre mondiale ?",
+    "options": [
+      "Ferdinand Foch",
+      "Joseph Joffre",
+      "Philippe Pétain",
+      "Charles de Gaulle"
+    ],
+    "correct_index": 0,
+    "explanation": "Le maréchal Foch fut nommé commandant en chef des forces alliées en 1918 et mena l'offensive finale."
+  },
+  {
+    "question": "Quelle reine de France était d'origine autrichienne et épouse de Louis XVI ?",
+    "options": [
+      "Marie-Antoinette",
+      "Catherine de Médicis",
+      "Anne d'Autriche",
+      "Marie de Médicis"
+    ],
+    "correct_index": 0,
+    "explanation": "Marie-Antoinette d'Autriche épousa Louis XVI en 1770 et fut guillotinée en 1793."
+  },
+  {
+    "question": "Quel ministre de Louis XIV a réorganisé l'économie française ?",
+    "options": [
+      "Colbert",
+      "Richelieu",
+      "Mazarin",
+      "Necker"
+    ],
+    "correct_index": 0,
+    "explanation": "Jean-Baptiste Colbert, contrôleur général des finances de 1665 à 1683, développa le mercantilisme."
+  },
+  {
+    "question": "En quelle année la bataille de Marignan a-t-elle eu lieu ?",
+    "options": [
+      "1515",
+      "1525",
+      "1505",
+      "1535"
+    ],
+    "correct_index": 0,
+    "explanation": "François Ier remporta la bataille de Marignan en Italie les 13 et 14 septembre 1515."
+  },
+  {
+    "question": "Qui était Napoléon III ?",
+    "options": [
+      "Le neveu de Napoléon Bonaparte",
+      "Le fils de Napoléon Bonaparte",
+      "Le frère de Napoléon Bonaparte",
+      "Le cousin de Napoléon Bonaparte"
+    ],
+    "correct_index": 0,
+    "explanation": "Louis-Napoléon Bonaparte, neveu de Napoléon Ier, devint empereur sous le nom de Napoléon III de 1852 à 1870."
+  },
+  {
+    "question": "Quelle réforme le président Jacques Chirac a-t-il mise en place en 2000 ?",
+    "options": [
+      "Le quinquennat",
+      "Le septennat",
+      "L'abolition du service militaire",
+      "L'euro"
+    ],
+    "correct_index": 0,
+    "explanation": "Le quinquennat, réduisant le mandat présidentiel de 7 à 5 ans, a été approuvé par référendum en 2000."
+  },
+  {
+    "question": "Quel événement a marqué le début de la Terreur pendant la Révolution ?",
+    "options": [
+      "L'exécution de Louis XVI",
+      "La prise de la Bastille",
+      "Le serment du Jeu de Paume",
+      "La bataille de Valmy"
+    ],
+    "correct_index": 0,
+    "explanation": "L'exécution du roi Louis XVI le 21 janvier 1793 marque le début de la période de la Terreur."
+  },
+  {
+    "question": "Quelle ville française a été capitale du royaume de France avant Paris ?",
+    "options": [
+      "Orléans",
+      "Lyon",
+      "Tours",
+      "Reims"
+    ],
+    "correct_index": 0,
+    "explanation": "Plusieurs villes furent capitales, dont Orléans sous les Capétiens, avant que Paris ne s'impose durablement."
+  },
+  {
+    "question": "En quelle année le Front populaire est-il arrivé au pouvoir ?",
+    "options": [
+      "1936",
+      "1934",
+      "1938",
+      "1940"
+    ],
+    "correct_index": 0,
+    "explanation": "Le Front populaire, coalition de gauche dirigée par Léon Blum, a remporté les élections en mai 1936."
+  },
+  {
+    "question": "Quel traité a mis fin à la guerre de Succession d'Espagne en 1713 ?",
+    "options": [
+      "Le traité d'Utrecht",
+      "Le traité de Versailles",
+      "Le traité de Westphalie",
+      "Le traité de Paris"
+    ],
+    "correct_index": 0,
+    "explanation": "Le traité d'Utrecht (1713) mit fin à la guerre et reconnut Philippe V comme roi d'Espagne."
+  },
+  {
+    "question": "Qui a été le dernier roi de France ?",
+    "options": [
+      "Louis-Philippe Ier",
+      "Charles X",
+      "Louis XVIII",
+      "Napoléon III"
+    ],
+    "correct_index": 0,
+    "explanation": "Louis-Philippe Ier, « roi des Français », régna de 1830 à 1848 avant la Deuxième République."
+  },
+  {
+    "question": "Quelle bataille navale de 1805 opposa la France à l'Angleterre ?",
+    "options": [
+      "Trafalgar",
+      "Austerlitz",
+      "Waterloo",
+      "Iéna"
+    ],
+    "correct_index": 0,
+    "explanation": "La bataille de Trafalgar, victoire navale britannique contre la France et l'Espagne, eut lieu le 21 octobre 1805."
+  },
+  {
+    "question": "En quelle année la France a-t-elle officiellement aboli la monarchie ?",
+    "options": [
+      "1792",
+      "1789",
+      "1793",
+      "1794"
+    ],
+    "correct_index": 0,
+    "explanation": "La monarchie fut officiellement abolie le 21 septembre 1792, jour de proclamation de la République."
+  },
+  {
+    "question": "Quel célèbre château de la Loire a été construit sous François Ier à partir de 1519 ?",
+    "options": [
+      "Chambord",
+      "Chenonceau",
+      "Amboise",
+      "Blois"
+    ],
+    "correct_index": 0,
+    "explanation": "Le château de Chambord est le plus vaste des châteaux de la Loire, commandé par François Ier comme symbole de sa puissance."
+  },
+  {
+    "question": "En quelle année Napoléon Bonaparte est-il mort en exil ?",
+    "options": [
+      "1821",
+      "1815",
+      "1825",
+      "1818"
+    ],
+    "correct_index": 0,
+    "explanation": "Napoléon est mort le 5 mai 1821 sur l'île de Sainte-Hélène, où il était exilé depuis 1815."
+  },
+  {
+    "question": "Qui a été le premier président de la IVe République en 1947 ?",
+    "options": [
+      "Vincent Auriol",
+      "René Coty",
+      "Albert Lebrun",
+      "Paul Doumer"
+    ],
+    "correct_index": 0,
+    "explanation": "Vincent Auriol a été élu premier président de la IVe République en janvier 1947 et est resté en fonction jusqu'en 1954."
+  },
+  {
+    "question": "Quelle bataille de 1214 a marqué la victoire du roi Philippe Auguste ?",
+    "options": [
+      "Bouvines",
+      "Crécy",
+      "Azincourt",
+      "Poitiers"
+    ],
+    "correct_index": 0,
+    "explanation": "La bataille de Bouvines, remportée par Philippe Auguste, a consolidé le pouvoir royal français face à une coalition européenne."
+  },
+  {
+    "question": "Quel événement marque le début de la Seconde Guerre mondiale pour la France ?",
+    "options": [
+      "Déclaration de guerre à l'Allemagne en septembre 1939",
+      "Invasion de la Pologne",
+      "Armistice de juin 1940",
+      "Débarquement en Normandie"
+    ],
+    "correct_index": 0,
+    "explanation": "La France et le Royaume-Uni ont déclaré la guerre à l'Allemagne le 3 septembre 1939, après l'invasion de la Pologne."
+  },
+  {
+    "question": "Quel est le symbole de la République française depuis la Révolution ?",
+    "options": [
+      "Marianne",
+      "La Marseillaise",
+      "Le coq gaulois",
+      "Le bonnet phrygien"
+    ],
+    "correct_index": 0,
+    "explanation": "Marianne est l'effigie symbolique de la République française, représentant la Liberté et la Raison."
+  },
+  {
+    "question": "En quelle année Jules César a-t-il conquis la Gaule ?",
+    "options": [
+      "52 avant J.-C.",
+      "58 avant J.-C.",
+      "44 avant J.-C.",
+      "27 avant J.-C."
+    ],
+    "correct_index": 0,
+    "explanation": "La victoire d'Alésia en 52 avant J.-C. marque la fin de la conquête de la Gaule par Jules César."
+  },
+  {
+    "question": "Qui était le ministre des Finances de Louis XVI en 1789 ?",
+    "options": [
+      "Jacques Necker",
+      "Charles de Calonne",
+      "Turgot",
+      "Colbert"
+    ],
+    "correct_index": 0,
+    "explanation": "Jacques Necker était ministre des Finances et son renvoi en juillet 1789 a contribué au déclenchement de la Révolution."
+  },
+  {
+    "question": "Quelle reine de France était d'origine autrichienne ?",
+    "options": [
+      "Marie-Antoinette",
+      "Anne d'Autriche",
+      "Catherine de Médicis",
+      "Aliénor d'Aquitaine"
+    ],
+    "correct_index": 0,
+    "explanation": "Marie-Antoinette, fille de l'impératrice Marie-Thérèse d'Autriche, a épousé Louis XVI en 1770."
+  },
+  {
+    "question": "En quelle année la France a-t-elle adopté le drapeau tricolore bleu-blanc-rouge ?",
+    "options": [
+      "1794",
+      "1789",
+      "1792",
+      "1804"
+    ],
+    "correct_index": 0,
+    "explanation": "Le drapeau tricolore a été officiellement adopté en février 1794 pendant la Révolution française."
+  },
+  {
+    "question": "Quel président français a nationalisé les banques en 1981 ?",
+    "options": [
+      "François Mitterrand",
+      "Valéry Giscard d'Estaing",
+      "Georges Pompidou",
+      "Jacques Chirac"
+    ],
+    "correct_index": 0,
+    "explanation": "François Mitterrand a procédé à d'importantes nationalisations dès son arrivée au pouvoir en 1981."
+  },
+  {
+    "question": "Quelle guerre a opposé la France et la Prusse en 1870 ?",
+    "options": [
+      "La guerre franco-prussienne",
+      "La guerre de Crimée",
+      "La guerre de Sept Ans",
+      "La guerre d'Espagne"
+    ],
+    "correct_index": 0,
+    "explanation": "La guerre franco-prussienne de 1870-1871 s'est terminée par la défaite française et la perte de l'Alsace-Lorraine."
+  },
+  {
+    "question": "Qui était le dauphin, fils de Louis XVI, mort en prison en 1795 ?",
+    "options": [
+      "Louis XVII",
+      "Louis XVIII",
+      "Charles X",
+      "Louis XVI"
+    ],
+    "correct_index": 0,
+    "explanation": "Louis XVII, fils de Louis XVI et Marie-Antoinette, est mort en captivité à l'âge de 10 ans sans avoir régné."
+  },
+  {
+    "question": "Quelle ordonnance royale de 1539 a imposé le français comme langue administrative ?",
+    "options": [
+      "L'ordonnance de Villers-Cotterêts",
+      "L'Édit de Nantes",
+      "L'ordonnance de Blois",
+      "L'Édit de Fontainebleau"
+    ],
+    "correct_index": 0,
+    "explanation": "François Ier a signé l'ordonnance de Villers-Cotterêts qui impose l'usage du français dans tous les actes officiels."
+  },
+  {
+    "question": "En quelle année a eu lieu le massacre de la Saint-Barthélemy ?",
+    "options": [
+      "1572",
+      "1562",
+      "1598",
+      "1585"
+    ],
+    "correct_index": 0,
+    "explanation": "Le massacre de la Saint-Barthélemy a eu lieu dans la nuit du 23 au 24 août 1572, visant les protestants à Paris."
+  },
+  {
+    "question": "Quel roi de France a régné le plus longtemps ?",
+    "options": [
+      "Louis XIV",
+      "Louis XV",
+      "François Ier",
+      "Henri IV"
+    ],
+    "correct_index": 0,
+    "explanation": "Louis XIV a régné pendant 72 ans, de 1643 à 1715, ce qui constitue le plus long règne de l'histoire de France."
+  },
+  {
+    "question": "Quelle bataille de 1429 a permis à Jeanne d'Arc de libérer une ville assiégée ?",
+    "options": [
+      "Orléans",
+      "Paris",
+      "Reims",
+      "Rouen"
+    ],
+    "correct_index": 0,
+    "explanation": "Jeanne d'Arc a levé le siège d'Orléans en mai 1429, ce qui a marqué un tournant dans la guerre de Cent Ans."
+  },
+  {
+    "question": "Quel événement a mis fin à la monarchie de Juillet en 1848 ?",
+    "options": [
+      "La Révolution de février 1848",
+      "Le coup d'État de Napoléon III",
+      "La Commune de Paris",
+      "L'abdication de Charles X"
+    ],
+    "correct_index": 0,
+    "explanation": "La révolution de février 1848 a renversé Louis-Philippe Ier et instauré la IIe République."
+  },
+  {
+    "question": "Quel surnom donnait-on au roi Philippe II Auguste ?",
+    "options": [
+      "Le Conquérant",
+      "Le Bel",
+      "Auguste",
+      "Le Hardi"
+    ],
+    "correct_index": 2,
+    "explanation": "Philippe II est surnommé Auguste car il a agrandi considérablement le domaine royal, notamment en reprenant la Normandie aux Anglais en 1204."
+  },
+  {
+    "question": "En quelle année Henri IV a-t-il été assassiné par Ravaillac ?",
+    "options": [
+      "1598",
+      "1610",
+      "1624",
+      "1643"
+    ],
+    "correct_index": 1,
+    "explanation": "Henri IV a été assassiné le 14 mai 1610 à Paris par François Ravaillac, un fanatique religieux."
+  }
+]

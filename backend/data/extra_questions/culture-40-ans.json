@@ -1,0 +1,772 @@
+[
+  {
+    "question": "Quel était le nom du premier moteur de recherche français lancé en 1996 ?",
+    "options": [
+      "Voila",
+      "Lycos France",
+      "Altavista France",
+      "Google France"
+    ],
+    "correct_index": 0,
+    "explanation": "Voila a été lancé en 1996 par France Télécom et a dominé le marché français avant l'arrivée de Google."
+  },
+  {
+    "question": "Quelle série culte mettait en scène Fox Mulder et Dana Scully ?",
+    "options": [
+      "Urgences",
+      "X-Files",
+      "Friends",
+      "Buffy"
+    ],
+    "correct_index": 1,
+    "explanation": "X-Files (Aux frontières du réel) a marqué les années 90 avec ses enquêtes sur le paranormal."
+  },
+  {
+    "question": "En quelle année la PlayStation 2 est-elle sortie en Europe ?",
+    "options": [
+      "1998",
+      "2000",
+      "2002",
+      "2004"
+    ],
+    "correct_index": 1,
+    "explanation": "La PlayStation 2 de Sony est sortie en novembre 2000 en Europe et a connu un succès mondial."
+  },
+  {
+    "question": "Quel dessin animé japonais suivait les aventures de Yugi et son jeu de cartes ?",
+    "options": [
+      "Dragon Ball Z",
+      "Yu-Gi-Oh!",
+      "Pokémon",
+      "Digimon"
+    ],
+    "correct_index": 1,
+    "explanation": "Yu-Gi-Oh! a popularisé le jeu de cartes à collectionner dans les années 2000."
+  },
+  {
+    "question": "Qui a chanté « On ira » en 2003 ?",
+    "options": [
+      "Calogero",
+      "Garou",
+      "Patrick Bruel",
+      "Jean-Jacques Goldman"
+    ],
+    "correct_index": 2,
+    "explanation": "Patrick Bruel a sorti ce titre qui est devenu l'un de ses plus grands succès des années 2000."
+  },
+  {
+    "question": "Quel film d'animation DreamWorks mettait en scène un ogre vert en 2001 ?",
+    "options": [
+      "Monstres & Cie",
+      "L'Âge de glace",
+      "Shrek",
+      "Kung Fu Panda"
+    ],
+    "correct_index": 2,
+    "explanation": "Shrek est sorti en 2001 et a lancé une franchise à succès pour DreamWorks Animation."
+  },
+  {
+    "question": "Quelle émission culinaire animée par Jean-Luc Petitrenaud a marqué France 3 ?",
+    "options": [
+      "Un dîner presque parfait",
+      "Les Escapades",
+      "Top Chef",
+      "Masterchef"
+    ],
+    "correct_index": 1,
+    "explanation": "Les Escapades de Petitrenaud ont été diffusées sur France 3 de 1999 à 2014."
+  },
+  {
+    "question": "En quelle année le tunnel sous la Manche a-t-il été inauguré ?",
+    "options": [
+      "1990",
+      "1994",
+      "1998",
+      "2002"
+    ],
+    "correct_index": 1,
+    "explanation": "Le tunnel sous la Manche a été inauguré le 6 mai 1994 par François Mitterrand et Elizabeth II."
+  },
+  {
+    "question": "Quel groupe français a chanté « Jeune et con » en 2001 ?",
+    "options": [
+      "Louise Attaque",
+      "Saez",
+      "Noir Désir",
+      "Téléphone"
+    ],
+    "correct_index": 1,
+    "explanation": "Saez a sorti ce titre engagé qui est devenu un hymne générationnel au début des années 2000."
+  },
+  {
+    "question": "Quel baladeur numérique Apple a révolutionné l'écoute musicale en 2001 ?",
+    "options": [
+      "iPhone",
+      "iPod",
+      "iPad",
+      "iMac"
+    ],
+    "correct_index": 1,
+    "explanation": "L'iPod lancé en octobre 2001 a transformé la façon d'écouter et de transporter sa musique."
+  },
+  {
+    "question": "Quelle série suivait les aventures de Will Smith dans une famille riche ?",
+    "options": [
+      "New York Police Blues",
+      "Le Prince de Bel-Air",
+      "Sauvés par le gong",
+      "Côte Ouest"
+    ],
+    "correct_index": 1,
+    "explanation": "Le Prince de Bel-Air a été diffusé de 1990 à 1996 et a lancé la carrière de Will Smith."
+  },
+  {
+    "question": "Quel jeu vidéo de simulation permettait de construire et gérer une ville ?",
+    "options": [
+      "Age of Empires",
+      "SimCity",
+      "Civilization",
+      "Les Sims"
+    ],
+    "correct_index": 1,
+    "explanation": "SimCity, créé par Maxis, a popularisé le genre de la gestion urbaine dès 1989."
+  },
+  {
+    "question": "Quel film de James Cameron est devenu le plus gros succès de 1997 ?",
+    "options": [
+      "Avatar",
+      "Terminator 2",
+      "Titanic",
+      "Abyss"
+    ],
+    "correct_index": 2,
+    "explanation": "Titanic est sorti en 1997 et a détenu le record du box-office mondial pendant 12 ans."
+  },
+  {
+    "question": "Quelle catastrophe naturelle a frappé la France le 26 décembre 1999 ?",
+    "options": [
+      "Canicule",
+      "Tempête",
+      "Inondation",
+      "Tremblement de terre"
+    ],
+    "correct_index": 1,
+    "explanation": "Les tempêtes Lothar et Martin ont dévasté la France les 26 et 27 décembre 1999."
+  },
+  {
+    "question": "Qui a gagné le Tour de France sept fois consécutives de 1999 à 2005 ?",
+    "options": [
+      "Miguel Indurain",
+      "Lance Armstrong",
+      "Jan Ullrich",
+      "Marco Pantani"
+    ],
+    "correct_index": 1,
+    "explanation": "Lance Armstrong a remporté 7 Tours de France, mais ses victoires ont été annulées pour dopage en 2012."
+  },
+  {
+    "question": "Quel réseau social créé en 2004 a révolutionné Internet ?",
+    "options": [
+      "MySpace",
+      "Facebook",
+      "Twitter",
+      "LinkedIn"
+    ],
+    "correct_index": 1,
+    "explanation": "Facebook a été créé par Mark Zuckerberg en février 2004 à l'université Harvard."
+  },
+  {
+    "question": "Quelle chanteuse a représenté la France à l'Eurovision 2002 avec « Il faut du temps » ?",
+    "options": [
+      "Lara Fabian",
+      "Hélène Ségara",
+      "Sandrine François",
+      "Nolwenn Leroy"
+    ],
+    "correct_index": 2,
+    "explanation": "Sandrine François a représenté la France à l'Eurovision 2002 à Tallinn."
+  },
+  {
+    "question": "Quel jeu de cartes à collectionner inspiré de Pokémon est sorti en 1999 ?",
+    "options": [
+      "Magic",
+      "Yu-Gi-Oh!",
+      "Pokémon JCC",
+      "Duel Masters"
+    ],
+    "correct_index": 2,
+    "explanation": "Le Jeu de Cartes à Collectionner Pokémon est sorti au Japon en 1996 et en France en 1999."
+  },
+  {
+    "question": "Quel animateur présentait « Questions pour un champion » sur France 3 ?",
+    "options": [
+      "Julien Lepers",
+      "Thierry Beccaro",
+      "Samuel Étienne",
+      "Cyril Féraud"
+    ],
+    "correct_index": 0,
+    "explanation": "Julien Lepers a animé Questions pour un champion de 1988 à 2016."
+  },
+  {
+    "question": "En quelle année le premier SMS a-t-il été envoyé en France ?",
+    "options": [
+      "1992",
+      "1995",
+      "1998",
+      "2000"
+    ],
+    "correct_index": 1,
+    "explanation": "Les SMS ont commencé à être utilisés en France à partir de 1995 avec la démocratisation du GSM."
+  },
+  {
+    "question": "Quelle série française mettait en scène un commissaire marseillais joué par Roger Hanin ?",
+    "options": [
+      "Maigret",
+      "Navarro",
+      "Julie Lescaut",
+      "PJ"
+    ],
+    "correct_index": 1,
+    "explanation": "Navarro a été diffusé sur TF1 de 1989 à 2007 avec Roger Hanin dans le rôle-titre."
+  },
+  {
+    "question": "Quel chanteur a popularisé le zouk avec « Zouk la sé sel médikaman nou ni » ?",
+    "options": [
+      "Kassav'",
+      "Zouk Machine",
+      "Francky Vincent",
+      "Admiral T"
+    ],
+    "correct_index": 0,
+    "explanation": "Le groupe Kassav' a créé et popularisé le zouk dans les années 80 et 90."
+  },
+  {
+    "question": "Quel magazine féminin français a lancé sa version en ligne en 1995 ?",
+    "options": [
+      "Elle",
+      "Marie Claire",
+      "Femme Actuelle",
+      "Biba"
+    ],
+    "correct_index": 0,
+    "explanation": "Elle a été l'un des premiers magazines français à se lancer sur Internet en 1995."
+  },
+  {
+    "question": "Quelle comédie française de 1998 mettait en scène des chômeurs créant un spectacle de strip-tease ?",
+    "options": [
+      "Le Père Noël est une ordure",
+      "Le Dîner de cons",
+      "Le Placard",
+      "Le Débardeur"
+    ],
+    "correct_index": 3,
+    "explanation": "Le Débardeur (adaptation française de The Full Monty) est sorti en 1998 et a connu un succès modéré."
+  },
+  {
+    "question": "Quel format de compression audio a révolutionné le partage de musique dans les années 90 ?",
+    "options": [
+      "WAV",
+      "MP3",
+      "MIDI",
+      "AAC"
+    ],
+    "correct_index": 1,
+    "explanation": "Le MP3, standardisé en 1991, a permis de compresser la musique et a favorisé le partage en ligne."
+  },
+  {
+    "question": "Quel système d'exploitation Microsoft est sorti en 1995 et a révolutionné l'informatique grand public ?",
+    "options": [
+      "Windows 95",
+      "Windows 3.1",
+      "Windows 98",
+      "Windows 2000"
+    ],
+    "correct_index": 0,
+    "explanation": "Windows 95 a introduit le menu Démarrer et la barre des tâches, devenant le système d'exploitation le plus populaire des années 90."
+  },
+  {
+    "question": "Quel film français de 2001 met en scène Audrey Tautou dans le rôle d'une jeune femme parisienne pleine de fantaisie ?",
+    "options": [
+      "Le Fabuleux Destin d'Amélie Poulain",
+      "Les Visiteurs",
+      "Le Dîner de cons",
+      "La Vie est un long fleuve tranquille"
+    ],
+    "correct_index": 0,
+    "explanation": "Réalisé par Jean-Pierre Jeunet, ce film a connu un succès mondial et a fait découvrir Audrey Tautou au grand public."
+  },
+  {
+    "question": "Quelle console de jeux portable Nintendo est sortie en 1989 et a connu un immense succès dans les années 90 ?",
+    "options": [
+      "Game Boy",
+      "Game Gear",
+      "Lynx",
+      "Neo Geo Pocket"
+    ],
+    "correct_index": 0,
+    "explanation": "La Game Boy de Nintendo a vendu plus de 118 millions d'unités dans le monde et a popularisé le jeu vidéo portable."
+  },
+  {
+    "question": "Quel chanteur français a interprété « Savoir aimer » en 1997 ?",
+    "options": [
+      "Florent Pagny",
+      "Patrick Bruel",
+      "Francis Cabrel",
+      "Jean-Jacques Goldman"
+    ],
+    "correct_index": 0,
+    "explanation": "« Savoir aimer » est l'un des plus grands succès de Florent Pagny, extrait de l'album du même nom."
+  },
+  {
+    "question": "En quelle année le téléphone portable WAP (permettant d'accéder à Internet) s'est-il démocratisé en France ?",
+    "options": [
+      "1999",
+      "1995",
+      "2001",
+      "2003"
+    ],
+    "correct_index": 0,
+    "explanation": "Le protocole WAP a permis dès 1999 d'accéder à des versions simplifiées de sites web sur mobile, précurseur du smartphone."
+  },
+  {
+    "question": "Quel groupe de rock français a chanté « Ton invit' » en 1997 ?",
+    "options": [
+      "Louise Attaque",
+      "Noir Désir",
+      "Téléphone",
+      "Indochine"
+    ],
+    "correct_index": 0,
+    "explanation": "Louise Attaque a connu un succès fulgurant avec son premier album éponyme en 1997, dont « Ton invit' » est extrait."
+  },
+  {
+    "question": "Quel feuilleton télévisé se déroulait à la clinique Keller sur TF1 dans les années 90 ?",
+    "options": [
+      "Urgences",
+      "Hélène et les garçons",
+      "Les Feux de l'amour",
+      "Premiers Baisers"
+    ],
+    "correct_index": 0,
+    "explanation": "La série américaine « Urgences » (ER) a été diffusée en France sur TF1 et a connu un immense succès dans les années 90."
+  },
+  {
+    "question": "Quel était le nom du chat orange de la BD Garfield créée par Jim Davis ?",
+    "options": [
+      "Garfield",
+      "Heathcliff",
+      "Felix",
+      "Tom"
+    ],
+    "correct_index": 0,
+    "explanation": "Garfield, le chat paresseux et gourmand, est devenu une icône de la culture pop et a été adapté en dessins animés dans les années 90."
+  },
+  {
+    "question": "Quelle émission de télé-réalité française a été lancée en 2001 sur M6 ?",
+    "options": [
+      "Loft Story",
+      "Star Academy",
+      "Koh-Lanta",
+      "La Ferme Célébrités"
+    ],
+    "correct_index": 0,
+    "explanation": "Loft Story, diffusée sur M6 en 2001, a été la première émission de télé-réalité française et a créé un phénomène de société."
+  },
+  {
+    "question": "Quel format de stockage optique a remplacé la cassette VHS dans les années 2000 ?",
+    "options": [
+      "DVD",
+      "Blu-ray",
+      "LaserDisc",
+      "MiniDisc"
+    ],
+    "correct_index": 0,
+    "explanation": "Le DVD (Digital Versatile Disc) s'est imposé dans les années 2000 comme le nouveau standard pour les films à domicile."
+  },
+  {
+    "question": "Quel animateur présentait « Fort Boyard » dans les années 90 ?",
+    "options": [
+      "Patrice Laffont",
+      "Olivier Minne",
+      "Christophe Dechavanne",
+      "Nagui"
+    ],
+    "correct_index": 0,
+    "explanation": "Patrice Laffont a animé Fort Boyard de 1990 à 1999, avant d'être remplacé par d'autres présentateurs."
+  },
+  {
+    "question": "Quel film d'animation Disney de 1991 racontait l'histoire d'une Belle et d'une Bête ?",
+    "options": [
+      "La Belle et la Bête",
+      "Aladdin",
+      "Pocahontas",
+      "Mulan"
+    ],
+    "correct_index": 0,
+    "explanation": "La Belle et la Bête de 1991 a marqué la renaissance Disney et a été le premier film d'animation nominé aux Oscars du meilleur film."
+  },
+  {
+    "question": "Quel était le slogan publicitaire de la marque de chips Lay's dans les années 90 ?",
+    "options": [
+      "À croquer sans faim",
+      "Betcha can't eat just one",
+      "Le goût qui croustille",
+      "Les chips de la liberté"
+    ],
+    "correct_index": 0,
+    "explanation": "« À croquer sans faim » était le célèbre slogan français de Lay's qui mettait en avant le plaisir de grignoter."
+  },
+  {
+    "question": "Quelle série télévisée mettait en scène six amis vivant à New York ?",
+    "options": [
+      "Friends",
+      "Seinfeld",
+      "How I Met Your Mother",
+      "Will & Grace"
+    ],
+    "correct_index": 0,
+    "explanation": "Friends, diffusée de 1994 à 2004, est devenue une série culte suivie par des millions de téléspectateurs dans le monde."
+  },
+  {
+    "question": "En quelle année le clonage de la brebis Dolly a-t-il été annoncé au monde ?",
+    "options": [
+      "1997",
+      "1995",
+      "1999",
+      "2001"
+    ],
+    "correct_index": 0,
+    "explanation": "Dolly, premier mammifère cloné à partir d'une cellule adulte, a été annoncée en février 1997, provoquant un débat éthique mondial."
+  },
+  {
+    "question": "Quel rappeur français a sorti l'album « L'École du micro d'argent » en 1997 ?",
+    "options": [
+      "IAM",
+      "NTM",
+      "MC Solaar",
+      "Assassin"
+    ],
+    "correct_index": 0,
+    "explanation": "Le groupe IAM a sorti cet album mythique considéré comme l'un des meilleurs albums de rap français de tous les temps."
+  },
+  {
+    "question": "Quelle était la capacité de stockage du premier iPod sorti en 2001 ?",
+    "options": [
+      "5 Go",
+      "1 Go",
+      "10 Go",
+      "20 Go"
+    ],
+    "correct_index": 0,
+    "explanation": "Le premier iPod d'Apple avait une capacité de 5 Go, permettant de stocker environ 1000 chansons."
+  },
+  {
+    "question": "Quel jeu vidéo de combat est sorti en 1991 et a popularisé les finishers spectaculaires ?",
+    "options": [
+      "Mortal Kombat",
+      "Street Fighter II",
+      "Tekken",
+      "Virtua Fighter"
+    ],
+    "correct_index": 0,
+    "explanation": "Mortal Kombat a marqué l'histoire du jeu vidéo avec ses « Fatalities » sanglantes qui ont créé la polémique."
+  },
+  {
+    "question": "Quelle chanteuse a représenté la France à l'Eurovision 1991 avec « Le Dernier qui a parlé » ?",
+    "options": [
+      "Amina",
+      "Nathalie Pâque",
+      "Sandrine François",
+      "Kali"
+    ],
+    "correct_index": 0,
+    "explanation": "Amina a terminé deuxième de l'Eurovision 1991, égalité parfaite avec la Suède avant de perdre aux règles de départage."
+  },
+  {
+    "question": "Quel navigateur web a dominé Internet dans les années 90 avant l'arrivée de Firefox et Chrome ?",
+    "options": [
+      "Internet Explorer",
+      "Netscape Navigator",
+      "Opera",
+      "Safari"
+    ],
+    "correct_index": 0,
+    "explanation": "Internet Explorer de Microsoft a dominé le marché des navigateurs web avec plus de 95% de parts de marché au début des années 2000."
+  },
+  {
+    "question": "Quel événement tragique a eu lieu le 11 septembre 2001 aux États-Unis ?",
+    "options": [
+      "Les attentats du World Trade Center",
+      "L'ouragan Katrina",
+      "Le tremblement de terre de San Francisco",
+      "L'explosion de la navette Columbia"
+    ],
+    "correct_index": 0,
+    "explanation": "Les attentats du 11 septembre 2001 à New York et Washington ont marqué le début du XXIe siècle et changé la géopolitique mondiale."
+  },
+  {
+    "question": "Quelle trilogie cinématographique réalisée par Peter Jackson est sortie entre 2001 et 2003 ?",
+    "options": [
+      "Le Seigneur des Anneaux",
+      "Star Wars",
+      "Matrix",
+      "Pirates des Caraïbes"
+    ],
+    "correct_index": 0,
+    "explanation": "La trilogie du Seigneur des Anneaux a remporté 17 Oscars au total et a révolutionné le cinéma d'aventure fantastique."
+  },
+  {
+    "question": "Quel service de messagerie instantanée Microsoft a été lancé en 1999 ?",
+    "options": [
+      "MSN Messenger",
+      "ICQ",
+      "Yahoo! Messenger",
+      "AIM"
+    ],
+    "correct_index": 0,
+    "explanation": "MSN Messenger (puis Windows Live Messenger) a été le service de messagerie instantanée le plus populaire des années 2000."
+  },
+  {
+    "question": "Quel chanteur français a interprété « Foule sentimentale » en 1993 ?",
+    "options": [
+      "Alain Souchon",
+      "Laurent Voulzy",
+      "Renaud",
+      "Michel Jonasz"
+    ],
+    "correct_index": 0,
+    "explanation": "« Foule sentimentale » est l'un des plus grands succès d'Alain Souchon, extrait de l'album « C'est déjà ça »."
+  },
+  {
+    "question": "En quelle année le premier téléphone à écran tactile grand public (iPhone) est-il sorti ?",
+    "options": [
+      "2007",
+      "2005",
+      "2009",
+      "2003"
+    ],
+    "correct_index": 0,
+    "explanation": "L'iPhone d'Apple, présenté en janvier 2007 et commercialisé en juin, a révolutionné l'industrie du téléphone mobile."
+  },
+  {
+    "question": "Quel duo français a chanté « Il changeait la vie » en 1998 ?",
+    "options": [
+      "Jean-Jacques Goldman et Céline Dion",
+      "Garou et Céline Dion",
+      "Johnny Hallyday et Sylvie Vartan",
+      "Pascal Obispo et Zazie"
+    ],
+    "correct_index": 0,
+    "explanation": "Jean-Jacques Goldman et Céline Dion ont interprété ce titre à succès en duo en 1998."
+  },
+  {
+    "question": "Quel dessin animé mettait en scène quatre tortues ninjas vivant dans les égouts de New York ?",
+    "options": [
+      "Les Tortues Ninja",
+      "Les Rangers",
+      "Les Chevaliers du Zodiaque",
+      "Les X-Men"
+    ],
+    "correct_index": 0,
+    "explanation": "Les Tortues Ninja, créées dans les années 80, ont connu un immense succès dans les années 90 en France."
+  },
+  {
+    "question": "En quelle année Google a-t-il été créé ?",
+    "options": [
+      "1998",
+      "1995",
+      "2000",
+      "1993"
+    ],
+    "correct_index": 0,
+    "explanation": "Google a été fondé en septembre 1998 par Larry Page et Sergey Brin."
+  },
+  {
+    "question": "Quel animateur présentait « Fort Boyard » sur France 2 ?",
+    "options": [
+      "Patrice Laffont",
+      "Julien Lepers",
+      "Nagui",
+      "Jean-Pierre Foucault"
+    ],
+    "correct_index": 0,
+    "explanation": "Patrice Laffont a présenté Fort Boyard de 1990 à 1999, puis de 2003 à 2006."
+  },
+  {
+    "question": "Quel film de science-fiction des frères Wachowski est sorti en 1999 ?",
+    "options": [
+      "Matrix",
+      "Minority Report",
+      "Le Cinquième Élément",
+      "Starship Troopers"
+    ],
+    "correct_index": 0,
+    "explanation": "Matrix est sorti en 1999 et a révolutionné le cinéma de science-fiction avec ses effets spéciaux innovants."
+  },
+  {
+    "question": "Quelle console de jeux Sega a été lancée en 1998 en Europe ?",
+    "options": [
+      "Dreamcast",
+      "Saturn",
+      "Mega Drive",
+      "Game Gear"
+    ],
+    "correct_index": 0,
+    "explanation": "La Dreamcast est sortie en Europe en octobre 1998, marquant la dernière console de salon de Sega."
+  },
+  {
+    "question": "Qui a chanté « Tomber la chemise » en 1998 ?",
+    "options": [
+      "Zebda",
+      "Nèg' Marrons",
+      "IAM",
+      "NTM"
+    ],
+    "correct_index": 0,
+    "explanation": "Zebda a sorti ce tube festif en 1998, qui est devenu un hymne populaire."
+  },
+  {
+    "question": "Quelle série télévisée française mettait en scène des urgences hospitalières à partir de 1998 ?",
+    "options": [
+      "Urgences",
+      "Sous le soleil",
+      "Julie Lescaut",
+      "Louis la Brocante"
+    ],
+    "correct_index": 0,
+    "explanation": "« Urgences » était une série médicale française diffusée sur TF1 de 1998 à 2006."
+  },
+  {
+    "question": "Quel système de paiement en ligne a été créé en 1999 ?",
+    "options": [
+      "PayPal",
+      "Skrill",
+      "Bitcoin",
+      "Apple Pay"
+    ],
+    "correct_index": 0,
+    "explanation": "PayPal a été fondé en décembre 1998 et lancé officiellement en 1999, révolutionnant les paiements en ligne."
+  },
+  {
+    "question": "Quel magazine de jeux vidéo français était distribué avec des CD de démos dans les années 90 ?",
+    "options": [
+      "Joystick",
+      "Consoles +",
+      "Tilt",
+      "Player One"
+    ],
+    "correct_index": 0,
+    "explanation": "Joystick était un magazine culte des années 90, très apprécié pour ses CD de démos de jeux."
+  },
+  {
+    "question": "En quelle année la France a-t-elle arrêté le service militaire obligatoire ?",
+    "options": [
+      "1997",
+      "1995",
+      "2000",
+      "1992"
+    ],
+    "correct_index": 0,
+    "explanation": "Jacques Chirac a annoncé en 1996 la suspension du service militaire obligatoire, effective en 1997."
+  },
+  {
+    "question": "Quel rappeur français a sorti l'album « Mauvais œil » en 2000 ?",
+    "options": [
+      "Lunatic",
+      "NTM",
+      "IAM",
+      "113"
+    ],
+    "correct_index": 0,
+    "explanation": "Le duo Lunatic (Booba et Ali) a sorti cet album culte du rap français en 2000."
+  },
+  {
+    "question": "Quel format de disque numérique a remplacé les cassettes VHS dans les années 2000 ?",
+    "options": [
+      "DVD",
+      "Blu-ray",
+      "LaserDisc",
+      "CD-ROM"
+    ],
+    "correct_index": 0,
+    "explanation": "Le DVD s'est généralisé au début des années 2000, offrant une meilleure qualité que les cassettes VHS."
+  },
+  {
+    "question": "Quel film d'animation japonais de Hayao Miyazaki a remporté l'Ours d'or à Berlin en 2002 ?",
+    "options": [
+      "Le Voyage de Chihiro",
+      "Princesse Mononoké",
+      "Mon voisin Totoro",
+      "Le Château ambulant"
+    ],
+    "correct_index": 0,
+    "explanation": "Le Voyage de Chihiro a remporté l'Ours d'or à Berlin en 2002 et l'Oscar du meilleur film d'animation en 2003."
+  },
+  {
+    "question": "Quel constructeur automobile français a fusionné avec Nissan en 1999 ?",
+    "options": [
+      "Renault",
+      "Peugeot",
+      "Citroën",
+      "Simca"
+    ],
+    "correct_index": 0,
+    "explanation": "Renault et Nissan ont formé une alliance stratégique en 1999, devenant un groupe automobile majeur."
+  },
+  {
+    "question": "Quelle chanteuse française a représenté la France à l'Eurovision en 1997 avec « Sentiments songes » ?",
+    "options": [
+      "Fanny",
+      "Patricia Kaas",
+      "Sandrine François",
+      "Nathalie Pâque"
+    ],
+    "correct_index": 0,
+    "explanation": "Fanny a représenté la France à l'Eurovision 1997 à Dublin avec la chanson « Sentiments songes »."
+  },
+  {
+    "question": "Quel logiciel de messagerie instantanée Microsoft a été lancé en 1999 ?",
+    "options": [
+      "MSN Messenger",
+      "Skype",
+      "ICQ",
+      "Yahoo Messenger"
+    ],
+    "correct_index": 0,
+    "explanation": "MSN Messenger a été lancé en 1999 et est devenu extrêmement populaire dans les années 2000."
+  },
+  {
+    "question": "Quel groupe de rock français a chanté « J'ai demandé à la lune » en 2002 ?",
+    "options": [
+      "Indochine",
+      "Noir Désir",
+      "Téléphone",
+      "Louise Attaque"
+    ],
+    "correct_index": 0,
+    "explanation": "Indochine a sorti ce titre en 2002 sur l'album « Paradize », devenu l'un de leurs plus grands succès."
+  },
+  {
+    "question": "En quelle année le passage informatique à l'an 2000 (bug de l'an 2000) a-t-il eu lieu sans incident majeur ?",
+    "options": [
+      "2000",
+      "1999",
+      "2001",
+      "1998"
+    ],
+    "correct_index": 0,
+    "explanation": "Le passage à l'an 2000 s'est déroulé sans catastrophe informatique majeure grâce aux préparatifs effectués."
+  },
+  {
+    "question": "Quelle série télévisée française mettait en scène un chevalier du Moyen Âge projeté au XXe siècle ?",
+    "options": [
+      "Les Visiteurs du Mercredi",
+      "Grégoire Moulin contre l'humanité",
+      "Kaamelott",
+      "Le Miracle de l'amour"
+    ],
+    "correct_index": 2,
+    "explanation": "Kaamelott, créée par Alexandre Astier, a débuté en 2005 sur M6 et est devenue culte avec ses réinterprétations comiques de la légende arthurienne."
+  }
+]

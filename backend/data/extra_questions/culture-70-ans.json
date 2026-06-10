@@ -1,0 +1,772 @@
+[
+  {
+    "question": "En quelle année a eu lieu mai 68 en France ?",
+    "options": [
+      "1968",
+      "1967",
+      "1969",
+      "1970"
+    ],
+    "correct_index": 0,
+    "explanation": "Mai 68 désigne les manifestations étudiantes et grèves générales qui ont paralysé la France en mai 1968."
+  },
+  {
+    "question": "Quel chanteur français a popularisé « Comme d'habitude » en 1967 ?",
+    "options": [
+      "Claude François",
+      "Johnny Hallyday",
+      "Jacques Brel",
+      "Serge Gainsbourg"
+    ],
+    "correct_index": 0,
+    "explanation": "Claude François a sorti ce tube en 1967, qui deviendra plus tard « My Way » de Frank Sinatra."
+  },
+  {
+    "question": "Quel était le prénom du général de Gaulle ?",
+    "options": [
+      "Charles",
+      "Georges",
+      "François",
+      "André"
+    ],
+    "correct_index": 0,
+    "explanation": "Charles de Gaulle a été président de la République française de 1959 à 1969."
+  },
+  {
+    "question": "En quelle année a été inauguré le paquebot France ?",
+    "options": [
+      "1962",
+      "1960",
+      "1965",
+      "1958"
+    ],
+    "correct_index": 0,
+    "explanation": "Le paquebot France, fleuron de la marine française, a été inauguré en 1962 et a navigué jusqu'en 1974."
+  },
+  {
+    "question": "Quelle guerre s'est terminée en 1975 avec la chute de Saïgon ?",
+    "options": [
+      "La guerre du Vietnam",
+      "La guerre de Corée",
+      "La guerre d'Algérie",
+      "La guerre du Golfe"
+    ],
+    "correct_index": 0,
+    "explanation": "La guerre du Vietnam s'est achevée le 30 avril 1975 avec la prise de Saïgon par les forces nord-vietnamiennes."
+  },
+  {
+    "question": "Qui a chanté « Avec le temps » en 1970 ?",
+    "options": [
+      "Léo Ferré",
+      "Georges Brassens",
+      "Jacques Brel",
+      "Barbara"
+    ],
+    "correct_index": 0,
+    "explanation": "Léo Ferré a composé et interprété cette chanson emblématique en 1970."
+  },
+  {
+    "question": "En quelle année la France est-elle devenue membre de la CEE ?",
+    "options": [
+      "1957",
+      "1960",
+      "1963",
+      "1955"
+    ],
+    "correct_index": 0,
+    "explanation": "La France fait partie des six pays fondateurs de la Communauté Économique Européenne créée par le traité de Rome en 1957."
+  },
+  {
+    "question": "Quel sport pratiquait Pelé, star mondiale des années 60-70 ?",
+    "options": [
+      "Le football",
+      "Le tennis",
+      "Le basket",
+      "Le rugby"
+    ],
+    "correct_index": 0,
+    "explanation": "Pelé, footballeur brésilien, a remporté trois Coupes du monde (1958, 1962, 1970) et reste une légende du sport."
+  },
+  {
+    "question": "Quelle actrice a joué dans « La Grande Vadrouille » en 1966 ?",
+    "options": [
+      "Marie Dubois",
+      "Brigitte Bardot",
+      "Catherine Deneuve",
+      "Françoise Dorléac"
+    ],
+    "correct_index": 0,
+    "explanation": "Marie Dubois jouait Juliette aux côtés de Bourvil et Louis de Funès dans ce film culte."
+  },
+  {
+    "question": "En quelle année l'État d'Israël a-t-il été créé ?",
+    "options": [
+      "1948",
+      "1945",
+      "1950",
+      "1952"
+    ],
+    "correct_index": 0,
+    "explanation": "L'État d'Israël a été proclamé le 14 mai 1948 après le vote de l'ONU en 1947."
+  },
+  {
+    "question": "Quel conflit a opposé Israël à ses voisins arabes en juin 1967 ?",
+    "options": [
+      "La guerre des Six Jours",
+      "La guerre du Kippour",
+      "La guerre du Liban",
+      "La guerre d'indépendance"
+    ],
+    "correct_index": 0,
+    "explanation": "La guerre des Six Jours s'est déroulée du 5 au 10 juin 1967, marquant une victoire israélienne éclair."
+  },
+  {
+    "question": "Quel philosophe a été compagnon de Simone de Beauvoir ?",
+    "options": [
+      "Jean-Paul Sartre",
+      "Albert Camus",
+      "Maurice Merleau-Ponty",
+      "Michel Foucault"
+    ],
+    "correct_index": 0,
+    "explanation": "Jean-Paul Sartre et Simone de Beauvoir ont vécu une relation intellectuelle et sentimentale unique pendant plus de 50 ans."
+  },
+  {
+    "question": "En quelle année la pilule contraceptive a-t-elle été autorisée en France ?",
+    "options": [
+      "1967",
+      "1965",
+      "1970",
+      "1963"
+    ],
+    "correct_index": 0,
+    "explanation": "La loi Neuwirth autorisant la contraception en France a été votée en 1967, marquant une révolution sociétale."
+  },
+  {
+    "question": "Qui était le Premier ministre français pendant mai 68 ?",
+    "options": [
+      "Georges Pompidou",
+      "Jacques Chaban-Delmas",
+      "Pierre Mendès France",
+      "Michel Debré"
+    ],
+    "correct_index": 0,
+    "explanation": "Georges Pompidou était Premier ministre de 1962 à 1968 et a géré la crise de mai 68 avant de devenir président en 1969."
+  },
+  {
+    "question": "Quel festival de cinéma français a été créé en 1946 ?",
+    "options": [
+      "Le Festival de Cannes",
+      "Les César",
+      "Le Festival de Deauville",
+      "Le Festival d'Avignon"
+    ],
+    "correct_index": 0,
+    "explanation": "Le Festival de Cannes, créé en 1946, est devenu le plus prestigieux festival de cinéma au monde."
+  },
+  {
+    "question": "Quelle chanteuse a interprété « Non, je ne regrette rien » en 1960 ?",
+    "options": [
+      "Édith Piaf",
+      "Dalida",
+      "Juliette Gréco",
+      "Barbara"
+    ],
+    "correct_index": 0,
+    "explanation": "Édith Piaf a enregistré ce titre emblématique en 1960, composé par Charles Dumont."
+  },
+  {
+    "question": "En quelle année a eu lieu le choc pétrolier ?",
+    "options": [
+      "1973",
+      "1970",
+      "1975",
+      "1971"
+    ],
+    "correct_index": 0,
+    "explanation": "Le premier choc pétrolier d'octobre 1973, suite à la guerre du Kippour, a quadruplé le prix du pétrole et provoqué une crise mondiale."
+  },
+  {
+    "question": "Quel cosmonaute soviétique était le second homme dans l'espace ?",
+    "options": [
+      "Guerman Titov",
+      "Alexeï Leonov",
+      "Valentina Terechkova",
+      "Pavel Popovitch"
+    ],
+    "correct_index": 0,
+    "explanation": "Guerman Titov a effectué le second vol spatial habité le 6 août 1961, un jour après Youri Gagarine."
+  },
+  {
+    "question": "Qui a réalisé le film « 2001, l'Odyssée de l'espace » en 1968 ?",
+    "options": [
+      "Stanley Kubrick",
+      "Steven Spielberg",
+      "George Lucas",
+      "Ridley Scott"
+    ],
+    "correct_index": 0,
+    "explanation": "Stanley Kubrick a réalisé ce chef-d'œuvre de science-fiction en 1968, révolutionnant les effets spéciaux."
+  },
+  {
+    "question": "Quel pays a envahi la Tchécoslovaquie en 1968 ?",
+    "options": [
+      "L'URSS",
+      "L'Allemagne de l'Est",
+      "La Pologne",
+      "La Hongrie"
+    ],
+    "correct_index": 0,
+    "explanation": "L'URSS et ses alliés du Pacte de Varsovie ont écrasé le Printemps de Prague en août 1968."
+  },
+  {
+    "question": "Qui a remporté le Prix Nobel de littérature en 1964 pour son œuvre philosophique ?",
+    "options": [
+      "Jean-Paul Sartre",
+      "Albert Camus",
+      "Samuel Beckett",
+      "André Malraux"
+    ],
+    "correct_index": 0,
+    "explanation": "Jean-Paul Sartre a reçu le Prix Nobel de littérature en 1964 mais l'a refusé par principe."
+  },
+  {
+    "question": "Quel nom portait le programme spatial américain qui a conduit à la Lune ?",
+    "options": [
+      "Apollo",
+      "Mercury",
+      "Gemini",
+      "Skylab"
+    ],
+    "correct_index": 0,
+    "explanation": "Le programme Apollo (1961-1972) a permis aux États-Unis d'envoyer des hommes sur la Lune, avec Apollo 11 en 1969."
+  },
+  {
+    "question": "En quelle année Brigitte Bardot a-t-elle tourné « Et Dieu... créa la femme » ?",
+    "options": [
+      "1956",
+      "1959",
+      "1961",
+      "1954"
+    ],
+    "correct_index": 0,
+    "explanation": "Ce film de Roger Vadim sorti en 1956 a propulsé Brigitte Bardot au rang de star internationale."
+  },
+  {
+    "question": "Quel architecte a conçu la pyramide du Louvre inaugurée en 1989 ?",
+    "options": [
+      "Ieoh Ming Pei",
+      "Le Corbusier",
+      "Jean Nouvel",
+      "Ricardo Bofill"
+    ],
+    "correct_index": 0,
+    "explanation": "L'architecte sino-américain Ieoh Ming Pei a conçu cette pyramide de verre controversée, inaugurée par François Mitterrand."
+  },
+  {
+    "question": "Quelle actrice française a été découverte dans « Les Parapluies de Cherbourg » en 1964 ?",
+    "options": [
+      "Catherine Deneuve",
+      "Jeanne Moreau",
+      "Simone Signoret",
+      "Romy Schneider"
+    ],
+    "correct_index": 0,
+    "explanation": "Catherine Deneuve, alors âgée de 20 ans, a été révélée par ce film musical de Jacques Demy."
+  },
+  {
+    "question": "Quel mouvement de protestation étudiante a débuté à l'université de Nanterre en mars 1968 ?",
+    "options": [
+      "Le Mouvement du 22 mars",
+      "Les Enragés de mai",
+      "Action directe",
+      "La Jeune Garde"
+    ],
+    "correct_index": 0,
+    "explanation": "Le Mouvement du 22 mars, animé par Daniel Cohn-Bendit, a initié la contestation qui mènera aux événements de mai 68."
+  },
+  {
+    "question": "En quelle année le premier satellite artificiel Spoutnik a-t-il été lancé par l'URSS ?",
+    "options": [
+      "1955",
+      "1957",
+      "1959",
+      "1961"
+    ],
+    "correct_index": 1,
+    "explanation": "Spoutnik 1 a été lancé le 4 octobre 1957, marquant le début de la conquête spatiale."
+  },
+  {
+    "question": "Quel pays a accueilli la Coupe du monde de football en 1966 ?",
+    "options": [
+      "Angleterre",
+      "Allemagne",
+      "Italie",
+      "Brésil"
+    ],
+    "correct_index": 0,
+    "explanation": "L'Angleterre a organisé et remporté la Coupe du monde 1966, battant l'Allemagne en finale."
+  },
+  {
+    "question": "Qui a chanté « La Bohème » en 1965 ?",
+    "options": [
+      "Gilbert Bécaud",
+      "Charles Aznavour",
+      "Jacques Brel",
+      "Georges Brassens"
+    ],
+    "correct_index": 1,
+    "explanation": "Charles Aznavour a écrit et interprété cette chanson nostalgique devenue un classique de la chanson française."
+  },
+  {
+    "question": "En quelle année la Cinquième République a-t-elle été instaurée en France ?",
+    "options": [
+      "1956",
+      "1958",
+      "1960",
+      "1962"
+    ],
+    "correct_index": 1,
+    "explanation": "La Cinquième République a été fondée en 1958 avec l'adoption d'une nouvelle Constitution sous l'impulsion du général de Gaulle."
+  },
+  {
+    "question": "Quel était le prénom du président Kennedy assassiné en 1963 ?",
+    "options": [
+      "Robert",
+      "John",
+      "Edward",
+      "Joseph"
+    ],
+    "correct_index": 1,
+    "explanation": "John Fitzgerald Kennedy (JFK) était le 35e président des États-Unis, assassiné à Dallas le 22 novembre 1963."
+  },
+  {
+    "question": "Quelle série télévisée spatiale américaine a débuté en 1966 ?",
+    "options": [
+      "Star Trek",
+      "Lost in Space",
+      "The Outer Limits",
+      "Space Patrol"
+    ],
+    "correct_index": 0,
+    "explanation": "Star Trek (Star Trek : La série originale) a été diffusée pour la première fois en 1966 et est devenue culte."
+  },
+  {
+    "question": "En quelle année l'Algérie a-t-elle obtenu son indépendance de la France ?",
+    "options": [
+      "1960",
+      "1962",
+      "1964",
+      "1966"
+    ],
+    "correct_index": 1,
+    "explanation": "L'indépendance de l'Algérie a été proclamée le 5 juillet 1962 après les accords d'Évian."
+  },
+  {
+    "question": "Quel acteur français a joué dans « Le Samouraï » de Melville en 1967 ?",
+    "options": [
+      "Jean-Paul Belmondo",
+      "Alain Delon",
+      "Yves Montand",
+      "Lino Ventura"
+    ],
+    "correct_index": 1,
+    "explanation": "Alain Delon incarne le tueur solitaire Jef Costello dans ce film noir emblématique de Jean-Pierre Melville."
+  },
+  {
+    "question": "Quel conflit a opposé l'Inde et le Pakistan en 1971 ?",
+    "options": [
+      "La guerre du Cachemire",
+      "La guerre de libération du Bangladesh",
+      "La guerre de Kargil",
+      "La première guerre indo-pakistanaise"
+    ],
+    "correct_index": 1,
+    "explanation": "La guerre de 1971 a conduit à l'indépendance du Bangladesh, ancien Pakistan oriental."
+  },
+  {
+    "question": "Qui a réalisé le film « La Chinoise » en 1967 ?",
+    "options": [
+      "François Truffaut",
+      "Jean-Luc Godard",
+      "Claude Chabrol",
+      "Alain Resnais"
+    ],
+    "correct_index": 1,
+    "explanation": "Jean-Luc Godard a réalisé ce film politique avec Jean-Pierre Léaud, préfigurant mai 68."
+  },
+  {
+    "question": "En quelle année le traité de Rome instituant la CEE a-t-il été signé ?",
+    "options": [
+      "1955",
+      "1957",
+      "1959",
+      "1961"
+    ],
+    "correct_index": 1,
+    "explanation": "Le traité de Rome a été signé le 25 mars 1957 par six pays fondateurs, créant la Communauté économique européenne."
+  },
+  {
+    "question": "Quel groupe britannique a chanté « Light My Fire » en 1967 ?",
+    "options": [
+      "The Who",
+      "The Kinks",
+      "The Doors",
+      "Cream"
+    ],
+    "correct_index": 2,
+    "explanation": "« Light My Fire » est une chanson emblématique du groupe américain The Doors, menée par Jim Morrison."
+  },
+  {
+    "question": "Quelle actrice a joué Bonnie Parker dans « Bonnie and Clyde » (1967) ?",
+    "options": [
+      "Jane Fonda",
+      "Faye Dunaway",
+      "Shirley MacLaine",
+      "Julie Christie"
+    ],
+    "correct_index": 1,
+    "explanation": "Faye Dunaway a incarné la célèbre criminelle Bonnie Parker aux côtés de Warren Beatty dans ce film culte."
+  },
+  {
+    "question": "En quelle année Apollo 11 s'est-il posé sur la Lune ?",
+    "options": [
+      "1967",
+      "1968",
+      "1969",
+      "1970"
+    ],
+    "correct_index": 2,
+    "explanation": "Neil Armstrong et Buzz Aldrin ont marché sur la Lune le 21 juillet 1969 lors de la mission Apollo 11."
+  },
+  {
+    "question": "Quel boxeur a refusé d'être enrôlé au Vietnam en 1967 ?",
+    "options": [
+      "Joe Frazier",
+      "Muhammad Ali",
+      "George Foreman",
+      "Sonny Liston"
+    ],
+    "correct_index": 1,
+    "explanation": "Muhammad Ali a refusé la conscription pour des raisons religieuses, ce qui lui a valu d'être déchu de son titre."
+  },
+  {
+    "question": "Qui a composé la musique du film « Un homme et une femme » en 1966 ?",
+    "options": [
+      "Michel Legrand",
+      "Francis Lai",
+      "Georges Delerue",
+      "Maurice Jarre"
+    ],
+    "correct_index": 1,
+    "explanation": "Francis Lai a composé la bande originale de ce film de Claude Lelouch, devenue mondialement célèbre."
+  },
+  {
+    "question": "En quelle année Mao Zedong a-t-il fondé la République populaire de Chine ?",
+    "options": [
+      "1945",
+      "1947",
+      "1949",
+      "1951"
+    ],
+    "correct_index": 2,
+    "explanation": "La République populaire de Chine a été proclamée le 1er octobre 1949 après la victoire communiste."
+  },
+  {
+    "question": "Quel mouvement artistique Andy Warhol a-t-il popularisé dans les années 60 ?",
+    "options": [
+      "L'expressionnisme abstrait",
+      "Le pop art",
+      "Le minimalisme",
+      "L'art conceptuel"
+    ],
+    "correct_index": 1,
+    "explanation": "Andy Warhol est devenu l'icône du pop art avec ses sérigraphies de célébrités et d'objets de consommation."
+  },
+  {
+    "question": "Quelle chanteuse française a représenté le Luxembourg à l'Eurovision 1965 ?",
+    "options": [
+      "Françoise Hardy",
+      "Sheila",
+      "France Gall",
+      "Sylvie Vartan"
+    ],
+    "correct_index": 2,
+    "explanation": "France Gall a remporté l'Eurovision 1965 avec la chanson « Poupée de cire, poupée de son » de Serge Gainsbourg."
+  },
+  {
+    "question": "En quelle année la miniature « mini-jupe » a-t-elle été popularisée par Mary Quant ?",
+    "options": [
+      "1962",
+      "1964",
+      "1966",
+      "1968"
+    ],
+    "correct_index": 1,
+    "explanation": "La styliste britannique Mary Quant a popularisé la mini-jupe au milieu des années 60, symbole de libération."
+  },
+  {
+    "question": "Quel roman de Boris Vian a été publié en 1947 ?",
+    "options": [
+      "L'Écume des jours",
+      "J'irai cracher sur vos tombes",
+      "L'Arrache-cœur",
+      "L'Automne à Pékin"
+    ],
+    "correct_index": 0,
+    "explanation": "« L'Écume des jours » est le roman le plus célèbre de Boris Vian, histoire d'amour poétique et tragique."
+  },
+  {
+    "question": "Quel pays a remporté la Coupe du monde de football en 1970 au Mexique ?",
+    "options": [
+      "Argentine",
+      "Italie",
+      "Brésil",
+      "Allemagne"
+    ],
+    "correct_index": 2,
+    "explanation": "Le Brésil a remporté sa troisième Coupe du monde en 1970 avec Pelé, conservant définitivement le trophée Jules Rimet."
+  },
+  {
+    "question": "Qui a écrit « Le Silence de la mer » publié clandestinement en 1942 ?",
+    "options": [
+      "Albert Camus",
+      "Vercors",
+      "Jean Paulhan",
+      "Louis Aragon"
+    ],
+    "correct_index": 1,
+    "explanation": "Vercors (Jean Bruller) a publié ce récit sous l'Occupation aux Éditions de Minuit clandestines."
+  },
+  {
+    "question": "En quelle année la pilule contraceptive a-t-elle été commercialisée aux États-Unis ?",
+    "options": [
+      "1958",
+      "1960",
+      "1962",
+      "1964"
+    ],
+    "correct_index": 1,
+    "explanation": "La pilule contraceptive a été approuvée par la FDA en 1960, révolutionnant le contrôle des naissances."
+  },
+  {
+    "question": "Quel pays a organisé la Coupe du monde de football en 1970 ?",
+    "options": [
+      "Mexique",
+      "Brésil",
+      "Argentine",
+      "Italie"
+    ],
+    "correct_index": 0,
+    "explanation": "La Coupe du monde 1970 s'est déroulée au Mexique, remportée par le Brésil de Pelé."
+  },
+  {
+    "question": "En quelle année le régime des colonels a-t-il pris le pouvoir en Grèce ?",
+    "options": [
+      "1965",
+      "1967",
+      "1969",
+      "1971"
+    ],
+    "correct_index": 1,
+    "explanation": "La dictature des colonels a débuté en Grèce le 21 avril 1967 et s'est terminée en 1974."
+  },
+  {
+    "question": "Quel boxeur a refusé d'aller combattre au Vietnam en 1967 ?",
+    "options": [
+      "Joe Frazier",
+      "Muhammad Ali",
+      "George Foreman",
+      "Mike Tyson"
+    ],
+    "correct_index": 1,
+    "explanation": "Muhammad Ali a refusé la conscription en 1967 pour des raisons religieuses et politiques."
+  },
+  {
+    "question": "Quelle chanteuse française a représenté le Luxembourg à l'Eurovision en 1965 ?",
+    "options": [
+      "Sylvie Vartan",
+      "Sheila",
+      "France Gall",
+      "Françoise Hardy"
+    ],
+    "correct_index": 2,
+    "explanation": "France Gall a gagné l'Eurovision 1965 avec « Poupée de cire, poupée de son »."
+  },
+  {
+    "question": "En quelle année a été créé le périphérique parisien ?",
+    "options": [
+      "1960",
+      "1963",
+      "1973",
+      "1978"
+    ],
+    "correct_index": 2,
+    "explanation": "Le boulevard périphérique de Paris a été achevé et inauguré en 1973."
+  },
+  {
+    "question": "Qui a remporté le Festival de Cannes en 1969 avec le film « If.... » ?",
+    "options": [
+      "François Truffaut",
+      "Lindsay Anderson",
+      "Federico Fellini",
+      "Ingmar Bergman"
+    ],
+    "correct_index": 1,
+    "explanation": "Le réalisateur britannique Lindsay Anderson a remporté la Palme d'or 1969 avec « If.... »."
+  },
+  {
+    "question": "Quel pays a accueilli les Jeux olympiques d'hiver de 1968 ?",
+    "options": [
+      "Suisse",
+      "Autriche",
+      "France",
+      "Norvège"
+    ],
+    "correct_index": 2,
+    "explanation": "Les Jeux olympiques d'hiver de 1968 se sont déroulés à Grenoble, en France."
+  },
+  {
+    "question": "En quelle année le premier vol commercial du Boeing 747 a-t-il eu lieu ?",
+    "options": [
+      "1968",
+      "1970",
+      "1972",
+      "1974"
+    ],
+    "correct_index": 1,
+    "explanation": "Le Boeing 747, le premier avion gros-porteur, a effectué son premier vol commercial en 1970."
+  },
+  {
+    "question": "Qui a réalisé le film « Les Demoiselles de Rochefort » en 1967 ?",
+    "options": [
+      "Claude Chabrol",
+      "Jacques Demy",
+      "François Truffaut",
+      "Jean-Luc Godard"
+    ],
+    "correct_index": 1,
+    "explanation": "Jacques Demy a réalisé cette comédie musicale avec Catherine Deneuve et Françoise Dorléac."
+  },
+  {
+    "question": "Quel pays a quitté l'OTAN en 1966 ?",
+    "options": [
+      "France",
+      "Espagne",
+      "Italie",
+      "Belgique"
+    ],
+    "correct_index": 0,
+    "explanation": "La France, sous de Gaulle, s'est retirée du commandement militaire intégré de l'OTAN en 1966."
+  },
+  {
+    "question": "En quelle année le barrage d'Assouan a-t-il été inauguré en Égypte ?",
+    "options": [
+      "1968",
+      "1970",
+      "1972",
+      "1974"
+    ],
+    "correct_index": 1,
+    "explanation": "Le barrage d'Assouan, construit avec l'aide soviétique, a été inauguré en 1970."
+  },
+  {
+    "question": "Quel groupe a chanté « House of the Rising Sun » en 1964 ?",
+    "options": [
+      "The Who",
+      "The Kinks",
+      "The Animals",
+      "The Byrds"
+    ],
+    "correct_index": 2,
+    "explanation": "The Animals ont eu un succès mondial avec leur version rock de cette chanson traditionnelle."
+  },
+  {
+    "question": "Qui a été le premier président de la République du Sénégal indépendant en 1960 ?",
+    "options": [
+      "Félix Houphouët-Boigny",
+      "Léopold Sédar Senghor",
+      "Modibo Keïta",
+      "Sékou Touré"
+    ],
+    "correct_index": 1,
+    "explanation": "Léopold Sédar Senghor, poète et homme d'État, a été président du Sénégal de 1960 à 1980."
+  },
+  {
+    "question": "En quelle année la guerre des Six Jours a-t-elle eu lieu ?",
+    "options": [
+      "1965",
+      "1967",
+      "1969",
+      "1971"
+    ],
+    "correct_index": 1,
+    "explanation": "La guerre des Six Jours s'est déroulée en juin 1967 entre Israël et ses voisins arabes."
+  },
+  {
+    "question": "Quel chanteur français a interprété « Les Champs-Élysées » en 1969 ?",
+    "options": [
+      "Michel Sardou",
+      "Joe Dassin",
+      "Claude François",
+      "Serge Gainsbourg"
+    ],
+    "correct_index": 1,
+    "explanation": "Joe Dassin a popularisé cette chanson, adaptation française d'un titre britannique."
+  },
+  {
+    "question": "En quelle année l'âge de la majorité est-il passé de 21 à 18 ans en France ?",
+    "options": [
+      "1970",
+      "1972",
+      "1974",
+      "1976"
+    ],
+    "correct_index": 2,
+    "explanation": "La loi abaissant l'âge de la majorité à 18 ans a été votée en France en 1974."
+  },
+  {
+    "question": "Quel groupe de rock a sorti l'album « Abbey Road » en 1969 ?",
+    "options": [
+      "The Rolling Stones",
+      "The Beatles",
+      "Pink Floyd",
+      "Led Zeppelin"
+    ],
+    "correct_index": 1,
+    "explanation": "« Abbey Road » est l'avant-dernier album des Beatles, enregistré dans les studios du même nom."
+  },
+  {
+    "question": "En quelle année Valéry Giscard d'Estaing est-il devenu président de la République française ?",
+    "options": [
+      "1972",
+      "1974",
+      "1976",
+      "1978"
+    ],
+    "correct_index": 1,
+    "explanation": "VGE a été élu président en 1974, après la mort de Georges Pompidou."
+  },
+  {
+    "question": "Quel pays a accueilli la Coupe du monde de football en 1974 ?",
+    "options": [
+      "Allemagne de l'Ouest",
+      "Pays-Bas",
+      "Angleterre",
+      "Suède"
+    ],
+    "correct_index": 0,
+    "explanation": "La RFA a organisé et remporté la Coupe du monde de football en 1974."
+  },
+  {
+    "question": "Quel était le nom du président français élu en 1974 ?",
+    "options": [
+      "Valéry Giscard d'Estaing",
+      "François Mitterrand",
+      "Jacques Chirac",
+      "Georges Pompidou"
+    ],
+    "correct_index": 0,
+    "explanation": "Valéry Giscard d'Estaing a été élu président de la République française en mai 1974, succédant à Georges Pompidou décédé en fonction."
+  }
+]

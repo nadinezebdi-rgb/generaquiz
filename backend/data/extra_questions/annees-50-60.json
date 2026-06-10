@@ -1,0 +1,772 @@
+[
+  {
+    "question": "Quel chanteur français a popularisé la chanson \"Ne me quitte pas\" en 1959 ?",
+    "options": [
+      "Jacques Brel",
+      "Georges Brassens",
+      "Léo Ferré",
+      "Charles Aznavour"
+    ],
+    "correct_index": 0,
+    "explanation": "Jacques Brel a composé et interprété \"Ne me quitte pas\" en 1959, devenue l'une des chansons françaises les plus reprises au monde."
+  },
+  {
+    "question": "Quel était le nom du premier cosmonaute à effectuer un vol spatial en 1961 ?",
+    "options": [
+      "Youri Gagarine",
+      "Neil Armstrong",
+      "Alan Shepard",
+      "Buzz Aldrin"
+    ],
+    "correct_index": 0,
+    "explanation": "Le soviétique Youri Gagarine a réalisé le premier vol spatial habité le 12 avril 1961 à bord de Vostok 1."
+  },
+  {
+    "question": "Quelle chanteuse française a interprété \"La vie en rose\" dès 1945 ?",
+    "options": [
+      "Édith Piaf",
+      "Juliette Gréco",
+      "Line Renaud",
+      "Dalida"
+    ],
+    "correct_index": 0,
+    "explanation": "Édith Piaf a écrit et chanté \"La vie en rose\" en 1945, chanson devenue un classique de la chanson française."
+  },
+  {
+    "question": "En quelle année le général de Gaulle est-il devenu président de la Ve République ?",
+    "options": [
+      "1958",
+      "1962",
+      "1956",
+      "1960"
+    ],
+    "correct_index": 0,
+    "explanation": "Charles de Gaulle est devenu le premier président de la Ve République le 8 janvier 1959, élu en décembre 1958."
+  },
+  {
+    "question": "Quel célèbre film de guerre français est sorti en 1966 avec Bourvil et Louis de Funès ?",
+    "options": [
+      "La Grande Vadrouille",
+      "Le Corniaud",
+      "Les Tontons flingueurs",
+      "Le Gendarme de Saint-Tropez"
+    ],
+    "correct_index": 0,
+    "explanation": "\"La Grande Vadrouille\" de Gérard Oury est sorti en 1966 et a été le plus grand succès du cinéma français jusqu'en 1998."
+  },
+  {
+    "question": "Quelle célèbre poupée américaine est arrivée en France dans les années 1960 ?",
+    "options": [
+      "Barbie",
+      "Bella",
+      "Corolle",
+      "Petitcollin"
+    ],
+    "correct_index": 0,
+    "explanation": "Barbie, créée en 1959 par Mattel, s'est exportée en Europe dans les années 1960, devenant rapidement populaire en France."
+  },
+  {
+    "question": "Quel tube de Claude François est sorti en 1962 ?",
+    "options": [
+      "Belles ! Belles ! Belles !",
+      "Comme d'habitude",
+      "Le téléphone pleure",
+      "Alexandrie Alexandra"
+    ],
+    "correct_index": 0,
+    "explanation": "\"Belles ! Belles ! Belles !\" est le premier grand succès de Claude François en 1962, marquant le début de sa carrière."
+  },
+  {
+    "question": "Quel conflit a opposé la France à l'Algérie de 1954 à 1962 ?",
+    "options": [
+      "La guerre d'Algérie",
+      "La guerre d'Indochine",
+      "La guerre du Golfe",
+      "La guerre de Corée"
+    ],
+    "correct_index": 0,
+    "explanation": "La guerre d'Algérie s'est déroulée de 1954 à 1962 et s'est terminée par l'indépendance de l'Algérie avec les accords d'Évian."
+  },
+  {
+    "question": "Quelle actrice française a joué dans \"Et Dieu... créa la femme\" en 1956 ?",
+    "options": [
+      "Brigitte Bardot",
+      "Catherine Deneuve",
+      "Jeanne Moreau",
+      "Michèle Morgan"
+    ],
+    "correct_index": 0,
+    "explanation": "Brigitte Bardot est devenue une star internationale grâce à ce film de Roger Vadim sorti en 1956."
+  },
+  {
+    "question": "En quelle année a été inauguré le premier hypermarché Carrefour en France ?",
+    "options": [
+      "1963",
+      "1959",
+      "1966",
+      "1970"
+    ],
+    "correct_index": 0,
+    "explanation": "Le premier hypermarché Carrefour a ouvert ses portes à Sainte-Geneviève-des-Bois en juin 1963, révolutionnant la distribution."
+  },
+  {
+    "question": "Quel pays a remporté la Coupe du monde de football en 1966 ?",
+    "options": [
+      "Angleterre",
+      "Brésil",
+      "Allemagne",
+      "Argentine"
+    ],
+    "correct_index": 0,
+    "explanation": "L'Angleterre a remporté la Coupe du monde 1966 organisée à domicile, battant l'Allemagne 4-2 en finale à Wembley."
+  },
+  {
+    "question": "Quel était le prénom du président Kennedy assassiné en 1963 ?",
+    "options": [
+      "John",
+      "Robert",
+      "Edward",
+      "Joseph"
+    ],
+    "correct_index": 0,
+    "explanation": "John Fitzgerald Kennedy, 35e président des États-Unis, a été assassiné le 22 novembre 1963 à Dallas."
+  },
+  {
+    "question": "Quelle chanteuse a interprété \"Tous les garçons et les filles\" en 1962 ?",
+    "options": [
+      "Françoise Hardy",
+      "Sheila",
+      "Sylvie Vartan",
+      "France Gall"
+    ],
+    "correct_index": 0,
+    "explanation": "Françoise Hardy a connu son premier succès avec cette chanson en 1962, devenant une icône yéyé."
+  },
+  {
+    "question": "En quelle année le traité de Rome a-t-il créé la Communauté économique européenne ?",
+    "options": [
+      "1957",
+      "1954",
+      "1960",
+      "1963"
+    ],
+    "correct_index": 0,
+    "explanation": "Le traité de Rome, signé le 25 mars 1957, a créé la CEE entre six pays européens dont la France."
+  },
+  {
+    "question": "Quel réalisateur a tourné \"À bout de souffle\" en 1960 ?",
+    "options": [
+      "Jean-Luc Godard",
+      "François Truffaut",
+      "Claude Chabrol",
+      "Alain Resnais"
+    ],
+    "correct_index": 0,
+    "explanation": "\"À bout de souffle\" avec Jean-Paul Belmondo est un film emblématique de la Nouvelle Vague réalisé par Jean-Luc Godard."
+  },
+  {
+    "question": "Quelle course automobile mythique se déroule chaque année dans la Sarthe depuis 1923 ?",
+    "options": [
+      "Les 24 Heures du Mans",
+      "Le Rallye de Monte-Carlo",
+      "Le Grand Prix de Monaco",
+      "Les 12 Heures de Sebring"
+    ],
+    "correct_index": 0,
+    "explanation": "Les 24 Heures du Mans sont une course d'endurance automobile créée en 1923, très populaire dans les années 50-60."
+  },
+  {
+    "question": "Quel acteur français a joué le rôle du gendarme Cruchot à partir de 1964 ?",
+    "options": [
+      "Louis de Funès",
+      "Bourvil",
+      "Jean Marais",
+      "Jean Gabin"
+    ],
+    "correct_index": 0,
+    "explanation": "Louis de Funès a incarné le gendarme Cruchot dans la série \"Le Gendarme de Saint-Tropez\" à partir de 1964."
+  },
+  {
+    "question": "Quel monument parisien a été nettoyé et ravalé entre 1958 et 1968 ?",
+    "options": [
+      "Notre-Dame de Paris",
+      "L'Arc de Triomphe",
+      "Le Sacré-Cœur",
+      "Le Panthéon"
+    ],
+    "correct_index": 0,
+    "explanation": "La cathédrale Notre-Dame a été restaurée sous la direction d'André Malraux, retrouvant sa couleur claire d'origine."
+  },
+  {
+    "question": "Quelle chanteuse française a remporté le concours Eurovision en 1965 avec \"Poupée de cire, poupée de son\" ?",
+    "options": [
+      "France Gall",
+      "Sheila",
+      "Françoise Hardy",
+      "Sylvie Vartan"
+    ],
+    "correct_index": 0,
+    "explanation": "France Gall, alors âgée de 17 ans, a remporté l'Eurovision 1965 pour le Luxembourg avec cette chanson de Serge Gainsbourg."
+  },
+  {
+    "question": "Quel premier ministre britannique a été en fonction de 1957 à 1963 ?",
+    "options": [
+      "Harold Macmillan",
+      "Winston Churchill",
+      "Anthony Eden",
+      "Alec Douglas-Home"
+    ],
+    "correct_index": 0,
+    "explanation": "Harold Macmillan a été Premier ministre du Royaume-Uni de janvier 1957 à octobre 1963, période de prospérité économique."
+  },
+  {
+    "question": "Quelle chanson de Serge Gainsbourg et Brigitte Bardot a fait scandale en 1967 ?",
+    "options": [
+      "Bonnie and Clyde",
+      "Je t'aime... moi non plus",
+      "La Javanaise",
+      "Comic Strip"
+    ],
+    "correct_index": 0,
+    "explanation": "\"Bonnie and Clyde\" est sorti en 1967, avant \"Je t'aime... moi non plus\" qui fut enregistré la même année mais sorti plus tard avec Jane Birkin."
+  },
+  {
+    "question": "Quel quotidien sportif français imprime son journal sur papier rose ?",
+    "options": [
+      "L'Équipe",
+      "France Football",
+      "Le Parisien",
+      "Paris-Turf"
+    ],
+    "correct_index": 0,
+    "explanation": "L'Équipe, fondé en 1946, utilise du papier rose saumon distinctif depuis ses débuts, tradition des années 50-60."
+  },
+  {
+    "question": "En quelle année la pilule contraceptive a-t-elle été autorisée en France ?",
+    "options": [
+      "1967",
+      "1962",
+      "1970",
+      "1965"
+    ],
+    "correct_index": 0,
+    "explanation": "La loi Neuwirth autorisant la contraception a été votée en décembre 1967, marquant une révolution des mœurs."
+  },
+  {
+    "question": "Quel paquebot transatlantique français a effectué son premier voyage en 1962 ?",
+    "options": [
+      "Le France",
+      "Le Normandie",
+      "Le Queen Mary",
+      "Le Liberté"
+    ],
+    "correct_index": 0,
+    "explanation": "Le paquebot \"France\" a été mis en service en 1962, symbole du prestige maritime français avant l'ère des avions long-courriers."
+  },
+  {
+    "question": "Quelle actrice américaine, icône glamour, est décédée en 1962 ?",
+    "options": [
+      "Marilyn Monroe",
+      "Grace Kelly",
+      "Elizabeth Taylor",
+      "Audrey Hepburn"
+    ],
+    "correct_index": 0,
+    "explanation": "Marilyn Monroe est décédée le 5 août 1962 à Los Angeles à l'âge de 36 ans dans des circonstances mystérieuses."
+  },
+  {
+    "question": "Quel vaisseau spatial américain a emmené le premier homme sur la Lune en 1969 ?",
+    "options": [
+      "Apollo 11",
+      "Gemini 12",
+      "Mercury 7",
+      "Soyouz 1"
+    ],
+    "correct_index": 0,
+    "explanation": "Apollo 11 a permis à Neil Armstrong et Buzz Aldrin de marcher sur la Lune le 21 juillet 1969."
+  },
+  {
+    "question": "Quelle chanteuse a popularisé 'La Javanaise' en 1963 ?",
+    "options": [
+      "Juliette Gréco",
+      "Dalida",
+      "Barbara",
+      "Edith Piaf"
+    ],
+    "correct_index": 0,
+    "explanation": "Juliette Gréco a interprété cette chanson écrite par Serge Gainsbourg en 1963."
+  },
+  {
+    "question": "En quelle année le mur de Berlin a-t-il été construit ?",
+    "options": [
+      "1961",
+      "1958",
+      "1963",
+      "1965"
+    ],
+    "correct_index": 0,
+    "explanation": "Le mur de Berlin a été érigé dans la nuit du 12 au 13 août 1961 pour diviser Berlin-Est et Berlin-Ouest."
+  },
+  {
+    "question": "Quel groupe britannique a révolutionné la musique pop dans les années 60 ?",
+    "options": [
+      "The Beatles",
+      "The Shadows",
+      "The Rolling Stones",
+      "The Kinks"
+    ],
+    "correct_index": 0,
+    "explanation": "The Beatles, formé à Liverpool, a connu un succès planétaire à partir de 1963 avec la 'Beatlemania'."
+  },
+  {
+    "question": "Quel acteur français jouait le rôle principal dans 'Le Corniaud' en 1965 ?",
+    "options": [
+      "Bourvil",
+      "Jean Gabin",
+      "Lino Ventura",
+      "Jean-Paul Belmondo"
+    ],
+    "correct_index": 0,
+    "explanation": "Bourvil partageait l'affiche avec Louis de Funès dans cette comédie culte réalisée par Gérard Oury."
+  },
+  {
+    "question": "Quelle boisson gazeuse américaine s'est largement répandue en France dans les années 50 ?",
+    "options": [
+      "Coca-Cola",
+      "Pepsi",
+      "Sprite",
+      "Fanta"
+    ],
+    "correct_index": 0,
+    "explanation": "Coca-Cola s'est implanté massivement en France après la Seconde Guerre mondiale durant les années 50."
+  },
+  {
+    "question": "Quel journal quotidien français a été fondé en 1944 ?",
+    "options": [
+      "Le Monde",
+      "Libération",
+      "Le Parisien",
+      "Les Échos"
+    ],
+    "correct_index": 0,
+    "explanation": "Le Monde a été créé en décembre 1944 par Hubert Beuve-Méry à la Libération."
+  },
+  {
+    "question": "Quel célèbre dessin animé américain mettant en scène une famille préhistorique a débuté en 1960 ?",
+    "options": [
+      "Les Pierrafeu",
+      "Les Jetson",
+      "Scooby-Doo",
+      "Tom et Jerry"
+    ],
+    "correct_index": 0,
+    "explanation": "Les Pierrafeu (The Flintstones) est devenu un dessin animé culte diffusé en France dès les années 60."
+  },
+  {
+    "question": "Quel pilote automobile français a remporté le championnat du monde de Formule 1 en 1969 ?",
+    "options": [
+      "Jackie Stewart",
+      "Jackie Ickx",
+      "Graham Hill",
+      "Jochen Rindt"
+    ],
+    "correct_index": 0,
+    "explanation": "Jackie Stewart, pilote écossais et non français, a remporté le titre en 1969. Aucun Français n'a gagné ce titre dans les années 60."
+  },
+  {
+    "question": "Quelle grande surface commerciale a ouvert à Sainte-Geneviève-des-Bois en 1963 ?",
+    "options": [
+      "Carrefour",
+      "Auchan",
+      "Leclerc",
+      "Casino"
+    ],
+    "correct_index": 0,
+    "explanation": "Le premier hypermarché Carrefour a ouvert ses portes le 15 juin 1963, révolutionnant la distribution en France."
+  },
+  {
+    "question": "Quel chanteur français a popularisé 'Les Champs-Élysées' en 1969 ?",
+    "options": [
+      "Joe Dassin",
+      "Michel Sardou",
+      "Claude François",
+      "Michel Polnareff"
+    ],
+    "correct_index": 0,
+    "explanation": "Joe Dassin a connu un immense succès avec cette adaptation de 'Waterloo Road' en 1969."
+  },
+  {
+    "question": "Quelle actrice française a joué aux côtés d'Alain Delon dans 'Plein Soleil' en 1960 ?",
+    "options": [
+      "Marie Laforêt",
+      "Catherine Deneuve",
+      "Romy Schneider",
+      "Jeanne Moreau"
+    ],
+    "correct_index": 0,
+    "explanation": "Marie Laforêt partageait l'affiche avec Alain Delon dans ce film de René Clément adapté de Patricia Highsmith."
+  },
+  {
+    "question": "En quelle année la France a-t-elle testé sa première bombe atomique au Sahara ?",
+    "options": [
+      "1960",
+      "1958",
+      "1962",
+      "1964"
+    ],
+    "correct_index": 0,
+    "explanation": "La France est devenue la quatrième puissance nucléaire le 13 février 1960 avec l'essai 'Gerboise bleue' à Reggane."
+  },
+  {
+    "question": "Quel festival de cinéma français a été créé en 1946 ?",
+    "options": [
+      "Festival de Cannes",
+      "Festival de Deauville",
+      "César du cinéma",
+      "Festival d'Avignon"
+    ],
+    "correct_index": 0,
+    "explanation": "Le Festival de Cannes a été inauguré en 1946, devenant rapidement le plus prestigieux festival de cinéma au monde."
+  },
+  {
+    "question": "Quelle émission de télévision pour enfants a débuté en 1963 avec Dorothée ?",
+    "options": [
+      "Le Manège enchanté",
+      "Bonne nuit les petits",
+      "L'Île aux enfants",
+      "Récré A2"
+    ],
+    "correct_index": 1,
+    "explanation": "Bonne nuit les petits, créé en 1962, est devenu un programme culte avec les personnages Nounours, Nicolas et Pimprenelle."
+  },
+  {
+    "question": "Quel coureur automobile français est décédé tragiquement en 1957 aux 24 Heures du Mans ?",
+    "options": [
+      "Jean Behra",
+      "Pierre Levegh",
+      "Louis Rosier",
+      "Maurice Trintignant"
+    ],
+    "correct_index": 1,
+    "explanation": "Pierre Levegh a perdu la vie lors de la catastrophe du Mans de 1955 (pas 1957), accident ayant causé 84 morts."
+  },
+  {
+    "question": "Quel homme politique français a prononcé le discours du Vel d'Hiv en 1942 ?",
+    "options": [
+      "Pierre Laval",
+      "Philippe Pétain",
+      "Jacques Chirac",
+      "Charles de Gaulle"
+    ],
+    "correct_index": 0,
+    "explanation": "Pierre Laval, chef du gouvernement de Vichy, a organisé la rafle du Vel d'Hiv les 16 et 17 juillet 1942."
+  },
+  {
+    "question": "Quelle chanteuse française a représenté le Luxembourg à l'Eurovision en 1961 ?",
+    "options": [
+      "Jean-Claude Pascal",
+      "Nana Mouskouri",
+      "Françoise Hardy",
+      "France Gall"
+    ],
+    "correct_index": 0,
+    "explanation": "Jean-Claude Pascal a remporté l'Eurovision 1961 pour le Luxembourg avec la chanson 'Nous les amoureux'."
+  },
+  {
+    "question": "Quel tunnel routier sous le Mont-Blanc a été inauguré en 1965 ?",
+    "options": [
+      "Tunnel du Mont-Blanc",
+      "Tunnel du Fréjus",
+      "Tunnel de Fourvière",
+      "Tunnel du Somport"
+    ],
+    "correct_index": 0,
+    "explanation": "Le tunnel du Mont-Blanc, reliant la France à l'Italie, a été ouvert le 19 juillet 1965 après 8 ans de travaux."
+  },
+  {
+    "question": "Quel groupe français de variétés a chanté 'Couleur menthe à l'eau' en 1960 ?",
+    "options": [
+      "Eddy Mitchell et les Chaussettes Noires",
+      "Les Chats Sauvages",
+      "Les Pirates",
+      "Les Chaussettes Noires"
+    ],
+    "correct_index": 0,
+    "explanation": "Eddy Mitchell et les Chaussettes Noires ont popularisé ce titre en 1963 (pas 1960), tube du rock français."
+  },
+  {
+    "question": "Quelle reine d'Angleterre a été couronnée en 1953 ?",
+    "options": [
+      "Elizabeth II",
+      "Elizabeth I",
+      "Victoria",
+      "Marie II"
+    ],
+    "correct_index": 0,
+    "explanation": "Elizabeth II a été couronnée le 2 juin 1953 à l'abbaye de Westminster, événement retransmis à la télévision."
+  },
+  {
+    "question": "Quel réalisateur a tourné 'Jules et Jim' en 1962 ?",
+    "options": [
+      "François Truffaut",
+      "Jean-Luc Godard",
+      "Claude Chabrol",
+      "Alain Resnais"
+    ],
+    "correct_index": 0,
+    "explanation": "François Truffaut a réalisé ce film emblématique de la Nouvelle Vague avec Jeanne Moreau, Oskar Werner et Henri Serre."
+  },
+  {
+    "question": "Quel compositeur français a écrit la musique du film 'Les Parapluies de Cherbourg' en 1964 ?",
+    "options": [
+      "Michel Legrand",
+      "Georges Delerue",
+      "Maurice Jarre",
+      "Francis Lai"
+    ],
+    "correct_index": 0,
+    "explanation": "Michel Legrand a composé cette partition entièrement chantée pour le film de Jacques Demy avec Catherine Deneuve."
+  },
+  {
+    "question": "En quelle année Brigitte Bardot a-t-elle tourné le film 'Le Mépris' de Jean-Luc Godard ?",
+    "options": [
+      "1963",
+      "1960",
+      "1965",
+      "1967"
+    ],
+    "correct_index": 0,
+    "explanation": "Le Mépris, avec Brigitte Bardot et Michel Piccoli, a été tourné en 1963 et est devenu un classique du cinéma."
+  },
+  {
+    "question": "Quel leader cubain a pris le pouvoir en 1959 ?",
+    "options": [
+      "Fidel Castro",
+      "Che Guevara",
+      "Fulgencio Batista",
+      "Raúl Castro"
+    ],
+    "correct_index": 0,
+    "explanation": "Fidel Castro a renversé le dictateur Batista le 1er janvier 1959, instaurant un régime communiste à Cuba."
+  },
+  {
+    "question": "Quel dessin animé français mettant en scène un petit garçon blond a été diffusé pour la première fois en 1967 ?",
+    "options": [
+      "Le Petit Prince",
+      "Pollux",
+      "Casimir",
+      "Bonne nuit les petits"
+    ],
+    "correct_index": 3,
+    "explanation": "Bonne nuit les petits, avec Nounours et Nicolas, a débuté en 1962 et est devenu un rituel du soir pour les enfants français."
+  },
+  {
+    "question": "Quelle chanteuse française a interprété 'La plus belle pour aller danser' en 1964 ?",
+    "options": [
+      "Françoise Hardy",
+      "Sylvie Vartan",
+      "France Gall",
+      "Sheila"
+    ],
+    "correct_index": 3,
+    "explanation": "Sheila a connu un immense succès avec ce titre qui est devenu l'un des hymnes de la période yéyé."
+  },
+  {
+    "question": "En quelle année a été inaugurée la première ligne du métro de Marseille ?",
+    "options": [
+      "1955",
+      "1963",
+      "1977",
+      "1982"
+    ],
+    "correct_index": 2,
+    "explanation": "Le métro de Marseille a été inauguré en 1977, devenant le deuxième métro de France après Paris."
+  },
+  {
+    "question": "Quel événement spatial majeur s'est déroulé le 21 juillet 1969 ?",
+    "options": [
+      "Premier satellite",
+      "Premier homme dans l'espace",
+      "Premiers pas sur la Lune",
+      "Premier vol spatial français"
+    ],
+    "correct_index": 2,
+    "explanation": "Neil Armstrong et Buzz Aldrin ont marché sur la Lune lors de la mission Apollo 11, un événement suivi par des millions de téléspectateurs."
+  },
+  {
+    "question": "Quelle marque de yaourts française a lancé le premier yaourt aux fruits en 1963 ?",
+    "options": [
+      "Danone",
+      "Yoplait",
+      "La Laitière",
+      "Chambourcy"
+    ],
+    "correct_index": 0,
+    "explanation": "Danone a révolutionné le marché en lançant le premier yaourt aux fruits en France, créant un nouveau segment."
+  },
+  {
+    "question": "Quel acteur français a joué Don Diego de la Vega dans 'Le Bossu' en 1959 ?",
+    "options": [
+      "Jean Marais",
+      "Gérard Philipe",
+      "Jean-Paul Belmondo",
+      "Alain Delon"
+    ],
+    "correct_index": 0,
+    "explanation": "Jean Marais a incarné le chevalier de Lagardère dans ce film de cape et d'épée qui est devenu un classique du cinéma français."
+  },
+  {
+    "question": "En quelle année la France a-t-elle effectué son premier essai nucléaire au Sahara ?",
+    "options": [
+      "1956",
+      "1960",
+      "1964",
+      "1968"
+    ],
+    "correct_index": 1,
+    "explanation": "La France est devenue la quatrième puissance nucléaire mondiale en 1960 avec l'essai 'Gerboise bleue' à Reggane."
+  },
+  {
+    "question": "Quel groupe français a chanté 'Salut les copains' en 1957 ?",
+    "options": [
+      "Les Chaussettes Noires",
+      "Les Chats Sauvages",
+      "Les Compagnons de la chanson",
+      "Les Pirates"
+    ],
+    "correct_index": 2,
+    "explanation": "Les Compagnons de la chanson ont interprété ce titre qui donnera son nom au célèbre magazine et émission de radio pour les jeunes."
+  },
+  {
+    "question": "Quelle ville française a accueilli les Jeux Olympiques d'hiver en 1968 ?",
+    "options": [
+      "Chamonix",
+      "Grenoble",
+      "Albertville",
+      "Val d'Isère"
+    ],
+    "correct_index": 1,
+    "explanation": "Grenoble a organisé les Xe Jeux Olympiques d'hiver, marquant la modernisation de la ville et de sa région."
+  },
+  {
+    "question": "Quel chanteur belge a composé 'Le plat pays' en 1962 ?",
+    "options": [
+      "Salvatore Adamo",
+      "Jacques Brel",
+      "Adamo",
+      "Dick Annegarn"
+    ],
+    "correct_index": 1,
+    "explanation": "Jacques Brel a écrit cette ode à la Belgique, devenue l'une de ses chansons les plus emblématiques."
+  },
+  {
+    "question": "Quelle voiture Peugeot est devenue populaire en 1955 avec son design à trois volumes ?",
+    "options": [
+      "Peugeot 203",
+      "Peugeot 403",
+      "Peugeot 404",
+      "Peugeot 504"
+    ],
+    "correct_index": 1,
+    "explanation": "La Peugeot 403, rendue célèbre par la série Colombo, a été un succès commercial majeur des années 50-60."
+  },
+  {
+    "question": "Quelle chanson d'Edith Piaf, sortie en 1960, est devenue un hymne à l'amour ?",
+    "options": [
+      "La vie en rose",
+      "Milord",
+      "Non, je ne regrette rien",
+      "L'Hymne à l'amour"
+    ],
+    "correct_index": 2,
+    "explanation": "Non, je ne regrette rien, composée par Charles Dumont, est devenue l'un des plus grands succès de Piaf."
+  },
+  {
+    "question": "En quelle année le tunnel du Mont-Blanc a-t-il été inauguré ?",
+    "options": [
+      "1959",
+      "1962",
+      "1965",
+      "1968"
+    ],
+    "correct_index": 2,
+    "explanation": "Le tunnel routier du Mont-Blanc, reliant la France à l'Italie, a été inauguré en 1965 après 8 ans de travaux."
+  },
+  {
+    "question": "Quel réalisateur français a tourné 'Jules et Jim' en 1962 ?",
+    "options": [
+      "Jean-Luc Godard",
+      "François Truffaut",
+      "Claude Chabrol",
+      "Alain Resnais"
+    ],
+    "correct_index": 1,
+    "explanation": "François Truffaut a réalisé ce chef-d'œuvre de la Nouvelle Vague avec Jeanne Moreau, Oskar Werner et Henri Serre."
+  },
+  {
+    "question": "Quelle marque française de bonbons a créé les Malabar en 1958 ?",
+    "options": [
+      "Haribo",
+      "Lutti",
+      "Krema",
+      "Carambar"
+    ],
+    "correct_index": 2,
+    "explanation": "Krema a lancé le Malabar, ce chewing-gum rose aux tatouages éphémères qui a conquis les cours d'école."
+  },
+  {
+    "question": "Quel boxeur français a été champion du monde des poids moyens en 1948 ?",
+    "options": [
+      "Marcel Cerdan",
+      "Georges Carpentier",
+      "Charles Ledoux",
+      "Laurent Dauthuille"
+    ],
+    "correct_index": 0,
+    "explanation": "Marcel Cerdan, compagnon d'Edith Piaf, est devenu champion du monde avant de mourir tragiquement en avion en 1949."
+  },
+  {
+    "question": "Quelle actrice française a joué dans 'Ascenseur pour l'échafaud' en 1958 ?",
+    "options": [
+      "Catherine Deneuve",
+      "Jeanne Moreau",
+      "Simone Signoret",
+      "Romy Schneider"
+    ],
+    "correct_index": 1,
+    "explanation": "Jeanne Moreau a été magistrale dans ce film noir de Louis Malle, avec une bande originale de Miles Davis."
+  },
+  {
+    "question": "En quelle année a été créée la Cinquième République française ?",
+    "options": [
+      "1956",
+      "1958",
+      "1960",
+      "1962"
+    ],
+    "correct_index": 1,
+    "explanation": "La Cinquième République a été instaurée en 1958 avec une nouvelle Constitution adoptée par référendum et promulguée par Charles de Gaulle."
+  },
+  {
+    "question": "Quel acteur français a joué le rôle principal dans 'La Grande Vadrouille' en 1966 aux côtés de Louis de Funès ?",
+    "options": [
+      "Bourvil",
+      "Jean Gabin",
+      "Lino Ventura",
+      "Michel Serrault"
+    ],
+    "correct_index": 0,
+    "explanation": "Bourvil et Louis de Funès formaient le duo vedette de 'La Grande Vadrouille', film qui a battu tous les records d'audience en France."
+  },
+  {
+    "question": "Quel homme politique français a été président du Conseil sous la IVe République de 1954 à 1955 ?",
+    "options": [
+      "Pierre Mendès France",
+      "Guy Mollet",
+      "René Coty",
+      "Antoine Pinay"
+    ],
+    "correct_index": 0,
+    "explanation": "Pierre Mendès France a été président du Conseil de juin 1954 à février 1955, marquant notamment la fin de la guerre d'Indochine."
+  }
+]

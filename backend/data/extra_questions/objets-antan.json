@@ -1,0 +1,772 @@
+[
+  {
+    "question": "Comment appelait-on la boîte en fer où l'on rangeait le pain ?",
+    "options": [
+      "La huche",
+      "La mie",
+      "Le panier",
+      "Le coffre"
+    ],
+    "correct_index": 0,
+    "explanation": "La huche était un coffre en bois ou en fer servant à conserver le pain à l'abri de l'humidité et des rongeurs."
+  },
+  {
+    "question": "Quel objet servait à aiguiser les couteaux et les outils tranchants ?",
+    "options": [
+      "La pierre à aiguiser",
+      "Le polissoir",
+      "La meule",
+      "L'affûteur"
+    ],
+    "correct_index": 0,
+    "explanation": "La pierre à aiguiser, ou pierre à affûter, permettait d'aiguiser les lames en les frottant contre sa surface abrasive."
+  },
+  {
+    "question": "Comment s'appelait le petit meuble à tiroirs pour ranger les épices ?",
+    "options": [
+      "Le vaisselier",
+      "L'étagère",
+      "Le semainier",
+      "L'épicier"
+    ],
+    "correct_index": 3,
+    "explanation": "L'épicier était un petit meuble mural à tiroirs ou compartiments spécialement conçu pour ranger les épices et aromates."
+  },
+  {
+    "question": "Quel ustensile en fonte servait à lisser le linge après lavage ?",
+    "options": [
+      "Le fer à repasser",
+      "La calandre",
+      "Le battoir",
+      "Le lissoir"
+    ],
+    "correct_index": 0,
+    "explanation": "Le fer à repasser en fonte était chauffé sur le poêle ou dans la cheminée avant d'être utilisé pour lisser le linge."
+  },
+  {
+    "question": "Comment appelait-on la grande marmite en cuivre suspendue dans la cheminée ?",
+    "options": [
+      "La cocotte",
+      "Le chaudron",
+      "Le faitout",
+      "La bassine"
+    ],
+    "correct_index": 1,
+    "explanation": "Le chaudron en cuivre ou en fonte était suspendu à une crémaillère dans la cheminée pour cuisiner soupes et ragoûts."
+  },
+  {
+    "question": "Quel objet servait à plier les draps en les faisant tourner ?",
+    "options": [
+      "Le rouleau",
+      "La manivelle",
+      "Le plissoir",
+      "Le plioir"
+    ],
+    "correct_index": 3,
+    "explanation": "Le plioir était un dispositif en bois avec des poignées permettant de plier le linge proprement à deux personnes."
+  },
+  {
+    "question": "Comment s'appelait le coussin rembourré servant à repasser les manches ?",
+    "options": [
+      "Le mannequin",
+      "La jeannette",
+      "Le coussin de repassage",
+      "Le pressoir"
+    ],
+    "correct_index": 1,
+    "explanation": "La jeannette était une petite planche rembourrée montée sur pied, idéale pour repasser les manches et les parties étroites."
+  },
+  {
+    "question": "Quel instrument servait à mesurer le temps avec du sable ?",
+    "options": [
+      "La clepsydre",
+      "Le cadran solaire",
+      "Le sablier",
+      "L'horloge"
+    ],
+    "correct_index": 2,
+    "explanation": "Le sablier mesure le temps par l'écoulement de sable fin entre deux ampoules de verre reliées."
+  },
+  {
+    "question": "Comment appelait-on le récipient en grès pour conserver les œufs dans la chaux ?",
+    "options": [
+      "Le pot à œufs",
+      "La terrine",
+      "Le saloir",
+      "La jarre"
+    ],
+    "correct_index": 0,
+    "explanation": "Le pot à œufs en grès contenait une solution de chaux permettant de conserver les œufs frais plusieurs mois."
+  },
+  {
+    "question": "Quel objet servait à former les bougies artisanalement ?",
+    "options": [
+      "Le moule à chandelles",
+      "Le fondoir",
+      "La filière",
+      "Le brûloir"
+    ],
+    "correct_index": 0,
+    "explanation": "Le moule à chandelles, souvent en étain, permettait de couler la cire ou le suif pour fabriquer les bougies."
+  },
+  {
+    "question": "Comment s'appelait l'appareil à vapeur pour nettoyer les vêtements ?",
+    "options": [
+      "Le défroisseur",
+      "Le vaporisateur",
+      "Le nettoyeur",
+      "Le steamer"
+    ],
+    "correct_index": 1,
+    "explanation": "Le vaporisateur ou pulvérisateur à main servait à humidifier le linge avant repassage ou à le rafraîchir."
+  },
+  {
+    "question": "Quel ustensile servait à retirer les cendres du foyer ?",
+    "options": [
+      "Le tisonnier",
+      "La pelle à cendres",
+      "Le racloir",
+      "Le soufflet"
+    ],
+    "correct_index": 1,
+    "explanation": "La pelle à cendres, souvent en métal, permettait de ramasser et évacuer les cendres refroidies du foyer."
+  },
+  {
+    "question": "Comment appelait-on la boîte métallique pour transporter son repas au travail ?",
+    "options": [
+      "Le panier-repas",
+      "La gamelle",
+      "Le casse-croûte",
+      "La boîte à lunch"
+    ],
+    "correct_index": 1,
+    "explanation": "La gamelle était un récipient métallique compartimenté que les ouvriers utilisaient pour transporter leur repas."
+  },
+  {
+    "question": "Quel objet en bois servait à étendre le beurre sur les tartines ?",
+    "options": [
+      "Le couteau à beurre",
+      "L'étaloir",
+      "La spatule",
+      "La palette"
+    ],
+    "correct_index": 0,
+    "explanation": "Le couteau à beurre, à lame large et arrondie, permettait d'étaler facilement le beurre sans déchirer le pain."
+  },
+  {
+    "question": "Comment s'appelait l'instrument pour mesurer la température extérieure ?",
+    "options": [
+      "Le thermomètre",
+      "L'hygromètre",
+      "Le baromètre",
+      "Le climomètre"
+    ],
+    "correct_index": 0,
+    "explanation": "Le thermomètre, souvent à mercure, indiquait la température en degrés Celsius grâce à la dilatation d'un liquide."
+  },
+  {
+    "question": "Quel appareil manuel servait à hacher la viande à la maison ?",
+    "options": [
+      "Le broyeur",
+      "Le mixeur",
+      "Le hachoir",
+      "Le moulin"
+    ],
+    "correct_index": 2,
+    "explanation": "Le hachoir à viande, fixé sur table avec une manivelle, permettait de hacher la viande grâce à une vis sans fin."
+  },
+  {
+    "question": "Comment appelait-on le panier en osier pour faire les courses au marché ?",
+    "options": [
+      "La cagette",
+      "Le cabas",
+      "La hotte",
+      "La corbeille"
+    ],
+    "correct_index": 1,
+    "explanation": "Le cabas était un panier souple en osier, paille ou tissu, utilisé traditionnellement pour transporter les courses."
+  },
+  {
+    "question": "Quel objet servait à ravauder les chaussettes trouées ?",
+    "options": [
+      "L'œuf à repriser",
+      "Le dé à coudre",
+      "L'aiguille",
+      "Le mannequin"
+    ],
+    "correct_index": 0,
+    "explanation": "L'œuf à repriser, en bois ou en porcelaine, se glissait dans la chaussette pour faciliter le raccommodage des trous."
+  },
+  {
+    "question": "Comment s'appelait le dispositif pour attiser le feu dans la cheminée ?",
+    "options": [
+      "Le tisonnier",
+      "La pincette",
+      "Le soufflet",
+      "L'attisoir"
+    ],
+    "correct_index": 2,
+    "explanation": "Le soufflet envoyait de l'air sur les braises pour raviver le feu et activer la combustion."
+  },
+  {
+    "question": "Quel instrument servait à carder la laine avant de la filer ?",
+    "options": [
+      "Le rouet",
+      "Le peigne",
+      "La carde",
+      "Le fuseau"
+    ],
+    "correct_index": 2,
+    "explanation": "La carde, planche garnie de pointes métalliques, permettait de démêler et d'aérer la laine brute avant le filage."
+  },
+  {
+    "question": "Comment appelait-on la lampe portative à huile des veillées ?",
+    "options": [
+      "La chandelle",
+      "La quinquet",
+      "La bougie",
+      "La torche"
+    ],
+    "correct_index": 1,
+    "explanation": "La quinquet était une lampe à huile perfectionnée avec un mécanisme de réglage de la flamme inventée au XVIIIe siècle."
+  },
+  {
+    "question": "Quel objet en bois servait à façonner les chapeaux de paille ?",
+    "options": [
+      "Le tour",
+      "La forme",
+      "Le moule",
+      "Le gabarit"
+    ],
+    "correct_index": 1,
+    "explanation": "La forme, en bois tourné, servait de support pour modeler et sécher les chapeaux en leur donnant leur shape définitive."
+  },
+  {
+    "question": "Comment s'appelait le dispositif mécanique pour remonter les horloges ?",
+    "options": [
+      "Le ressort",
+      "La clé d'horloge",
+      "Le remontoir",
+      "La manivelle"
+    ],
+    "correct_index": 1,
+    "explanation": "La clé d'horloge, adaptée à chaque mécanisme, permettait de remonter le ressort moteur des horloges et montres à gousset."
+  },
+  {
+    "question": "Quel ustensile servait à presser les fruits pour faire des confitures ?",
+    "options": [
+      "Le pressoir",
+      "Le moulin",
+      "Le pilon",
+      "Le presse-purée"
+    ],
+    "correct_index": 3,
+    "explanation": "Le presse-purée, avec sa grille perforée et son levier, permettait d'écraser fruits et légumes pour confitures et purées."
+  },
+  {
+    "question": "Comment appelait-on le petit balai en plumes pour dépoussiérer les bibelots ?",
+    "options": [
+      "Le plumeau",
+      "La houppe",
+      "L'épousseteur",
+      "Le balai-brosse"
+    ],
+    "correct_index": 0,
+    "explanation": "Le plumeau, fait de plumes d'autruche ou de coq, servait à dépoussiérer délicatement les objets fragiles et les meubles."
+  },
+  {
+    "question": "Comment appelait-on la boîte métallique percée de trous pour garder les aliments au chaud près du feu ?",
+    "options": [
+      "La chaufferette",
+      "La bouillotte",
+      "Le réchaud",
+      "La marmite"
+    ],
+    "correct_index": 0,
+    "explanation": "La chaufferette était une boîte métallique percée contenant des braises, utilisée pour se réchauffer ou garder les plats au chaud."
+  },
+  {
+    "question": "Quel objet servait à cirer et faire briller les chaussures ?",
+    "options": [
+      "Le cirage avec sa brosse",
+      "Le polissoir",
+      "Le frottoir",
+      "La pierre ponce"
+    ],
+    "correct_index": 0,
+    "explanation": "La boîte de cirage accompagnée de ses brosses était l'indispensable pour entretenir et faire briller les chaussures en cuir."
+  },
+  {
+    "question": "Comment s'appelait le petit appareil à rouleau pour écraser la purée ?",
+    "options": [
+      "Le presse-purée",
+      "Le moulin à légumes",
+      "L'écrase-tout",
+      "Le broyeur"
+    ],
+    "correct_index": 0,
+    "explanation": "Le presse-purée manuel était un ustensile avec un rouleau perforé et une manivelle pour écraser pommes de terre et légumes."
+  },
+  {
+    "question": "Quel objet en métal servait à découper les biscuits dans la pâte ?",
+    "options": [
+      "L'emporte-pièce",
+      "Le coupe-pâte",
+      "Le découpoir",
+      "Le moule à biscuits"
+    ],
+    "correct_index": 0,
+    "explanation": "L'emporte-pièce est un ustensile métallique aux formes variées permettant de découper des formes précises dans la pâte à biscuits."
+  },
+  {
+    "question": "Comment appelait-on le grand coffre en bois où l'on rangeait le linge et le trousseau ?",
+    "options": [
+      "La malle",
+      "L'armoire",
+      "Le bahut",
+      "La cassone"
+    ],
+    "correct_index": 2,
+    "explanation": "Le bahut était un grand coffre en bois massif, souvent sculpté, servant à ranger le linge et les effets précieux de la famille."
+  },
+  {
+    "question": "Quel instrument servait à peser les aliments chez l'épicier ?",
+    "options": [
+      "La balance à plateaux",
+      "Le pèse-lettre",
+      "La bascule",
+      "Le trébuchet"
+    ],
+    "correct_index": 0,
+    "explanation": "La balance à plateaux avec ses poids en fonte permettait de peser avec précision les denrées vendues en vrac chez l'épicier."
+  },
+  {
+    "question": "Comment s'appelait le petit tabouret en bois à trois pieds utilisé pour traire les vaches ?",
+    "options": [
+      "Le sellette",
+      "Le trépied",
+      "L'escabeau",
+      "Le tabouret de traite"
+    ],
+    "correct_index": 3,
+    "explanation": "Le tabouret de traite était un petit siège bas à trois pieds permettant au fermier de s'asseoir confortablement pour traire les vaches."
+  },
+  {
+    "question": "Quel objet servait à conserver les allumettes au sec dans la cuisine ?",
+    "options": [
+      "Le porte-allumettes mural",
+      "La boîte d'allumettes",
+      "L'allumoir",
+      "Le bougeoir"
+    ],
+    "correct_index": 0,
+    "explanation": "Le porte-allumettes était un petit récipient fixé au mur, souvent en tôle ou en bois, gardant les allumettes à portée de main et à l'abri de l'humidité."
+  },
+  {
+    "question": "Comment appelait-on l'outil en bois denté pour démêler et nettoyer les fibres de chanvre ou de lin ?",
+    "options": [
+      "Le peigne",
+      "La carde",
+      "Le séran",
+      "La brosse à fibres"
+    ],
+    "correct_index": 2,
+    "explanation": "Le séran était un peigne de bois garni de pointes métalliques servant à séparer et nettoyer les fibres textiles végétales avant le filage."
+  },
+  {
+    "question": "Quel appareil manuel à manivelle servait à projeter des images sur un mur blanc ?",
+    "options": [
+      "La lanterne magique",
+      "Le kinétoscope",
+      "Le projecteur",
+      "La visionneuse"
+    ],
+    "correct_index": 0,
+    "explanation": "La lanterne magique était l'ancêtre du projecteur, utilisant une source lumineuse pour projeter des images peintes sur verre."
+  },
+  {
+    "question": "Comment s'appelait le petit meuble vitré pour exposer la vaisselle précieuse ?",
+    "options": [
+      "Le buffet",
+      "Le vaisselier",
+      "La crédence",
+      "L'étagère"
+    ],
+    "correct_index": 1,
+    "explanation": "Le vaisselier était un meuble de salle à manger avec étagères et vitrine permettant d'exposer la belle vaisselle et les objets précieux."
+  },
+  {
+    "question": "Quel objet métallique servait à retirer les bottes en tirant sur le talon ?",
+    "options": [
+      "Le tire-bottes",
+      "Le chausse-pied",
+      "Le déchausseur",
+      "L'arrache-bottes"
+    ],
+    "correct_index": 0,
+    "explanation": "Le tire-bottes était un ustensile en fonte ou en bois en forme de V où l'on coinçait le talon pour extraire facilement sa botte."
+  },
+  {
+    "question": "Comment appelait-on le petit sac en tissu rempli de lavande placé dans les armoires ?",
+    "options": [
+      "Le sachet parfumé",
+      "Le coussin d'herbes",
+      "Le sachet de lavande",
+      "Le potpourri"
+    ],
+    "correct_index": 2,
+    "explanation": "Les sachets de lavande séchée étaient placés dans les armoires pour parfumer le linge et éloigner les mites."
+  },
+  {
+    "question": "Quel ustensile servait à râper le fromage ou les légumes ?",
+    "options": [
+      "La râpe",
+      "Le moulin",
+      "La grille",
+      "Le hachoir"
+    ],
+    "correct_index": 0,
+    "explanation": "La râpe manuelle, souvent en métal perforé, permettait de râper fromage, légumes ou pain rassis selon les besoins culinaires."
+  },
+  {
+    "question": "Comment s'appelait la grosse pierre plate où l'on lavait le linge en le frottant ?",
+    "options": [
+      "Le lavoir",
+      "La pierre à laver",
+      "Le battoir",
+      "La dalle à lessive"
+    ],
+    "correct_index": 1,
+    "explanation": "La pierre à laver était une dalle inclinée au bord de l'eau où les lavandières frottaient le linge avec du savon."
+  },
+  {
+    "question": "Quel instrument à cadran servait à réveiller les gens le matin ?",
+    "options": [
+      "Le réveil mécanique",
+      "La pendule",
+      "La cloche",
+      "Le carillon"
+    ],
+    "correct_index": 0,
+    "explanation": "Le réveil mécanique à remontoir avec sa sonnerie stridente était l'instrument quotidien pour se lever à l'heure souhaitée."
+  },
+  {
+    "question": "Comment appelait-on le long bâton fourchu pour étendre ou retirer le linge haut sur le fil ?",
+    "options": [
+      "La perche à linge",
+      "Le crochet",
+      "La fourche",
+      "Le tendeur"
+    ],
+    "correct_index": 0,
+    "explanation": "La perche à linge était un long bâton souvent fourchu permettant d'accrocher ou décrocher le linge sur les fils tendus en hauteur."
+  },
+  {
+    "question": "Quel objet en verre servait à conserver les confitures hermétiquement ?",
+    "options": [
+      "Le bocal à conserve",
+      "La bonbonne",
+      "Le pot en grès",
+      "La jarre"
+    ],
+    "correct_index": 0,
+    "explanation": "Les bocaux en verre avec couvercle et joint en caoutchouc permettaient de stériliser et conserver confitures et conserves maison."
+  },
+  {
+    "question": "Comment s'appelait le support en métal pour poser les fers chauds sur la table ?",
+    "options": [
+      "Le trépied",
+      "Le repose-fer",
+      "Le support",
+      "L'appui-fer"
+    ],
+    "correct_index": 1,
+    "explanation": "Le repose-fer était un support métallique protégeant la table de la chaleur du fer à repasser quand on ne l'utilisait pas."
+  },
+  {
+    "question": "Quel outil servait à fendre les bûches pour le chauffage ?",
+    "options": [
+      "La hache",
+      "La scie",
+      "Le merlin",
+      "La cognée"
+    ],
+    "correct_index": 2,
+    "explanation": "Le merlin est une masse fendeuse avec une lame d'un côté, spécialement conçue pour fendre les bûches dans le sens du fil du bois."
+  },
+  {
+    "question": "Comment appelait-on le petit balai en paille de riz pour nettoyer les miettes sur la table ?",
+    "options": [
+      "La balayette",
+      "L'époussetoir",
+      "Le plumeau",
+      "La vergette"
+    ],
+    "correct_index": 0,
+    "explanation": "La balayette de table était un petit balai accompagné d'une pelle miniature pour ramasser rapidement les miettes après les repas."
+  },
+  {
+    "question": "Quel instrument en bois servait à lisser et repasser le linge avant l'invention du fer électrique ?",
+    "options": [
+      "La batte à linge",
+      "Le rouleau à repasser",
+      "La calandre",
+      "Le battoir"
+    ],
+    "correct_index": 1,
+    "explanation": "Le rouleau à repasser était un cylindre de bois qu'on faisait rouler sur le linge enroulé autour d'une barre pour le lisser."
+  },
+  {
+    "question": "Comment s'appelait le panier plat en osier pour transporter le pain frais de la boulangerie ?",
+    "options": [
+      "La panière",
+      "Le cabas",
+      "La corbeille",
+      "Le banneton"
+    ],
+    "correct_index": 0,
+    "explanation": "La panière était un panier plat en osier tressé, souvent ovale, spécialement conçu pour transporter les pains sans les écraser."
+  },
+  {
+    "question": "Quel objet métallique servait à découper proprement le bout des cigares ?",
+    "options": [
+      "Le coupe-cigare",
+      "Les ciseaux",
+      "Le cutter",
+      "La guillotine"
+    ],
+    "correct_index": 0,
+    "explanation": "Le coupe-cigare était un petit instrument métallique avec une lame circulaire permettant de couper net l'extrémité du cigare avant de le fumer."
+  },
+  {
+    "question": "Comment appelait-on le dispositif à ressort pour faire griller plusieurs tranches de pain simultanément ?",
+    "options": [
+      "Le grille-pain mécanique",
+      "Le toaster",
+      "Le porte-toasts",
+      "La rôtissoire"
+    ],
+    "correct_index": 0,
+    "explanation": "Le grille-pain mécanique était un appareil métallique sans électricité, posé sur le feu ou le poêle, qui maintenait les tranches verticalement pour les griller."
+  },
+  {
+    "question": "Comment appelait-on l'appareil qui servait à projeter des photos sur un mur ou un drap blanc ?",
+    "options": [
+      "Le projecteur de diapositives",
+      "Le cinématographe",
+      "Le stéréoscope",
+      "Le kaléidoscope"
+    ],
+    "correct_index": 0,
+    "explanation": "Le projecteur de diapositives permettait de visionner en grand format les photographies prises lors des vacances, réunissant toute la famille pour ces séances souvenirs."
+  },
+  {
+    "question": "Quel objet servait à repasser les cols et poignets de chemise ?",
+    "options": [
+      "Le fer à gaufrer",
+      "Le polissoir",
+      "Le jeannette",
+      "L'aplatissoir"
+    ],
+    "correct_index": 0,
+    "explanation": "Le fer à gaufrer était un petit fer spécial qui permettait de former les plis et godets des cols et manchettes amidonnés."
+  },
+  {
+    "question": "Comment s'appelait le meuble haut et étroit où l'on rangeait les balais et ustensiles de ménage ?",
+    "options": [
+      "Le placard à balais",
+      "Le débarras",
+      "La souillarde",
+      "Le garde-manger"
+    ],
+    "correct_index": 0,
+    "explanation": "Le placard à balais était un meuble spécifique, souvent installé dans un recoin, destiné au rangement vertical des balais et autres outils de nettoyage."
+  },
+  {
+    "question": "Quel objet en porcelaine servait à se laver le visage et les mains dans la chambre ?",
+    "options": [
+      "Le pot à eau",
+      "La cuvette",
+      "Le broc et la bassine",
+      "L'aiguière"
+    ],
+    "correct_index": 2,
+    "explanation": "Le broc (pichet) et la bassine formaient un ensemble de toilette placé sur la table de toilette dans les chambres avant l'arrivée de l'eau courante."
+  },
+  {
+    "question": "Comment appelait-on la grande pierre plate servant à laver le linge au lavoir ?",
+    "options": [
+      "La pierre à laver",
+      "Le carreau",
+      "La dalle de lavage",
+      "La pierre savonnière"
+    ],
+    "correct_index": 1,
+    "explanation": "Le carreau était la surface inclinée en pierre où les lavandières savonnaient et frottaient le linge au bord de l'eau."
+  },
+  {
+    "question": "Quel appareil servait à écouter la radio dans les années 1930-1940 ?",
+    "options": [
+      "Le poste à galène",
+      "Le phonographe",
+      "Le gramophone",
+      "Le magnétophone"
+    ],
+    "correct_index": 0,
+    "explanation": "Le poste à galène était un récepteur radio simple utilisant un cristal de galène, très populaire avant l'arrivée des postes à lampes."
+  },
+  {
+    "question": "Comment s'appelait l'ustensile en bois pour essorer le linge après lavage ?",
+    "options": [
+      "Le tordoir",
+      "L'essoroir",
+      "Le pressoir à linge",
+      "La rouleuse"
+    ],
+    "correct_index": 0,
+    "explanation": "Le tordoir était constitué de deux rouleaux en bois actionnés par une manivelle entre lesquels on passait le linge mouillé pour l'essorer."
+  },
+  {
+    "question": "Quel objet servait à écraser l'ail avant l'invention des presse-ail modernes ?",
+    "options": [
+      "Le mortier et son pilon",
+      "L'écrase-ail",
+      "La pierre à broyer",
+      "Le moulin à condiments"
+    ],
+    "correct_index": 0,
+    "explanation": "Le mortier en pierre ou en bois avec son pilon permettait d'écraser l'ail, les épices et diverses préparations culinaires."
+  },
+  {
+    "question": "Comment appelait-on le récipient en terre cuite pour faire cuire les plats au four ?",
+    "options": [
+      "Le plat en faïence",
+      "La terrine",
+      "La cocotte",
+      "Le tupine"
+    ],
+    "correct_index": 1,
+    "explanation": "La terrine en terre cuite permettait une cuisson douce et homogène des plats mijotés au four traditionnel."
+  },
+  {
+    "question": "Quel objet servait à garder les pieds au chaud dans le lit pendant l'hiver ?",
+    "options": [
+      "La pierre chaude",
+      "Le chauffe-lit",
+      "La bouillotte",
+      "Le réchaud de lit"
+    ],
+    "correct_index": 2,
+    "explanation": "La bouillotte, souvent en grès ou en cuivre, était remplie d'eau chaude et placée dans le lit avant le coucher pour réchauffer les draps."
+  },
+  {
+    "question": "Comment s'appelait l'outil à lame courbe pour couper les céréales à la main ?",
+    "options": [
+      "La serpette",
+      "La faux",
+      "La faucille",
+      "La serpe"
+    ],
+    "correct_index": 2,
+    "explanation": "La faucille était l'outil agricole à lame en demi-cercle utilisé pour moissonner les blés et autres céréales à la main."
+  },
+  {
+    "question": "Quel objet permettait de faire des trous dans le cuir pour la couture ?",
+    "options": [
+      "Le poinçon",
+      "L'alène",
+      "Le perçoir",
+      "La vrille"
+    ],
+    "correct_index": 1,
+    "explanation": "L'alène était l'outil pointu du cordonnier et du sellier servant à percer le cuir avant de passer le fil."
+  },
+  {
+    "question": "Comment appelait-on le petit appareil mécanique pour compter les points au tricot ?",
+    "options": [
+      "Le compteur de rangs",
+      "Le compte-mailles",
+      "Le totaliseur",
+      "Le boulier à tricoter"
+    ],
+    "correct_index": 1,
+    "explanation": "Le compte-mailles était un petit dispositif mécanique que les tricoteuses utilisaient pour ne pas perdre le compte de leurs rangs ou motifs."
+  },
+  {
+    "question": "Quel ustensile servait à retourner les crêpes dans la poêle ?",
+    "options": [
+      "La palette",
+      "La spatule en bois",
+      "L'écumoire",
+      "La raclette"
+    ],
+    "correct_index": 0,
+    "explanation": "La palette, large et plate en bois, permettait de glisser sous la crêpe pour la retourner sans la déchirer."
+  },
+  {
+    "question": "Comment s'appelait la grosse cloche que l'on agitait pour annoncer les nouvelles dans les villages ?",
+    "options": [
+      "Le grelot",
+      "La cloche à main",
+      "La clochette du crieur",
+      "La campanette"
+    ],
+    "correct_index": 2,
+    "explanation": "Le crieur public agitait sa clochette pour rassembler les villageois avant d'annoncer les nouvelles et proclamations officielles."
+  },
+  {
+    "question": "Quel objet en métal servait à retirer les bottes en tirant sur le talon ?",
+    "options": [
+      "Le tire-bottes",
+      "L'arrache-chaussures",
+      "Le décrottoir",
+      "Le chausse-pied"
+    ],
+    "correct_index": 0,
+    "explanation": "Le tire-bottes était un instrument en forme de V dans lequel on coinçait le talon pour retirer facilement ses bottes en tirant le pied."
+  },
+  {
+    "question": "Comment appelait-on la petite table roulante servant à présenter les plats ?",
+    "options": [
+      "Le chariot",
+      "La desserte",
+      "Le guéridon",
+      "La console mobile"
+    ],
+    "correct_index": 1,
+    "explanation": "La desserte était un meuble à roulettes utilisé pour apporter et présenter les plats du repas, facilitant le service à table."
+  },
+  {
+    "question": "Quel instrument servait à couper les plumes d'oie pour en faire des porte-plumes ?",
+    "options": [
+      "Le taille-plume",
+      "Le canif",
+      "La serpette à plumes",
+      "L'émondoir"
+    ],
+    "correct_index": 1,
+    "explanation": "Le canif, petit couteau de poche, permettait de tailler la pointe des plumes d'oie pour en faire des instruments d'écriture."
+  },
+  {
+    "question": "Comment s'appelait le panier en osier que portaient les vendangeurs sur le dos ?",
+    "options": [
+      "La hotte",
+      "La banne",
+      "Le panier dorsal",
+      "La corbeille"
+    ],
+    "correct_index": 0,
+    "explanation": "La hotte était le grand panier porté sur le dos grâce à des bretelles, utilisé notamment lors des vendanges pour transporter le raisin."
+  },
+  {
+    "question": "Quel objet servait à sceller les lettres avant l'invention des enveloppes autocollantes ?",
+    "options": [
+      "Le cachet de cire",
+      "Le sceau",
+      "Le timbre humide",
+      "La gomme arabique"
+    ],
+    "correct_index": 0,
+    "explanation": "Le cachet de cire chaude, appliqué sur le rabat de l'enveloppe puis marqué d'un sceau gravé, garantissait la confidentialité du courrier."
+  }
+]

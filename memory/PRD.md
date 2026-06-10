@@ -124,3 +124,21 @@ Source data: French senior quiz platform (6 categories, 8 activities, sample que
 - ✅ Admin email : `admin@quizdantan.fr` → `admin@generaquiz.fr` (nouveau admin auto-créé au démarrage, mot de passe inchangé `Admin2026!`)
 - ✅ Footer : `contact@generaquiz.fr`, mention `generaquiz.fr`
 - ✅ Domaine Resend : prêt à recevoir `generaquiz.fr` une fois les DNS configurés
+
+
+## Implemented (2026-02-08, iteration 12) — Massive question bank expansion
+- ✅ **Total questions: 240 → 800** (+560 nouvelles questions générées par Claude Sonnet 4.5)
+- ✅ **100 questions par catégorie** (30 curées + 70 IA) sur les 8 catégories
+- ✅ Variété de difficulté par catégorie : ~50 % facile (enfants/famille), ~35 % moyen, ~15 % difficile (seniors connaisseurs)
+- ✅ Public ciblé : enfants, parents, grands-parents en famille
+- ✅ Architecture : `/app/backend/data/extra_questions/{category_id}.json` (8 fichiers JSON, 70 q chacun)
+- ✅ Loader idempotent dans `seed_data.py` qui agrège base + extras
+- ✅ Script de génération réutilisable : `/app/backend/generate_questions.py` (Claude Sonnet 4.5 via Emergent LLM Key, dédoublonnage automatique, batchs de 25)
+- ✅ Catégories mises à jour : `count` = 100 (affiché dans la landing/dashboard)
+- ✅ Reseed automatique au boot : 800 questions en DB, 100 par catégorie
+
+## Backlog (P1/P2)
+- 🟡 P1 : Vérifier le domaine `generaquiz.fr` sur Resend (action utilisateur DNS) puis basculer `SENDER_EMAIL` vers `contact@generaquiz.fr`
+- 🟡 P2 : Mode tournoi (Défi Famille en temps réel multi-joueurs)
+- 🟡 P2 : Système de badges / progression par catégorie
+- 🟡 P2 : Stats avancées : graphique progression hebdo, classement amis

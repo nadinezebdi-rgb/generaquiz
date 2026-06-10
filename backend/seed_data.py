@@ -1,7 +1,11 @@
-"""Static seed data for Quiz d'Antan.
+"""Static seed data for GénéraQuiz.
 
-8 categories x ~30 questions = ~240 questions total.
+8 categories x 100 questions = 800 questions total.
+30 curated base questions per category + 70 AI-generated extra questions per category
+(loaded from /app/backend/data/extra_questions/{category_id}.json).
 """
+import json
+from pathlib import Path
 
 CATEGORIES = [
     {
@@ -10,56 +14,56 @@ CATEGORIES = [
         "description": "Télé, musique, événements et icônes des Trente Glorieuses.",
         "color": "#E07A5F", "icon": "tv",
         "mascot_image": "/api/static/mascots/annees-50-60.png",
-        "mascot_name": "Robert le Téléspectateur", "count": 30,
+        "mascot_name": "Robert le Téléspectateur", "count": 100,
     },
     {
         "id": "chansons", "title": "Chansons",
         "description": "Les grands succès d'Édith Piaf à Brassens, en passant par Trenet.",
         "color": "#722F37", "icon": "music",
         "mascot_image": "/api/static/mascots/chansons.png",
-        "mascot_name": "Yvette la Chanteuse", "count": 30,
+        "mascot_name": "Yvette la Chanteuse", "count": 100,
     },
     {
         "id": "cinema", "title": "Cinéma",
         "description": "Films cultes, acteurs inoubliables et répliques mythiques.",
         "color": "#1E3A5F", "icon": "film",
         "mascot_image": "/api/static/mascots/cinema.png",
-        "mascot_name": "Marcel le Projectionniste", "count": 30,
+        "mascot_name": "Marcel le Projectionniste", "count": 100,
     },
     {
         "id": "objets-antan", "title": "Objets d'antan",
         "description": "Saurez-vous reconnaître les objets d'autrefois ?",
         "color": "#F2CC8F", "icon": "phone",
         "mascot_image": "/api/static/mascots/objets-antan.png",
-        "mascot_name": "Mémé Suzanne", "count": 30,
+        "mascot_name": "Mémé Suzanne", "count": 100,
     },
     {
         "id": "histoire-france", "title": "Histoire de France",
         "description": "Événements marquants et grands personnages de notre histoire.",
         "color": "#3D9970", "icon": "landmark",
         "mascot_image": "/api/static/mascots/histoire-france.png",
-        "mascot_name": "Maître Henri", "count": 30,
+        "mascot_name": "Maître Henri", "count": 100,
     },
     {
         "id": "cuisine-terroir", "title": "Cuisine & Terroir",
         "description": "Recettes, produits et traditions des régions de France.",
         "color": "#D97706", "icon": "utensils",
         "mascot_image": "/api/static/mascots/cuisine-terroir.png",
-        "mascot_name": "Chef Bernard", "count": 30,
+        "mascot_name": "Chef Bernard", "count": 100,
     },
     {
         "id": "culture-40-ans", "title": "Génération 40 ans",
         "description": "Pop culture, tech et événements des années 90 et 2000.",
         "color": "#8B5CF6", "icon": "sparkles",
         "mascot_image": "/api/static/mascots/culture-40-ans.png",
-        "mascot_name": "Sophie la Quadra", "count": 30,
+        "mascot_name": "Sophie la Quadra", "count": 100,
     },
     {
         "id": "culture-70-ans", "title": "Génération 70 ans",
         "description": "Culture générale des années 60-70 : société, sciences, monde.",
         "color": "#0F766E", "icon": "book",
         "mascot_image": "/api/static/mascots/culture-70-ans.png",
-        "mascot_name": "Pierre le Sage", "count": 30,
+        "mascot_name": "Pierre le Sage", "count": 100,
     },
 ]
 
@@ -805,3 +809,42 @@ QUESTIONS = [
       ["1967", "1968", "1969", "1970"], 2,
       "15-18 août 1969, à Bethel (USA), 400 000 spectateurs."),
 ]
+
+
+# ---------------------------------------------------------------------------
+# Extra AI-generated questions (70 per category), loaded from JSON files
+# Files at /app/backend/data/extra_questions/{category_id}.json
+# Generated via /app/backend/generate_questions.py using Claude Sonnet 4.5.
+# ---------------------------------------------------------------------------
+_EXTRA_DIR = Path(__file__).parent / "data" / "extra_questions"
+
+
+def _load_extra_questions():
+    extras = []
+    if not _EXTRA_DIR.exists():
+        return extras
+    for cat in CATEGORIES:
+        f = _EXTRA_DIR / f"{cat['id']}.json"
+        if not f.exists():
+            continue
+        try:
+            items = json.loads(f.read_text(encoding="utf-8"))
+        except Exception:
+            continue
+        for i, item in enumerate(items, start=1):
+            qid = f"x_{cat['id']}_{i}"
+            try:
+                extras.append(Q(
+                    qid,
+                    cat["id"],
+                    item["question"],
+                    item["options"],
+                    int(item["correct_index"]),
+                    item.get("explanation", ""),
+                ))
+            except (KeyError, ValueError, TypeError):
+                continue
+    return extras
+
+
+QUESTIONS.extend(_load_extra_questions())
