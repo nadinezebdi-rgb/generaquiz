@@ -1,6 +1,7 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { Sparkles, LogOut, User as UserIcon } from "lucide-react";
+import { LogOut, User as UserIcon } from "lucide-react";
+import Logo from "@/components/Logo";
 
 export default function Navbar({ variant = "landing" }) {
   const { user, logout } = useAuth();
@@ -9,19 +10,7 @@ export default function Navbar({ variant = "landing" }) {
   return (
     <header className="sticky top-0 z-40 bg-bgmain/90 backdrop-blur-md border-b-2 border-cream">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between">
-        <Link
-          to="/"
-          data-testid="navbar-logo"
-          className="flex items-center gap-3 group"
-        >
-          <span className="w-11 h-11 rounded-full bg-terracotta flex items-center justify-center shadow-warm group-hover:scale-105 transition-transform">
-            <Sparkles className="w-6 h-6 text-white" strokeWidth={2.5} />
-          </span>
-          <div className="leading-tight">
-            <div className="font-display text-2xl font-bold text-navy">Quiz d'Antan</div>
-            <div className="text-xs text-navy/60 font-medium tracking-wide">Mémoire & souvenirs</div>
-          </div>
-        </Link>
+        <Logo size="md" showTagline={true} />
 
         <nav className="hidden md:flex items-center gap-2">
           {variant === "landing" && (

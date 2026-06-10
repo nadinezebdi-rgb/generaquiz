@@ -35,7 +35,7 @@ export default function Login() {
           <span className="w-12 h-12 rounded-full bg-terracotta flex items-center justify-center shadow-warm">
             <Sparkles className="w-6 h-6 text-white" strokeWidth={2.5} />
           </span>
-          <span className="font-display text-3xl font-bold text-navy">Quiz d'Antan</span>
+          <span className="font-display text-3xl font-bold text-navy">GénéraQuiz</span>
         </Link>
 
         <div className="bg-white border-2 border-cream-dark rounded-3xl p-8 shadow-soft">

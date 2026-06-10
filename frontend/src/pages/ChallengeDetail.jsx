@@ -36,7 +36,7 @@ export default function ChallengeDetail() {
     } catch {}
   };
 
-  const shareText = `Salut ! Je te défie au quiz "${data?.category_title || ""}" sur Quiz d'Antan. Joue ici : ${inviteUrl}`;
+  const shareText = `Salut ! Je te défie au quiz "${data?.category_title || ""}" sur GénéraQuiz. Joue ici : ${inviteUrl}`;
   const waUrl = `https://wa.me/?text=${encodeURIComponent(shareText)}`;
   const mailUrl = `mailto:?subject=${encodeURIComponent("Défi quiz famille !")}&body=${encodeURIComponent(shareText)}`;
   const smsUrl = `sms:?body=${encodeURIComponent(shareText)}`;

@@ -28,12 +28,12 @@ def _build_reset_email_html(reset_link: str) -> str:
       <table width="560" cellpadding="0" cellspacing="0" style="background-color:#FFFFFF;border-radius:24px;border:2px solid #E8E2C9;overflow:hidden;">
         <tr><td style="background-color:#1E3A5F;padding:30px;text-align:center;">
           <div style="display:inline-block;background-color:#E07A5F;width:48px;height:48px;border-radius:50%;line-height:48px;color:#FFFFFF;font-size:24px;font-weight:bold;">Q</div>
-          <h1 style="color:#F2CC8F;font-family:Georgia,serif;font-size:28px;margin:14px 0 0;">Quiz d'Antan</h1>
+          <h1 style="color:#F2CC8F;font-family:Georgia,serif;font-size:28px;margin:14px 0 0;">GénéraQuiz</h1>
         </td></tr>
         <tr><td style="padding:40px 32px;">
           <h2 style="font-family:Georgia,serif;font-size:24px;color:#1A2530;margin:0 0 16px;">Réinitialisation de votre mot de passe</h2>
           <p style="font-size:16px;line-height:1.6;color:#334155;margin:0 0 20px;">Bonjour,</p>
-          <p style="font-size:16px;line-height:1.6;color:#334155;margin:0 0 20px;">Vous avez demandé à réinitialiser le mot de passe de votre compte <strong>Quiz d'Antan</strong>. Cliquez sur le bouton ci-dessous pour choisir un nouveau mot de passe :</p>
+          <p style="font-size:16px;line-height:1.6;color:#334155;margin:0 0 20px;">Vous avez demandé à réinitialiser le mot de passe de votre compte <strong>GénéraQuiz</strong>. Cliquez sur le bouton ci-dessous pour choisir un nouveau mot de passe :</p>
           <table cellpadding="0" cellspacing="0" style="margin:28px auto;"><tr><td style="background-color:#E07A5F;border-radius:30px;">
             <a href="{reset_link}" style="display:inline-block;padding:16px 36px;color:#FFFFFF;text-decoration:none;font-weight:bold;font-size:16px;font-family:Arial,sans-serif;">Réinitialiser mon mot de passe</a>
           </td></tr></table>
@@ -43,7 +43,7 @@ def _build_reset_email_html(reset_link: str) -> str:
           <p style="font-size:14px;line-height:1.6;color:#64748B;margin:20px 0 0;">Si vous n'avez pas demandé cette réinitialisation, ignorez simplement cet email — votre mot de passe reste inchangé.</p>
         </td></tr>
         <tr><td style="background-color:#F4F1DE;padding:20px 32px;text-align:center;border-top:2px solid #E8E2C9;">
-          <p style="font-size:12px;color:#64748B;margin:0;">© Quiz d'Antan — La plateforme de jeux de mémoire pour seniors</p>
+          <p style="font-size:12px;color:#64748B;margin:0;">© GénéraQuiz — La plateforme de jeux de mémoire pour seniors</p>
         </td></tr>
       </table>
     </td></tr>
@@ -56,7 +56,7 @@ async def _send_reset_email(to_email: str, reset_link: str) -> bool:
         logger.warning("RESEND_API_KEY not set — email not sent")
         return False
     params = {"from": SENDER_EMAIL, "to": [to_email],
-              "subject": "Réinitialisation de votre mot de passe — Quiz d'Antan",
+              "subject": "Réinitialisation de votre mot de passe — GénéraQuiz",
               "html": _build_reset_email_html(reset_link)}
     try:
         result = await asyncio.to_thread(resend.Emails.send, params)

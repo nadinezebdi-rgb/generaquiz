@@ -53,7 +53,7 @@ export default function ChallengePlay() {
           <h1 className="font-display text-3xl font-extrabold text-navy mb-3">Oups !</h1>
           <p className="text-navy/70 text-lg mb-6">{err || "Ce défi n'est plus disponible."}</p>
           <Link to="/" className="inline-flex items-center gap-2 bg-terracotta text-white font-bold px-5 py-3 rounded-full">
-            Aller sur Quiz d'Antan
+            Aller sur GénéraQuiz
           </Link>
         </div>
       </div>
@@ -109,7 +109,7 @@ export default function ChallengePlay() {
         <div className="max-w-4xl mx-auto px-4 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2">
             <Sparkles className="w-5 h-5 text-mustard" />
-            <span className="font-display text-xl font-bold">Quiz d'Antan</span>
+            <span className="font-display text-xl font-bold">GénéraQuiz</span>
           </Link>
           <span className="text-mustard font-bold text-sm tracking-wide uppercase">Défi famille</span>
         </div>
@@ -322,7 +322,7 @@ export default function ChallengePlay() {
                   data-testid="play-cta-register"
                   className="inline-flex items-center gap-2 bg-terracotta hover:bg-terracotta-dark text-white font-bold px-6 py-3 rounded-full shadow-warm"
                 >
-                  Créer mon compte Quiz d'Antan <ArrowRight className="w-5 h-5" />
+                  Créer mon compte GénéraQuiz <ArrowRight className="w-5 h-5" />
                 </Link>
               </div>
             </motion.div>

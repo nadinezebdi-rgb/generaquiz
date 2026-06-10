@@ -43,7 +43,7 @@ export default function ResetPassword() {
             <span className="w-12 h-12 rounded-full bg-terracotta flex items-center justify-center">
               <Sparkles className="w-6 h-6 text-white" strokeWidth={2.5} />
             </span>
-            <span className="font-display text-2xl font-bold text-navy">Quiz d'Antan</span>
+            <span className="font-display text-2xl font-bold text-navy">GénéraQuiz</span>
           </div>
           <h1 className="font-display text-3xl font-extrabold text-navy text-center mb-2">Nouveau mot de passe</h1>
           <p className="text-navy/70 text-center mb-7">Choisissez un mot de passe d'au moins 6 caractères.</p>

@@ -34,7 +34,7 @@ export default function ForgotPassword() {
             <span className="w-12 h-12 rounded-full bg-terracotta flex items-center justify-center">
               <Sparkles className="w-6 h-6 text-white" strokeWidth={2.5} />
             </span>
-            <span className="font-display text-2xl font-bold text-navy">Quiz d'Antan</span>
+            <span className="font-display text-2xl font-bold text-navy">GénéraQuiz</span>
           </div>
 
           {!sent ? (
