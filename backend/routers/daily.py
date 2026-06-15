@@ -74,6 +74,24 @@ async def _pick_daily_questions(date_key: str) -> list[dict]:
     return picked[:DAILY_QUESTION_COUNT]
 
 
+# In-memory cache to avoid hitting MongoDB for every daily-quiz request and every
+# morning email send. Keyed by date_key; auto-evicts on day rollover.
+_daily_cache: dict[str, list[dict]] = {}
+
+
+async def get_daily_questions_cached(date_key: str) -> list[dict]:
+    """Cached wrapper around _pick_daily_questions. Same for everyone on a given day."""
+    cached = _daily_cache.get(date_key)
+    if cached is not None:
+        return cached
+    # On a new day, drop stale entries (small dict but keep it tidy)
+    if _daily_cache:
+        _daily_cache.clear()
+    picked = await _pick_daily_questions(date_key)
+    _daily_cache[date_key] = picked
+    return picked
+
+
 # -------------------- request models --------------------
 class DailySubmit(BaseModel):
     score: int = Field(..., ge=0, le=DAILY_QUESTION_COUNT)
@@ -88,7 +106,7 @@ async def get_daily_quiz(request: Request):
     If user is authenticated, also returns `has_played` (already submitted today).
     """
     date_key = _today_key()
-    questions = await _pick_daily_questions(date_key)
+    questions = await get_daily_questions_cached(date_key)
     user = await _optional_user(request)
     has_played = False
     if user:

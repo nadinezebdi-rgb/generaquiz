@@ -3,6 +3,7 @@ import { useParams, Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { api, BACKEND_URL } from "@/lib/api";
 import { Sparkles, ChevronRight, Trophy, ArrowRight, Check, X } from "lucide-react";
+import ScoreCard from "@/components/ScoreCard";
 
 // Fisher-Yates: shuffle options + return mapping[displayedIdx] = originalIdx
 function shuffleOptions(options) {
@@ -189,10 +190,10 @@ export default function ChallengePlay() {
               className="bg-white border-4 border-navy rounded-[32px] p-6 md:p-10 shadow-warm"
             >
               <div className="flex items-center justify-between mb-5">
-                <span className="text-sm font-bold uppercase tracking-wider text-navy/60">
+                <span className="text-base sm:text-lg font-bold uppercase tracking-wider text-navy/60">
                   Question {idx + 1} / {data.total}
                 </span>
-                <span className="bg-cream border-2 border-cream-dark text-navy font-bold px-3 py-1 rounded-full text-sm">
+                <span className="bg-cream border-2 border-cream-dark text-navy font-bold px-4 py-2 rounded-full text-base">
                   Joueur : {name}
                 </span>
               </div>
@@ -200,7 +201,7 @@ export default function ChallengePlay() {
                 <div className="bg-terracotta h-3" style={{ width: `${((idx + (selected !== null ? 1 : 0)) / data.total) * 100}%` }} />
               </div>
 
-              <h2 data-testid="play-question" className="font-display text-2xl md:text-3xl font-extrabold text-navy leading-snug mb-7">
+              <h2 data-testid="play-question" className="font-display text-3xl md:text-4xl lg:text-5xl font-extrabold text-navy leading-snug mb-7">
                 {q.question}
               </h2>
 
@@ -219,9 +220,9 @@ export default function ChallengePlay() {
                       whileTap={selected === null ? { scale: 0.98 } : {}}
                       onClick={() => pick(i)}
                       disabled={selected !== null}
-                      className={`text-left px-6 py-5 rounded-2xl font-semibold text-lg transition min-h-[72px] ${cls}`}
+                      className={`text-left px-6 py-6 rounded-2xl font-semibold text-xl md:text-2xl leading-snug transition min-h-[96px] ${cls}`}
                     >
-                      <span className="font-display text-xl mr-2 text-terracotta">{String.fromCharCode(65 + i)}.</span>
+                      <span className="font-display text-2xl md:text-3xl mr-3 text-terracotta">{String.fromCharCode(65 + i)}.</span>
                       {opt}
                     </motion.button>
                   );
@@ -233,10 +234,10 @@ export default function ChallengePlay() {
                   <button
                     onClick={next}
                     data-testid="play-next-btn"
-                    className="inline-flex items-center gap-2 bg-terracotta hover:bg-terracotta-dark text-white font-bold text-lg px-7 py-4 rounded-full shadow-warm min-h-[56px] transition"
+                    className="inline-flex items-center gap-2 bg-terracotta hover:bg-terracotta-dark text-white font-bold text-xl px-10 py-5 rounded-full shadow-warm min-h-[64px] transition"
                   >
                     {idx + 1 >= data.total ? "Valider mes réponses" : "Question suivante"}
-                    <ChevronRight className="w-5 h-5" />
+                    <ChevronRight className="w-6 h-6" />
                   </button>
                 </div>
               )}
@@ -324,6 +325,19 @@ export default function ChallengePlay() {
                 >
                   Créer mon compte GénéraQuiz <ArrowRight className="w-5 h-5" />
                 </Link>
+              </div>
+
+              {/* ============ SHAREABLE SCORE CARD ============ */}
+              <div className="mt-8 pt-8 border-t-2 border-cream-dark">
+                <ScoreCard
+                  title={`Défi Famille — ${data?.category_title || "Quiz"}`}
+                  subtitle="Défi Famille"
+                  score={result.score}
+                  total={result.total}
+                  playerName={name}
+                  shareText={`👨‍👩‍👧 J'ai fait ${result.score}/${result.total} au Défi Famille de GénéraQuiz ! À votre tour de relever le défi.`}
+                  shareUrl={window.location.href}
+                />
               </div>
             </motion.div>
           )}

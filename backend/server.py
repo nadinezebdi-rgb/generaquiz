@@ -15,7 +15,7 @@ from fastapi.staticfiles import StaticFiles
 from starlette.middleware.cors import CORSMiddleware
 
 from core import (
-    ROOT_DIR, FRONTEND_URL, ADMIN_EMAIL, ADMIN_PASSWORD, LIFETIME_DAYS,
+    ROOT_DIR, FRONTEND_URL, ADMIN_EMAIL, ADMIN_PASSWORD,
     client, db, logger, hash_password, verify_password, get_admin_user,
 )
 from seed_data import CATEGORIES, QUESTIONS
@@ -112,12 +112,17 @@ async def startup():
         logger.info("Admin password mis à jour")
 
     # Seed default promo codes (idempotent)
+    # Note: les codes "à vie" (FAMILLE2026) ne sont plus seedés par défaut en prod.
+    # L'admin peut toujours les créer manuellement via /api/promo/create si besoin.
     default_promos = [
-        {"code": "FAMILLE2026", "label": "Code famille — accès Premium à vie",
-         "duration_days": LIFETIME_DAYS, "max_uses": None, "expires_at": None, "active": True},
         {"code": "DECOUVERTE30", "label": "Essai 30 jours — 50 utilisations",
          "duration_days": 30, "max_uses": 50, "expires_at": None, "active": True},
     ]
+    # Désactiver le code FAMILLE2026 historique s'il est encore actif en base
+    await db.promo_codes.update_many(
+        {"code": "FAMILLE2026", "active": True},
+        {"$set": {"active": False}},
+    )
     for promo in default_promos:
         if not await db.promo_codes.find_one({"code": promo["code"]}):
             await db.promo_codes.insert_one({**promo, "used_count": 0, "redeemed_by": [],

@@ -4,9 +4,10 @@ import { motion, AnimatePresence } from "framer-motion";
 import { api, formatError } from "@/lib/api";
 import { useAuth } from "@/contexts/AuthContext";
 import {
-  Sparkles, Trophy, ArrowRight, Check, X, Calendar, Crown, LogIn, Share2, Medal, Flame,
+  Sparkles, Trophy, ArrowRight, Check, X, Calendar, Crown, LogIn, Medal, Flame,
 } from "lucide-react";
 import Logo from "@/components/Logo";
+import ScoreCard from "@/components/ScoreCard";
 import { toast } from "sonner";
 
 // Fisher-Yates shuffle of options + return mapping so we can re-map to original index
@@ -88,21 +89,6 @@ export default function DailyQuiz() {
       setStage("done");
     } else {
       setIdx(idx + 1); setSelected(null); setRevealed(false);
-    }
-  };
-
-  const shareLink = async () => {
-    const url = `${window.location.origin}/quiz-du-jour`;
-    const text = `J'ai fait ${score}/${data?.questions?.length || 5} au Quiz du Jour de GénéraQuiz ! 🎯 Saurez-vous battre mon score ?`;
-    try {
-      if (navigator.share) {
-        await navigator.share({ title: "Quiz du Jour — GénéraQuiz", text, url });
-      } else {
-        await navigator.clipboard.writeText(`${text} ${url}`);
-        toast.success("Lien copié dans le presse-papier !");
-      }
-    } catch {
-      /* user cancelled */
     }
   };
 
@@ -218,10 +204,10 @@ export default function DailyQuiz() {
               data-testid="daily-question"
             >
               <div className="flex items-center justify-between mb-5">
-                <span className="text-sm font-bold uppercase tracking-wider text-navy/60">
+                <span className="text-base sm:text-lg font-bold uppercase tracking-wider text-navy/60">
                   Question {idx + 1} / {data.questions.length}
                 </span>
-                <span className="bg-cream border-2 border-cream-dark text-navy font-bold px-3 py-1 rounded-full text-sm">
+                <span className="bg-cream border-2 border-cream-dark text-navy font-bold px-4 py-2 rounded-full text-base">
                   Score : {score}
                 </span>
               </div>
@@ -231,7 +217,7 @@ export default function DailyQuiz() {
                   style={{ width: `${((idx + (revealed ? 1 : 0)) / data.questions.length) * 100}%` }}
                 />
               </div>
-              <h2 className="font-display text-2xl md:text-3xl font-extrabold text-navy mb-6 leading-snug">
+              <h2 className="font-display text-3xl md:text-4xl lg:text-5xl font-extrabold text-navy mb-6 leading-snug">
                 {currentQ.question}
               </h2>
               <div className="space-y-3 mb-6">
@@ -245,25 +231,25 @@ export default function DailyQuiz() {
                       data-testid={`daily-option-${i}`}
                       onClick={() => pick(i)}
                       disabled={revealed}
-                      className={`w-full text-left p-4 md:p-5 rounded-2xl border-2 font-semibold text-lg transition flex items-start gap-3
+                      className={`w-full text-left p-5 md:p-6 rounded-2xl border-2 font-semibold text-xl md:text-2xl leading-snug transition flex items-start gap-3 min-h-[88px]
                         ${isCorrect ? "bg-green-50 border-green-600 text-green-900" : ""}
                         ${isWrong ? "bg-red-50 border-red-600 text-red-900" : ""}
                         ${!revealed ? "bg-white border-cream-dark hover:border-navy hover:bg-cream" : ""}
                         ${revealed && !isCorrect && !isWrong ? "opacity-60" : ""}`}
                     >
-                      <span className="w-7 h-7 shrink-0 rounded-full bg-cream border-2 border-cream-dark flex items-center justify-center font-extrabold text-sm">
+                      <span className="w-9 h-9 shrink-0 rounded-full bg-cream border-2 border-cream-dark flex items-center justify-center font-extrabold text-base">
                         {String.fromCharCode(65 + i)}
                       </span>
                       <span className="flex-1">{opt}</span>
-                      {isCorrect && <Check className="w-6 h-6 text-green-700 shrink-0" />}
-                      {isWrong && <X className="w-6 h-6 text-red-700 shrink-0" />}
+                      {isCorrect && <Check className="w-7 h-7 text-green-700 shrink-0" />}
+                      {isWrong && <X className="w-7 h-7 text-red-700 shrink-0" />}
                     </button>
                   );
                 })}
               </div>
               {revealed && currentQ.explanation && (
-                <div className="bg-cream border-l-4 border-mustard-dark rounded-xl p-4 mb-6">
-                  <p className="text-navy text-base leading-relaxed">
+                <div className="bg-cream border-l-4 border-mustard-dark rounded-xl p-5 mb-6">
+                  <p className="text-navy text-lg leading-relaxed">
                     <strong>💡 Explication :</strong> {currentQ.explanation}
                   </p>
                 </div>
@@ -272,10 +258,10 @@ export default function DailyQuiz() {
                 <button
                   data-testid="daily-next-btn"
                   onClick={next}
-                  className="w-full inline-flex items-center justify-center gap-2 bg-navy hover:bg-navy/90 text-white font-bold text-lg px-6 py-4 rounded-full transition min-h-[60px]"
+                  className="w-full inline-flex items-center justify-center gap-2 bg-navy hover:bg-navy/90 text-white font-bold text-xl px-6 py-5 rounded-full transition min-h-[68px]"
                 >
                   {idx + 1 >= data.questions.length ? "Voir mon score" : "Question suivante"}{" "}
-                  <ArrowRight className="w-5 h-5" />
+                  <ArrowRight className="w-6 h-6" />
                 </button>
               )}
             </motion.div>
@@ -332,33 +318,38 @@ export default function DailyQuiz() {
                   </div>
                 )}
 
-                <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                  <button
-                    data-testid="daily-share-btn"
-                    onClick={shareLink}
-                    className="inline-flex items-center justify-center gap-2 bg-cream border-2 border-navy text-navy hover:bg-navy hover:text-white font-bold px-6 py-3 rounded-full transition"
-                  >
-                    <Share2 className="w-4 h-4" /> Partager mon score
-                  </button>
+                <div className="flex flex-col sm:flex-row gap-3 justify-center mb-2">
                   {user ? (
                     <Link
                       to="/app/dashboard"
                       data-testid="daily-dashboard-cta"
-                      className="inline-flex items-center justify-center gap-2 bg-terracotta hover:bg-terracotta-dark text-white font-bold px-6 py-3 rounded-full shadow-warm transition"
+                      className="inline-flex items-center justify-center gap-2 bg-cream border-2 border-navy text-navy hover:bg-navy hover:text-white font-bold px-6 py-3 rounded-full transition"
                     >
-                      Mon Dashboard <ArrowRight className="w-4 h-4" />
+                      Mon tableau de bord <ArrowRight className="w-4 h-4" />
                     </Link>
                   ) : (
                     <Link
                       to="/register"
                       data-testid="daily-register-cta"
-                      className="inline-flex items-center justify-center gap-2 bg-terracotta hover:bg-terracotta-dark text-white font-bold px-6 py-3 rounded-full shadow-warm transition"
+                      className="inline-flex items-center justify-center gap-2 bg-cream border-2 border-navy text-navy hover:bg-navy hover:text-white font-bold px-6 py-3 rounded-full transition"
                     >
                       Créer un compte gratuit <ArrowRight className="w-4 h-4" />
                     </Link>
                   )}
                 </div>
               </div>
+
+              {/* ============ SHAREABLE SCORE CARD ============ */}
+              <ScoreCard
+                title="Quiz du Jour"
+                subtitle={dateLabel}
+                score={score}
+                total={data.questions.length}
+                playerName={user?.name}
+                streak={submitResult?.streak_current}
+                shareText={`🎯 J'ai fait ${score}/${data.questions.length} au Quiz du Jour de GénéraQuiz ! ${submitResult?.streak_current >= 2 ? `🔥 Série de ${submitResult.streak_current} jours.` : ""} Saurez-vous battre mon score ?`}
+                shareUrl={`${window.location.origin}/quiz-du-jour`}
+              />
 
               {/* Premium nudge */}
               {(!user || user.plan !== "premium") && (

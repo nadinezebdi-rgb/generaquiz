@@ -89,7 +89,11 @@ async def _send_one(user: dict) -> bool:
 
 
 async def send_morning_emails() -> dict:
-    """Iterate eligible users and send the reminder. Returns a summary dict."""
+    """Iterate eligible users and send the reminder. Returns a summary dict.
+
+    Optimised: 1 query to get all users who already played today (instead of N queries),
+    then filter in-memory while iterating opt-in users.
+    """
     if not RESEND_API_KEY:
         logger.info("[daily-email] RESEND_API_KEY manquant — envoi sauté")
         return {"sent": 0, "skipped": 0, "reason": "no_resend_key"}
@@ -99,17 +103,17 @@ async def send_morning_emails() -> dict:
     skipped = 0
     failed = 0
 
+    # Batch: get all user_ids who already played today (single Mongo query)
+    played_user_ids: set[str] = set()
+    async for att in db.daily_attempts.find({"date_key": today}, {"user_id": 1, "_id": 0}):
+        played_user_ids.add(att["user_id"])
+
     # users opted-in (default true if field absent)
     cursor = db.users.find({
         "$or": [{"daily_email_optin": {"$ne": False}}, {"daily_email_optin": {"$exists": False}}],
     })
     async for user in cursor:
-        # Skip if user already played today
-        played = await db.daily_attempts.find_one({
-            "user_id": str(user["_id"]),
-            "date_key": today,
-        })
-        if played:
+        if str(user["_id"]) in played_user_ids:
             skipped += 1
             continue
         ok = await _send_one(user)
