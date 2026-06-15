@@ -54,6 +54,7 @@ export default function ScoreCard({
       cacheBust: true,
       pixelRatio: 2,
       backgroundColor: "#F4F1DE",
+      skipFonts: true, // avoid SecurityError on cross-origin Google Fonts stylesheets
       filter: (node) => !node.dataset?.exclude,
     });
     const res = await fetch(dataUrl);

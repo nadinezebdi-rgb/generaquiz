@@ -9,7 +9,7 @@ from bson import ObjectId
 from fastapi import APIRouter, Depends, HTTPException, Response
 
 from core import (
-    db, logger, FRONTEND_URL, RESEND_API_KEY, SENDER_EMAIL,
+    db, logger, FRONTEND_URL, RESEND_API_KEY, SENDER_EMAIL, WELCOME_CREDITS,
     hash_password, verify_password, create_access_token, create_refresh_token,
     set_auth_cookies, clear_auth_cookies, user_to_public, get_current_user, rate_limit,
     RegisterRequest, LoginRequest, ForgotPasswordRequest, ResetPasswordRequest,
@@ -75,9 +75,18 @@ async def register(body: RegisterRequest, response: Response):
         raise HTTPException(status_code=400, detail="Cet email est déjà utilisé")
     doc = {"email": email, "password_hash": hash_password(body.password),
            "name": body.name.strip(), "role": "user", "plan": "free",
-           "plan_expires_at": None, "created_at": datetime.now(timezone.utc).isoformat()}
+           "plan_expires_at": None, "created_at": datetime.now(timezone.utc).isoformat(),
+           "credits": WELCOME_CREDITS, "xp_total": 0, "auth_provider": "email"}
     result = await db.users.insert_one(doc)
     doc["_id"] = result.inserted_id
+    # Welcome bonus ledger entry (audit trail)
+    await db.credit_ledger.insert_one({
+        "user_id": str(result.inserted_id),
+        "delta": WELCOME_CREDITS,
+        "balance_after": WELCOME_CREDITS,
+        "reason": "welcome_bonus",
+        "created_at": datetime.now(timezone.utc).isoformat(),
+    })
     access = create_access_token(str(result.inserted_id), email)
     refresh = create_refresh_token(str(result.inserted_id))
     set_auth_cookies(response, access, refresh)

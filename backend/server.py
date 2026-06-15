@@ -22,11 +22,13 @@ from seed_data import CATEGORIES, QUESTIONS
 from daily_email import start_daily_scheduler, stop_daily_scheduler, send_morning_emails
 
 from routers import auth as auth_router
+from routers import social_auth as social_auth_router
 from routers import quiz as quiz_router
 from routers import payments as payments_router
 from routers import challenges as challenges_router
 from routers import promo as promo_router
 from routers import daily as daily_router
+from routers import gamification as gamification_router
 
 app = FastAPI(title="Quiz d'Antan API")
 api = APIRouter(prefix="/api")
@@ -45,11 +47,13 @@ async def admin_trigger_daily_email(user: dict = Depends(get_admin_user)):
 
 # Mount routers under /api
 api.include_router(auth_router.router)
+api.include_router(social_auth_router.router)
 api.include_router(quiz_router.router)
 api.include_router(payments_router.router)
 api.include_router(challenges_router.router)
 api.include_router(promo_router.router)
 api.include_router(daily_router.router)
+api.include_router(gamification_router.router)
 app.include_router(api)
 
 # CORS
@@ -72,6 +76,8 @@ app.mount("/api/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
 async def startup():
     # Indexes
     await db.users.create_index("email", unique=True)
+    await db.users.create_index("apple_sub", sparse=True)
+    await db.users.create_index("google_sub", sparse=True)
     await db.categories.create_index("id", unique=True)
     await db.questions.create_index("category_id")
     await db.attempts.create_index([("user_id", 1), ("created_at", -1)])
@@ -83,6 +89,12 @@ async def startup():
     await db.password_reset_tokens.create_index("expires_at", expireAfterSeconds=0)
     await db.daily_attempts.create_index([("user_id", 1), ("date_key", 1)], unique=True)
     await db.daily_attempts.create_index([("date_key", 1), ("score", -1), ("duration_seconds", 1)])
+    # Gamification indexes
+    await db.credit_ledger.create_index([("user_id", 1), ("created_at", -1)])
+    await db.league_memberships.create_index([("user_id", 1), ("week_key", 1)], unique=True)
+    await db.league_memberships.create_index("cohort_id")
+    await db.league_scores.create_index([("user_id", 1), ("week_key", 1)], unique=True)
+    await db.league_scores.create_index([("week_key", 1), ("xp", -1)])
 
     # Seed categories + questions (refresh on every boot)
     for cat in CATEGORIES:
@@ -110,6 +122,15 @@ async def startup():
             {"$set": {"password_hash": hash_password(ADMIN_PASSWORD)}},
         )
         logger.info("Admin password mis à jour")
+
+    # Backfill credits for users registered before the credits system.
+    # Idempotent: only acts on users missing the `credits` field.
+    backfilled = await db.users.update_many(
+        {"credits": {"$exists": False}},
+        {"$set": {"credits": 5, "xp_total": 0}},
+    )
+    if backfilled.modified_count:
+        logger.info(f"Crédits de bienvenue rétroactifs : {backfilled.modified_count} utilisateurs")
 
     # Seed default promo codes (idempotent)
     # Note: les codes "à vie" (FAMILLE2026) ne sont plus seedés par défaut en prod.

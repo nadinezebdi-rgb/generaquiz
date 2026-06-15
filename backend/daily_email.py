@@ -132,7 +132,10 @@ _scheduler: AsyncIOScheduler | None = None
 
 
 def start_daily_scheduler() -> None:
-    """Start the APScheduler job for morning emails (09:00 Europe/Paris)."""
+    """Start the APScheduler jobs:
+    - Daily morning emails at 09:00 Europe/Paris
+    - Weekly league settlement at Monday 00:05 Europe/Paris
+    """
     global _scheduler
     if _scheduler is not None:
         return
@@ -144,8 +147,19 @@ def start_daily_scheduler() -> None:
         replace_existing=True,
         misfire_grace_time=3600,
     )
+    # Lazy import to avoid circular imports at module load
+    from routers.gamification import settle_finished_week  # noqa: WPS433
+    _scheduler.add_job(
+        settle_finished_week,
+        CronTrigger(day_of_week="mon", hour=0, minute=5, timezone="Europe/Paris"),
+        id="leagues_weekly_settle",
+        replace_existing=True,
+        misfire_grace_time=3600,
+    )
     _scheduler.start()
-    logger.info("[daily-email] scheduler démarré — envoi quotidien à 09:00 Europe/Paris")
+    logger.info(
+        "[scheduler] démarré — email quotidien 09:00 Paris + clôture ligues lundi 00:05 Paris"
+    )
 
 
 def stop_daily_scheduler() -> None:

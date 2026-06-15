@@ -166,6 +166,26 @@ async def submit_daily(body: DailySubmit, user: dict = Depends(get_current_user)
         "created_at": datetime.now(timezone.utc).isoformat(),
     }
     await db.daily_attempts.insert_one(doc)
+
+    # Award XP toward the user's weekly league cohort (lazy import to avoid cycles)
+    try:
+        from core import XP_PER_CORRECT_DAILY
+        from routers.gamification import _ensure_league_membership, _week_key
+        xp_gained = body.score * XP_PER_CORRECT_DAILY
+        if xp_gained > 0:
+            await _ensure_league_membership(user_id)
+            await db.league_scores.update_one(
+                {"user_id": user_id, "week_key": _week_key()},
+                {"$inc": {"xp": xp_gained}, "$setOnInsert": {
+                    "user_id": user_id, "week_key": _week_key(),
+                    "user_name": user.get("name") or user.get("email", "").split("@")[0],
+                }},
+                upsert=True,
+            )
+            await db.users.update_one({"_id": user["_id"]}, {"$inc": {"xp_total": xp_gained}})
+    except Exception as e:  # never block the daily submit
+        logger.warning(f"[daily] XP award failed: {e}")
+
     return {
         "ok": True,
         "saved": True,
