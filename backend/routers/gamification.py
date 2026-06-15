@@ -14,6 +14,7 @@ import hashlib
 import re
 from datetime import datetime, timezone, timedelta
 from typing import Optional
+from zoneinfo import ZoneInfo
 
 from bson import ObjectId
 from fastapi import APIRouter, Depends, HTTPException
@@ -30,6 +31,8 @@ from core import (
 
 router = APIRouter(prefix="/gamification", tags=["gamification"])
 
+PARIS_TZ = ZoneInfo("Europe/Paris")
+
 # ---------------------------------------------------------------------------
 # helpers
 # ---------------------------------------------------------------------------
@@ -37,7 +40,8 @@ ALLOWED_SPEND_REASONS = {"hint_5050", "streak_save", "skip_question", "bonus_que
 
 
 def _now_paris() -> datetime:
-    return datetime.now(timezone.utc) + timedelta(hours=1)
+    """Returns a timezone-aware datetime in Europe/Paris (handles CET/CEST DST automatically)."""
+    return datetime.now(PARIS_TZ)
 
 
 def _today_key() -> str:
@@ -52,7 +56,7 @@ def _week_key(when: Optional[datetime] = None) -> str:
 
 
 def _week_bounds(when: Optional[datetime] = None) -> tuple[datetime, datetime]:
-    """Monday 00:00 → next Monday 00:00 in Europe/Paris (returned naive)."""
+    """Monday 00:00 → next Monday 00:00 in Europe/Paris (returned tz-aware)."""
     d = when or _now_paris()
     monday = d - timedelta(days=d.weekday())
     monday = monday.replace(hour=0, minute=0, second=0, microsecond=0)
@@ -292,9 +296,8 @@ async def league_current(user: dict = Depends(get_current_user)):
         row["rank"] = i
 
     week_start, week_end = _week_bounds()
-    now_naive = _now_paris().replace(tzinfo=None)
-    week_end_naive = week_end.replace(tzinfo=None) if week_end.tzinfo else week_end
-    seconds_left = max(0, int((week_end_naive - now_naive).total_seconds()))
+    now = _now_paris()
+    seconds_left = max(0, int((week_end - now).total_seconds()))
 
     my_row = next((r for r in leaderboard if r["is_me"]), None)
     tier_index = LEAGUES.index(tier)
@@ -306,7 +309,7 @@ async def league_current(user: dict = Depends(get_current_user)):
         "previous_tier": LEAGUES[tier_index - 1] if tier_index > 0 else None,
         "cohort_id": cohort_id,
         "week_key": week_key,
-        "week_ends_at": week_end_naive.isoformat() + "+01:00",
+        "week_ends_at": week_end.isoformat(),
         "seconds_until_close": seconds_left,
         "promote_top": LEAGUE_PROMOTE,
         "relegate_bottom": LEAGUE_RELEGATE,

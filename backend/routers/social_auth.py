@@ -111,8 +111,12 @@ async def _upsert_social_user(
 
     # Brand-new account — create + grant welcome credits
     display_name = (name_from_request or name_from_token or (email.split("@")[0] if email else "Joueur")).strip()[:80]
+    placeholder_email = (
+        email.lower() if email
+        else (f"{sub}@apple.local" if provider == "apple" else f"{sub}@google.local")
+    )
     doc = {
-        "email": (email or f"{sub}@apple.local" if provider == "apple" else f"{sub}@google.local").lower(),
+        "email": placeholder_email,
         "password_hash": None,         # social-only, no password
         "name": display_name,
         "role": "user",

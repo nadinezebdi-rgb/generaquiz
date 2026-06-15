@@ -178,3 +178,44 @@ Source data: French senior quiz platform (6 categories, 8 activities, sample que
 - ✅ Tests : 11/11 backend pytest + 100% frontend (3/3 flows E2E)
 - ✅ DB nettoyée : 49 users de test supprimés, reste 2 users légitimes (admin + nadine)
 
+
+## Implemented (2026-02-08, iteration 15) — Backend prêt pour app mobile 📱
+- ✅ **Économie de crédits virtuels** :
+  - **5 crédits offerts à l'inscription** + backfill au boot pour comptes existants
+  - Ledger `credit_ledger` (audit trail complet : welcome, hint, ad_reward, challenge_complete...)
+  - `WELCOME_CREDITS=5`, `HINT_5050_COST=2`, `STREAK_SAVER_COST=10`, `AD_REWARD_DAILY_CAP=5/jour`
+- ✅ **Endpoints gamification mobile** (`/api/gamification/...`) :
+  - `GET /credits/balance` — solde + 20 dernières entrées ledger
+  - `POST /credits/spend` — anti-cheat coût serveur, raisons whitelist (`hint_5050`, `streak_save`, `skip_question`, `bonus_question`)
+  - `POST /credits/earn-ad` — +1 par pub, cap 5/jour avec HTTP 429
+  - `POST /streak-saver` — sauvegarde de série après 1 jour manqué
+  - `POST /challenge/submit` — score persisté + 50 XP base + 1 XP/correct + 1 crédit
+  - `GET /leagues/current` — cohorte hebdo (30 joueurs), tier (bronze→argent→or→diamant), classement temps réel, timer fin semaine
+- ✅ **Ligues hebdomadaires** :
+  - 4 tiers : `bronze` → `argent` → `or` → `diamant`
+  - Cohortes de 30 joueurs assignées de façon déterministe (SHA256 user+week+tier)
+  - **Scheduler hebdo lundi 00:05 Europe/Paris** (APScheduler) : promotion Top 5 / relégation 3 derniers
+  - XP gagné via `/daily/submit` (10 XP × score) et `/challenge/submit` (50 + score)
+- ✅ **Apple Sign-In / Google Sign-In backend** (`/app/backend/routers/social_auth.py`) :
+  - PyJWT 2.13 + cryptography + httpx async + cache JWKS 24h
+  - Vérification stricte : iss / aud / exp (5 min leeway) / azp (Google) / email_verified (Google)
+  - Endpoints `POST /api/auth/apple` et `POST /api/auth/google` (id_token → JWT applicatif)
+  - **Safe by default** : 503 si env vars Apple/Google absentes (jamais d'auth non vérifiée)
+  - Variables à configurer en prod : `APPLE_SERVICES_ID`, `APPLE_BUNDLE_ID`, `GOOGLE_WEB_CLIENT_ID`, `GOOGLE_IOS_CLIENT_ID`, `GOOGLE_ANDROID_CLIENT_ID`
+  - `.env.example` documenté
+- ✅ **Pages légales web (obligatoires Apple / RGPD)** :
+  - `/cgu` Conditions Générales d'Utilisation
+  - `/cgv` Conditions Générales de Vente (Stripe / Apple StoreKit / Google Play)
+  - `/confidentialite` Politique de Confidentialité RGPD (CNIL ready)
+  - Composant `LegalLayout.jsx` réutilisable + liens footer
+- ✅ **DST-aware** : utilisation `zoneinfo("Europe/Paris")` pour basculement CET/CEST automatique (été/hiver)
+- ✅ Tests : 17/17 backend pytest + 100% frontend smoke. Aucune régression.
+
+## Architecture mobile (pour le nouveau projet Mobile Agent)
+Le backend est **prêt à être consommé** par une app React Native :
+- Auth : `/api/auth/{register,login,apple,google}` retournent `access_token` JWT
+- Quiz : `/api/categories`, `/api/categories/{id}/questions`, `/api/attempts`
+- Daily : `/api/daily/{quiz,submit,leaderboard}`
+- Gamification : `/api/gamification/{credits,leagues,challenge}`
+- Paiements : Stripe (web) + RevenueCat à brancher côté mobile (le backend reçoit déjà les webhooks Stripe)
+
