@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { api, BACKEND_URL } from "@/lib/api";
 import Navbar from "@/components/Navbar";
 import { ArrowLeft, ChevronRight, RotateCcw, Volume2, Crown, Check, X } from "lucide-react";
+import ScoreCard from "@/components/ScoreCard";
 
 // Fisher-Yates shuffle helper that returns the new options + the new correct index.
 function shuffleOptions(options, correctIndex) {
@@ -148,10 +149,10 @@ export default function QuizPlayer() {
               className="bg-white border-4 border-navy rounded-[32px] p-6 md:p-10 shadow-warm"
             >
               <div className="flex items-center justify-between mb-5">
-                <span className="text-sm font-bold uppercase tracking-wider text-navy/60">
+                <span className="text-base sm:text-lg font-bold uppercase tracking-wider text-navy/60">
                   Question {idx + 1} / {total}
                 </span>
-                <span className="bg-cream border-2 border-cream-dark text-navy font-bold px-3 py-1 rounded-full text-sm">
+                <span className="bg-cream border-2 border-cream-dark text-navy font-bold px-4 py-2 rounded-full text-base">
                   Score : {score}/{idx + (selected !== null ? 1 : 0)}
                 </span>
               </div>
@@ -164,17 +165,17 @@ export default function QuizPlayer() {
               </div>
 
               <div className="flex items-start gap-4 mb-8">
-                <h2 className="font-display text-2xl md:text-3xl font-extrabold text-navy leading-snug flex-1" data-testid="quiz-question">
+                <h2 className="font-display text-3xl md:text-4xl lg:text-5xl font-extrabold text-navy leading-snug flex-1" data-testid="quiz-question">
                   {q.question}
                 </h2>
                 <button
                   onClick={() => speak(q.question)}
                   data-testid="quiz-speak"
-                  className="shrink-0 p-3 rounded-2xl bg-cream hover:bg-mustard transition border-2 border-cream-dark"
-                  aria-label="Lire à voix haute"
+                  className="shrink-0 p-4 rounded-2xl bg-cream hover:bg-mustard transition border-2 border-cream-dark"
+                  aria-label="Lire la question à voix haute"
                   title="Lire la question à voix haute"
                 >
-                  <Volume2 className="w-6 h-6 text-navy" />
+                  <Volume2 className="w-7 h-7 text-navy" />
                 </button>
               </div>
 
@@ -185,10 +186,10 @@ export default function QuizPlayer() {
                   if (selected !== null) {
                     if (i === shuffled.newCorrectIdx) {
                       cls = "bg-[#3D9970]/15 border-2 border-[#3D9970] text-navy";
-                      icon = <Check className="w-5 h-5 text-[#3D9970]" strokeWidth={3} />;
+                      icon = <Check className="w-6 h-6 text-[#3D9970]" strokeWidth={3} />;
                     } else if (i === selected) {
                       cls = "bg-[#D9534F]/15 border-2 border-[#D9534F] text-navy";
-                      icon = <X className="w-5 h-5 text-[#D9534F]" strokeWidth={3} />;
+                      icon = <X className="w-6 h-6 text-[#D9534F]" strokeWidth={3} />;
                     } else {
                       cls = "bg-cream border-2 border-cream-dark text-navy/50";
                     }
@@ -201,10 +202,10 @@ export default function QuizPlayer() {
                       whileTap={selected === null ? { scale: 0.98 } : {}}
                       onClick={() => onSelect(i)}
                       disabled={selected !== null}
-                      className={`text-left px-6 py-5 rounded-2xl font-semibold text-lg transition min-h-[72px] flex items-center justify-between ${cls}`}
+                      className={`text-left px-6 py-6 rounded-2xl font-semibold text-xl md:text-2xl leading-snug transition min-h-[96px] flex items-center justify-between ${cls}`}
                     >
                       <span>
-                        <span className="font-display text-xl mr-2 text-terracotta">{String.fromCharCode(65 + i)}.</span>
+                        <span className="font-display text-2xl md:text-3xl mr-3 text-terracotta">{String.fromCharCode(65 + i)}.</span>
                         {opt}
                       </span>
                       {icon}
@@ -226,10 +227,10 @@ export default function QuizPlayer() {
                     }`}
                     data-testid="quiz-feedback"
                   >
-                    <p className="font-display text-xl font-bold text-navy mb-1">
-                      {selected === shuffled.newCorrectIdx ? "✅ Bonne réponse !" : "❌ Pas tout à fait..."}
+                    <p className="font-display text-2xl font-bold text-navy mb-2">
+                      {selected === shuffled.newCorrectIdx ? "✅ Bonne réponse !" : "❌ Presque !"}
                     </p>
-                    <p className="text-navy/80">{q.explanation}</p>
+                    <p className="text-navy/80 text-lg leading-relaxed">{q.explanation}</p>
                   </motion.div>
                 )}
               </AnimatePresence>
@@ -239,10 +240,10 @@ export default function QuizPlayer() {
                   <button
                     onClick={onNext}
                     data-testid="quiz-next"
-                    className="inline-flex items-center gap-2 bg-navy hover:bg-navy-dark text-white font-bold text-lg px-8 py-4 rounded-full transition min-h-[56px] shadow-soft"
+                    className="inline-flex items-center gap-2 bg-navy hover:bg-navy-dark text-white font-bold text-xl px-10 py-5 rounded-full transition min-h-[64px] shadow-soft"
                   >
                     {idx + 1 >= total ? "Voir mon score" : "Question suivante"}
-                    <ChevronRight className="w-5 h-5" />
+                    <ChevronRight className="w-6 h-6" />
                   </button>
                 </div>
               )}
@@ -284,7 +285,7 @@ export default function QuizPlayer() {
                   </Link>
                 </div>
               )}
-              <div className="flex flex-wrap gap-3 justify-center">
+              <div className="flex flex-wrap gap-3 justify-center mb-8">
                 <button
                   onClick={restart}
                   data-testid="quiz-restart"
@@ -300,6 +301,18 @@ export default function QuizPlayer() {
                   Autres catégories <ChevronRight className="w-5 h-5" />
                 </Link>
               </div>
+
+              {/* ============ SHAREABLE SCORE CARD ============ */}
+              <ScoreCard
+                title={category.title}
+                subtitle="Catégorie"
+                score={score}
+                total={total}
+                mascotImage={category.mascot_image}
+                mascotName={category.mascot_name}
+                shareText={`🎯 J'ai fait ${score}/${total} en ${category.title} sur GénéraQuiz ! Saurez-vous battre mon score ?`}
+                shareUrl={`${window.location.origin}/quiz-du-jour`}
+              />
             </motion.div>
           )}
         </AnimatePresence>

@@ -36,6 +36,26 @@ if RESEND_API_KEY:
 
 LIFETIME_DAYS = 36500
 
+# ---------------------------------------------------------------------------
+# Gamification economy
+# ---------------------------------------------------------------------------
+WELCOME_CREDITS = 5          # gift on signup
+AD_REWARD_CREDITS = 1        # per rewarded video ad
+AD_REWARD_DAILY_CAP = 5      # max rewarded ads / day
+CHALLENGE_COMPLETE_CREDITS = 1
+HINT_5050_COST = 2
+STREAK_SAVER_COST = 10
+
+# XP rewards (used by ladder/leagues weekly ranking)
+XP_PER_CORRECT_DAILY = 10        # each correct answer in /daily/submit
+XP_PER_CORRECT_CATEGORY = 1      # each correct answer in a category quiz
+XP_CHALLENGE_COMPLETION = 50     # finishing a family challenge
+
+LEAGUES = ["bronze", "argent", "or", "diamant"]
+LEAGUE_COHORT_SIZE = 30
+LEAGUE_PROMOTE = 5  # top 5 promote each Sunday
+LEAGUE_RELEGATE = 3  # bottom 3 relegate
+
 PACKAGES = {
     "premium_monthly": {"amount": 9.99, "currency": "eur", "label": "Premium Mensuel",
                         "description": "Accès illimité aux quiz, activités et défis famille"},
@@ -99,7 +119,10 @@ def user_to_public(u: dict) -> dict:
             "streak_current": int(u.get("streak_current") or 0),
             "streak_best": int(u.get("streak_best") or 0),
             "streak_last_date": u.get("streak_last_date"),
-            "daily_email_optin": u.get("daily_email_optin", True)}
+            "daily_email_optin": u.get("daily_email_optin", True),
+            "credits": int(u.get("credits") or 0),
+            "xp_total": int(u.get("xp_total") or 0),
+            "auth_provider": u.get("auth_provider", "email")}
 
 
 # -------------------- auth dependencies --------------------

@@ -21,17 +21,19 @@ export default function Footer() {
           <h4 className="font-display text-lg font-bold mb-3 text-mustard">Plateforme</h4>
           <ul className="space-y-2 text-cream/80">
             <li><Link to="/" className="hover:text-mustard">Accueil</Link></li>
+            <li><Link to="/quiz-du-jour" className="hover:text-mustard">Quiz du Jour</Link></li>
             <li><Link to="/login" className="hover:text-mustard">Connexion</Link></li>
             <li><Link to="/register" className="hover:text-mustard">Inscription</Link></li>
-            <li><a href="#tarifs" className="hover:text-mustard">Tarifs</a></li>
           </ul>
         </div>
 
         <div>
-          <h4 className="font-display text-lg font-bold mb-3 text-mustard">À propos</h4>
+          <h4 className="font-display text-lg font-bold mb-3 text-mustard">Informations légales</h4>
           <ul className="space-y-2 text-cream/80">
-            <li>contact@generaquiz.fr</li>
-            <li>Paris, France</li>
+            <li><Link to="/cgu" data-testid="footer-cgu" className="hover:text-mustard">Conditions d&apos;utilisation</Link></li>
+            <li><Link to="/cgv" data-testid="footer-cgv" className="hover:text-mustard">Conditions de vente</Link></li>
+            <li><Link to="/confidentialite" data-testid="footer-confidentialite" className="hover:text-mustard">Confidentialité (RGPD)</Link></li>
+            <li><a href="mailto:contact@generaquiz.fr" className="hover:text-mustard">contact@generaquiz.fr</a></li>
           </ul>
         </div>
       </div>

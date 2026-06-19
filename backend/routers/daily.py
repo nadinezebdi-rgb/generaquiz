@@ -74,6 +74,24 @@ async def _pick_daily_questions(date_key: str) -> list[dict]:
     return picked[:DAILY_QUESTION_COUNT]
 
 
+# In-memory cache to avoid hitting MongoDB for every daily-quiz request and every
+# morning email send. Keyed by date_key; auto-evicts on day rollover.
+_daily_cache: dict[str, list[dict]] = {}
+
+
+async def get_daily_questions_cached(date_key: str) -> list[dict]:
+    """Cached wrapper around _pick_daily_questions. Same for everyone on a given day."""
+    cached = _daily_cache.get(date_key)
+    if cached is not None:
+        return cached
+    # On a new day, drop stale entries (small dict but keep it tidy)
+    if _daily_cache:
+        _daily_cache.clear()
+    picked = await _pick_daily_questions(date_key)
+    _daily_cache[date_key] = picked
+    return picked
+
+
 # -------------------- request models --------------------
 class DailySubmit(BaseModel):
     score: int = Field(..., ge=0, le=DAILY_QUESTION_COUNT)
@@ -88,7 +106,7 @@ async def get_daily_quiz(request: Request):
     If user is authenticated, also returns `has_played` (already submitted today).
     """
     date_key = _today_key()
-    questions = await _pick_daily_questions(date_key)
+    questions = await get_daily_questions_cached(date_key)
     user = await _optional_user(request)
     has_played = False
     if user:
@@ -148,6 +166,26 @@ async def submit_daily(body: DailySubmit, user: dict = Depends(get_current_user)
         "created_at": datetime.now(timezone.utc).isoformat(),
     }
     await db.daily_attempts.insert_one(doc)
+
+    # Award XP toward the user's weekly league cohort (lazy import to avoid cycles)
+    try:
+        from core import XP_PER_CORRECT_DAILY
+        from routers.gamification import _ensure_league_membership, _week_key
+        xp_gained = body.score * XP_PER_CORRECT_DAILY
+        if xp_gained > 0:
+            await _ensure_league_membership(user_id)
+            await db.league_scores.update_one(
+                {"user_id": user_id, "week_key": _week_key()},
+                {"$inc": {"xp": xp_gained}, "$setOnInsert": {
+                    "user_id": user_id, "week_key": _week_key(),
+                    "user_name": user.get("name") or user.get("email", "").split("@")[0],
+                }},
+                upsert=True,
+            )
+            await db.users.update_one({"_id": user["_id"]}, {"$inc": {"xp_total": xp_gained}})
+    except Exception as e:  # never block the daily submit
+        logger.warning(f"[daily] XP award failed: {e}")
+
     return {
         "ok": True,
         "saved": True,

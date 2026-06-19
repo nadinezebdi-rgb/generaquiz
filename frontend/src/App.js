@@ -19,6 +19,9 @@ import Account from "@/pages/Account";
 import ForgotPassword from "@/pages/ForgotPassword";
 import ResetPassword from "@/pages/ResetPassword";
 import DailyQuiz from "@/pages/DailyQuiz";
+import CGU from "@/pages/legal/CGU";
+import CGV from "@/pages/legal/CGV";
+import Confidentialite from "@/pages/legal/Confidentialite";
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();
@@ -48,6 +51,9 @@ export default function App() {
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/quiz-du-jour" element={<DailyQuiz />} />
+          <Route path="/cgu" element={<CGU />} />
+          <Route path="/cgv" element={<CGV />} />
+          <Route path="/confidentialite" element={<Confidentialite />} />
           <Route
             path="/app/account"
             element={
