@@ -32,6 +32,7 @@ export default function Navbar({ variant = "landing" }) {
               <Link to="/app/account" data-testid="nav-account" className="px-4 py-2 text-lg font-semibold text-navy hover:text-terracotta transition">Mon compte</Link>
               {user.role === "admin" && (
                 <Link to="/app/admin/promo" data-testid="nav-admin-promo" className="px-4 py-2 text-lg font-semibold text-bordeaux hover:text-terracotta transition">Promos</Link>
+            <Link to="/app/admin/users" data-testid="nav-admin-users" className="px-4 py-2 text-lg font-semibold text-bordeaux hover:text-terracotta transition">Inscrits</Link>
               )}
               <button
                 data-testid="nav-logout"
