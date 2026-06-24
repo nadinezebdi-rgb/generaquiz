@@ -9,24 +9,25 @@ import hashlib
 import random
 from datetime import datetime, timezone, timedelta
 from typing import Optional
+from zoneinfo import ZoneInfo
 
 import jwt
 from bson import ObjectId
 from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel, Field
 
-from core import db, get_current_user, JWT_SECRET, JWT_ALG
+from core import db, get_current_user, JWT_SECRET, JWT_ALG, logger
 
 router = APIRouter(tags=["daily"])
 
 DAILY_QUESTION_COUNT = 5
+PARIS_TZ = ZoneInfo("Europe/Paris")
 
 
 # -------------------- helpers --------------------
 def _today_key() -> str:
-    """YYYY-MM-DD in Europe/Paris (UTC+1 simplified — no DST handling needed for daily granularity)."""
-    now = datetime.now(timezone.utc) + timedelta(hours=1)
-    return now.strftime("%Y-%m-%d")
+    """YYYY-MM-DD in Europe/Paris (DST-aware via zoneinfo)."""
+    return datetime.now(PARIS_TZ).strftime("%Y-%m-%d")
 
 
 async def _optional_user(request: Request) -> Optional[dict]:
@@ -138,7 +139,7 @@ async def submit_daily(body: DailySubmit, user: dict = Depends(get_current_user)
     current = int(user.get("streak_current") or 0)
     best = int(user.get("streak_best") or 0)
     today = date_key
-    yesterday = (datetime.now(timezone.utc) + timedelta(hours=1) - timedelta(days=1)).strftime("%Y-%m-%d")
+    yesterday = (datetime.now(PARIS_TZ) - timedelta(days=1)).strftime("%Y-%m-%d")
     if last_date == yesterday:
         current += 1                       # streak continues
     elif last_date == today:

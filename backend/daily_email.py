@@ -12,6 +12,7 @@ from __future__ import annotations
 import asyncio
 from datetime import datetime, timezone, timedelta
 from typing import Iterable
+from zoneinfo import ZoneInfo
 
 import resend
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
@@ -19,11 +20,17 @@ from apscheduler.triggers.cron import CronTrigger
 
 from core import db, logger, FRONTEND_URL, RESEND_API_KEY, SENDER_EMAIL
 
+PARIS_TZ = ZoneInfo("Europe/Paris")
+
+# Resend "test mode" sandbox = clé non vérifiée, seul l'email du propriétaire
+# de compte peut recevoir des messages depuis onboarding@resend.dev. On détecte
+# cela pour adapter le log et éviter de marquer un envoi comme échoué à tort.
+RESEND_TEST_MODE = "onboarding@resend.dev" in SENDER_EMAIL
+
 
 def _today_key() -> str:
-    """Same convention as routers.daily — Europe/Paris (UTC+1, no DST handling)."""
-    now = datetime.now(timezone.utc) + timedelta(hours=1)
-    return now.strftime("%Y-%m-%d")
+    """Europe/Paris calendar day, DST-aware (CET/CEST)."""
+    return datetime.now(PARIS_TZ).strftime("%Y-%m-%d")
 
 
 def _build_morning_email_html(name: str, streak: int, play_url: str) -> str:

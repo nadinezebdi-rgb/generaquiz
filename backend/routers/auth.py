@@ -55,6 +55,15 @@ async def _send_reset_email(to_email: str, reset_link: str) -> bool:
     if not RESEND_API_KEY:
         logger.warning("RESEND_API_KEY not set — email not sent")
         return False
+    # Détection du mode test/sandbox Resend : si l'expéditeur est encore
+    # onboarding@resend.dev, seul l'email propriétaire du compte Resend pourra
+    # recevoir le message. On log un avertissement explicite pour aider au debug.
+    if "onboarding@resend.dev" in SENDER_EMAIL:
+        logger.warning(
+            "Resend en mode sandbox (SENDER_EMAIL=onboarding@resend.dev) — "
+            "seul l'email propriétaire du compte Resend recevra le mail. "
+            "Vérifier le domaine generaquiz.fr sur resend.com/domains."
+        )
     params = {"from": SENDER_EMAIL, "to": [to_email],
               "subject": "Réinitialisation de votre mot de passe — GénéraQuiz",
               "html": _build_reset_email_html(reset_link)}

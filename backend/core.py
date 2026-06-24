@@ -29,7 +29,17 @@ ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "Admin2026!")
 FRONTEND_URL = os.environ.get("FRONTEND_URL", "http://localhost:3000")
 STRIPE_API_KEY = os.environ.get("STRIPE_API_KEY", "sk_test_emergent")
 RESEND_API_KEY = os.environ.get("RESEND_API_KEY", "")
-SENDER_EMAIL = os.environ.get("SENDER_EMAIL", "onboarding@resend.dev")
+SENDER_EMAIL = os.environ.get("SENDER_EMAIL", "GénéraQuiz <contact@generaquiz.fr>")
+
+# Garde-fou : si la variable d'environnement n'utilise pas le domaine vérifié,
+# on bascule automatiquement sur contact@generaquiz.fr pour éviter le rejet Resend.
+# (logger n'est pas encore initialisé ici — on utilise logging.warning directement)
+if "@generaquiz.fr" not in SENDER_EMAIL:
+    logging.warning(
+        f"SENDER_EMAIL='{SENDER_EMAIL}' n'utilise pas le domaine vérifié generaquiz.fr "
+        f"— bascule sur contact@generaquiz.fr pour éviter le blocage Resend"
+    )
+    SENDER_EMAIL = "GénéraQuiz <contact@generaquiz.fr>"
 
 if RESEND_API_KEY:
     resend.api_key = RESEND_API_KEY
