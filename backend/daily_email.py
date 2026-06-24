@@ -12,6 +12,7 @@ from __future__ import annotations
 import asyncio
 from datetime import datetime, timezone, timedelta
 from typing import Iterable
+from zoneinfo import ZoneInfo
 
 import resend
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
@@ -21,8 +22,8 @@ from core import db, logger, FRONTEND_URL, RESEND_API_KEY, SENDER_EMAIL
 
 
 def _today_key() -> str:
-    """Same convention as routers.daily — Europe/Paris (UTC+1, no DST handling)."""
-    now = datetime.now(timezone.utc) + timedelta(hours=1)
+    """Date du jour en Europe/Paris (gère automatiquement l'heure d'été/hiver)."""
+    now = datetime.now(ZoneInfo("Europe/Paris"))
     return now.strftime("%Y-%m-%d")
 
 
@@ -84,7 +85,11 @@ async def _send_one(user: dict) -> bool:
         })
         return True
     except Exception as e:
-        logger.warning(f"[daily-email] échec pour {user.get('email')}: {e}")
+        msg = str(e)
+        if "testing" in msg.lower() or "verify a domain" in msg.lower():
+            logger.warning(f"[daily-email] {user.get('email')} non envoyé — Resend en mode test : vérifiez le domaine SENDER_EMAIL sur resend.com/domains")
+        else:
+            logger.warning(f"[daily-email] échec pour {user.get('email')}: {e}")
         return False
 
 
