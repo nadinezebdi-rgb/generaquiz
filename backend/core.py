@@ -30,6 +30,9 @@ FRONTEND_URL = os.environ.get("FRONTEND_URL", "http://localhost:3000")
 STRIPE_API_KEY = os.environ.get("STRIPE_API_KEY", "sk_test_emergent")
 RESEND_API_KEY = os.environ.get("RESEND_API_KEY", "")
 SENDER_EMAIL = os.environ.get("SENDER_EMAIL", "GénéraQuiz <contact@generaquiz.fr>")
+if "@generaquiz.fr" not in SENDER_EMAIL:
+    logging.warning(f"SENDER_EMAIL='{SENDER_EMAIL}' n'utilise pas le domaine vérifié generaquiz.fr — bascule sur contact@generaquiz.fr pour éviter le blocage Resend")
+    SENDER_EMAIL = "GénéraQuiz <contact@generaquiz.fr>"
 
 if RESEND_API_KEY:
     resend.api_key = RESEND_API_KEY
