@@ -64,7 +64,11 @@ async def _send_reset_email(to_email: str, reset_link: str) -> bool:
         logger.info(f"Reset email sent to {to_email} — id={eid}")
         return True
     except Exception as e:
-        logger.error(f"Failed to send reset email to {to_email}: {e}")
+        msg = str(e)
+        if "testing" in msg.lower() or "verify a domain" in msg.lower():
+            logger.error(f"Reset email non envoyé à {to_email} — Resend en mode test : domaine SENDER_EMAIL non vérifié (resend.com/domains)")
+        else:
+            logger.error(f"Failed to send reset email to {to_email}: {e}")
         return False
 
 
