@@ -156,6 +156,7 @@ def start_daily_scheduler() -> None:
     )
     # Lazy import to avoid circular imports at module load
     from routers.gamification import settle_finished_week  # noqa: WPS433
+    from mistral_client import regenerate_all as _mistral_regen  # noqa: WPS433
     _scheduler.add_job(
         settle_finished_week,
         CronTrigger(day_of_week="mon", hour=0, minute=5, timezone="Europe/Paris"),
@@ -163,9 +164,16 @@ def start_daily_scheduler() -> None:
         replace_existing=True,
         misfire_grace_time=3600,
     )
+    _scheduler.add_job(
+        _mistral_regen,
+        CronTrigger(hour=3, minute=0, timezone="Europe/Paris"),
+        id="mistral_regenerate_all",
+        replace_existing=True,
+        misfire_grace_time=3600,
+    )
     _scheduler.start()
     logger.info(
-        "[scheduler] démarré — email quotidien 09:00 Paris + clôture ligues lundi 00:05 Paris"
+        "[scheduler] démarré — email quotidien 09:00 Paris + régénération Mistral 03:00 Paris + clôture ligues lundi 00:05 Paris"
     )
 
 

@@ -219,3 +219,26 @@ Le backend est **prêt à être consommé** par une app React Native :
 - Gamification : `/api/gamification/{credits,leagues,challenge}`
 - Paiements : Stripe (web) + RevenueCat à brancher côté mobile (le backend reçoit déjà les webhooks Stripe)
 
+
+## Implemented (2026-02-15, iteration 16) — 🤖 Toutes les questions générées par Mistral
+- ✅ **Intégration Mistral AI** (SDK officiel `mistralai==1.5.0`) avec modèle `mistral-small-latest`
+- ✅ **Régénération nocturne automatique** : APScheduler à **03:00 Europe/Paris** chaque nuit régénère **les 800 questions** (100/catégorie × 8 catégories)
+- ✅ **Endpoint admin manuel** : `POST /api/admin/mistral/regenerate` (admin-only) lance la régénération en background (~5 min)
+- ✅ **Architecture zero-downtime** :
+  - Mistral génère TOUTES les questions en MongoDB (pool persistant)
+  - Les joueurs jouent depuis MongoDB → **latence 0 ms** au quiz
+  - Si une catégorie échoue côté Mistral → l'ancien pool est conservé (rollback automatique)
+- ✅ **Seed initial conservé** : si MongoDB est vide au boot (premier déploiement / flush), les 240 questions seed servent de fallback en attendant la première régénération nocturne
+- ✅ **Format JSON strict** : Mistral retourne du JSON pur via `response_format={"type": "json_object"}`, parsing robuste avec retry (3 tentatives par batch de 25 questions)
+- ✅ **Coût estimé** : ~0,50 €/mois pour 24 000 générations/mois (8 cat × 100 q × 30 nuits)
+- ✅ **Tests qualité** : 800/800 questions générées avec succès le 24/06, qualité factuelle excellente (1-2 % d'ambiguïtés possibles — bouton "Signaler" à ajouter en v2)
+
+## Variables d'environnement à configurer en production
+- `MISTRAL_API_KEY` — clé API Mistral (obtenue sur console.mistral.ai)
+- `MISTRAL_MODEL` — défaut `mistral-small-latest` (recommandé : rapide + économique)
+
+## Backlog (P2)
+- Bouton "Signaler cette question" sur le frontend pour collecter les questions ambiguës générées
+- Endpoint admin pour valider/supprimer manuellement les questions signalées
+- Métriques mensuelles Mistral (latence moyenne, taux de retry, coût exact)
+

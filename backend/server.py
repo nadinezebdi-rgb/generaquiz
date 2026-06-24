@@ -9,6 +9,7 @@ Modular structure:
 - routers/promo.py: promo codes (user redeem + admin CRUD)
 """
 from datetime import datetime, timezone, timedelta
+import asyncio
 
 from fastapi import APIRouter, Depends, FastAPI
 from fastapi.staticfiles import StaticFiles
@@ -20,6 +21,7 @@ from core import (
 )
 from seed_data import CATEGORIES, QUESTIONS
 from daily_email import start_daily_scheduler, stop_daily_scheduler, send_morning_emails
+from mistral_client import regenerate_all as mistral_regenerate_all
 
 from routers import auth as auth_router
 from routers import social_auth as social_auth_router
@@ -43,6 +45,21 @@ async def root():
 async def admin_trigger_daily_email(user: dict = Depends(get_admin_user)):
     """Admin-only manual trigger for the morning email (used for testing and recovery)."""
     return await send_morning_emails()
+
+
+@api.post("/admin/mistral/regenerate")
+async def admin_mistral_regenerate(user: dict = Depends(get_admin_user)):
+    """Admin-only manual trigger for the full Mistral regeneration of all 800 questions.
+
+    The job is kicked off as a background task and returns immediately
+    (full regeneration takes ~3-5 minutes — too long for an HTTP request).
+    Watch the server logs (`[mistral] ...`) to track progress.
+    """
+    asyncio.create_task(mistral_regenerate_all())
+    return {
+        "ok": True,
+        "message": "Régénération Mistral lancée en arrière-plan (~3-5 min). Consultez les logs serveur.",
+    }
 
 
 # Mount routers under /api
@@ -96,12 +113,20 @@ async def startup():
     await db.league_scores.create_index([("user_id", 1), ("week_key", 1)], unique=True)
     await db.league_scores.create_index([("week_key", 1), ("xp", -1)])
 
-    # Seed categories + questions (refresh on every boot)
+    # Seed categories (always refresh metadata: title/description/mascot/count)
     for cat in CATEGORIES:
         await db.categories.update_one({"id": cat["id"]}, {"$set": cat}, upsert=True)
-    await db.questions.delete_many({})
-    if QUESTIONS:
-        await db.questions.insert_many([{**q} for q in QUESTIONS])
+
+    # Seed questions ONLY if the pool is empty (first boot or after manual flush).
+    # Mistral regenerates the full pool nightly at 03:00 Paris — we don't want
+    # to overwrite those fresh questions on every container restart.
+    existing_q = await db.questions.estimated_document_count()
+    if existing_q == 0:
+        if QUESTIONS:
+            await db.questions.insert_many([{**q} for q in QUESTIONS])
+            logger.info(f"Pool de questions vide : {len(QUESTIONS)} questions seed insérées")
+    else:
+        logger.info(f"{existing_q} questions déjà en DB — seed sauté (Mistral gère la régénération)")
 
     # Seed admin
     existing = await db.users.find_one({"email": ADMIN_EMAIL})
