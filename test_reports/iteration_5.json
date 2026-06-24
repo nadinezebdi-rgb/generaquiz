@@ -1,0 +1,27 @@
+{
+  "summary": "Iteration 5: content expansion 100→240 questions (30 per category × 8) + backend MongoDB $sample randomization. Updated EXPECTED_COUNTS in /app/backend/tests/backend_test.py to all 30s, fixed test_premium_user_gets_up_to_20 (10→20 expected), added 3 new randomization tests (free 5-of-30, premium 20-of-30, full-pool coverage via aggregation), added test_challenge_snapshot_randomized, and made test_participate_perfect_score robust against random subsets (it now collects all 30 correct_indexes across multiple calls before mapping). Pytest result: 54/54 PASSED (was 50/50). Frontend: visiting /app/quiz/chansons four times in a row produced 4 DIFFERENT first questions — true randomization confirmed end-to-end. UI shows 'Question 1 / 20' for admin (premium). All 8 category cards still render on Landing.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {"ui_bugs": [], "integration_issues": [], "design_issues": []},
+  "test_report_links": [
+    "/app/backend/tests/backend_test.py",
+    "/app/backend/tests/test_promo.py",
+    "/app/test_reports/pytest/pytest_results.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "Backend get_questions() correctly uses $sample aggregation: confirmed truly random per call by collecting 5 free-tier sets (4-5 distinct) and 5 premium-tier sets (4-5 distinct) for /api/categories/chansons/questions.",
+    "Full-pool coverage test (test_total_pool_30_per_category) verifies that across 15 successive premium calls per category, exactly 30 unique question IDs are observed for each of the 8 categories — confirming the seed loaded all 240 questions and no duplicate IDs.",
+    "Challenge snapshot ($sample on creation) is also random: 3 successive POST /api/challenges with category_id=chansons num_questions=10 produced at least 2 distinct snapshots (verified by test_challenge_snapshot_randomized).",
+    "Frontend QuizPlayer.jsx fetches /api/categories/{id}/questions on mount, so each navigation to /app/quiz/{id} triggers a fresh $sample — verified visually with 4 different first questions on 4 successive visits to /app/quiz/chansons as admin.",
+    "Note (pre-existing, content-quality only): q40_3 (Indochine 'Aventurier' — actually correct as worded in current seed) and option text mismatches reported in iteration_4 are unchanged and not blockers.",
+    "Suggestion: get_questions() in server.py could benefit from an LRU cache around the categories metadata lookup (small win); not required."
+  ],
+  "updated_files": ["/app/backend/tests/backend_test.py"],
+  "success_rate": {"backend": "100% (54/54)", "frontend": "100% (Landing 8 cards + premium quiz shows 20 questions + 4/4 distinct first questions across 4 successive visits = randomization confirmed)"},
+  "test_credentials": "admin@quizdantan.fr / Admin2026!",
+  "seed_data_creation": "Each pytest run still registers ~4 throw-away free users (qa.test.*, qa.reg.*, qa.dup.*) and creates several challenges (chansons 4q, culture-40-ans 10q, cinema 4q, plus 3 chansons 10q for snapshot-randomization test). No cleanup needed; data isolated by timestamped emails.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "EXPECTED_COUNTS is now all 30s. Pool-coverage test asserts exactly 30 unique IDs per category — if you grow the pool again past 30, update both EXPECTED_COUNTS and the assertion in test_total_pool_30_per_category. The test_participate_perfect_score test now iterates up to 20 calls of /api/categories/cinema/questions to build a complete answer map; this is required because $sample only returns a 20-of-30 subset per call. If $sample is ever replaced with a deterministic strategy, this loop can be simplified.",
+  "rca of the issue": "N/A — feature works end-to-end."
+}

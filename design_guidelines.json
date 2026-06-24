@@ -1,0 +1,123 @@
+{
+  "theme": "light",
+  "archetype": "Organic & Earthy (French Nostalgia)",
+  "global_rules": {
+    "readability": "CRITICAL: Target audience is 60+ seniors. Minimum text size is text-lg. All buttons must have large click targets (min-h-[56px] or h-14). High contrast text is mandatory.",
+    "border_radius": "rounded-xl for cards, rounded-full for primary buttons",
+    "shadows": "shadow-sm for resting, shadow-md for hover. Do not use complex layered shadows that might confuse the elderly.",
+    "borders": "Use clear 2px borders (border-navy or border-terracotta) on cards and inputs to define boundaries clearly for aging eyes."
+  },
+  "typography": {
+    "font_family_headings": "Playfair Display, serif",
+    "font_family_body": "Work Sans, sans-serif",
+    "sizes": {
+      "h1": "text-4xl sm:text-5xl tracking-tight font-bold text-navy",
+      "h2": "text-3xl sm:text-4xl tracking-tight font-bold text-navy",
+      "h3": "text-2xl sm:text-3xl font-semibold text-navy",
+      "body": "text-lg sm:text-xl text-gray-800 leading-relaxed",
+      "small": "text-base font-medium text-gray-700"
+    }
+  },
+  "colors": {
+    "background": {
+      "main": "#FDFBF7",
+      "card": "#FFFFFF",
+      "accent": "#F4F1DE"
+    },
+    "text": {
+      "primary": "#1A2530",
+      "secondary": "#334155",
+      "light": "#FFFFFF"
+    },
+    "brand": {
+      "terracotta": "#E07A5F",
+      "navy": "#1E3A5F",
+      "mustard": "#F2CC8F",
+      "bordeaux": "#722F37",
+      "cream": "#F4F1DE"
+    },
+    "states": {
+      "success": "#3D9970",
+      "error": "#D9534F",
+      "focus_ring": "focus:ring-4 focus:ring-terracotta/50 focus:outline-none"
+    }
+  },
+  "components": {
+    "button": {
+      "primary": "bg-terracotta text-white font-bold py-4 px-8 rounded-full hover:bg-terracotta/90 transition-colors text-xl min-h-[56px] flex items-center justify-center border-2 border-transparent",
+      "secondary": "bg-white text-navy border-2 border-navy font-bold py-4 px-8 rounded-full hover:bg-navy/5 transition-colors text-xl min-h-[56px] flex items-center justify-center",
+      "accent": "bg-mustard text-navy font-bold py-4 px-8 rounded-full hover:bg-mustard/90 transition-colors text-xl min-h-[56px]"
+    },
+    "card": {
+      "base": "bg-white rounded-2xl p-6 md:p-8 border-2 border-cream shadow-sm hover:shadow-md transition-shadow relative overflow-hidden",
+      "interactive": "cursor-pointer hover:-translate-y-1 transition-transform border-2 hover:border-terracotta"
+    },
+    "input": {
+      "base": "w-full text-lg p-4 rounded-xl border-2 border-gray-300 focus:border-navy focus:ring-0 bg-white min-h-[56px]"
+    },
+    "navigation": {
+      "header": "sticky top-0 z-50 bg-[#FDFBF7]/95 backdrop-blur-md border-b-2 border-cream py-4"
+    },
+    "badge": "px-4 py-2 rounded-full text-base font-bold bg-cream text-navy"
+  },
+  "layouts": {
+    "landing": {
+      "hero": "grid grid-cols-1 lg:grid-cols-2 gap-12 items-center min-h-[70vh] py-16 px-6 lg:px-12 bg-cream",
+      "categories_grid": "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 py-16 px-6 lg:px-12 max-w-7xl mx-auto",
+      "activities": "py-20 px-6 lg:px-12 bg-white",
+      "pricing": "py-20 px-6 lg:px-12 bg-[#FDFBF7]"
+    },
+    "dashboard": {
+      "container": "max-w-7xl mx-auto px-4 py-12",
+      "grid": "grid grid-cols-1 lg:grid-cols-4 gap-8",
+      "sidebar": "lg:col-span-1 space-y-6",
+      "main_content": "lg:col-span-3 space-y-8"
+    },
+    "quiz_player": {
+      "container": "max-w-4xl mx-auto px-4 py-12 flex flex-col items-center",
+      "header": "w-full flex justify-between items-center mb-8",
+      "question_card": "w-full bg-white rounded-3xl p-8 md:p-12 border-4 border-navy shadow-lg",
+      "options_grid": "grid grid-cols-1 sm:grid-cols-2 gap-6 mt-10",
+      "option_button": "w-full p-6 text-xl text-left border-2 border-gray-200 rounded-2xl hover:border-terracotta hover:bg-terracotta/10 transition-all font-medium min-h-[80px] flex items-center"
+    }
+  },
+  "media": {
+    "images": [
+      {
+        "category": "hero",
+        "description": "Happy senior using a tablet",
+        "url": "https://images.unsplash.com/photo-1758691030790-efe4c90a1ca6?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA2MjJ8MHwxfHNlYXJjaHwxfHxzZW5pb3IlMjB1c2luZyUyMHRhYmxldCUyMGhhcHB5fGVufDB8fHx8MTc4MDkzMTI4OXww&ixlib=rb-4.1.0&q=85"
+      },
+      {
+        "category": "category_chansons",
+        "description": "Retro gramophone",
+        "url": "https://images.unsplash.com/photo-1635264349913-219c2229483b?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjAzOTB8MHwxfHNlYXJjaHwxfHxyZXRybyUyMGdyYW1vcGhvbmUlMjB2aW50YWdlfGVufDB8fHx8MTc4MDkzMTI5MHww&ixlib=rb-4.1.0&q=85"
+      },
+      {
+        "category": "category_cuisine",
+        "description": "French chef cooking",
+        "url": "https://images.unsplash.com/photo-1577219491135-ce391730fb2c?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA1NjZ8MHwxfHNlYXJjaHwyfHxmcmVuY2glMjBjaGVmJTIwY29va2luZ3xlbnwwfHx8fDE3ODA5MzEyODl8MA&ixlib=rb-4.1.0&q=85"
+      },
+      {
+        "category": "category_cinema",
+        "description": "Vintage French cinema sign",
+        "url": "https://images.unsplash.com/photo-1674473191471-126ceaf72e95?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NTYxOTB8MHwxfHNlYXJjaHwxfHx2aW50YWdlJTIwZnJlbmNoJTIwY2luZW1hfGVufDB8fHx8MTc4MDkzMTI4OXww&ixlib=rb-4.1.0&q=85"
+      },
+      {
+        "category": "background_pattern",
+        "description": "Vintage retro floral pattern",
+        "url": "https://images.unsplash.com/photo-1690268798033-ae52e4e57db6?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjAzNzl8MHwxfHNlYXJjaHwyfHx2aW50YWdlJTIwcmV0cm8lMjBwYXR0ZXJuJTIwYmFja2dyb3VuZHxlbnwwfHx8fDE3ODA5MzEyODl8MA&ixlib=rb-4.1.0&q=85"
+      }
+    ],
+    "mascots_instructions": "The problem asks for 6 caricature cartoon mascots (e.g., Old French Rocker, Chef with mustache). Use large scale (64px+) iconoir-react or lucide-react icons in a thick circular badge with brand colors as strong symbolic fallbacks if explicit caricature SVGs cannot be sourced. Alternatively, use the provided Unsplash images as rich hero backgrounds inside the category cards."
+  },
+  "instructions_to_main_agent": [
+    "INSTALL GOOGLE FONTS: Ensure Playfair Display and Work Sans are added to index.css or index.html.",
+    "TESTING/ATTRIBUTES: You MUST add descriptive `data-testid` attributes to all buttons, navigation links, form inputs, and quiz options (e.g. `data-testid=\"quiz-option-button-1\"`).",
+    "ACCESSIBILITY (CRITICAL): This UI is for French Seniors (60+). Base text MUST be text-lg or text-xl. Never use light grey text on white. Use high-contrast #1A2530 for text.",
+    "CLICK TARGETS: Ensure all clickable items (buttons, quiz options, nav links) have a minimum height of 56px (`min-h-[56px]`) or large padding (`p-4`, `p-6`) for easy tapping on tablets.",
+    "UI COMPONENTS: Use Shadcn/UI for foundational logic but heavily customize the classes. Override default Shadcn paddings and text sizes to be much larger. Remove the default 'Vercel' subtle aesthetics; we need bold 2px borders (border-navy, border-terracotta) to define boundaries.",
+    "AESTHETIC: Avoid generic purple/teal gradients. Stick to the provided French Vintage palette (Terracotta, Navy, Cream, Mustard, Bordeaux). The feel should be warm, nostalgic, and premium, not childish.",
+    "ICONS: Use 'lucide-react' with a minimum size of 32px (w-8 h-8) and a stroke width of 2 for maximum clarity."
+  ]
+}

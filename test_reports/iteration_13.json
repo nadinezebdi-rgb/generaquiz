@@ -1,0 +1,34 @@
+{
+  "summary": "Iteration 13 — Streaks + morning email Resend. Backend tests: 11/11 passing. Frontend UI flows fully validated end-to-end (Account toggle + persistence, Dashboard streak badge, DailyQuiz result streak block).",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_iteration13_streaks.py",
+    "/app/test_reports/pytest/pytest_iter13.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "daily_email.py uses 'asyncio.to_thread(resend.Emails.send, ...)' inside a loop with 0.25s pacing — OK for current scale but consider batching when users grow.",
+    "Both daily.py and daily_email.py have their own _today_key() with UTC+1 simplification (no DST). Extract into core.py to avoid drift in spring/autumn DST transitions.",
+    "POST /api/admin/daily-email/trigger has no rate-limit and triggers real email send synchronously in the request thread — consider running as background task (BackgroundTasks) so admin doesn't wait for all sends.",
+    "PATCH /auth/preferences/daily-email accepts a raw dict body — should use a Pydantic model (e.g. DailyEmailPrefRequest) for input validation.",
+    "core.user_to_public returns streak_last_date as None or string — frontend handles both, but typing this as Optional[str] in a Pydantic response model would document the API better."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_iteration13_streaks.py (new)"
+  ],
+  "success_rate": {"backend": "100% (11/11)", "frontend": "100% (3/3 flows)"},
+  "test_credentials": "Admin: admin@generaquiz.fr / Admin2026! ; new test users created lowercased via /api/auth/register",
+  "seed_data_creation": "Test users registered with email prefix 'test_streak_*' / 'test_ui_*'. Cleaned up via DELETE /api/auth/account. Admin daily_attempt seeded to verify skipped>=1 in trigger endpoint.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Iteration 13 covers Streaks (streak_current/streak_best/streak_last_date) and daily_email_optin. Backend logic in /app/backend/routers/daily.py (submit_daily) handles 3 streak cases: first play -> 1, last=yesterday -> +1, last older -> reset to 1 (best preserved). Admin trigger at /api/admin/daily-email/trigger returns {sent, skipped, failed, date}. Frontend testids confirmed: account-streak-card, account-email-optin-toggle, account-pref-msg, dashboard-streak-badge, daily-streak-block, dashboard-daily-widget. Server lowercases emails on register/login — when seeding MongoDB streak state by email, use lowercase.",
+  "rca_of_the_issue": "Initial pytest run had 2 failures because test fixtures used 'TEST_streak_*@example.com' but the backend lowercases all emails in /auth/register before insert. The MongoDB update_one({email: 'TEST_...'}) didn't match the persisted lowercase doc, so the seeded streak fields were never applied. Fixed by using all-lowercase test emails. All 11 tests pass after fix."
+}

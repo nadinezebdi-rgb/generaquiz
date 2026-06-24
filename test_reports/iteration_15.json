@@ -1,0 +1,34 @@
+{
+  "summary": "Iteration 15 — Gamification backend (credits, leagues, challenge, streak-saver) + Apple/Google Sign-In 503 guards + frontend legal pages (/cgu, /cgv, /confidentialite) and footer testids. 17/17 pytest cases pass; frontend smoke (login admin → dashboard → daily) succeeds.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_iteration15_gamification.py",
+    "/app/test_reports/pytest/pytest_iter15.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "core.py: ADMIN_EMAIL default still points to 'admin@quizdantan.fr' (pre-rebrand). It is overridden by .env in this env, but the default is misleading after rebrand — consider switching default to 'admin@generaquiz.fr'.",
+    "gamification.py _now_paris() uses a fixed UTC+1 offset; this will be incorrect during CEST summer time (UTC+2). Recommend using zoneinfo('Europe/Paris'). Same caveat for daily_email scheduler.",
+    "gamification.py _credits_change(): for delta >= 0 there is no insufficiency check (correct), but for negative deltas if user doc not found at all (rare race) the 400 message is 'Crédits insuffisants' which would be misleading — acceptable trade-off.",
+    "social_auth.py line 115: dictionary literal uses Python operator precedence — `(email or f\"{sub}@apple.local\" if provider == \"apple\" else f\"{sub}@google.local\")` parses as `email or (apple|google)` ternary inside the `or` — when email is None and provider is google, it falls back to '{sub}@google.local' correctly but the expression is brittle/hard to read. Recommend explicit parentheses.",
+    "social_auth.py: Google verification missing `nonce` validation when client passes it; not blocking but best-practice for replay protection on mobile."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_iteration15_gamification.py (new)"
+  ],
+  "success_rate": {"backend": "100% (17/17)", "frontend": "100% smoke"},
+  "test_credentials": "admin@generaquiz.fr / Admin2026! (from /app/memory/test_credentials.md). New users created on-the-fly via /api/auth/register for credits/league flows.",
+  "seed_data_creation": "Each test that needs an isolated user calls _register_unique() (timestamp-based emails). Insufficient-credits test directly sets credits=0 via Mongo. earn-ad test clears prior ad_reward ledger rows for the freshly-registered user before looping (already isolated by unique email, but defensive).",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "All requested features verified end-to-end: (1) register → credits=5 + ledger 'welcome_bonus' entry; (2) admin login → credits>=5 (backfill OK); (3) GET /credits/balance shape; (4) spend 2 hint_5050 → balance 3 + recent[0]=hint_5050; (5) spend amount=5/reason=hint_5050 → 400 'Indice 50/50 coûte 2 crédits'; (6) reason='foo' → 400 'Raison invalide'; (7) credits=0 then spend → 400 'Crédits insuffisants'; (8) earn-ad ×5 OK, 6th → 429 'Limite quotidienne'; (9) streak-saver with no streak → 400 'Aucune série à sauver'; (10) challenge cinema 4/5 → xp_gained=54 + credits_gained=1; (11) /leagues/current → tier=bronze, cohort_id present, week_key format YYYY-Www, seconds_until_close>0, my_rank set; (12) /auth/apple → 503 'Apple Sign-In non configuré' (env absent as designed); (13) /auth/google → 503 'Google Sign-In non configuré'; (14) /auth/apple id_token='short' → 422 Pydantic; (15) /cgu /cgv /confidentialite return 200 with h1 'Conditions Générales d'Utilisation' / 'Conditions Générales de Vente' / 'Politique de Confidentialité — RGPD'; (16) Footer contains data-testid footer-cgu / footer-cgv / footer-confidentialite (one each); (17) admin login → /app/dashboard reachable, /daily page renders. No regressions detected.",
+  "rca of the issue": "N/A — no bugs found."
+}

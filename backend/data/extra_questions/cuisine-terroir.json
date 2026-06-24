@@ -1,0 +1,772 @@
+[
+  {
+    "question": "Quel fruit est utilisé pour faire le clafoutis limousin traditionnel ?",
+    "options": [
+      "Cerises",
+      "Pommes",
+      "Prunes",
+      "Abricots"
+    ],
+    "correct_index": 0,
+    "explanation": "Le clafoutis limousin est traditionnellement préparé avec des cerises noires non dénoyautées, originaire de la région du Limousin."
+  },
+  {
+    "question": "Quelle est la capitale française de la gastronomie selon Paul Bocuse ?",
+    "options": [
+      "Lyon",
+      "Paris",
+      "Marseille",
+      "Bordeaux"
+    ],
+    "correct_index": 0,
+    "explanation": "Lyon est surnommée la capitale de la gastronomie française, notamment grâce à ses bouchons et ses grands chefs comme Paul Bocuse."
+  },
+  {
+    "question": "Quel légume est l'ingrédient principal du gratin dauphinois ?",
+    "options": [
+      "Pomme de terre",
+      "Courgette",
+      "Aubergine",
+      "Chou-fleur"
+    ],
+    "correct_index": 0,
+    "explanation": "Le gratin dauphinois est un plat traditionnel de la région Dauphiné composé de pommes de terre, de crème et de lait."
+  },
+  {
+    "question": "Quelle région produit le cidre en France ?",
+    "options": [
+      "Normandie",
+      "Provence",
+      "Alsace",
+      "Bourgogne"
+    ],
+    "correct_index": 0,
+    "explanation": "La Normandie est la principale région productrice de cidre en France, fabriqué à partir de pommes."
+  },
+  {
+    "question": "Quel est l'ingrédient principal de l'aïoli provençal ?",
+    "options": [
+      "Ail",
+      "Basilic",
+      "Tomate",
+      "Oignon"
+    ],
+    "correct_index": 0,
+    "explanation": "L'aïoli est une sauce provençale à base d'ail pilé et d'huile d'olive, servie avec des légumes et du poisson."
+  },
+  {
+    "question": "Quelle est la forme traditionnelle du pain breton appelé 'couronne' ?",
+    "options": [
+      "Ronde avec un trou au centre",
+      "Baguette",
+      "Boule",
+      "Carré"
+    ],
+    "correct_index": 0,
+    "explanation": "La couronne bretonne est un pain traditionnel en forme d'anneau, facilement reconnaissable par son trou central."
+  },
+  {
+    "question": "Quel fromage français est surnommé 'le roi des fromages' ?",
+    "options": [
+      "Brie",
+      "Comté",
+      "Camembert",
+      "Roquefort"
+    ],
+    "correct_index": 0,
+    "explanation": "Le Brie, notamment le Brie de Meaux, est surnommé 'le roi des fromages' depuis le Congrès de Vienne en 1815."
+  },
+  {
+    "question": "Dans quelle région française trouve-t-on la spécialité de la tarte flambée ?",
+    "options": [
+      "Alsace",
+      "Lorraine",
+      "Franche-Comté",
+      "Savoie"
+    ],
+    "correct_index": 0,
+    "explanation": "La tarte flambée (flammekueche) est une spécialité alsacienne composée de pâte fine, crème, oignons et lardons."
+  },
+  {
+    "question": "Combien de fromages différents la France produit-elle approximativement ?",
+    "options": [
+      "Plus de 1000",
+      "Environ 200",
+      "Environ 500",
+      "Moins de 100"
+    ],
+    "correct_index": 0,
+    "explanation": "La France produit plus de 1000 variétés de fromages différents, ce qui en fait l'un des pays les plus riches en fromages au monde."
+  },
+  {
+    "question": "Quel est le plat traditionnel de la région basque à base de piment doux ?",
+    "options": [
+      "Piperade",
+      "Axoa",
+      "Garbure",
+      "Ttoro"
+    ],
+    "correct_index": 0,
+    "explanation": "La piperade est un plat basque composé de poivrons, tomates, oignons et piment doux d'Espelette, souvent servi avec des œufs."
+  },
+  {
+    "question": "Quelle ville est célèbre pour ses calissons, confiserie à base d'amandes ?",
+    "options": [
+      "Aix-en-Provence",
+      "Montpellier",
+      "Avignon",
+      "Nice"
+    ],
+    "correct_index": 0,
+    "explanation": "Les calissons d'Aix sont une spécialité d'Aix-en-Provence, confiserie en forme de losange à base de pâte d'amandes et de fruits confits."
+  },
+  {
+    "question": "Quel alcool anisé est traditionnel dans la région méditerranéenne française ?",
+    "options": [
+      "Pastis",
+      "Cognac",
+      "Calvados",
+      "Chartreuse"
+    ],
+    "correct_index": 0,
+    "explanation": "Le pastis est un alcool anisé typique du sud de la France, particulièrement apprécié en apéritif dilué avec de l'eau."
+  },
+  {
+    "question": "Quelle est la particularité du beurre de baratte traditionnellement fabriqué ?",
+    "options": [
+      "Il est baratté mécaniquement",
+      "Il est cuit",
+      "Il est salé uniquement",
+      "Il est fermenté toujours"
+    ],
+    "correct_index": 0,
+    "explanation": "Le beurre de baratte est fabriqué selon une méthode traditionnelle où la crème est battue mécaniquement dans une baratte."
+  },
+  {
+    "question": "Quelle pâtisserie bordelaise est un petit gâteau caramélisé à l'extérieur ?",
+    "options": [
+      "Canelé",
+      "Macaron",
+      "Financier",
+      "Madeleine"
+    ],
+    "correct_index": 0,
+    "explanation": "Le canelé de Bordeaux est une spécialité bordelaise reconnaissable à sa forme cannelée et son cœur moelleux sous une croûte caramélisée."
+  },
+  {
+    "question": "Quel poisson est traditionnellement utilisé pour les rillettes de la Loire ?",
+    "options": [
+      "Sandre",
+      "Saumon",
+      "Thon",
+      "Maquereau"
+    ],
+    "correct_index": 0,
+    "explanation": "Les rillettes de sandre sont une spécialité de la vallée de la Loire, préparées avec ce poisson d'eau douce."
+  },
+  {
+    "question": "Dans quelle région française produit-on le vin jaune ?",
+    "options": [
+      "Jura",
+      "Bourgogne",
+      "Alsace",
+      "Languedoc"
+    ],
+    "correct_index": 0,
+    "explanation": "Le vin jaune est une spécialité du Jura, vieilli au minimum six ans en fût et servi dans des bouteilles appelées clavelins."
+  },
+  {
+    "question": "Quel condiment à base de cornichons accompagne traditionnellement la charcuterie ?",
+    "options": [
+      "Pickles",
+      "Moutarde",
+      "Ketchup",
+      "Mayonnaise"
+    ],
+    "correct_index": 0,
+    "explanation": "Les pickles ou cornichons au vinaigre sont traditionnellement servis avec la charcuterie et les terrines françaises."
+  },
+  {
+    "question": "Quelle tarte salée niçoise contient des anchois et des olives noires ?",
+    "options": [
+      "Pissaladière",
+      "Tarte tropézienne",
+      "Fougasse",
+      "Panisse"
+    ],
+    "correct_index": 0,
+    "explanation": "La pissaladière est une tarte niçoise garnie d'oignons confits, d'anchois et d'olives noires, sans tomate ni fromage."
+  },
+  {
+    "question": "Quel fromage corse est fabriqué à partir de lait de brebis ?",
+    "options": [
+      "Brocciu",
+      "Venaco",
+      "Niolo",
+      "Calenzana"
+    ],
+    "correct_index": 0,
+    "explanation": "Le brocciu est un fromage frais corse AOP fabriqué à partir de lactosérum de lait de brebis ou de chèvre."
+  },
+  {
+    "question": "Quel dessert glacé parisien porte le nom d'une avenue célèbre ?",
+    "options": [
+      "Vacherin",
+      "Champs-Élysées",
+      "Opéra",
+      "Saint-Honoré"
+    ],
+    "correct_index": 0,
+    "explanation": "Le Vacherin glacé est un dessert composé de meringue et de glace, bien que son nom ne vienne pas d'une avenue mais du fromage."
+  },
+  {
+    "question": "Quelle liqueur verte est produite par des moines chartreux depuis le XVIIIe siècle ?",
+    "options": [
+      "Chartreuse",
+      "Bénédictine",
+      "Izarra",
+      "Génépi"
+    ],
+    "correct_index": 0,
+    "explanation": "La Chartreuse est une liqueur produite par les moines de la Grande Chartreuse près de Grenoble depuis 1737, à base de 130 plantes."
+  },
+  {
+    "question": "Quel est le nom de la soupe de poissons marseillaise servie avec de la rouille ?",
+    "options": [
+      "Bouillabaisse",
+      "Bourride",
+      "Aïgo boulido",
+      "Soupe au pistou"
+    ],
+    "correct_index": 0,
+    "explanation": "La bouillabaisse est une soupe de poissons marseillaise traditionnelle servie avec des croûtons tartinés de rouille, sauce à l'ail et safran."
+  },
+  {
+    "question": "Quelle appellation viticole du Bordelais produit les vins les plus prestigieux sur la rive gauche ?",
+    "options": [
+      "Pauillac",
+      "Saint-Émilion",
+      "Pomerol",
+      "Sancerre"
+    ],
+    "correct_index": 0,
+    "explanation": "Pauillac est une appellation prestigieuse du Médoc abritant trois des cinq premiers grands crus classés de 1855."
+  },
+  {
+    "question": "Quel gâteau de semoule aux amandes est une spécialité du Maghreb adoptée en France ?",
+    "options": [
+      "Makrout",
+      "Baklava",
+      "Cornes de gazelle",
+      "Halva"
+    ],
+    "correct_index": 0,
+    "explanation": "Le makrout est une pâtisserie nord-africaine à base de semoule et d'amandes, frite puis trempée dans le miel, populaire en France."
+  },
+  {
+    "question": "Quel type de pain est traditionnellement servi avec les huîtres ?",
+    "options": [
+      "Pain de seigle beurré",
+      "Baguette blanche",
+      "Pain complet",
+      "Pain brioché"
+    ],
+    "correct_index": 0,
+    "explanation": "Le pain de seigle beurré est traditionnellement servi avec les huîtres, car son goût se marie parfaitement avec l'iode des fruits de mer."
+  },
+  {
+    "question": "Quel est l'ingrédient principal du pot-au-feu traditionnel ?",
+    "options": [
+      "Le bœuf",
+      "Le porc",
+      "Le poulet",
+      "L'agneau"
+    ],
+    "correct_index": 0,
+    "explanation": "Le pot-au-feu est un plat mijoté à base de viande de bœuf (paleron, gîte) et de légumes."
+  },
+  {
+    "question": "Quelle région française est réputée pour ses pruneaux d'Agen ?",
+    "options": [
+      "La Nouvelle-Aquitaine",
+      "La Bourgogne",
+      "La Normandie",
+      "Les Hauts-de-France"
+    ],
+    "correct_index": 0,
+    "explanation": "Les pruneaux d'Agen sont une spécialité du Lot-et-Garonne, en Nouvelle-Aquitaine."
+  },
+  {
+    "question": "Quelle est la couleur caractéristique du safran, épice cultivée dans le Quercy ?",
+    "options": [
+      "Rouge orangé",
+      "Jaune vif",
+      "Vert foncé",
+      "Violet"
+    ],
+    "correct_index": 0,
+    "explanation": "Le safran est une épice aux filaments rouge orangé qui donne une couleur jaune aux plats."
+  },
+  {
+    "question": "Quel fromage de chèvre en forme de pyramide tronquée est produit dans le Berry ?",
+    "options": [
+      "Le Valençay",
+      "Le Crottin de Chavignol",
+      "Le Sainte-Maure",
+      "Le Selles-sur-Cher"
+    ],
+    "correct_index": 0,
+    "explanation": "Le Valençay est un fromage AOP du Berry reconnaissable à sa forme pyramidale caractéristique."
+  },
+  {
+    "question": "Quelle est la viande traditionnelle utilisée pour le confit du Sud-Ouest ?",
+    "options": [
+      "Le canard",
+      "Le bœuf",
+      "Le lapin",
+      "Le poulet"
+    ],
+    "correct_index": 0,
+    "explanation": "Le confit de canard est une spécialité emblématique du Sud-Ouest, où la viande cuit dans sa graisse."
+  },
+  {
+    "question": "Dans quelle région fabrique-t-on le munster, fromage à pâte molle et croûte lavée ?",
+    "options": [
+      "L'Alsace",
+      "La Savoie",
+      "L'Auvergne",
+      "La Franche-Comté"
+    ],
+    "correct_index": 0,
+    "explanation": "Le munster est un fromage alsacien au goût prononcé, souvent accompagné de cumin."
+  },
+  {
+    "question": "Quelle ville du Rhône est célèbre pour ses quenelles de brochet ?",
+    "options": [
+      "Lyon",
+      "Marseille",
+      "Bordeaux",
+      "Toulouse"
+    ],
+    "correct_index": 0,
+    "explanation": "Les quenelles de brochet sauce Nantua sont une spécialité lyonnaise traditionnelle."
+  },
+  {
+    "question": "Quel fruit sec est l'ingrédient principal de la tarte aux noix du Périgord ?",
+    "options": [
+      "Les noix",
+      "Les amandes",
+      "Les noisettes",
+      "Les châtaignes"
+    ],
+    "correct_index": 0,
+    "explanation": "La tarte aux noix du Périgord est préparée avec les noix locales, réputées dans cette région."
+  },
+  {
+    "question": "Quelle spécialité sucrée de Montélimar est à base d'amandes et de miel ?",
+    "options": [
+      "Le nougat",
+      "Le calisson",
+      "Le berlingot",
+      "La praline"
+    ],
+    "correct_index": 0,
+    "explanation": "Montélimar est célèbre pour son nougat blanc, confiserie aux amandes et au miel."
+  },
+  {
+    "question": "Quel légume vert est cultivé dans le Vaucluse et protégé par une IGP ?",
+    "options": [
+      "L'asperge",
+      "Le poireau",
+      "Le haricot vert",
+      "La courgette"
+    ],
+    "correct_index": 0,
+    "explanation": "L'asperge du Vaucluse bénéficie d'une IGP et est récoltée au printemps."
+  },
+  {
+    "question": "Quelle est la base du far breton traditionnel ?",
+    "options": [
+      "La farine et les œufs",
+      "La semoule et le lait",
+      "Le riz et la crème",
+      "Le pain et le beurre"
+    ],
+    "correct_index": 0,
+    "explanation": "Le far breton est un flan dense à base de farine, œufs, lait et pruneaux."
+  },
+  {
+    "question": "Quel sel récolté à la main est considéré comme le plus fin de France ?",
+    "options": [
+      "La fleur de sel de Guérande",
+      "Le sel de Camargue",
+      "Le sel de l'Île de Ré",
+      "Le sel de Noirmoutier"
+    ],
+    "correct_index": 0,
+    "explanation": "La fleur de sel de Guérande est récoltée manuellement à la surface des marais salants."
+  },
+  {
+    "question": "Quelle confiserie angevine en forme de coussin contient une liqueur d'orange ?",
+    "options": [
+      "Le Cointreau",
+      "Le berlingot",
+      "La papillote",
+      "Le coussin de Lyon"
+    ],
+    "correct_index": 0,
+    "explanation": "Le Cointreau est une liqueur d'orange créée à Angers, utilisée en pâtisserie et cocktails."
+  },
+  {
+    "question": "Quel fromage de Normandie en forme de cœur est fabriqué depuis le XIXe siècle ?",
+    "options": [
+      "Le Neufchâtel",
+      "Le Pont-l'Évêque",
+      "Le Livarot",
+      "Le Brillat-Savarin"
+    ],
+    "correct_index": 0,
+    "explanation": "Le Neufchâtel AOP est reconnaissable à sa forme de cœur caractéristique."
+  },
+  {
+    "question": "Quelle soupe provençale est servie froide avec des légumes et du pain rassis ?",
+    "options": [
+      "Le pan bagnat",
+      "La soupe au pistou",
+      "L'aigo boulido",
+      "Le gaspacho"
+    ],
+    "correct_index": 1,
+    "explanation": "La soupe au pistou est un plat d'été provençal aux légumes frais et au basilic."
+  },
+  {
+    "question": "Quel crustacé breton est traditionnellement dégusté avec du pain beurré ?",
+    "options": [
+      "L'araignée de mer",
+      "La crevette grise",
+      "Le tourteau",
+      "Le homard"
+    ],
+    "correct_index": 2,
+    "explanation": "Le tourteau (crabe) est très apprécié en Bretagne, servi simplement avec du pain et du beurre salé."
+  },
+  {
+    "question": "Quelle pâtisserie alsacienne en forme de couronne est garnie de fruits confits ?",
+    "options": [
+      "Le kougelhopf",
+      "Le bretzel",
+      "Le stollen",
+      "La tarte tropézienne"
+    ],
+    "correct_index": 0,
+    "explanation": "Le kougelhopf est une brioche alsacienne cuite dans un moule cannelé, souvent avec des raisins secs."
+  },
+  {
+    "question": "Quel fromage du Jura est affiné en cave pendant plusieurs mois minimum ?",
+    "options": [
+      "Le Comté",
+      "Le Beaufort",
+      "L'Abondance",
+      "Le Reblochon"
+    ],
+    "correct_index": 0,
+    "explanation": "Le Comté AOP est affiné au minimum 4 mois, souvent bien plus longtemps en cave."
+  },
+  {
+    "question": "Quelle ville est célèbre pour ses bergamotes, bonbons parfumés à l'agrume ?",
+    "options": [
+      "Nancy",
+      "Strasbourg",
+      "Metz",
+      "Colmar"
+    ],
+    "correct_index": 0,
+    "explanation": "Les bergamotes de Nancy sont des bonbons transparents parfumés à l'essence de bergamote."
+  },
+  {
+    "question": "Quel est le nom du gâteau basque fourré à la confiture de cerises noires ?",
+    "options": [
+      "Le gâteau basque",
+      "Le millas",
+      "Le pastis landais",
+      "La tourtière"
+    ],
+    "correct_index": 0,
+    "explanation": "Le gâteau basque traditionnel est fourré à la confiture de cerises noires d'Itxassou ou à la crème."
+  },
+  {
+    "question": "Quelle appellation de Bourgogne produit des vins blancs de prestige ?",
+    "options": [
+      "Chablis",
+      "Beaujolais",
+      "Côtes du Rhône",
+      "Sancerre"
+    ],
+    "correct_index": 0,
+    "explanation": "Chablis est une appellation bourguignonne réputée pour ses vins blancs secs issus du cépage Chardonnay."
+  },
+  {
+    "question": "Quel condiment à base d'anchois et d'olives noires est typique de Provence ?",
+    "options": [
+      "La tapenade",
+      "L'anchoïade",
+      "Le pistou",
+      "La rouille"
+    ],
+    "correct_index": 0,
+    "explanation": "La tapenade est une purée d'olives noires, câpres et anchois, servie sur du pain grillé."
+  },
+  {
+    "question": "Quelle pâtisserie savoyarde est préparée avec des pommes, du pain et de la crème ?",
+    "options": [
+      "Le rissoles",
+      "La tarte aux myrtilles",
+      "Les bugnes",
+      "Les crozets"
+    ],
+    "correct_index": 0,
+    "explanation": "Les rissoles savoyardes sont des chaussons fourrés aux pommes ou aux poires, frits ou cuits au four."
+  },
+  {
+    "question": "Quel poisson de rivière est traditionnellement préparé au bleu en Franche-Comté ?",
+    "options": [
+      "La truite",
+      "Le brochet",
+      "La carpe",
+      "Le sandre"
+    ],
+    "correct_index": 0,
+    "explanation": "La truite au bleu est cuite dans un court-bouillon vinaigré qui donne une teinte bleutée à la peau."
+  },
+  {
+    "question": "Quelle confiserie de Cambrai est une menthe poivrée en forme de bâtonnet rayé ?",
+    "options": [
+      "La bêtise de Cambrai",
+      "Le berlingot",
+      "Le calisson",
+      "La violette de Toulouse"
+    ],
+    "correct_index": 0,
+    "explanation": "La bêtise de Cambrai est un bonbon à la menthe inventé accidentellement au XIXe siècle."
+  },
+  {
+    "question": "Quelle est la principale région productrice de lavande en France ?",
+    "options": [
+      "Provence",
+      "Bretagne",
+      "Normandie",
+      "Alsace"
+    ],
+    "correct_index": 0,
+    "explanation": "La Provence, notamment le plateau de Valensole, est la principale région de production de lavande en France, utilisée aussi en cuisine."
+  },
+  {
+    "question": "Quel est l'ingrédient principal des macarons ?",
+    "options": [
+      "Poudre d'amandes",
+      "Farine de blé",
+      "Noisettes",
+      "Noix de coco"
+    ],
+    "correct_index": 0,
+    "explanation": "Les macarons sont principalement composés de poudre d'amandes, de sucre et de blancs d'œufs."
+  },
+  {
+    "question": "Quelle ville est célèbre pour ses bergamotes, bonbons à base d'huile essentielle ?",
+    "options": [
+      "Nancy",
+      "Dijon",
+      "Tours",
+      "Nantes"
+    ],
+    "correct_index": 0,
+    "explanation": "Nancy est célèbre pour ses bergamotes, bonbons translucides parfumés à l'essence de bergamote depuis le XIXe siècle."
+  },
+  {
+    "question": "Quel fruit sec est traditionnellement utilisé dans le pain d'épices ?",
+    "options": [
+      "Aucun traditionnellement",
+      "Raisins secs",
+      "Figues",
+      "Dattes"
+    ],
+    "correct_index": 0,
+    "explanation": "Le pain d'épices traditionnel est fait de miel, farine et épices, sans fruits secs, même si certaines versions modernes en contiennent."
+  },
+  {
+    "question": "Quelle est la spécialité sucrée de Montélimar ?",
+    "options": [
+      "Le nougat",
+      "Le calisson",
+      "La praline",
+      "Le berlingot"
+    ],
+    "correct_index": 0,
+    "explanation": "Montélimar dans la Drôme est mondialement connue pour son nougat blanc aux amandes et au miel."
+  },
+  {
+    "question": "Quel légume est l'ingrédient principal de la soupe au pistou ?",
+    "options": [
+      "Haricots verts",
+      "Carottes",
+      "Navets",
+      "Choux"
+    ],
+    "correct_index": 0,
+    "explanation": "La soupe au pistou provençale contient principalement des haricots (verts et blancs), des courgettes et des tomates."
+  },
+  {
+    "question": "Dans quelle région française produit-on l'Armagnac ?",
+    "options": [
+      "Gascogne",
+      "Champagne",
+      "Bourgogne",
+      "Languedoc"
+    ],
+    "correct_index": 0,
+    "explanation": "L'Armagnac est une eau-de-vie produite en Gascogne, dans le Sud-Ouest, plus ancienne que le Cognac."
+  },
+  {
+    "question": "Quel est le nom de la tarte alsacienne aux quetsches ?",
+    "options": [
+      "Tarte aux quetsches",
+      "Flammekueche",
+      "Kougelhopf",
+      "Bretzel"
+    ],
+    "correct_index": 0,
+    "explanation": "La tarte aux quetsches est une spécialité alsacienne préparée avec ces petites prunes violettes typiques de la région."
+  },
+  {
+    "question": "Quelle charcuterie corse est fabriquée avec de l'échine de porc ?",
+    "options": [
+      "Le coppa",
+      "Le figatellu",
+      "La panzetta",
+      "Le lonzu"
+    ],
+    "correct_index": 0,
+    "explanation": "Le coppa corse est fabriqué à partir d'échine de porc salée, séchée et affinée plusieurs mois."
+  },
+  {
+    "question": "Quel mollusque est élevé dans les parcs ostréicoles ?",
+    "options": [
+      "L'huître",
+      "La moule",
+      "La palourde",
+      "Le bulot"
+    ],
+    "correct_index": 0,
+    "explanation": "Les parcs ostréicoles sont dédiés à l'élevage des huîtres, notamment à Marennes-Oléron et en Bretagne."
+  },
+  {
+    "question": "Quelle est la couleur du vin produit à Tavel dans la vallée du Rhône ?",
+    "options": [
+      "Rosé",
+      "Rouge",
+      "Blanc",
+      "Jaune"
+    ],
+    "correct_index": 0,
+    "explanation": "Tavel produit exclusivement du vin rosé, considéré parmi les meilleurs rosés de France."
+  },
+  {
+    "question": "Quel fromage à pâte molle et croûte fleurie vient de Normandie ?",
+    "options": [
+      "Le Camembert",
+      "Le Roquefort",
+      "Le Comté",
+      "Le Cantal"
+    ],
+    "correct_index": 0,
+    "explanation": "Le Camembert de Normandie est un fromage emblématique à pâte molle et croûte fleurie blanche."
+  },
+  {
+    "question": "Quel est l'ingrédient principal du far breton traditionnel ?",
+    "options": [
+      "La farine",
+      "Les pruneaux",
+      "Le lait",
+      "Les œufs"
+    ],
+    "correct_index": 0,
+    "explanation": "Le far breton est un flan épais à base de farine, traditionnellement garni de pruneaux."
+  },
+  {
+    "question": "Quelle volaille est traditionnellement consommée à Noël en France ?",
+    "options": [
+      "La dinde",
+      "Le poulet",
+      "Le canard",
+      "L'oie"
+    ],
+    "correct_index": 0,
+    "explanation": "La dinde aux marrons est le plat traditionnel du réveillon de Noël dans la plupart des familles françaises."
+  },
+  {
+    "question": "Quel type de crêpe salée est une spécialité bretonne ?",
+    "options": [
+      "La galette de sarrasin",
+      "La crêpe suzette",
+      "La crêpe dentelle",
+      "La crêpe Parmentier"
+    ],
+    "correct_index": 0,
+    "explanation": "La galette bretonne est faite de farine de sarrasin (blé noir) et garnie d'ingrédients salés."
+  },
+  {
+    "question": "Quel condiment à base d'ail pilé accompagne traditionnellement la bourride ?",
+    "options": [
+      "L'aïoli",
+      "Le pistou",
+      "La tapenade",
+      "L'anchoïade"
+    ],
+    "correct_index": 0,
+    "explanation": "L'aïoli, mayonnaise à l'ail, accompagne la bourride, ragoût de poissons provençal."
+  },
+  {
+    "question": "Dans quelle région trouve-t-on le plat traditionnel appelé baeckeoffe ?",
+    "options": [
+      "Alsace",
+      "Lorraine",
+      "Franche-Comté",
+      "Savoie"
+    ],
+    "correct_index": 0,
+    "explanation": "Le baeckeoffe est un plat alsacien composé de viandes marinées et de pommes de terre cuites dans un récipient en terre."
+  },
+  {
+    "question": "Quel est le nom du jambon cru des Pyrénées séché pendant 12 à 18 mois ?",
+    "options": [
+      "Le jambon de Bayonne",
+      "Le jambon d'Aoste",
+      "Le jambon d'Ardèche",
+      "Le jambon de Savoie"
+    ],
+    "correct_index": 0,
+    "explanation": "Le jambon de Bayonne est un jambon cru du Pays Basque, salé au sel de l'Adour et séché longuement."
+  },
+  {
+    "question": "Quelle est la particularité du sel de Guérande ?",
+    "options": [
+      "Il est récolté manuellement",
+      "Il est rose",
+      "Il vient de mine",
+      "Il est iodé artificiellement"
+    ],
+    "correct_index": 0,
+    "explanation": "Le sel de Guérande est récolté manuellement dans les marais salants de Loire-Atlantique selon des méthodes ancestrales."
+  },
+  {
+    "question": "Quel champignon du Périgord est l'un des plus recherchés et coûteux au monde ?",
+    "options": [
+      "La truffe noire",
+      "Le cèpe",
+      "La morille",
+      "La girolle"
+    ],
+    "correct_index": 0,
+    "explanation": "La truffe noire du Périgord (Tuber melanosporum) est un champignon très prisé, pouvant atteindre plusieurs milliers d'euros le kilo."
+  }
+]

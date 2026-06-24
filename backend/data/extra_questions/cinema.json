@@ -1,0 +1,772 @@
+[
+  {
+    "question": "Quel animal est le héros du film Disney « Le Roi Lion » ?",
+    "options": [
+      "Un lion",
+      "Un tigre",
+      "Un éléphant",
+      "Une panthère"
+    ],
+    "correct_index": 0,
+    "explanation": "Simba, le personnage principal du Roi Lion sorti en 1994, est un lionceau qui devient roi."
+  },
+  {
+    "question": "Dans quel film Ratatouille se passe l'histoire d'un rat qui veut devenir cuisinier ?",
+    "options": [
+      "New York",
+      "Rome",
+      "Paris",
+      "Londres"
+    ],
+    "correct_index": 2,
+    "explanation": "Ratatouille (2007) se déroule à Paris, où le rat Rémy rêve de devenir chef cuisinier."
+  },
+  {
+    "question": "Quel acteur français joue Astérix dans les films « Astérix et Obélix : Mission Cléopâtre » ?",
+    "options": [
+      "Gérard Depardieu",
+      "Christian Clavier",
+      "Jean Reno",
+      "Alain Chabat"
+    ],
+    "correct_index": 1,
+    "explanation": "Christian Clavier incarne Astérix tandis que Gérard Depardieu joue Obélix dans ce film de 2002."
+  },
+  {
+    "question": "Qui a réalisé le film d'animation « Kirikou et la Sorcière » en 1998 ?",
+    "options": [
+      "Michel Ocelot",
+      "René Goscinny",
+      "Jacques Tati",
+      "Sylvain Chomet"
+    ],
+    "correct_index": 0,
+    "explanation": "Michel Ocelot est le créateur et réalisateur de Kirikou, film d'animation français célèbre."
+  },
+  {
+    "question": "Dans quel film Bourvil et Louis de Funès jouent-ils ensemble en 1966 ?",
+    "options": [
+      "Les Tontons flingueurs",
+      "La Grande Vadrouille",
+      "Le Corniaud",
+      "Rabbi Jacob"
+    ],
+    "correct_index": 1,
+    "explanation": "La Grande Vadrouille (1966) est une comédie culte réunissant Bourvil et De Funès pendant la Seconde Guerre mondiale."
+  },
+  {
+    "question": "Quelle actrice française a joué Belle dans « La Belle et la Bête » de Jean Cocteau en 1946 ?",
+    "options": [
+      "Simone Signoret",
+      "Michèle Morgan",
+      "Josette Day",
+      "Arletty"
+    ],
+    "correct_index": 2,
+    "explanation": "Josette Day incarne Belle dans ce chef-d'œuvre poétique de Jean Cocteau."
+  },
+  {
+    "question": "Quel film de 1995 raconte l'histoire d'un cochon qui veut devenir chien de berger ?",
+    "options": [
+      "Beethoven",
+      "Babe",
+      "Stuart Little",
+      "Garfield"
+    ],
+    "correct_index": 1,
+    "explanation": "Babe, le cochon devenu berger, a remporté un grand succès mondial en 1995."
+  },
+  {
+    "question": "Dans quel film de 1993 les dinosaures sont-ils recréés à partir d'ADN ?",
+    "options": [
+      "King Kong",
+      "Godzilla",
+      "Jurassic Park",
+      "La Planète des singes"
+    ],
+    "correct_index": 2,
+    "explanation": "Jurassic Park de Steven Spielberg (1993) révolutionne les effets spéciaux avec ses dinosaures."
+  },
+  {
+    "question": "Qui incarne le Commissaire Juve dans les films « Fantômas » des années 1960 ?",
+    "options": [
+      "Louis de Funès",
+      "Jean Marais",
+      "Bourvil",
+      "Lino Ventura"
+    ],
+    "correct_index": 0,
+    "explanation": "Louis de Funès joue le commissaire Juve face à Jean Marais (Fantômas) dans cette trilogie culte."
+  },
+  {
+    "question": "Quel film de Francis Veber met en scène Pierre Richard et Gérard Depardieu en 1981 ?",
+    "options": [
+      "Le Jouet",
+      "La Chèvre",
+      "Les Compères",
+      "Le Grand Blond"
+    ],
+    "correct_index": 1,
+    "explanation": "La Chèvre (1981) réunit ce duo comique dans une aventure au Mexique."
+  },
+  {
+    "question": "Quelle actrice joue dans « Les Demoiselles de Rochefort » aux côtés de sa sœur en 1967 ?",
+    "options": [
+      "Catherine Deneuve",
+      "Brigitte Bardot",
+      "Jeanne Moreau",
+      "Simone Signoret"
+    ],
+    "correct_index": 0,
+    "explanation": "Catherine Deneuve joue avec sa vraie sœur Françoise Dorléac dans cette comédie musicale de Jacques Demy."
+  },
+  {
+    "question": "Quel film de Claude Berri adapte Marcel Pagnol en 1986 ?",
+    "options": [
+      "La Gloire de mon père",
+      "Jean de Florette",
+      "Manon des sources",
+      "Le Château de ma mère"
+    ],
+    "correct_index": 1,
+    "explanation": "Jean de Florette (1986) avec Yves Montand et Gérard Depardieu est suivi de Manon des sources."
+  },
+  {
+    "question": "Qui compose la musique du film « Les Chariots de feu » en 1981 ?",
+    "options": [
+      "Ennio Morricone",
+      "Vangelis",
+      "John Williams",
+      "Hans Zimmer"
+    ],
+    "correct_index": 1,
+    "explanation": "Le compositeur grec Vangelis a créé la célèbre musique synthétique de ce film britannique."
+  },
+  {
+    "question": "Dans quel film de 1975 Robert Redford et Paul Newman arnaquent-ils un gangster ?",
+    "options": [
+      "L'Arnaque",
+      "Les Hommes du président",
+      "Butch Cassidy",
+      "Le Verdict"
+    ],
+    "correct_index": 0,
+    "explanation": "L'Arnaque (The Sting) a remporté 7 Oscars dont celui du meilleur film."
+  },
+  {
+    "question": "Quel acteur incarne Don Vito Corleone dans « Le Parrain » en 1972 ?",
+    "options": [
+      "Al Pacino",
+      "Robert De Niro",
+      "Marlon Brando",
+      "James Caan"
+    ],
+    "correct_index": 2,
+    "explanation": "Marlon Brando a remporté l'Oscar pour son interprétation iconique du parrain mafieux."
+  },
+  {
+    "question": "Quelle actrice française a joué dans « Indochine » en 1992 ?",
+    "options": [
+      "Isabelle Adjani",
+      "Juliette Binoche",
+      "Catherine Deneuve",
+      "Emmanuelle Béart"
+    ],
+    "correct_index": 2,
+    "explanation": "Catherine Deneuve joue le rôle principal dans ce film qui a reçu l'Oscar du meilleur film étranger."
+  },
+  {
+    "question": "Qui réalise « Tchao Pantin » avec Coluche en 1983 ?",
+    "options": [
+      "Claude Berri",
+      "Bertrand Blier",
+      "Claude Zidi",
+      "Jean Becker"
+    ],
+    "correct_index": 1,
+    "explanation": "Bertrand Blier dirige Coluche dans ce drame qui lui vaudra le César du meilleur acteur."
+  },
+  {
+    "question": "En quelle année sort « Titanic » de James Cameron ?",
+    "options": [
+      "1995",
+      "1997",
+      "1999",
+      "2001"
+    ],
+    "correct_index": 1,
+    "explanation": "Titanic sort en 1997 et devient le plus grand succès mondial jusqu'à Avatar (2009)."
+  },
+  {
+    "question": "Quel film de Luc Besson met en scène un tueur et une enfant en 1994 ?",
+    "options": [
+      "Nikita",
+      "Le Grand Bleu",
+      "Léon",
+      "Le Cinquième Élément"
+    ],
+    "correct_index": 2,
+    "explanation": "Léon (1994) avec Jean Reno et Natalie Portman est devenu un film culte."
+  },
+  {
+    "question": "Qui joue le rôle principal féminin dans « Jules et Jim » de François Truffaut en 1962 ?",
+    "options": [
+      "Jeanne Moreau",
+      "Anna Karina",
+      "Anouk Aimée",
+      "Stéphane Audran"
+    ],
+    "correct_index": 0,
+    "explanation": "Jeanne Moreau incarne Catherine dans ce chef-d'œuvre de la Nouvelle Vague."
+  },
+  {
+    "question": "Quel réalisateur italien a tourné « Huit et demi » en 1963 ?",
+    "options": [
+      "Luchino Visconti",
+      "Federico Fellini",
+      "Michelangelo Antonioni",
+      "Vittorio De Sica"
+    ],
+    "correct_index": 1,
+    "explanation": "Federico Fellini signe ce film autobiographique considéré comme son chef-d'œuvre."
+  },
+  {
+    "question": "Combien de fois Katharine Hepburn a-t-elle remporté l'Oscar de la meilleure actrice ?",
+    "options": [
+      "2 fois",
+      "3 fois",
+      "4 fois",
+      "5 fois"
+    ],
+    "correct_index": 2,
+    "explanation": "Katharine Hepburn détient le record avec 4 Oscars de la meilleure actrice (1934, 1968, 1969, 1982)."
+  },
+  {
+    "question": "Qui a composé la musique du film « Il était une fois dans l'Ouest » en 1968 ?",
+    "options": [
+      "Ennio Morricone",
+      "Nino Rota",
+      "Michel Legrand",
+      "Georges Delerue"
+    ],
+    "correct_index": 0,
+    "explanation": "Ennio Morricone a créé la bande originale mythique de ce western de Sergio Leone."
+  },
+  {
+    "question": "Quel film de Jacques Becker se déroule en prison et sort en 1960 ?",
+    "options": [
+      "Casque d'or",
+      "Touchez pas au grisbi",
+      "Le Trou",
+      "Antoine et Antoinette"
+    ],
+    "correct_index": 2,
+    "explanation": "Le Trou (1960) est le dernier film de Becker, chef-d'œuvre sur une évasion de prison."
+  },
+  {
+    "question": "En quelle année Charlie Chaplin réalise-t-il « Les Temps modernes » ?",
+    "options": [
+      "1931",
+      "1933",
+      "1936",
+      "1939"
+    ],
+    "correct_index": 2,
+    "explanation": "Les Temps modernes sort en 1936, satire brillante de l'industrialisation et du travail à la chaîne."
+  },
+  {
+    "question": "Quel acteur français joue le rôle principal dans « Intouchables » en 2011 ?",
+    "options": [
+      "Omar Sy",
+      "Jamel Debbouze",
+      "Dany Boon",
+      "Gad Elmaleh"
+    ],
+    "correct_index": 0,
+    "explanation": "Omar Sy a remporté le César du meilleur acteur pour son rôle de Driss dans « Intouchables », le plus grand succès du cinéma français."
+  },
+  {
+    "question": "Quel est le prénom du petit garçon dans « Le Ballon rouge » (1956) ?",
+    "options": [
+      "Pascal",
+      "Pierre",
+      "Paul",
+      "Philippe"
+    ],
+    "correct_index": 0,
+    "explanation": "Pascal Lamorisse joue le rôle de Pascal dans ce court-métrage mythique réalisé par son père Albert Lamorisse."
+  },
+  {
+    "question": "Dans quel film de 1998 Roberto Benigni joue-t-il un père protégeant son fils dans un camp ?",
+    "options": [
+      "La Vie est belle",
+      "Le Pianiste",
+      "Train de vie",
+      "Liste de Schindler"
+    ],
+    "correct_index": 0,
+    "explanation": "« La Vie est belle » de Roberto Benigni a remporté l'Oscar du meilleur film étranger en 1999."
+  },
+  {
+    "question": "Qui joue le rôle de Lucie dans « Taxi » en 1998 ?",
+    "options": [
+      "Marion Cotillard",
+      "Emma Sjöberg",
+      "Frédéric Diefenthal",
+      "Samy Naceri"
+    ],
+    "correct_index": 1,
+    "explanation": "Emma Sjöberg, mannequin et actrice suédoise, interprète Lucie, la petite amie de Daniel dans la saga « Taxi »."
+  },
+  {
+    "question": "Quel acteur incarne le héros dans « Indiana Jones et les Aventuriers de l'arche perdue » ?",
+    "options": [
+      "Harrison Ford",
+      "Tom Selleck",
+      "Kurt Russell",
+      "Sam Neill"
+    ],
+    "correct_index": 0,
+    "explanation": "Harrison Ford incarne Indiana Jones dans les quatre premiers films de la saga créée par George Lucas et Steven Spielberg."
+  },
+  {
+    "question": "Quelle actrice joue Edith Piaf dans « La Môme » en 2007 ?",
+    "options": [
+      "Audrey Tautou",
+      "Marion Cotillard",
+      "Isabelle Adjani",
+      "Juliette Binoche"
+    ],
+    "correct_index": 1,
+    "explanation": "Marion Cotillard a remporté l'Oscar de la meilleure actrice pour son interprétation d'Edith Piaf dans « La Môme »."
+  },
+  {
+    "question": "En quelle année sort « E.T. l'extra-terrestre » de Steven Spielberg ?",
+    "options": [
+      "1980",
+      "1982",
+      "1984",
+      "1986"
+    ],
+    "correct_index": 1,
+    "explanation": "« E.T. l'extra-terrestre » sort en 1982 et devient l'un des plus grands succès du cinéma américain."
+  },
+  {
+    "question": "Quel film de 2001 raconte l'histoire d'une jeune serveuse à Montmartre ?",
+    "options": [
+      "Le Fabuleux Destin d'Amélie Poulain",
+      "La Délicatesse",
+      "Les Émotifs anonymes",
+      "Ensemble, c'est tout"
+    ],
+    "correct_index": 0,
+    "explanation": "« Le Fabuleux Destin d'Amélie Poulain » de Jean-Pierre Jeunet avec Audrey Tautou est devenu un phénomène mondial."
+  },
+  {
+    "question": "Qui réalise « Les Quatre Cents Coups » en 1959 ?",
+    "options": [
+      "Jean-Luc Godard",
+      "François Truffaut",
+      "Claude Chabrol",
+      "Éric Rohmer"
+    ],
+    "correct_index": 1,
+    "explanation": "François Truffaut réalise ce film fondateur de la Nouvelle Vague avec Jean-Pierre Léaud dans le rôle d'Antoine Doinel."
+  },
+  {
+    "question": "Dans quel film de 1977 rencontre-t-on Luke Skywalker ?",
+    "options": [
+      "Star Trek",
+      "Star Wars",
+      "Stargate",
+      "Battlestar Galactica"
+    ],
+    "correct_index": 1,
+    "explanation": "Luke Skywalker est le héros de « Star Wars, épisode IV : Un nouvel espoir » réalisé par George Lucas."
+  },
+  {
+    "question": "Quel acteur joue le Joker dans « The Dark Knight » en 2008 ?",
+    "options": [
+      "Jack Nicholson",
+      "Jared Leto",
+      "Heath Ledger",
+      "Joaquin Phoenix"
+    ],
+    "correct_index": 2,
+    "explanation": "Heath Ledger a remporté l'Oscar du meilleur acteur dans un second rôle à titre posthume pour son interprétation du Joker."
+  },
+  {
+    "question": "Qui réalise « Le Dîner de cons » en 1998 ?",
+    "options": [
+      "Patrice Leconte",
+      "Francis Veber",
+      "Gérard Oury",
+      "Claude Zidi"
+    ],
+    "correct_index": 1,
+    "explanation": "Francis Veber adapte sa propre pièce de théâtre avec Jacques Villeret et Thierry Lhermitte dans les rôles principaux."
+  },
+  {
+    "question": "Dans quel film de 1939 Dorothy cherche-t-elle à rentrer au Kansas ?",
+    "options": [
+      "Autant en emporte le vent",
+      "Le Magicien d'Oz",
+      "La Prisonnière du désert",
+      "Blanche-Neige"
+    ],
+    "correct_index": 1,
+    "explanation": "« Le Magicien d'Oz » avec Judy Garland est devenu un classique intemporel du cinéma hollywoodien."
+  },
+  {
+    "question": "Quel réalisateur a tourné « Pulp Fiction » en 1994 ?",
+    "options": [
+      "Martin Scorsese",
+      "Quentin Tarantino",
+      "Robert Rodriguez",
+      "Oliver Stone"
+    ],
+    "correct_index": 1,
+    "explanation": "Quentin Tarantino remporte la Palme d'Or à Cannes pour « Pulp Fiction », film culte du cinéma indépendant américain."
+  },
+  {
+    "question": "Qui joue le rôle de Rose dans « Titanic » ?",
+    "options": [
+      "Kate Winslet",
+      "Nicole Kidman",
+      "Gwyneth Paltrow",
+      "Cate Blanchett"
+    ],
+    "correct_index": 0,
+    "explanation": "Kate Winslet incarne Rose DeWitt Bukater aux côtés de Leonardo DiCaprio dans le film de James Cameron."
+  },
+  {
+    "question": "En quelle année sort « Le Roi Lion » de Disney ?",
+    "options": [
+      "1992",
+      "1994",
+      "1996",
+      "1998"
+    ],
+    "correct_index": 1,
+    "explanation": "« Le Roi Lion » sort en 1994 et devient l'un des plus grands succès de l'animation Disney avec la chanson « Hakuna Matata »."
+  },
+  {
+    "question": "Quel acteur français joue dans « La Haine » en 1995 ?",
+    "options": [
+      "Vincent Cassel",
+      "Mathieu Kassovitz",
+      "Gaspard Ulliel",
+      "Romain Duris"
+    ],
+    "correct_index": 0,
+    "explanation": "Vincent Cassel joue Vinz dans « La Haine » de Mathieu Kassovitz, film noir et blanc sur les banlieues."
+  },
+  {
+    "question": "Quel film de 1994 raconte l'histoire de Forrest Gump ?",
+    "options": [
+      "Philadelphia",
+      "Forrest Gump",
+      "Apollo 13",
+      "Big"
+    ],
+    "correct_index": 1,
+    "explanation": "Tom Hanks remporte l'Oscar du meilleur acteur pour son rôle dans « Forrest Gump » réalisé par Robert Zemeckis."
+  },
+  {
+    "question": "Qui réalise « Apocalypse Now » en 1979 ?",
+    "options": [
+      "Stanley Kubrick",
+      "Francis Ford Coppola",
+      "Oliver Stone",
+      "Michael Cimino"
+    ],
+    "correct_index": 1,
+    "explanation": "Francis Ford Coppola réalise cette œuvre monumentale sur la guerre du Vietnam, remportant la Palme d'Or à Cannes."
+  },
+  {
+    "question": "Dans quel film de 1986 Tom Cruise joue-t-il un pilote de chasse ?",
+    "options": [
+      "Top Gun",
+      "Iron Eagle",
+      "Firefox",
+      "Memphis Belle"
+    ],
+    "correct_index": 0,
+    "explanation": "« Top Gun » de Tony Scott propulse Tom Cruise au rang de superstar avec la chanson « Take My Breath Away »."
+  },
+  {
+    "question": "Quel acteur incarne Hannibal Lecter dans « Le Silence des agneaux » en 1991 ?",
+    "options": [
+      "Robert De Niro",
+      "Anthony Hopkins",
+      "Jack Nicholson",
+      "Gene Hackman"
+    ],
+    "correct_index": 1,
+    "explanation": "Anthony Hopkins remporte l'Oscar du meilleur acteur pour son interprétation glaçante du cannibale Hannibal Lecter."
+  },
+  {
+    "question": "Qui réalise « Citizen Kane » en 1941 ?",
+    "options": [
+      "John Ford",
+      "Howard Hawks",
+      "Orson Welles",
+      "Billy Wilder"
+    ],
+    "correct_index": 2,
+    "explanation": "Orson Welles réalise, produit et joue dans « Citizen Kane », considéré comme l'un des plus grands films de l'histoire du cinéma."
+  },
+  {
+    "question": "Quel film de Stanley Kubrick sort en 1968 avec des singes et un monolithe ?",
+    "options": [
+      "Orange mécanique",
+      "2001 : L'Odyssée de l'espace",
+      "Dr Folamour",
+      "Barry Lyndon"
+    ],
+    "correct_index": 1,
+    "explanation": "« 2001 : L'Odyssée de l'espace » révolutionne le cinéma de science-fiction avec ses effets spéciaux innovants."
+  },
+  {
+    "question": "En quelle année Ingmar Bergman réalise-t-il « Le Septième Sceau » ?",
+    "options": [
+      "1955",
+      "1957",
+      "1959",
+      "1961"
+    ],
+    "correct_index": 1,
+    "explanation": "« Le Septième Sceau » (1957) est un chef-d'œuvre du cinéma suédois avec sa célèbre partie d'échecs contre la Mort."
+  },
+  {
+    "question": "Quel acteur japonais joue dans les films d'Akira Kurosawa comme « Yojimbo » ?",
+    "options": [
+      "Takeshi Kitano",
+      "Ken Watanabe",
+      "Toshirō Mifune",
+      "Hiroshi Abe"
+    ],
+    "correct_index": 2,
+    "explanation": "Toshirō Mifune est l'acteur fétiche d'Akira Kurosawa, collaborant sur seize films dont « Les Sept Samouraïs » et « Yojimbo »."
+  },
+  {
+    "question": "Quel animal est le personnage principal du film d'animation « Le Livre de la jungle » ?",
+    "options": [
+      "Un éléphant",
+      "Un ours",
+      "Un tigre",
+      "Un jeune garçon"
+    ],
+    "correct_index": 3,
+    "explanation": "Mowgli, le jeune garçon élevé par les loups, est le héros du « Livre de la jungle » de Disney (1967)."
+  },
+  {
+    "question": "Dans quel pays se déroule l'action du film « Ratatouille » ?",
+    "options": [
+      "Italie",
+      "France",
+      "Espagne",
+      "Belgique"
+    ],
+    "correct_index": 1,
+    "explanation": "L'histoire de Rémy le rat cuisinier se passe à Paris, en France."
+  },
+  {
+    "question": "Qui est le réalisateur du film « E.T. l'extra-terrestre » sorti en 1982 ?",
+    "options": [
+      "George Lucas",
+      "Steven Spielberg",
+      "James Cameron",
+      "Ridley Scott"
+    ],
+    "correct_index": 1,
+    "explanation": "Steven Spielberg a réalisé ce film culte sur l'amitié entre un enfant et un extraterrestre."
+  },
+  {
+    "question": "Quel acteur français joue le rôle principal dans « Le Dîner de cons » en 1998 ?",
+    "options": [
+      "Christian Clavier",
+      "Gérard Depardieu",
+      "Jacques Villeret",
+      "Daniel Auteuil"
+    ],
+    "correct_index": 2,
+    "explanation": "Jacques Villeret incarne François Pignon, l'invité involontaire de ce dîner cruel."
+  },
+  {
+    "question": "En quelle année sort le premier film de la saga « Harry Potter » au cinéma ?",
+    "options": [
+      "1999",
+      "2001",
+      "2003",
+      "2005"
+    ],
+    "correct_index": 1,
+    "explanation": "« Harry Potter à l'école des sorciers » sort en 2001, réalisé par Chris Columbus."
+  },
+  {
+    "question": "Quelle actrice joue le rôle d'Edith Piaf dans « La Môme » en 2007 ?",
+    "options": [
+      "Isabelle Adjani",
+      "Marion Cotillard",
+      "Audrey Tautou",
+      "Sophie Marceau"
+    ],
+    "correct_index": 1,
+    "explanation": "Marion Cotillard remporte l'Oscar de la meilleure actrice pour son interprétation d'Edith Piaf."
+  },
+  {
+    "question": "Qui réalise « Les Temps modernes » en 1936 ?",
+    "options": [
+      "Buster Keaton",
+      "Harold Lloyd",
+      "Charlie Chaplin",
+      "Laurel et Hardy"
+    ],
+    "correct_index": 2,
+    "explanation": "Charlie Chaplin réalise et joue dans ce film muet critique de l'industrialisation."
+  },
+  {
+    "question": "Dans quel film de 1939 Judy Garland chante-t-elle « Over the Rainbow » ?",
+    "options": [
+      "Blanche-Neige",
+      "Le Magicien d'Oz",
+      "Autant en emporte le vent",
+      "Cendrillon"
+    ],
+    "correct_index": 1,
+    "explanation": "Judy Garland incarne Dorothy dans « Le Magicien d'Oz », film musical mythique."
+  },
+  {
+    "question": "Quel réalisateur français a tourné « La Haine » en 1995 ?",
+    "options": [
+      "Mathieu Kassovitz",
+      "Luc Besson",
+      "Jean-Pierre Jeunet",
+      "Olivier Marchal"
+    ],
+    "correct_index": 0,
+    "explanation": "Mathieu Kassovitz réalise ce film en noir et blanc sur la violence en banlieue parisienne."
+  },
+  {
+    "question": "Combien d'Oscars le film « Ben-Hur » a-t-il remportés en 1960 ?",
+    "options": [
+      "8",
+      "9",
+      "11",
+      "13"
+    ],
+    "correct_index": 2,
+    "explanation": "« Ben-Hur » détient le record avec 11 Oscars, égalé seulement par « Titanic » et « Le Seigneur des anneaux : Le Retour du roi »."
+  },
+  {
+    "question": "Qui joue le rôle de Germain dans « La Tête en friche » en 2010 ?",
+    "options": [
+      "Gérard Depardieu",
+      "Daniel Auteuil",
+      "Patrick Bruel",
+      "Vincent Lindon"
+    ],
+    "correct_index": 0,
+    "explanation": "Gérard Depardieu incarne Germain, un homme simple dont la vie change grâce à la lecture."
+  },
+  {
+    "question": "Dans quel film de 1990 Kevin Costner joue-t-il un lieutenant pendant la guerre de Sécession ?",
+    "options": [
+      "Waterworld",
+      "Robin des Bois",
+      "Danse avec les loups",
+      "JFK"
+    ],
+    "correct_index": 2,
+    "explanation": "« Danse avec les loups » remporte 7 Oscars dont celui du meilleur film et meilleur réalisateur."
+  },
+  {
+    "question": "Quelle actrice incarne Scarlett O'Hara dans « Autant en emporte le vent » en 1939 ?",
+    "options": [
+      "Vivien Leigh",
+      "Bette Davis",
+      "Joan Crawford",
+      "Katharine Hepburn"
+    ],
+    "correct_index": 0,
+    "explanation": "Vivien Leigh remporte l'Oscar de la meilleure actrice pour ce rôle mythique."
+  },
+  {
+    "question": "Qui réalise « Orange mécanique » en 1971 ?",
+    "options": [
+      "Martin Scorsese",
+      "Francis Ford Coppola",
+      "Stanley Kubrick",
+      "Roman Polanski"
+    ],
+    "correct_index": 2,
+    "explanation": "Stanley Kubrick adapte le roman d'Anthony Burgess dans ce film controversé sur la violence."
+  },
+  {
+    "question": "En quelle année sort « Les Aventuriers de l'arche perdue » ?",
+    "options": [
+      "1979",
+      "1981",
+      "1983",
+      "1985"
+    ],
+    "correct_index": 1,
+    "explanation": "Le premier Indiana Jones, réalisé par Steven Spielberg, sort en 1981 et remporte 4 Oscars."
+  },
+  {
+    "question": "Quel film de Jean-Luc Godard met en scène Anna Karina et Jean-Paul Belmondo en 1965 ?",
+    "options": [
+      "Pierrot le fou",
+      "Bande à part",
+      "Alphaville",
+      "Le Mépris"
+    ],
+    "correct_index": 0,
+    "explanation": "« Pierrot le fou » est un film de la Nouvelle Vague où Belmondo et Karina fuient ensemble."
+  },
+  {
+    "question": "Qui compose la musique du film « Il était une fois en Amérique » en 1984 ?",
+    "options": [
+      "John Williams",
+      "Ennio Morricone",
+      "Hans Zimmer",
+      "Maurice Jarre"
+    ],
+    "correct_index": 1,
+    "explanation": "Ennio Morricone signe la partition de ce film-fleuve de Sergio Leone sur des gangsters juifs."
+  },
+  {
+    "question": "Dans quel film Orson Welles prononce-t-il le mot mystérieux « Rosebud » en 1941 ?",
+    "options": [
+      "La Soif du mal",
+      "Citizen Kane",
+      "Le Procès",
+      "La Dame de Shanghai"
+    ],
+    "correct_index": 1,
+    "explanation": "« Citizen Kane » est considéré comme l'un des plus grands films de l'histoire du cinéma."
+  },
+  {
+    "question": "Qui réalise « Le Samouraï » avec Alain Delon en 1967 ?",
+    "options": [
+      "Jean-Pierre Melville",
+      "Henri Verneuil",
+      "Claude Sautet",
+      "José Giovanni"
+    ],
+    "correct_index": 0,
+    "explanation": "Jean-Pierre Melville crée avec ce film un polar minimaliste et stylisé devenu culte."
+  },
+  {
+    "question": "Quel acteur incarne le docteur Hannibal Lecter dans « Le Silence des agneaux » en 1991 ?",
+    "options": [
+      "Robert De Niro",
+      "Jack Nicholson",
+      "Anthony Hopkins",
+      "Al Pacino"
+    ],
+    "correct_index": 2,
+    "explanation": "Anthony Hopkins remporte l'Oscar du meilleur acteur pour son interprétation terrifiante de ce tueur cannibale."
+  }
+]

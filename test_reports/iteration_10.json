@@ -1,0 +1,35 @@
+{
+  "summary": "Iteration 10 — Major refactor regression + new rate-limit. server.py monolith split into core.py + 5 routers (auth, quiz, payments, challenges, promo). 19/19 pytest backend tests PASS covering: auth (register/login/me/logout/profile-patch/change-password/account-delete), quiz (8 categories + premium & free questions + attempts + stats), payments (packages), challenges (admin create + mine + public get + participate), promo (admin list+CRUD+seeded codes FAMILLE2026/DECOUVERTE30 + redeem upgrades plan to premium), static mascots (8/8 served at /api/static/mascots/*.png), and the new rate-limit on /api/auth/forgot-password (first 3 calls return 200, 4th returns HTTP 429 with French detail 'Trop de tentatives' and Retry-After header). Rate-limit isolation verified: login/register unaffected after forgot-pw bucket exhausted. Frontend smoke: Landing shows 8 mascots; admin login → /app/dashboard works; /app/admin/promo lists FAMILLE2026 + DECOUVERTE30; /app/quiz/cinema loads questions; /forgot-password shows confirmation block. Full E2E reset flow: register → forgot → token from backend logs → /reset-password sets new pwd → auto-redirected to /login → login with new pwd reaches dashboard → old password rejected (401). Backend logs all 'Application startup complete' with proper seeding (admin idempotent, promos idempotent, 240 questions reloaded).",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_iteration10.py",
+    "/app/test_reports/pytest/pytest_iter10.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "core.py — rate-limit bucket dict is process-local and never bounded (only timestamps inside window are kept); under high cardinality of source IPs the dict grows unboundedly. Consider periodic GC or LRU cap.",
+    "core.py — rate_limit uses request.headers['x-forwarded-for'] without validating presence/format; behind a proxy that strips it, all clients share the same key (request.client.host). Currently OK because ingress sets XFF, but worth documenting.",
+    "server.py startup hook deletes all questions every boot (db.questions.delete_many({})) and re-inserts. Fine for seed-data but loses any runtime additions if such a concept were added later.",
+    "auth.py — _send_reset_email logs the full reset_link to backend logs (line 124 [RESET] ...). Useful for testing/debugging but sensitive in production; consider gating behind a DEBUG flag.",
+    "auth.py — forgot_password now always returns email_sent key (good — fixes prior enumeration concern raised in iter9). Generic response shape is consistent across known/unknown emails.",
+    "Modular split is clean: core.py (220 lines) + 5 routers stay well under the 700-line threshold; no duplicated logic spotted across routers."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_iteration10.py (new)"
+  ],
+  "success_rate": {"backend": "100% (19/19)", "frontend": "100% (smoke + E2E)"},
+  "test_credentials": "admin@quizdantan.fr / Admin2026! ; promo: FAMILLE2026, DECOUVERTE30",
+  "seed_data_creation": "test_iteration10.py creates TEST_<uuid>@example.com users (free + premium upgraded), TEST_<code> promo (deleted), TEST_del_<uuid> user (deleted). All test data prefixed TEST_ for cleanup.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Refactor is functionally equivalent to monolith — zero regressions. Rate-limit is in-memory & per-IP — when running pytest TestRateLimit::* repeatedly, restart backend (sudo supervisorctl restart backend) to clear _rate_buckets. Browser automation runs from a different egress IP than pytest, so they don't interfere. Note: backend [RESET] log line lowercases the email (body.email.lower() in register/forgot endpoints), so when grep-ing logs for an email created via API, search lowercase.",
+  "rca of the issue": "N/A — no issues found. Refactor passes all regression checks; new rate-limit behaves correctly (3 OK → 4th 429 with Retry-After and 'Trop de tentatives' message in French); isolation per-endpoint verified."
+}

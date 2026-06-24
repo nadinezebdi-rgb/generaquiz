@@ -1,0 +1,772 @@
+[
+  {
+    "question": "Qui chantait « Y'a d'la joie » en 1937 ?",
+    "options": [
+      "Charles Trenet",
+      "Maurice Chevalier",
+      "Tino Rossi",
+      "Jean Sablon"
+    ],
+    "correct_index": 0,
+    "explanation": "Charles Trenet a composé et interprété « Y'a d'la joie » en 1937, l'un de ses premiers grands succès."
+  },
+  {
+    "question": "Quelle chanson de Georges Brassens parle d'une femme aimée par tout un village ?",
+    "options": [
+      "La Marguerite",
+      "La mauvaise réputation",
+      "La Jeanne",
+      "Marinette"
+    ],
+    "correct_index": 2,
+    "explanation": "« La Jeanne » raconte l'histoire d'une femme généreuse de ses charmes, aimée par tous les hommes du village."
+  },
+  {
+    "question": "Qui a chanté « Le gorille » en 1952 ?",
+    "options": [
+      "Léo Ferré",
+      "Georges Brassens",
+      "Jacques Brel",
+      "Serge Gainsbourg"
+    ],
+    "correct_index": 1,
+    "explanation": "« Le gorille » est une chanson anticléricale et contestataire de Georges Brassens sortie en 1952."
+  },
+  {
+    "question": "Quelle chanteuse a interprété « Mon légionnaire » en 1936 ?",
+    "options": [
+      "Fréhel",
+      "Marie Dubas",
+      "Damia",
+      "Joséphine Baker"
+    ],
+    "correct_index": 2,
+    "explanation": "« Mon légionnaire » fut d'abord interprétée par Marie Dubas puis reprise avec succès par Damia en 1936."
+  },
+  {
+    "question": "Qui chante « L'Hymne à l'amour » en 1949 ?",
+    "options": [
+      "Édith Piaf",
+      "Juliette Gréco",
+      "Yves Montand",
+      "Lucienne Delyle"
+    ],
+    "correct_index": 0,
+    "explanation": "Édith Piaf a écrit et chanté « L'Hymne à l'amour » en hommage à Marcel Cerdan décédé en 1949."
+  },
+  {
+    "question": "Quelle chanson de Gilbert Bécaud commence par « Et maintenant que vais-je faire » ?",
+    "options": [
+      "Je reviens te chercher",
+      "Nathalie",
+      "Et maintenant",
+      "L'important c'est la rose"
+    ],
+    "correct_index": 2,
+    "explanation": "« Et maintenant » est le titre exact de cette chanson de Gilbert Bécaud sortie en 1961."
+  },
+  {
+    "question": "Qui a chanté « Syracuse » en 1962 ?",
+    "options": [
+      "Henri Salvador",
+      "Maurice Chevalier",
+      "Bourvil",
+      "Luis Mariano"
+    ],
+    "correct_index": 0,
+    "explanation": "Henri Salvador a interprété « Syracuse », chanson évoquant la ville sicilienne, en 1962."
+  },
+  {
+    "question": "Quelle chanson de Claude François évoque un moulin à musique ?",
+    "options": [
+      "Le lundi au soleil",
+      "Alexandrie Alexandra",
+      "Comme d'habitude",
+      "Le téléphone pleure"
+    ],
+    "correct_index": 1,
+    "explanation": "« Alexandrie Alexandra » (1978) évoque un bal au moulin de la galette avec un orgue de barbarie."
+  },
+  {
+    "question": "Qui a chanté « Le Sud » en 1975 ?",
+    "options": [
+      "Michel Sardou",
+      "Nino Ferrer",
+      "Michel Delpech",
+      "Christophe"
+    ],
+    "correct_index": 1,
+    "explanation": "« Le Sud » est une chanson de Nino Ferrer sortie en 1975, évoquant la nostalgie du soleil méridional."
+  },
+  {
+    "question": "Quelle chanteuse a interprété « Mon Dieu » en 1960 ?",
+    "options": [
+      "Édith Piaf",
+      "Barbara",
+      "Dalida",
+      "Juliette Gréco"
+    ],
+    "correct_index": 0,
+    "explanation": "« Mon Dieu » est une chanson d'Édith Piaf de 1960, écrite par Charles Dumont et Michel Vaucaire."
+  },
+  {
+    "question": "Qui chante « Avec le temps » en 1970 ?",
+    "options": [
+      "Léo Ferré",
+      "Serge Reggiani",
+      "Jacques Brel",
+      "Guy Béart"
+    ],
+    "correct_index": 0,
+    "explanation": "« Avec le temps » est une chanson mélancolique de Léo Ferré sortie en 1970."
+  },
+  {
+    "question": "Quelle chanson de Joe Dassin évoque un été indien ?",
+    "options": [
+      "L'été indien",
+      "Les Dalton",
+      "Le Café des Trois Colombes",
+      "À toi"
+    ],
+    "correct_index": 0,
+    "explanation": "« L'été indien » est l'un des plus grands succès de Joe Dassin, sorti en 1975."
+  },
+  {
+    "question": "Qui a chanté « Quand tu dors près de moi » ?",
+    "options": [
+      "Albert Préjean",
+      "Maurice Chevalier",
+      "Rina Ketty",
+      "Lys Gauty"
+    ],
+    "correct_index": 2,
+    "explanation": "Rina Ketty a interprété « Quand tu dors près de moi » et « Sombreros et mantilles » dans les années 30."
+  },
+  {
+    "question": "Quelle chanson de Serge Gainsbourg est chantée en duo avec sa fille Charlotte ?",
+    "options": [
+      "Lemon Incest",
+      "Bambou",
+      "Sorry Angel",
+      "Charlotte for Ever"
+    ],
+    "correct_index": 0,
+    "explanation": "« Lemon Incest » est un duo controversé entre Serge et Charlotte Gainsbourg sorti en 1984."
+  },
+  {
+    "question": "Qui chante « Göttingen » en 1965 ?",
+    "options": [
+      "Juliette Gréco",
+      "Barbara",
+      "Françoise Hardy",
+      "Brigitte Fontaine"
+    ],
+    "correct_index": 1,
+    "explanation": "« Göttingen » est une chanson de Barbara célébrant la réconciliation franco-allemande, sortie en 1965."
+  },
+  {
+    "question": "Quelle chanson de Jacques Dutronc évoque 700 millions de Chinois ?",
+    "options": [
+      "Il est cinq heures, Paris s'éveille",
+      "Les cactus",
+      "Et moi, et moi, et moi",
+      "L'opportuniste"
+    ],
+    "correct_index": 2,
+    "explanation": "« Et moi, et moi, et moi » (1966) contient le refrain célèbre « 700 millions de Chinois, et moi, et moi, et moi »."
+  },
+  {
+    "question": "Qui a chanté « Aux Champs-Élysées » avant Joe Dassin ?",
+    "options": [
+      "Sacha Distel",
+      "Hugues Aufray",
+      "Nino Ferrer",
+      "Personne, c'est une création originale"
+    ],
+    "correct_index": 0,
+    "explanation": "Sacha Distel a enregistré la version originale française en 1969, avant la reprise par Joe Dassin."
+  },
+  {
+    "question": "Quelle chanson de Michel Polnareff évoque une poupée ?",
+    "options": [
+      "Love Me, Please Love Me",
+      "La poupée qui fait non",
+      "Le bal des Laze",
+      "Tous les bateaux, tous les oiseaux"
+    ],
+    "correct_index": 1,
+    "explanation": "« La poupée qui fait non » est l'un des premiers succès de Michel Polnareff, sorti en 1966."
+  },
+  {
+    "question": "Qui chante « Le ciel, le soleil et la mer » en 1956 ?",
+    "options": [
+      "Luis Mariano",
+      "Tino Rossi",
+      "André Claveau",
+      "François Deguelt"
+    ],
+    "correct_index": 1,
+    "explanation": "Tino Rossi a popularisé « Le ciel, le soleil et la mer » en 1956, chanson emblématique de son répertoire."
+  },
+  {
+    "question": "Quelle chanteuse a interprété « La Complainte de la butte » ?",
+    "options": [
+      "Cora Vaucaire",
+      "Juliette Gréco",
+      "Mouloudji",
+      "Les Trois Cloches"
+    ],
+    "correct_index": 0,
+    "explanation": "Cora Vaucaire a chanté « La Complainte de la butte » en 1953 pour le film « French Cancan » de Renoir."
+  },
+  {
+    "question": "Qui a composé « La Mamma » reprise par Charles Aznavour ?",
+    "options": [
+      "Charles Aznavour lui-même",
+      "R. Rouzaud et C. Aznavour",
+      "Georges Garvarentz",
+      "Pierre Delanoë"
+    ],
+    "correct_index": 1,
+    "explanation": "« La Mamma » fut écrite par Robert Rouzaud et composée par Charles Aznavour en 1963."
+  },
+  {
+    "question": "Quelle chanson de Juliette Gréco commence par « Si tu t'imagines » ?",
+    "options": [
+      "Déshabillez-moi",
+      "Jolie môme",
+      "Si tu t'imagines",
+      "Sous le ciel de Paris"
+    ],
+    "correct_index": 2,
+    "explanation": "« Si tu t'imagines » est un poème de Raymond Queneau mis en musique et chanté par Juliette Gréco en 1949."
+  },
+  {
+    "question": "Qui chante « Chanson pour l'Auvergnat » en 1954 ?",
+    "options": [
+      "Georges Brassens",
+      "Félix Leclerc",
+      "Jean Ferrat",
+      "Guy Béart"
+    ],
+    "correct_index": 0,
+    "explanation": "« Chanson pour l'Auvergnat » est un hommage de Georges Brassens aux gens généreux qui l'ont aidé."
+  },
+  {
+    "question": "Quelle chanson d'Yves Montand évoque les feuilles mortes ?",
+    "options": [
+      "À bicyclette",
+      "Les feuilles mortes",
+      "C'est si bon",
+      "La chansonnette"
+    ],
+    "correct_index": 1,
+    "explanation": "« Les feuilles mortes » (1946), sur un poème de Prévert, est l'une des chansons les plus célèbres d'Yves Montand."
+  },
+  {
+    "question": "Qui a écrit et composé « Satanée chanson » pour Nana Mouskouri ?",
+    "options": [
+      "Eddy Marnay",
+      "Michel Legrand",
+      "Manos Hadjidakis",
+      "Pierre Delanoë"
+    ],
+    "correct_index": 1,
+    "explanation": "Michel Legrand a composé « Satanée chanson » pour Nana Mouskouri, l'un de ses succès des années 70."
+  },
+  {
+    "question": "Quel surnom portait Édith Piaf ?",
+    "options": [
+      "La Môme Piaf",
+      "La Môme Moineau",
+      "La Petite Étoile",
+      "La Voix de Paris"
+    ],
+    "correct_index": 0,
+    "explanation": "Édith Piaf était surnommée « La Môme Piaf » en référence à sa petite taille et à sa voix puissante."
+  },
+  {
+    "question": "Qui chante « La Montagne » en 1964 ?",
+    "options": [
+      "Jean Ferrat",
+      "Georges Brassens",
+      "Léo Ferré",
+      "Jacques Brel"
+    ],
+    "correct_index": 0,
+    "explanation": "Jean Ferrat a chanté « La Montagne », un hommage poignant à la vie rurale disparue."
+  },
+  {
+    "question": "Quelle chanson de Charles Trenet évoque un jardin extraordinaire ?",
+    "options": [
+      "Le Jardin extraordinaire",
+      "Y'a d'la joie",
+      "Douce France",
+      "La Mer"
+    ],
+    "correct_index": 0,
+    "explanation": "« Le Jardin extraordinaire » est une chanson emblématique de Charles Trenet créée en 1957."
+  },
+  {
+    "question": "Qui a chanté « Mon truc en plumes » ?",
+    "options": [
+      "Zizi Jeanmaire",
+      "Juliette Gréco",
+      "Édith Piaf",
+      "Barbara"
+    ],
+    "correct_index": 0,
+    "explanation": "Zizi Jeanmaire a interprété ce succès en 1961, devenant l'une de ses chansons emblématiques."
+  },
+  {
+    "question": "Quel chanteur a popularisé « Le Petit Jardin » ?",
+    "options": [
+      "Jacques Dutronc",
+      "Serge Reggiani",
+      "Georges Brassens",
+      "Claude Nougaro"
+    ],
+    "correct_index": 1,
+    "explanation": "Serge Reggiani a chanté « Le Petit Jardin », un classique de la chanson française poétique."
+  },
+  {
+    "question": "Qui chante « Il est cinq heures, Paris s'éveille » ?",
+    "options": [
+      "Jacques Dutronc",
+      "Michel Polnareff",
+      "Serge Gainsbourg",
+      "Johnny Hallyday"
+    ],
+    "correct_index": 0,
+    "explanation": "Jacques Dutronc a sorti ce tube en 1968, décrivant Paris au petit matin."
+  },
+  {
+    "question": "Quelle chanson de Dalida évoque une ville italienne ?",
+    "options": [
+      "Come prima",
+      "Bambino",
+      "Gondolier",
+      "Ciao ciao bambina"
+    ],
+    "correct_index": 2,
+    "explanation": "« Gondolier » est une chanson de Dalida qui évoque Venise et ses gondoliers."
+  },
+  {
+    "question": "Qui a chanté « Nathalie » en 1964 ?",
+    "options": [
+      "Gilbert Bécaud",
+      "Charles Aznavour",
+      "Sacha Distel",
+      "Enrico Macias"
+    ],
+    "correct_index": 0,
+    "explanation": "Gilbert Bécaud a interprété « Nathalie », une chanson évoquant une guide touristique russe."
+  },
+  {
+    "question": "Quelle chanson de Johnny Hallyday est sortie en 1960 ?",
+    "options": [
+      "Souvenirs, souvenirs",
+      "Que je t'aime",
+      "Gabrielle",
+      "Allumer le feu"
+    ],
+    "correct_index": 0,
+    "explanation": "« Souvenirs, souvenirs » fut l'un des premiers grands succès de Johnny Hallyday en 1960."
+  },
+  {
+    "question": "Qui chante « Armstrong » en 1967 ?",
+    "options": [
+      "Claude Nougaro",
+      "Serge Gainsbourg",
+      "Henri Salvador",
+      "Michel Legrand"
+    ],
+    "correct_index": 0,
+    "explanation": "Claude Nougaro rend hommage à Louis Armstrong dans cette chanson célèbre."
+  },
+  {
+    "question": "Quelle chanson d'Aznavour évoque des comédiens ?",
+    "options": [
+      "Les Comédiens",
+      "La Bohème",
+      "Hier encore",
+      "For Me Formidable"
+    ],
+    "correct_index": 0,
+    "explanation": "« Les Comédiens » est une chanson célèbre de Charles Aznavour sortie en 1962."
+  },
+  {
+    "question": "Qui a chanté « Parlez-moi d'amour » dans les années 1930 ?",
+    "options": [
+      "Lucienne Boyer",
+      "Mistinguett",
+      "Fréhel",
+      "Damia"
+    ],
+    "correct_index": 0,
+    "explanation": "Lucienne Boyer a popularisé cette chanson romantique devenue un classique en 1930."
+  },
+  {
+    "question": "Quelle chanson de Michel Fugain évoque une fête ?",
+    "options": [
+      "Une belle histoire",
+      "Fais comme l'oiseau",
+      "Chante",
+      "Bravo monsieur le monde"
+    ],
+    "correct_index": 0,
+    "explanation": "« Une belle histoire » est le grand succès de Michel Fugain et le Big Bazar en 1972."
+  },
+  {
+    "question": "Qui chante « Aline » en 1965 ?",
+    "options": [
+      "Christophe",
+      "Michel Polnareff",
+      "Antoine",
+      "Claude François"
+    ],
+    "correct_index": 0,
+    "explanation": "« Aline » est le premier grand succès de Christophe, devenu un classique intemporel."
+  },
+  {
+    "question": "Quelle chanson de Renaud évoque sa mère ?",
+    "options": [
+      "Mistral gagnant",
+      "Morgane de toi",
+      "Laisse béton",
+      "Ma chanson leur a pas plu"
+    ],
+    "correct_index": 1,
+    "explanation": "« Morgane de toi » est une chanson de Renaud dédiée à sa fille et évoquant sa mère."
+  },
+  {
+    "question": "Qui a chanté « Le déserteur » écrit par Boris Vian ?",
+    "options": [
+      "Mouloudji",
+      "Boris Vian",
+      "Serge Reggiani",
+      "Yves Montand"
+    ],
+    "correct_index": 0,
+    "explanation": "Mouloudji a popularisé « Le déserteur » en 1954, chanson pacifiste écrite par Boris Vian."
+  },
+  {
+    "question": "Quelle chanson de Serge Lama évoque une femme d'un soir ?",
+    "options": [
+      "Je suis malade",
+      "Les Ballons rouges",
+      "D'aventures en aventures",
+      "Femme, femme, femme"
+    ],
+    "correct_index": 2,
+    "explanation": "« D'aventures en aventures » est l'un des succès de Serge Lama sorti en 1974."
+  },
+  {
+    "question": "Qui chante « Les Moulins de mon cœur » ?",
+    "options": [
+      "Michel Legrand",
+      "Nana Mouskouri",
+      "Petula Clark",
+      "Mireille Mathieu"
+    ],
+    "correct_index": 0,
+    "explanation": "Michel Legrand a composé et chanté « Les Moulins de mon cœur », musique du film « L'Affaire Thomas Crown »."
+  },
+  {
+    "question": "Quelle chanson de Françoise Hardy évoque une rencontre manquée ?",
+    "options": [
+      "Message personnel",
+      "Comment te dire adieu",
+      "Mon amie la rose",
+      "Tous les garçons et les filles"
+    ],
+    "correct_index": 0,
+    "explanation": "« Message personnel » est un succès de Françoise Hardy sorti en 1973."
+  },
+  {
+    "question": "Qui a chanté « Le Tourbillon » dans le film « Jules et Jim » ?",
+    "options": [
+      "Jeanne Moreau",
+      "Catherine Deneuve",
+      "Brigitte Bardot",
+      "Anna Karina"
+    ],
+    "correct_index": 0,
+    "explanation": "Jeanne Moreau interprète « Le Tourbillon » dans le film de François Truffaut en 1962."
+  },
+  {
+    "question": "Quelle chanson de Brassens parle d'un banc public ?",
+    "options": [
+      "Les Amoureux des bancs publics",
+      "La Mauvaise Réputation",
+      "Chanson pour l'Auvergnat",
+      "Le Gorille"
+    ],
+    "correct_index": 0,
+    "explanation": "« Les Amoureux des bancs publics » est une chanson tendre de Georges Brassens de 1953."
+  },
+  {
+    "question": "Qui a interprété « Ne bouge pas » en 1954 ?",
+    "options": [
+      "Georges Guétary",
+      "Tino Rossi",
+      "Luis Mariano",
+      "André Claveau"
+    ],
+    "correct_index": 0,
+    "explanation": "Georges Guétary a popularisé « Ne bouge pas », un succès de la chanson française des années 50."
+  },
+  {
+    "question": "Quelle chanson de Barbara évoque un piano noir ?",
+    "options": [
+      "Dis, quand reviendras-tu ?",
+      "Göttingen",
+      "L'Aigle noir",
+      "Ma plus belle histoire d'amour"
+    ],
+    "correct_index": 2,
+    "explanation": "« L'Aigle noir » est l'une des chansons les plus emblématiques de Barbara, sortie en 1970."
+  },
+  {
+    "question": "Qui chante « La Plus Belle pour aller danser » ?",
+    "options": [
+      "Sylvie Vartan",
+      "Sheila",
+      "Françoise Hardy",
+      "France Gall"
+    ],
+    "correct_index": 0,
+    "explanation": "Sylvie Vartan a chanté ce tube yé-yé en 1964, devenu l'un de ses plus grands succès."
+  },
+  {
+    "question": "Quelle chanson de Léo Ferré évoque Paris et l'anarchie ?",
+    "options": [
+      "Avec le temps",
+      "L'Affiche rouge",
+      "Ni Dieu ni maître",
+      "C'est extra"
+    ],
+    "correct_index": 2,
+    "explanation": "« Ni Dieu ni maître » est une chanson anarchiste emblématique de Léo Ferré sortie en 1965."
+  },
+  {
+    "question": "Quelle chanson de Jacques Brel évoque la mort d'un homme avec les mots « Mourir, la belle affaire » ?",
+    "options": [
+      "La Quête",
+      "Les Vieux",
+      "Jef",
+      "Voir un ami pleurer"
+    ],
+    "correct_index": 2,
+    "explanation": "« Jef » est une chanson de Jacques Brel sortie en 1977, évoquant la mort d'un ami proche avec cette phrase emblématique."
+  },
+  {
+    "question": "Qui chante « Que je t'aime » en 1969 ?",
+    "options": [
+      "Johnny Hallyday",
+      "Claude François",
+      "Michel Sardou",
+      "Eddy Mitchell"
+    ],
+    "correct_index": 0,
+    "explanation": "« Que je t'aime » est l'un des plus grands succès de Johnny Hallyday, sorti en 1969."
+  },
+  {
+    "question": "Quelle chanson de Dalida commence par « Paroles, paroles, paroles » ?",
+    "options": [
+      "Gigi l'amoroso",
+      "Paroles paroles",
+      "Il venait d'avoir 18 ans",
+      "Laissez-moi danser"
+    ],
+    "correct_index": 1,
+    "explanation": "« Paroles paroles » est un duo célèbre de Dalida avec Alain Delon, sorti en 1973."
+  },
+  {
+    "question": "Qui a chanté « Les Roses blanches » ?",
+    "options": [
+      "Berthe Sylva",
+      "Fréhel",
+      "Damia",
+      "Yvonne Printemps"
+    ],
+    "correct_index": 0,
+    "explanation": "Berthe Sylva a popularisé « Les Roses blanches » en 1926, une chanson émouvante sur l'amour filial."
+  },
+  {
+    "question": "Quelle chanson de Georges Moustaki commence par « Ma liberté » ?",
+    "options": [
+      "Le Métèque",
+      "Ma liberté",
+      "Ma solitude",
+      "Joseph"
+    ],
+    "correct_index": 1,
+    "explanation": "« Ma liberté » est une chanson emblématique de Georges Moustaki sortie en 1970."
+  },
+  {
+    "question": "Qui chante « Les Sunlights des tropiques » en 1984 ?",
+    "options": [
+      "Gilbert Montagné",
+      "Claude Barzotti",
+      "Patrick Bruel",
+      "Alain Souchon"
+    ],
+    "correct_index": 0,
+    "explanation": "Gilbert Montagné a connu un grand succès avec « Les Sunlights des tropiques » en 1984."
+  },
+  {
+    "question": "Quelle chanson de Renaud évoque son fils ?",
+    "options": [
+      "Morgane de toi",
+      "Mistral gagnant",
+      "Manhattan-Kaboul",
+      "Dès que le vent soufflera"
+    ],
+    "correct_index": 1,
+    "explanation": "« Mistral gagnant » est une chanson tendre de Renaud adressée à sa fille Lolita, sortie en 1985."
+  },
+  {
+    "question": "Qui a chanté « Foule sentimentale » en 1993 ?",
+    "options": [
+      "Alain Souchon",
+      "Jean-Jacques Goldman",
+      "Francis Cabrel",
+      "Laurent Voulzy"
+    ],
+    "correct_index": 0,
+    "explanation": "« Foule sentimentale » est un succès d'Alain Souchon sorti en 1993, critiquant la société de consommation."
+  },
+  {
+    "question": "Quelle chanson de Barbara évoque la ville de Nantes ?",
+    "options": [
+      "Nantes",
+      "Dis, quand reviendras-tu ?",
+      "L'Aigle noir",
+      "Ma plus belle histoire d'amour"
+    ],
+    "correct_index": 0,
+    "explanation": "« Nantes » est une chanson poignante de Barbara sortie en 1964, évoquant la mort de son père."
+  },
+  {
+    "question": "Quelle chanson de Michel Fugain évoque une « bande à Bonnot » moderne ?",
+    "options": [
+      "Une belle histoire",
+      "Fais comme l'oiseau",
+      "La Fête",
+      "Chante"
+    ],
+    "correct_index": 0,
+    "explanation": "« Une belle histoire » de Michel Fugain et le Big Bazar est sortie en 1972 et célèbre la vie en collectif."
+  },
+  {
+    "question": "Qui a chanté « Je suis malade » en 1973 ?",
+    "options": [
+      "Dalida",
+      "Serge Lama",
+      "Sheila",
+      "Barbara"
+    ],
+    "correct_index": 1,
+    "explanation": "« Je suis malade » est une chanson écrite et composée par Serge Lama en 1973, reprise par Dalida la même année."
+  },
+  {
+    "question": "Quelle chanson de France Gall évoque un garçon prénommé Claude ?",
+    "options": [
+      "Sacré Charlemagne",
+      "Poupée de cire, poupée de son",
+      "Résiste",
+      "Évidemment"
+    ],
+    "correct_index": 3,
+    "explanation": "« Évidemment » est une chanson de France Gall sortie en 1987, évoquant Claude François décédé."
+  },
+  {
+    "question": "Qui chante « Petit Papa Noël », chanson traditionnelle française ?",
+    "options": [
+      "Tino Rossi",
+      "Luis Mariano",
+      "Georges Guétary",
+      "André Claveau"
+    ],
+    "correct_index": 0,
+    "explanation": "Tino Rossi a enregistré « Petit Papa Noël » en 1946, devenue un classique des fêtes de fin d'année."
+  },
+  {
+    "question": "Quelle chanson de Zazie commence par « Je suis un homme » ?",
+    "options": [
+      "Zen",
+      "Rue de la paix",
+      "Je suis un homme",
+      "Speed"
+    ],
+    "correct_index": 2,
+    "explanation": "« Je suis un homme » est un succès de Zazie sorti en 2007, abordant l'égalité des genres."
+  },
+  {
+    "question": "Qui a chanté « Il » en 1977 ?",
+    "options": [
+      "Sylvie Vartan",
+      "Sheila",
+      "Nicole Croisille",
+      "Marie Laforêt"
+    ],
+    "correct_index": 1,
+    "explanation": "« Il » est l'un des plus grands succès de Sheila, sorti en 1977, racontant une histoire d'amour."
+  },
+  {
+    "question": "Quelle chanson de Jean Ferrat rend hommage à la résistance ?",
+    "options": [
+      "La montagne",
+      "Nuit et brouillard",
+      "Que serais-je sans toi",
+      "Ma môme"
+    ],
+    "correct_index": 1,
+    "explanation": "« Nuit et brouillard » de Jean Ferrat, sortie en 1963, évoque la déportation et la Shoah."
+  },
+  {
+    "question": "Qui chante « L'Aventurier » en 1982 ?",
+    "options": [
+      "Indochine",
+      "Téléphone",
+      "Trust",
+      "Les Rita Mitsouko"
+    ],
+    "correct_index": 0,
+    "explanation": "« L'Aventurier » est le premier grand succès du groupe Indochine, sorti en 1982."
+  },
+  {
+    "question": "Quelle chanson de Léo Ferré met en musique un poème d'Aragon ?",
+    "options": [
+      "Avec le temps",
+      "C'est extra",
+      "Est-ce ainsi que les hommes vivent",
+      "Ni Dieu ni maître"
+    ],
+    "correct_index": 2,
+    "explanation": "Léo Ferré a mis en musique plusieurs poèmes d'Aragon, dont « Est-ce ainsi que les hommes vivent » en 1961."
+  },
+  {
+    "question": "Qui a chanté « Mon vieux » en 1974 ?",
+    "options": [
+      "Daniel Guichard",
+      "Michel Sardou",
+      "Frédéric François",
+      "Stone et Charden"
+    ],
+    "correct_index": 0,
+    "explanation": "« Mon vieux » est le plus grand succès de Daniel Guichard, sorti en 1974, hommage à son père."
+  },
+  {
+    "question": "Quelle chanson de Jacques Brel évoque des amoureux sur les bancs publics ?",
+    "options": [
+      "Les Vieux",
+      "Les Bonbons",
+      "Les Marquises",
+      "Les Flamandes"
+    ],
+    "correct_index": 0,
+    "explanation": "« Les Vieux » (1963) de Jacques Brel décrit avec tendresse un couple de personnes âgées qui se souviennent de leurs jeunes années passées sur les bancs publics."
+  }
+]

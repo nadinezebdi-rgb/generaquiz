@@ -1,0 +1,34 @@
+{
+  "summary": "Iteration 11 — Validation complète après expansion massive du contenu 240→800 questions (100/cat × 8). Backend pytest 12/12 PASS, frontend smoke + E2E quiz play OK. Aucune régression détectée. Les 8 catégories renvoient bien count=100, premium reçoit 30 questions uniques aléatoires par appel (sampling vérifié via 2 appels successifs avec sets différents), free reçoit 5 questions, toutes valides (4 options + correct_index ∈ [0,3]). Auth register/login/me OK, défi famille créé+lu+joué (avec correct_index correctement masqué en vue publique anti-triche), promo FAMILLE2026/DECOUVERTE30 listés + redeem upgrade en premium OK, forgot-password renvoie 200 avec email_sent + rate-limit 429 après 3 appels. Frontend: Landing affiche 100+ Questions / 8 Catégories, login admin → /app/dashboard montre 8 cartes catégories avec mascots et libellé '100 QUESTIONS' chacune, clic Jouer Cinéma → quiz se lance, 30 questions répondues séquentiellement avec feedback correct/incorrect + explications, bouton 'Voir mon score' à la fin. Aucune erreur console ni pageerror.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_iteration11_expansion.py",
+    "/app/test_reports/pytest/pytest_iter11.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "quiz.py — get_questions utilise $sample sur 100 docs par catégorie : OK, complexité acceptable.",
+    "challenges.py — la projection {questions.correct_index: 0, questions.explanation: 0} sur GET /challenges/{token} masque correctement les réponses (anti-triche). Bon pattern à conserver.",
+    "seed_data.py — loader extra_questions charge 70 q/cat depuis JSON puis fusionne avec les 30 q de base = 100 total. Le startup hook (server.py:79) delete_many({}) puis insert_many : idempotent au reboot mais effacerait toute Q runtime — non pertinent ici car pas d'ajout dynamique.",
+    "Toutes les 560 questions extra (8×70) bien chargées : vérification par /api/categories count=100 partout.",
+    "Rate-limit forgot-password : in-memory per-IP, vérifié 429 après bursts. Document deja noté en iter10 que le bucket n'est pas borné — non bloquant pour ce review."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_iteration11_expansion.py (new)"
+  ],
+  "success_rate": {"backend": "100% (12/12)", "frontend": "100% (landing + login + dashboard + quiz 30Q E2E)"},
+  "test_credentials": "admin@generaquiz.fr / Admin2026! ; promos: FAMILLE2026, DECOUVERTE30 ; TEST_<uuid>@example.com users créés dynamiquement (free + premium-via-promo)",
+  "seed_data_creation": "test_iteration11_expansion.py crée des users TEST_<uuid>@example.com (préfixe TEST_ pour cleanup futur). Aucune donnée seed altérée.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Expansion 800 questions validée. Si nouvelles questions ajoutées via generate_questions.py, relancer test_iteration11_expansion.py — il vérifie count=100/cat + structure (4 opts + correct_index 0-3 + uniqueness dans un même $sample). Le test challenges utilise schéma {name, answers: List[int]} pour /participate. Rate-limit est per-IP : si tests qui appellent forgot-password échouent, restart backend pour vider _rate_buckets.",
+  "rca of the issue": "N/A — aucun bug. Tous les flows critiques (auth, quiz play free/premium, challenges, promo, forgot-password+rate-limit) fonctionnent. Le contenu expansé est servi sans régression."
+}
