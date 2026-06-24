@@ -31,6 +31,7 @@ from routers import challenges as challenges_router
 from routers import promo as promo_router
 from routers import daily as daily_router
 from routers import gamification as gamification_router
+from routers import reports as reports_router
 
 app = FastAPI(title="Quiz d'Antan API")
 api = APIRouter(prefix="/api")
@@ -71,6 +72,7 @@ api.include_router(challenges_router.router)
 api.include_router(promo_router.router)
 api.include_router(daily_router.router)
 api.include_router(gamification_router.router)
+api.include_router(reports_router.router)
 app.include_router(api)
 
 # CORS
@@ -112,6 +114,8 @@ async def startup():
     await db.league_memberships.create_index("cohort_id")
     await db.league_scores.create_index([("user_id", 1), ("week_key", 1)], unique=True)
     await db.league_scores.create_index([("week_key", 1), ("xp", -1)])
+    await db.question_reports.create_index([("status", 1), ("question_id", 1)])
+    await db.question_reports.create_index([("user_id", 1), ("question_id", 1)])
 
     # Seed categories (always refresh metadata: title/description/mascot/count)
     for cat in CATEGORIES:

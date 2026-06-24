@@ -22,6 +22,7 @@ import DailyQuiz from "@/pages/DailyQuiz";
 import CGU from "@/pages/legal/CGU";
 import CGV from "@/pages/legal/CGV";
 import Confidentialite from "@/pages/legal/Confidentialite";
+import AdminReports from "@/pages/AdminReports";
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();
@@ -124,6 +125,14 @@ export default function App() {
             element={
               <ProtectedRoute>
                 <AdminPromo />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/app/admin/reports"
+            element={
+              <ProtectedRoute>
+                <AdminReports />
               </ProtectedRoute>
             }
           />

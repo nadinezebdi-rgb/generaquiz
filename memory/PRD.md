@@ -242,3 +242,19 @@ Le backend est **prêt à être consommé** par une app React Native :
 - Endpoint admin pour valider/supprimer manuellement les questions signalées
 - Métriques mensuelles Mistral (latence moyenne, taux de retry, coût exact)
 
+
+## Implemented (2026-02-15, iteration 17) — 🚩 Signalement de questions + revue admin
+- ✅ **Bouton "Signaler" discret** sur chaque question (QuizPlayer + DailyQuiz) après réponse
+- ✅ **Modal de signalement** avec 5 raisons : réponse incorrecte / ambiguë / doublon / inapproprié / autre + commentaire facultatif
+- ✅ **Anti-spam** : 1 signalement par user par question (dédup 24h pending)
+- ✅ **Backend** : nouveau router `/app/backend/routers/reports.py`
+  - `POST /api/quiz/report` — auth required, raisons whitelist
+  - `GET /api/admin/reports?status=pending|resolved|all` — admin only, agrégé par question avec compteurs
+  - `POST /api/admin/reports/{question_id}/resolve` — action `delete` (supprime la question — Mistral régénère à 03h) ou `dismiss`
+- ✅ **Frontend admin** : nouvelle page `/app/admin/reports` (`AdminReports.jsx`)
+  - 3 onglets : En attente / Traités / Tous
+  - Pour chaque question signalée : texte, options avec ✓ sur la bonne, badge Mistral 🤖, compteur par raison, commentaires dépliables
+  - 2 actions : "Supprimer la question" (rouge) ou "Écarter" (blanc)
+- ✅ **Navigation** : lien navbar admin "Signalements" (à côté de "Promos")
+- ✅ Tests : flow complet validé (report → admin list → resolve dismiss → resolved tab)
+

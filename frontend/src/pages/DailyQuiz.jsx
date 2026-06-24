@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import Logo from "@/components/Logo";
 import ScoreCard from "@/components/ScoreCard";
+import ReportButton from "@/components/ReportButton";
 import { toast } from "sonner";
 
 // Fisher-Yates shuffle of options + return mapping so we can re-map to original index
@@ -255,14 +256,19 @@ export default function DailyQuiz() {
                 </div>
               )}
               {revealed && (
-                <button
-                  data-testid="daily-next-btn"
-                  onClick={next}
-                  className="w-full inline-flex items-center justify-center gap-2 bg-navy hover:bg-navy/90 text-white font-bold text-xl px-6 py-5 rounded-full transition min-h-[68px]"
-                >
-                  {idx + 1 >= data.questions.length ? "Voir mon score" : "Question suivante"}{" "}
-                  <ArrowRight className="w-6 h-6" />
-                </button>
+                <>
+                  <div className="mb-4 flex justify-start">
+                    <ReportButton questionId={currentQ.id} />
+                  </div>
+                  <button
+                    data-testid="daily-next-btn"
+                    onClick={next}
+                    className="w-full inline-flex items-center justify-center gap-2 bg-navy hover:bg-navy/90 text-white font-bold text-xl px-6 py-5 rounded-full transition min-h-[68px]"
+                  >
+                    {idx + 1 >= data.questions.length ? "Voir mon score" : "Question suivante"}{" "}
+                    <ArrowRight className="w-6 h-6" />
+                  </button>
+                </>
               )}
             </motion.div>
           )}
