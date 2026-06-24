@@ -1,312 +1,378 @@
-# Quiz d’Antan — Intégration Mistral pour quiz intergénérationnels
+# Quiz d'Antan — Plateforme de quiz intergénérationnel
 
-Ce dossier fournit le nécessaire pour intégrer une génération de quiz via l’API Mistral dans **Quiz d’Antan**, avec une logique pensée pour des questions intergénérationnelles : souvenirs d’enfance, culture générale, musique, objets du quotidien, histoire récente, vie locale, technologies, sport, cinéma, expressions, cuisine, métiers et transmission entre générations.
+Plateforme complète de quiz intergénérationnel propulsée par **Mistral AI**, avec leaderboard en temps réel, gestion des familles, cache Redis, et suivi mensuel des performances.
 
-L’objectif recommandé est de combiner :
+L'objectif est de faire jouer ensemble grands-parents, parents, adolescents et enfants à partir de 8 ans, autour de questions mêlant nostalgie, culture générale, musique, cinéma, cuisine, sport et histoire.
 
-- **IA générative** pour renouveler les questions et éviter les répétitions ;
+L'architecture repose sur :
+
+- **IA générative** (Mistral Small 4) pour des questions toujours différentes, en français natif ;
 - **cache Redis** pour réduire les coûts et la latence ;
-- **pré-génération nocturne** pour disposer d’un stock de quiz prêts à servir ;
-- **fallback applicatif** pour garder le service disponible si Redis ou Mistral est momentanément indisponible.
+- **pré-génération nocturne** pour un stock de quiz prêts à servir ;
+- **Supabase** pour la persistance des scores, le leaderboard et le Realtime ;
+- **suivi mensuel automatique** pour surveiller tarifs et performances Mistral.
+
+---
 
 ## Structure du projet
 
 ```text
 quiz_antan/
+├── main.py                              # FastAPI — point d'entrée
+├── .env.example                         # Variables d'env backend
+├── .env.local.example                   # Variables d'env frontend
+│
 ├── backend/
-│   ├── mistral_client.py   # Client Mistral API
-│   ├── prompts.py          # Prompts intergénérationnels
-│   ├── cache.py            # Cache Redis
-│   ├── router.py           # Routes FastAPI
-│   └── cron_prefetch.py    # Pré-génération nocturne
-└── frontend/
-    ├── types/quiz.ts
-    ├── hooks/useQuiz.ts
-    ├── components/QuizCard.tsx
-    ├── components/QuizSession.tsx
-    └── components/ThemeSelector.tsx
+│   ├── mistral_client.py                # Client Mistral API (retry, parsing JSON)
+│   ├── prompts.py                       # Prompts intergénérationnels + catalogue thèmes
+│   ├── cache.py                         # Cache Redis async (TTL 24h, fallback gracieux)
+│   ├── router.py                        # Routes quiz : /generate, /themes, /random
+│   ├── cron_prefetch.py                 # Pré-génération nocturne à 2h00 (APScheduler)
+│   ├── supabase_client.py               # Client Supabase (service role, singleton)
+│   ├── leaderboard_service.py           # Calcul score, badges, classements
+│   ├── leaderboard_router.py            # Routes leaderboard : submit, family, global
+│   ├── family_router.py                 # Routes familles : create, join, by-code
+│   └── mistral_monitor.py               # Monitoring mensuel tarifs + latence Mistral
+│
+├── frontend/
+│   ├── lib/
+│   │   └── supabase.ts                  # Client Supabase singleton navigateur
+│   ├── types/
+│   │   ├── quiz.ts                      # Types Question, QuizSession, Theme…
+│   │   └── leaderboard.ts               # Types FamilyRank, PlayerRank, Badge…
+│   ├── hooks/
+│   │   ├── useQuiz.ts                   # Hook quiz : état, score, navigation
+│   │   └── useLeaderboard.ts            # Hook leaderboard : Realtime + fallback polling
+│   ├── components/
+│   │   ├── QuizCard.tsx                 # Carte question + animation réponse
+│   │   ├── QuizSession.tsx              # Orchestrateur : sélection → quiz → résultat
+│   │   ├── ThemeSelector.tsx            # Grille de thèmes groupés par catégorie
+│   │   ├── LeaderboardPanel.tsx         # Classement en direct (onglets + animation)
+│   │   ├── BadgeShowcase.tsx            # Affichage des badges obtenus
+│   │   └── FamilyInvite.tsx             # Créer / rejoindre une famille via code
+│   └── app/
+│       ├── quiz/page.tsx                # Page /quiz
+│       └── leaderboard/page.tsx         # Page /leaderboard
+│
+└── supabase/
+    ├── migrations/
+    │   ├── 001_create_tables.sql        # Tables : families, players, sessions, scores, badges
+    │   ├── 002_views.sql                # Vues : classements familles, joueurs, champions
+    │   └── 003_rls.sql                  # Row Level Security par famille
+    └── seed.sql                         # Données de test (dev uniquement)
 ```
+
+---
 
 ## Installation backend
 
 ### 1. Dépendances Python
 
-Depuis le dossier qui contient votre application FastAPI :
-
 ```bash
-pip install fastapi mistralai redis apscheduler uvicorn
+pip install fastapi mistralai redis apscheduler uvicorn supabase httpx
 ```
 
-### 2. Variables d’environnement requises
+### 2. Variables d'environnement
 
-Créez un fichier `.env` côté backend à partir de `quiz_antan/.env.example` :
+Créez un fichier `.env` à partir de `.env.example` :
 
 ```bash
-cp quiz_antan/.env.example .env
+cp .env.example .env
 ```
-
-Variables attendues :
 
 ```env
+# Mistral
 MISTRAL_API_KEY=your_mistral_api_key_here
 MISTRAL_MODEL=mistral-small-latest
 MISTRAL_TIMEOUT_SECONDS=30
+
+# Redis
 REDIS_URL=redis://localhost:6379/0
+
+# Supabase
+SUPABASE_URL=https://xxxx.supabase.co
+SUPABASE_SERVICE_ROLE_KEY=your_service_role_key_here
+
+# CORS
+ALLOWED_ORIGINS=http://localhost:3000
+
+# Environnement
+APP_ENV=development
+
+# Monitoring mensuel Mistral
+MONITOR_MONTHLY_QUIZ=10000
+MONITOR_CACHE_RATIO=30
+MONITOR_TOKENS_PER_QUIZ=800
+MONITOR_BENCHMARK_RUNS=3
+MONITOR_WEBHOOK_URL=
 ```
 
-Description :
+> Ne jamais exposer `MISTRAL_API_KEY` ou `SUPABASE_SERVICE_ROLE_KEY` côté frontend. Toutes les requêtes sensibles passent par le backend.
 
-| Variable | Rôle | Exemple |
-|---|---|---|
-| `MISTRAL_API_KEY` | Clé API Mistral utilisée par le backend. | `your_mistral_api_key_here` |
-| `MISTRAL_MODEL` | Modèle appelé pour générer les quiz. | `mistral-small-latest` |
-| `MISTRAL_TIMEOUT_SECONDS` | Délai maximum d’attente d’une réponse Mistral. | `30` |
-| `REDIS_URL` | URL de connexion Redis pour le cache. | `redis://localhost:6379/0` |
-
-> Recommandation : ne jamais exposer `MISTRAL_API_KEY` côté frontend. Toutes les requêtes Mistral doivent passer par le backend.
-
-### 3. Commande de lancement
+### 3. Lancement
 
 ```bash
-uvicorn main:app --reload
+uvicorn quiz_antan.main:app --reload --port 8000
 ```
 
-### 4. Commande cron manuel
-
-Pour déclencher manuellement la pré-génération des quiz :
+### 4. Pré-génération manuelle
 
 ```bash
-python quiz_antan/backend/cron_prefetch.py
+python backend/cron_prefetch.py
 ```
 
-Dans une architecture réelle, `cron_prefetch.py` peut être appelé par :
+### 5. Monitoring Mistral manuel
 
-- `cron` Linux ;
-- un job Docker planifié ;
-- APScheduler dans FastAPI ;
-- un worker séparé.
+```bash
+python backend/mistral_monitor.py
+```
+
+---
 
 ## Installation frontend
 
-### 1. Configuration Next.js
+### 1. Variables d'environnement Next.js
 
-Créez un fichier `.env.local` dans votre frontend Next.js à partir de `quiz_antan/.env.local.example` :
+Créez un fichier `.env.local` dans votre dossier frontend :
 
 ```bash
-cp quiz_antan/.env.local.example frontend/.env.local
+cp .env.local.example frontend/.env.local
 ```
-
-Contenu attendu :
 
 ```env
 NEXT_PUBLIC_API_URL=http://localhost:8000
+NEXT_PUBLIC_SUPABASE_URL=https://xxxx.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key_here
 ```
 
-Cette variable permet aux composants React d’appeler le backend FastAPI.
+### 2. Dépendances npm
 
-### 2. Import du composant `QuizSession` dans une page Next.js
-
-Exemple complet de page `app/quiz/page.tsx` :
-
-```tsx
-import QuizSession from '@/components/QuizSession';
-
-export const metadata = {
-  title: 'Quiz d’Antan — Quiz intergénérationnel',
-  description: 'Jouez à des quiz variés pour toutes les générations.',
-};
-
-export default function QuizPage() {
-  return (
-    <main className="min-h-screen bg-amber-50 px-4 py-8">
-      <section className="mx-auto max-w-4xl">
-        <header className="mb-8 text-center">
-          <p className="text-sm font-semibold uppercase tracking-wide text-amber-700">
-            Quiz d’Antan
-          </p>
-          <h1 className="mt-2 text-3xl font-bold text-stone-900 md:text-5xl">
-            Des questions pour toutes les générations
-          </h1>
-          <p className="mt-4 text-stone-700">
-            Choisissez un thème, lancez une session et partagez vos souvenirs,
-            anecdotes et connaissances en famille ou entre amis.
-          </p>
-        </header>
-
-        <QuizSession />
-      </section>
-    </main>
-  );
-}
+```bash
+npm install @supabase/supabase-js
 ```
 
-## Montage dans FastAPI `main.py`
+### 3. Pages disponibles
 
-Exemple complet de `main.py` incluant le router quiz :
-
-```python
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
-from quiz_antan.backend.router import router as quiz_router
-
-app = FastAPI(
-    title="Quiz d’Antan API",
-    description="API de génération de quiz intergénérationnels avec Mistral.",
-    version="1.0.0",
-)
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=[
-        "http://localhost:3000",
-        "http://127.0.0.1:3000",
-    ],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-app.include_router(quiz_router, prefix="/api/quiz", tags=["quiz"])
-
-
-@app.get("/health")
-def health_check():
-    return {"status": "ok"}
-```
-
-Endpoints recommandés dans `quiz_antan.backend.router` :
-
-| Méthode | Route | Rôle |
+| Route | Composant | Description |
 |---|---|---|
-| `GET` | `/api/quiz/themes` | Retourne la liste des thèmes disponibles. |
-| `POST` | `/api/quiz/generate` | Génère ou récupère un quiz depuis le cache. |
-| `POST` | `/api/quiz/prefetch` | Lance une pré-génération contrôlée, à réserver à l’administration. |
+| `/quiz` | `app/quiz/page.tsx` | Sélection de thème et jeu |
+| `/leaderboard` | `app/leaderboard/page.tsx` | Classement global en temps réel |
 
-## Prompt intergénérationnel recommandé
+---
 
-À placer dans `quiz_antan/backend/prompts.py` :
+## Routes API
+
+### Quiz
+
+| Méthode | Route | Description |
+|---|---|---|
+| `GET` | `/api/quiz/themes` | Liste des thèmes avec métadonnées |
+| `GET` | `/api/quiz/generate?theme=...&nb=5` | Génère ou sert depuis le cache |
+| `GET` | `/api/quiz/random` | Thème aléatoire intergénérationnel |
+
+### Leaderboard
+
+| Méthode | Route | Description |
+|---|---|---|
+| `POST` | `/api/leaderboard/submit` | Soumet un score de fin de session |
+| `GET` | `/api/leaderboard/family/{id}?period=week` | Classement d'une famille |
+| `GET` | `/api/leaderboard/global?period=week&limit=10` | Classement global |
+| `GET` | `/api/leaderboard/themes` | Champions par thème |
+| `GET` | `/api/leaderboard/player/{id}/badges` | Badges d'un joueur |
+
+### Familles
+
+| Méthode | Route | Description |
+|---|---|---|
+| `POST` | `/api/family/create` | Crée une famille (génère un invite_code) |
+| `POST` | `/api/family/join` | Rejoint une famille via code |
+| `GET` | `/api/family/{id}` | Info famille + liste joueurs |
+| `GET` | `/api/family/by-code/{code}` | Recherche par code d'invitation |
+
+### Système
+
+| Méthode | Route | Description |
+|---|---|---|
+| `GET` | `/` | Statut API |
+| `GET` | `/health` | Statut API + Redis |
+
+---
+
+## Base de données Supabase
+
+### Appliquer les migrations
+
+```bash
+# Via Supabase CLI
+supabase db push
+
+# Ou dans l'éditeur SQL Supabase, dans l'ordre :
+# 1. supabase/migrations/001_create_tables.sql
+# 2. supabase/migrations/002_views.sql
+# 3. supabase/migrations/003_rls.sql
+```
+
+### Charger les données de test (dev uniquement)
+
+```bash
+supabase db seed --file supabase/seed.sql
+```
+
+### Tables
+
+| Table | Description |
+|---|---|
+| `families` | Groupes familiaux avec code d'invitation |
+| `players` | Joueurs rattachés à une famille |
+| `quiz_sessions` | Trace de chaque partie jouée |
+| `scores` | Scores pondérés par session |
+| `badges` | Trophées attribués automatiquement |
+
+### Vues SQL
+
+| Vue | Description |
+|---|---|
+| `v_family_leaderboard` | Classement global des familles (RANK sur 30 jours) |
+| `v_player_leaderboard` | Classement des joueurs par famille |
+| `v_theme_champions` | Meilleur score par thème |
+
+---
+
+## Realtime Supabase
+
+Les scores s'affichent en direct chez toutes les familles connectées via WebSocket Supabase Realtime.
+
+**Activation requise dans le dashboard Supabase :**
+Database → Replication → activer **INSERT** sur la table `scores`.
+
+Le hook `useLeaderboard` souscrit automatiquement au channel famille, avec :
+
+- debounce de 300 ms sur les refetch ;
+- fallback polling toutes les 15 s si la connexion WebSocket échoue ;
+- indicateur "En direct" / "Hors ligne" dans `LeaderboardPanel`.
+
+---
+
+## Calcul du score
+
+```
+score = (bonnes_réponses / total) × 100 × multiplicateur_difficulté + bonus_temps
+```
+
+| Paramètre | Valeur |
+|---|---|
+| Difficulté facile | ×1.0 |
+| Difficulté moyen | ×1.5 |
+| Difficulté difficile | ×2.0 |
+| Réponse en < 5 s | +10 pts |
+| Réponse en < 10 s | +5 pts |
+| Score famille | Somme des scores des membres sur 7 jours glissants |
+
+### Badges automatiques
+
+| Badge | Condition |
+|---|---|
+| `first_game` | Première partie complétée |
+| `perfect_score` | 100 % de bonnes réponses |
+| `streak_3` | 3 sessions en 3 jours consécutifs |
+| `theme_champion` | Meilleur score sur un thème dans la famille |
+| `best_elder` | Meilleur score de la session parmi les joueurs seniors |
+
+---
+
+## Monitoring mensuel Mistral
+
+Le script `backend/mistral_monitor.py` s'exécute automatiquement **le 1er de chaque mois à 03h00**.
+
+Pour l'activer, ajouter dans `cron_prefetch.py`, dans `start_scheduler()` :
 
 ```python
-SYSTEM_PROMPT = """
-Tu es le moteur de génération de Quiz d’Antan, un jeu de quiz intergénérationnel.
-Ta mission est de créer des questions variées, bienveillantes, accessibles et amusantes,
-qui permettent aux jeunes, adultes, parents, grands-parents et arrière-grands-parents
- de jouer ensemble.
+from quiz_antan.backend.mistral_monitor import run_monthly_monitor
 
-Règles éditoriales :
-- Mélange les époques : années 1950 à aujourd’hui, sans te limiter à une seule génération.
-- Mélange les types de culture : histoire, vie quotidienne, objets anciens, musique,
-  cinéma, sport, cuisine, école, métiers, inventions, expressions populaires, télévision,
-  jeux, géographie, traditions et usages numériques.
-- Évite les questions trop clivantes, politiques ou anxiogènes.
-- Favorise les questions qui peuvent déclencher une discussion ou un souvenir.
-- Alterne questions faciles, moyennes et un peu plus difficiles.
-- N’utilise pas toujours les mêmes célébrités, événements ou décennies.
-- Réponds uniquement en JSON valide, sans texte autour.
-"""
-
-USER_PROMPT_TEMPLATE = """
-Génère un quiz intergénérationnel sur le thème : {theme}.
-
-Paramètres :
-- Nombre de questions : {question_count}
-- Difficulté publique cible : {difficulty}
-- Époque cible : {era}
-- Public : familles, seniors, adultes et jeunes joueurs ensemble
-
-Contraintes de variété :
-- Inclure au moins 3 décennies différentes si le thème le permet.
-- Inclure au moins une question accessible aux plus jeunes.
-- Inclure au moins une question qui parlera davantage aux générations plus âgées.
-- Inclure au moins une question reliant passé et présent.
-- Varier les formats : connaissance, comparaison, souvenir collectif, objet, chanson,
-  expression, événement ou usage du quotidien.
-
-Format JSON attendu :
-{
-  "theme": "string",
-  "era": "string",
-  "difficulty": "string",
-  "questions": [
-    {
-      "id": "string",
-      "question": "string",
-      "choices": ["string", "string", "string", "string"],
-      "answerIndex": 0,
-      "explanation": "string",
-      "generationHint": "pour quel public ou souvenir cette question peut créer une discussion"
-    }
-  ]
-}
-"""
+scheduler.add_job(
+    run_monthly_monitor,
+    'cron',
+    day=1, hour=3, minute=0,
+    id='monthly_mistral_monitor',
+    replace_existing=True
+)
 ```
 
-## Stratégie de cache
+À chaque exécution, le script :
 
-1. **Sans cache** : chaque demande utilisateur appelle Mistral. C’est simple à mettre en place, mais le coût augmente linéairement avec le trafic et la latence dépend directement du temps de réponse de l’API.
-2. **Avec cache Redis** : la clé de cache peut combiner `theme`, `difficulty`, `era`, `question_count` et une version de prompt. Si une combinaison existe déjà, le backend renvoie le quiz immédiatement sans nouvel appel Mistral.
-3. **Pré-génération nocturne** : `cron_prefetch.py` génère chaque nuit un stock de quiz pour les thèmes les plus utilisés. Les premiers utilisateurs du matin reçoivent donc une réponse rapide et peu coûteuse.
-4. **Fallback si Redis down** : si Redis est indisponible, le backend doit continuer à fonctionner en appelant directement Mistral. Si Mistral échoue aussi, il peut retourner un petit quiz local de secours ou un message clair invitant à réessayer.
-5. **TTL 24h** : chaque quiz généré peut être stocké avec un TTL de 24 heures. Cela garde les questions suffisamment fraîches tout en évitant de regénérer les mêmes combinaisons trop souvent.
+1. Benchmark la latence des 3 modèles (Small 4, Large 3, Medium 3.5) avec 3 appels réels ;
+2. Vérifie les tarifs depuis l'API Mistral et détecte tout changement ;
+3. Calcule le coût mensuel estimé selon votre volume configuré ;
+4. Génère un rapport Markdown dans `reports/mistral_report_YYYY-MM.md` ;
+5. Envoie une notification Slack/Discord si `MONITOR_WEBHOOK_URL` est défini.
 
-Exemple de clé Redis :
-
-```text
-quiz:v1:{theme}:{difficulty}:{era}:{question_count}
-```
+---
 
 ## Thèmes disponibles
 
-| Thème | Catégorie | Era cible | Difficulté publique cible |
+| Thème | Catégorie | Ère cible | Difficulté cible |
 |---|---|---|---|
-| Souvenirs d’école | Vie quotidienne | 1950-aujourd’hui | Facile |
-| Objets d’hier et d’aujourd’hui | Vie quotidienne | 1950-aujourd’hui | Facile |
-| Musique à travers les générations | Culture | 1960-aujourd’hui | Moyenne |
-| Cinéma et télévision familiale | Culture | 1960-aujourd’hui | Moyenne |
-| Expressions et proverbes | Langue française | Toutes époques | Facile |
-| Cuisine de famille | Traditions | 1950-aujourd’hui | Facile |
-| Inventions qui ont changé la vie | Sciences et technologies | 1900-aujourd’hui | Moyenne |
-| Sport populaire | Sport | 1950-aujourd’hui | Moyenne |
-| Histoire du quotidien | Histoire sociale | 1945-aujourd’hui | Moyenne |
-| Jeux et loisirs | Loisirs | 1950-aujourd’hui | Facile |
-| Métiers d’hier et de demain | Société | 1950-aujourd’hui | Moyenne |
-| Transports et voyages | Vie quotidienne | 1950-aujourd’hui | Moyenne |
-| Mode et tendances | Culture populaire | 1950-aujourd’hui | Facile |
-| Nouvelles technologies | Technologie | 1980-aujourd’hui | Moyenne |
-| Fêtes et traditions | Traditions | Toutes époques | Facile |
-| Géographie de proximité | Géographie | Toutes époques | Facile |
-| Publicités et slogans cultes | Culture populaire | 1960-aujourd’hui | Moyenne |
-| Radio, télé et internet | Médias | 1950-aujourd’hui | Moyenne |
-| Mémoire des années marquantes | Histoire récente | 1950-aujourd’hui | Difficile douce |
-| Passé ou présent ? | Comparaison intergénérationnelle | 1950-aujourd’hui | Facile |
+| Chansons des années 70 | Nostalgie | 1950-1980 | Mixte |
+| Films d'animation | Moderne | Mixte | Facile |
+| Cuisine française | Intemporel | Intemporel | Mixte |
+| Sport français | Intemporel | Mixte | Moyen |
+| Jeux des années 80 | Nostalgie | 1950-1980 | Mixte |
+| Animaux et nature | Culture | Intemporel | Facile |
+| Histoire de France | Intemporel | Intemporel | Moyen |
+| TV et pub d'antan | Nostalgie | 1950-1980 | Difficile |
+| Musique moderne | Moderne | 2000-2020 | Mixte |
+| Géographie France | Intemporel | Intemporel | Facile |
 
-## Coûts estimés
+---
 
-Mistral indique pour **Mistral Small 4** un tarif API de **0,15 $ par million de tokens en entrée** et **0,60 $ par million de tokens en sortie** [[1]](#ref1). Les estimations ci-dessous utilisent cette hypothèse tarifaire et une hypothèse technique volontairement simple :
+## Choix du modèle Mistral
 
-- 1 génération de quiz = environ **1 500 tokens en entrée** ;
-- 1 génération de quiz = environ **2 500 tokens en sortie** ;
-- coût estimé par quiz généré sans cache = `1 500 × 0,15 / 1 000 000 + 2 500 × 0,60 / 1 000 000`, soit environ **0,001725 $** ;
-- scénario avec cache = **70 % de réponses servies depuis Redis** et **30 % de nouveaux appels Mistral** ;
-- les montants n’incluent pas Redis, hébergement, logs, monitoring, marge d’erreur de tokenisation ni éventuelles variations de prix.
+| Modèle | Input | Output | Latence | Recommandation |
+|---|---|---|---|---|
+| `mistral-small-latest` | $0,15/M | $0,60/M | 0,8–2 s | **Idéal pour la production** |
+| `mistral-large-latest` | $0,50/M | $1,50/M | 2–4 s | Si Small manque de finesse culturelle |
+| `mistral-medium-latest` | $1,50/M | $7,50/M | 2–5 s | Non justifié pour des quiz |
 
-| Scénario | Quiz demandés / mois | Appels Mistral sans cache | Coût estimé sans cache | Appels Mistral avec cache 70 % | Coût estimé avec cache |
-|---:|---:|---:|---:|---:|---:|
-| Petit lancement | 100 | 100 | ~0,17 $ / mois | 30 | ~0,05 $ / mois |
-| Trafic régulier | 1 000 | 1 000 | ~1,73 $ / mois | 300 | ~0,52 $ / mois |
-| Forte activité | 10 000 | 10 000 | ~17,25 $ / mois | 3 000 | ~5,18 $ / mois |
+Changer de modèle sans toucher au code :
 
-> À retenir : le cache n’est pas seulement une optimisation de coût. Il améliore aussi la latence, absorbe les pics de trafic et réduit la dépendance immédiate à l’API Mistral.
+```env
+MISTRAL_MODEL=mistral-large-latest
+```
+
+---
+
+## Coûts estimés (avec cache Redis ×30)
+
+| Volume | Small 4 | Large 3 |
+|---|---|---|
+| 1 000 quiz/mois | ~$0,02 | ~$0,05 |
+| 10 000 quiz/mois | ~$0,19 | ~$0,45 |
+| 100 000 quiz/mois | ~$1,93 | ~$4,53 |
+
+> Le cache Redis (pré-génération nocturne, ratio ×30) réduit les appels Mistral réels à environ 3 % du volume total. Les coûts ci-dessus en tiennent compte.
+
+---
+
+## Stratégie de cache
+
+1. **Sans cache** : chaque quiz appelle Mistral directement (latence 1–5 s, coût linéaire).
+2. **Cache Redis** : clé `quiz:{theme}:{nb}`, TTL 24h. Réponse en < 20 ms si hit.
+3. **Pré-génération nocturne** : `cron_prefetch.py` génère 10 questions par thème à 2h00.
+4. **Fallback** : si Redis est indisponible, appel direct Mistral sans interruption de service.
+5. **Invalidation** : un changement de prompt incrémente la version de clé (`quiz:v2:...`).
+
+---
 
 ## Recommandations de maintenance
 
-- Versionner les prompts avec un préfixe de cache (`quiz:v1`, puis `quiz:v2` si le prompt change fortement).
-- Journaliser les erreurs Mistral sans stocker de données personnelles inutiles.
-- Ajouter un contrôle JSON strict côté backend avant de renvoyer une réponse au frontend.
-- Prévoir une liste de thèmes autorisés côté backend pour éviter les abus.
-- Mesurer le taux de cache hit afin d’ajuster la pré-génération nocturne.
-- Ajouter une limite de fréquence par IP ou utilisateur si le site devient public.
+- Versionner les prompts (`quiz:v1:...` → `quiz:v2:...`) à chaque changement significatif.
+- Consulter les rapports mensuels dans `reports/` pour détecter une hausse de tarifs ou une dégradation de latence.
+- Révoquer et renouveler les tokens GitHub et clés API régulièrement.
+- Ne jamais commiter `.env` ou `.env.local` — ils sont exclus par `.gitignore`.
+- Activer les alertes de dépenses dans le dashboard Mistral Studio.
+
+---
 
 ## Référence
 
-<p id="ref1" class="ref_item">[1] Mistral AI — Pricing <a target="_blank" rel="noreferrer" href="https://mistral.ai/pricing/">https://mistral.ai/pricing/</a></p>
+[1] Mistral AI — Pricing : https://mistral.ai/pricing/ (juin 2026)
