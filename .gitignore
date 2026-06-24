@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.env
+*.egg-info/
+dist/
+build/
+.venv/
+venv/
+
+# Node / Next.js
+node_modules/
+.next/
+.env.local
+.env.*.local
+out/
+
+# Rapports générés
+reports/
+
+# Divers
+.DS_Store
+*.log
+source_mistral_pricing.md
