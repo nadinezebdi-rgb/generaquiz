@@ -7,6 +7,7 @@ from datetime import datetime, timezone, timedelta
 import resend
 from bson import ObjectId
 from fastapi import APIRouter, Depends, HTTPException, Request, Response
+from pymongo.errors import DuplicateKeyError
 
 from core import (
     db, logger, FRONTEND_URL, RESEND_API_KEY, SENDER_EMAIL, WELCOME_CREDITS,
@@ -105,7 +106,9 @@ async def register(body: RegisterRequest, request: Request, response: Response):
         if sponsor:
             referred_by_user_id = str(sponsor["_id"])
 
-    # Generate this new user's own referral code (so they can invite immediately)
+    # Generate this new user's own referral code (so they can invite immediately).
+    # Retry on the extremely unlikely DuplicateKeyError race between two concurrent
+    # signups generating the same suffix.
     own_code = await generate_referral_code_for(body.name, email)
 
     doc = {"email": email, "password_hash": hash_password(body.password),
@@ -116,7 +119,12 @@ async def register(body: RegisterRequest, request: Request, response: Response):
            "referred_by_user_id": referred_by_user_id,
            "referral_count": 0,
            "country_code": _infer_country_code(request)}
-    result = await db.users.insert_one(doc)
+    try:
+        result = await db.users.insert_one(doc)
+    except DuplicateKeyError:
+        # Race on referral_code unique index — regenerate once and retry
+        doc["referral_code"] = await generate_referral_code_for(body.name, email)
+        result = await db.users.insert_one(doc)
     doc["_id"] = result.inserted_id
     # Welcome bonus ledger entry (audit trail)
     await db.credit_ledger.insert_one({

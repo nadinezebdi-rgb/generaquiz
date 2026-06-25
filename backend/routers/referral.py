@@ -48,14 +48,20 @@ async def _is_code_taken(code: str) -> bool:
 
 
 async def generate_referral_code_for(name: str, email: str) -> str:
-    """Produce a unique code like 'MARIE-X7K2'. Retries on rare collisions."""
+    """Produce a unique code like 'MARIE-X7K2'. Retries on rare collisions.
+
+    Two layers of protection:
+      1. Pre-check via find_one() to avoid the common case.
+      2. The unique index on users.referral_code raises DuplicateKeyError on race
+         conditions — caller (register) re-runs this function in that case.
+    """
     prefix = _slug_prefix(name, email)
     for _ in range(8):
         suffix = "".join(secrets.choice(CODE_ALPHABET) for _ in range(CODE_SUFFIX_LEN))
         candidate = f"{prefix}-{suffix}"
         if not await _is_code_taken(candidate):
             return candidate
-    # extremely unlikely: extend suffix length
+    # extremely unlikely: extend suffix length to widen the pool
     suffix = "".join(secrets.choice(CODE_ALPHABET) for _ in range(CODE_SUFFIX_LEN + 2))
     return f"{prefix}-{suffix}"
 
@@ -90,12 +96,10 @@ async def grant_referral_bonus_if_eligible(user: dict) -> bool:
     if res.modified_count == 0:
         return False  # someone else won the race
 
-    # Credit the referrer + audit ledger entries for both
-    await db.users.update_one(
-        {"_id": ObjectId(referrer_id)},
-        {"$inc": {"credits": REFERRAL_BONUS_CREDITS,
-                  "referral_count": 1}},
-    )
+    # Credit the referrer + audit ledger entries for both.
+    # We write the ledger entries FIRST so that an audit row always exists even
+    # if the subsequent $inc crashes (the worst case becomes "ledger says +5 but
+    # balance is wrong" — recoverable — instead of "balance is up but no trace").
     now_iso = datetime.now(timezone.utc).isoformat()
     await db.credit_ledger.insert_many([
         {"user_id": str(user["_id"]), "delta": REFERRAL_BONUS_CREDITS,
@@ -106,6 +110,11 @@ async def grant_referral_bonus_if_eligible(user: dict) -> bool:
          "balance_after": None,
          "meta": {"referred_user_id": str(user["_id"])}},
     ])
+    await db.users.update_one(
+        {"_id": ObjectId(referrer_id)},
+        {"$inc": {"credits": REFERRAL_BONUS_CREDITS,
+                  "referral_count": 1}},
+    )
     return True
 
 

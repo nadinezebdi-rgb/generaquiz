@@ -275,3 +275,28 @@ Le backend est **prêt à être consommé** par une app React Native :
 - **Atomicité Mongo** : `delete_many` + `insert_many` non atomique — si le processus est tué entre les 2, la catégorie reste vide. Utiliser une approche "insert temp tag → atomic swap"
 - **Truncation JSON** : `max_tokens=4000` peut tronquer la sortie sur les longs prompts (warnings observés). Soit augmenter, soit splitter en plus petits batches
 - **Healthcheck Mistral** : ajouter une route `/api/admin/mistral/ping` qui appelle `client.models.list()` pour détecter les rotations de clé tôt
+
+
+## 2026-02-16 — Sprint P2 + Mistral hardening (iteration 19) ✅
+
+### Features livrées (14/14 backend, 5/5 frontend — tous tests verts)
+- 🛡️ **Mistral hardening** : `asyncio.Lock` module-level empêche les régénérations concurrentes. Nouveau `GET /api/admin/mistral/ping` (ok, latency_ms, model, lock_held, last_run, questions_per_category, total_questions). Persistance dans `db.app_state`.
+- 📧 **Email expiration Premium J-7** : APScheduler 10:00 Paris, helper idempotent via `users.expiration_email_sent_for`, skip comptes lifetime.
+- 📊 **Stats publiques** : router `routers/stats.py` → `GET /api/stats/public` (no-auth). Frontend `StatsSection.jsx` avec 5 compteurs animés (IntersectionObserver + RAF). Détection pays via `Accept-Language`.
+- 👥 **Parrainage** : router `routers/referral.py`. Code unique `PRENOM-XXXX`, index unique sparse + backfill startup. Bonus +5 crédits aux 2 parties à la 1ʳᵉ partie du filleul. Frontend: Register `?code=` prefill + validation live debounce 400ms. Account: carte "Parrainer un proche" avec code/lien/compteur/copy.
+- 📺 **Pub → Crédit** : page `/app/earn-credits` avec timer 15s + AdSense slot (REACT_APP_ADSENSE_CLIENT/SLOT). House ad de fallback. Lien "Crédits" dans la Navbar avec badge solde.
+
+### Code review comments traités
+- ✅ DuplicateKeyError retry sur referral_code race
+- ✅ Ledger-then-$inc dans grant_referral_bonus_if_eligible (audit safe)
+- ⏳ Index sur `attempts.created_at` (déprioritisé, ok < 10k attempts)
+- ⏳ Mongo transactions pour bonus (nécessite replica set)
+- ⏳ Pool client Mistral (micro-opti ~50ms)
+
+### Schéma DB ajouts
+- `users.referral_code` (unique sparse), `referred_by_user_id`, `referral_count`, `referral_bonus_granted`, `country_code`, `expiration_email_sent_for`
+- Collection `app_state` (key, status, started_at, finished_at, last_summary)
+
+### Variables d'env ajoutées
+- `REACT_APP_ADSENSE_CLIENT` (vide par défaut → fallback house ad)
+- `REACT_APP_ADSENSE_SLOT`
