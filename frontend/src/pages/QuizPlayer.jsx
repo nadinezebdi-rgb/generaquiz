@@ -5,6 +5,7 @@ import { api, BACKEND_URL } from "@/lib/api";
 import Navbar from "@/components/Navbar";
 import { ArrowLeft, ChevronRight, RotateCcw, Volume2, Crown, Check, X } from "lucide-react";
 import ScoreCard from "@/components/ScoreCard";
+import ReportButton from "@/components/ReportButton";
 
 // Fisher-Yates shuffle helper that returns the new options + the new correct index.
 function shuffleOptions(options, correctIndex) {
@@ -236,7 +237,8 @@ export default function QuizPlayer() {
               </AnimatePresence>
 
               {selected !== null && (
-                <div className="flex justify-end">
+                <div className="flex justify-between items-center gap-3">
+                  <ReportButton questionId={q.id} />
                   <button
                     onClick={onNext}
                     data-testid="quiz-next"

@@ -219,3 +219,84 @@ Le backend est **prêt à être consommé** par une app React Native :
 - Gamification : `/api/gamification/{credits,leagues,challenge}`
 - Paiements : Stripe (web) + RevenueCat à brancher côté mobile (le backend reçoit déjà les webhooks Stripe)
 
+
+## Implemented (2026-02-15, iteration 16) — 🤖 Toutes les questions générées par Mistral
+- ✅ **Intégration Mistral AI** (SDK officiel `mistralai==1.5.0`) avec modèle `mistral-small-latest`
+- ✅ **Régénération nocturne automatique** : APScheduler à **03:00 Europe/Paris** chaque nuit régénère **les 800 questions** (100/catégorie × 8 catégories)
+- ✅ **Endpoint admin manuel** : `POST /api/admin/mistral/regenerate` (admin-only) lance la régénération en background (~5 min)
+- ✅ **Architecture zero-downtime** :
+  - Mistral génère TOUTES les questions en MongoDB (pool persistant)
+  - Les joueurs jouent depuis MongoDB → **latence 0 ms** au quiz
+  - Si une catégorie échoue côté Mistral → l'ancien pool est conservé (rollback automatique)
+- ✅ **Seed initial conservé** : si MongoDB est vide au boot (premier déploiement / flush), les 240 questions seed servent de fallback en attendant la première régénération nocturne
+- ✅ **Format JSON strict** : Mistral retourne du JSON pur via `response_format={"type": "json_object"}`, parsing robuste avec retry (3 tentatives par batch de 25 questions)
+- ✅ **Coût estimé** : ~0,50 €/mois pour 24 000 générations/mois (8 cat × 100 q × 30 nuits)
+- ✅ **Tests qualité** : 800/800 questions générées avec succès le 24/06, qualité factuelle excellente (1-2 % d'ambiguïtés possibles — bouton "Signaler" à ajouter en v2)
+
+## Variables d'environnement à configurer en production
+- `MISTRAL_API_KEY` — clé API Mistral (obtenue sur console.mistral.ai)
+- `MISTRAL_MODEL` — défaut `mistral-small-latest` (recommandé : rapide + économique)
+
+## Backlog (P2)
+- Bouton "Signaler cette question" sur le frontend pour collecter les questions ambiguës générées
+- Endpoint admin pour valider/supprimer manuellement les questions signalées
+- Métriques mensuelles Mistral (latence moyenne, taux de retry, coût exact)
+
+
+## Implemented (2026-02-15, iteration 17) — 🚩 Signalement de questions + revue admin
+- ✅ **Bouton "Signaler" discret** sur chaque question (QuizPlayer + DailyQuiz) après réponse
+- ✅ **Modal de signalement** avec 5 raisons : réponse incorrecte / ambiguë / doublon / inapproprié / autre + commentaire facultatif
+- ✅ **Anti-spam** : 1 signalement par user par question (dédup 24h pending)
+- ✅ **Backend** : nouveau router `/app/backend/routers/reports.py`
+  - `POST /api/quiz/report` — auth required, raisons whitelist
+  - `GET /api/admin/reports?status=pending|resolved|all` — admin only, agrégé par question avec compteurs
+  - `POST /api/admin/reports/{question_id}/resolve` — action `delete` (supprime la question — Mistral régénère à 03h) ou `dismiss`
+- ✅ **Frontend admin** : nouvelle page `/app/admin/reports` (`AdminReports.jsx`)
+  - 3 onglets : En attente / Traités / Tous
+  - Pour chaque question signalée : texte, options avec ✓ sur la bonne, badge Mistral 🤖, compteur par raison, commentaires dépliables
+  - 2 actions : "Supprimer la question" (rouge) ou "Écarter" (blanc)
+- ✅ **Navigation** : lien navbar admin "Signalements" (à côté de "Promos")
+- ✅ Tests : flow complet validé (report → admin list → resolve dismiss → resolved tab)
+
+
+
+## Validated (2026-02-16, iteration 18) — 🔑 Nouvelle clé Mistral
+- ✅ Ancienne clé `HfmN...` révoquée par l'utilisateur (avait été partagée en clair)
+- ✅ Nouvelle clé `ybVF...` (32 chars) installée via le panneau Environment Variables Emergent
+- ✅ Test direct du SDK `mistralai==1.5.0` : 5 questions « Chansons françaises 60-70 » générées avec JSON valide
+- ✅ Test backend end-to-end via testing agent (8/8 pytest passent) :
+  - Admin login OK (admin@generaquiz.fr)
+  - `POST /api/admin/mistral/regenerate` : 401 anon / 403 non-admin / 200 admin
+  - Régénération Mistral lancée sans erreur d'authentification
+  - Routes critiques non régressées : `/api/categories`, `/api/daily/quiz`, `/api/auth/me`
+
+## Recommandations techniques relevées (à traiter en P2)
+- **Concurrence régénération** : `asyncio.create_task(mistral_regenerate_all())` est fire-and-forget — ajouter un `asyncio.Lock` ou un statut Mongo pour empêcher 2 régénérations simultanées (risque de doubler les coûts Mistral)
+- **Atomicité Mongo** : `delete_many` + `insert_many` non atomique — si le processus est tué entre les 2, la catégorie reste vide. Utiliser une approche "insert temp tag → atomic swap"
+- **Truncation JSON** : `max_tokens=4000` peut tronquer la sortie sur les longs prompts (warnings observés). Soit augmenter, soit splitter en plus petits batches
+- **Healthcheck Mistral** : ajouter une route `/api/admin/mistral/ping` qui appelle `client.models.list()` pour détecter les rotations de clé tôt
+
+
+## 2026-02-16 — Sprint P2 + Mistral hardening (iteration 19) ✅
+
+### Features livrées (14/14 backend, 5/5 frontend — tous tests verts)
+- 🛡️ **Mistral hardening** : `asyncio.Lock` module-level empêche les régénérations concurrentes. Nouveau `GET /api/admin/mistral/ping` (ok, latency_ms, model, lock_held, last_run, questions_per_category, total_questions). Persistance dans `db.app_state`.
+- 📧 **Email expiration Premium J-7** : APScheduler 10:00 Paris, helper idempotent via `users.expiration_email_sent_for`, skip comptes lifetime.
+- 📊 **Stats publiques** : router `routers/stats.py` → `GET /api/stats/public` (no-auth). Frontend `StatsSection.jsx` avec 5 compteurs animés (IntersectionObserver + RAF). Détection pays via `Accept-Language`.
+- 👥 **Parrainage** : router `routers/referral.py`. Code unique `PRENOM-XXXX`, index unique sparse + backfill startup. Bonus +5 crédits aux 2 parties à la 1ʳᵉ partie du filleul. Frontend: Register `?code=` prefill + validation live debounce 400ms. Account: carte "Parrainer un proche" avec code/lien/compteur/copy.
+- 📺 **Pub → Crédit** : page `/app/earn-credits` avec timer 15s + AdSense slot (REACT_APP_ADSENSE_CLIENT/SLOT). House ad de fallback. Lien "Crédits" dans la Navbar avec badge solde.
+
+### Code review comments traités
+- ✅ DuplicateKeyError retry sur referral_code race
+- ✅ Ledger-then-$inc dans grant_referral_bonus_if_eligible (audit safe)
+- ⏳ Index sur `attempts.created_at` (déprioritisé, ok < 10k attempts)
+- ⏳ Mongo transactions pour bonus (nécessite replica set)
+- ⏳ Pool client Mistral (micro-opti ~50ms)
+
+### Schéma DB ajouts
+- `users.referral_code` (unique sparse), `referred_by_user_id`, `referral_count`, `referral_bonus_granted`, `country_code`, `expiration_email_sent_for`
+- Collection `app_state` (key, status, started_at, finished_at, last_summary)
+
+### Variables d'env ajoutées
+- `REACT_APP_ADSENSE_CLIENT` (vide par défaut → fallback house ad)
+- `REACT_APP_ADSENSE_SLOT`

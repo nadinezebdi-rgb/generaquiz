@@ -1,0 +1,34 @@
+{
+  "summary": "Iteration 19 — P2 features (stats publiques, parrainage, mistral ping/lock, pub→crédit) + email expiration helper. 14/14 backend pytest cases pass. 5/5 frontend flows pass. All data-testids present and functional.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_iteration19_p2.py",
+    "/app/test_reports/pytest/pytest_iter19.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "stats/public — players_today counts users *AND* anonymous public-attempt rows by aggregating on `attempts.created_at >= today` *without* deduplication against daily_attempts: a user playing both a category quiz and the daily quiz on the same day is correctly de-duped via the union set, but `games_today` adds counts from BOTH collections, which over-counts when daily attempts are derivatives of regular attempts. Acceptable for a vanity counter but document the semantics if marketing screenshots it.",
+    "referral.find_user_by_code does a $regex-free .find_one({referral_code: code}) — relies on the unique sparse index created in server.startup. If two registers race for the same generated code, motor will raise DuplicateKeyError that the current generate loop does NOT catch (it only checks existence pre-insert). Low probability (32^4 ≈ 1M combinations × 8 retries) but worth a try/except DuplicateKey + retry in generate_referral_code_for to harden.",
+    "grant_referral_bonus_if_eligible: the second db.users.update_one on the referrer ($inc credits + referral_count) is NOT idempotent with the audit ledger insert_many — if the process crashes between the two ops, the referrer gets credits but no ledger row, or vice-versa. Consider wrapping in a Mongo transaction (replica-set required) or write the ledger entry first then $inc.",
+    "mistral_client.ping() — creates a fresh Mistral() client on every call inside _ping_call. Cheap, but the SDK keeps an HTTPx connection pool; reusing the module-level client built lazily would shave ~30-80ms per ping.",
+    "stats/public — queries scan entire `attempts` and `users` collections without time-bound indexes on `created_at` (string-typed iso) — fine for <10k attempts but will hot-spot the read pool when traffic grows. Add an index on attempts.created_at and store it as a BSON Date instead of ISO string."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_iteration19_p2.py (new)"
+  ],
+  "success_rate": {"backend": "100% (14/14)", "frontend": "100% (5/5 flows)"},
+  "test_credentials": "admin@generaquiz.fr / Admin2026! (from /app/memory/test_credentials.md). Throwaway accounts created on the fly with TEST_ / test_ui_ prefix.",
+  "seed_data_creation": "Each referral / earn-ad test creates fresh TEST_*@example.com accounts. The full-flow referral test creates 2 users (sponsor + filleul) and triggers grant_referral_bonus_if_eligible via POST /api/attempts. No cleanup performed (intentional — useful for next testing agents to inspect).",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "All P2 features green. Public stats: GET /api/stats/public returns 6 int keys, questions_total=800. Mistral ping: GET /api/admin/mistral/ping returns ok, latency_ms, model, lock_held, questions_per_category (8 cats × ~100), total_questions, last_run. Properly guarded (401 anon, 403 non-admin). Mistral regenerate kicks off background task and returns immediately. Referral: every new user gets PRENOM-XXXX code (e.g. MARIE-X7K2), POST /referral/validate-code returns valid+sponsor_name+bonus=5, full A→B→1st-attempt flow credits both sides +5 and increments A.referral_count, second attempt is idempotent. GET /referral/my returns code+invite_link+count+bonus. POST /gamification/credits/earn-ad requires JSON body {placement: ...}, grants +1 credit, 429 after 5/day. Frontend: landing stats animate on scroll-into-view (IntersectionObserver), register has functional show-referral toggle + live validation + URL prefill with banner, navbar shows nav-earn-credits when logged in, /app/account exposes referral card with all 5 testids, /app/earn-credits has balance+start+15s timer. Account referral link is an <input value=...> so text_content is empty (use input_value() if asserting). For mistral regenerate test: do NOT wait for completion (3-5min) — just verify 200 + ping still works.",
+  "rca of the issue": "N/A — no issues found. Initial test failure was on TestAdReward (422 missing body): the /credits/earn-ad endpoint requires a Pydantic AdRewardRequest body. Fixed in the test by sending {placement: 'test'}. Initial stats showed 0s because StatsSection uses IntersectionObserver — fixed by scroll_into_view_if_needed() in playwright."
+}
