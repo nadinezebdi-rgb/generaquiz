@@ -258,3 +258,20 @@ Le backend est **prêt à être consommé** par une app React Native :
 - ✅ **Navigation** : lien navbar admin "Signalements" (à côté de "Promos")
 - ✅ Tests : flow complet validé (report → admin list → resolve dismiss → resolved tab)
 
+
+
+## Validated (2026-02-16, iteration 18) — 🔑 Nouvelle clé Mistral
+- ✅ Ancienne clé `HfmN...` révoquée par l'utilisateur (avait été partagée en clair)
+- ✅ Nouvelle clé `ybVF...` (32 chars) installée via le panneau Environment Variables Emergent
+- ✅ Test direct du SDK `mistralai==1.5.0` : 5 questions « Chansons françaises 60-70 » générées avec JSON valide
+- ✅ Test backend end-to-end via testing agent (8/8 pytest passent) :
+  - Admin login OK (admin@generaquiz.fr)
+  - `POST /api/admin/mistral/regenerate` : 401 anon / 403 non-admin / 200 admin
+  - Régénération Mistral lancée sans erreur d'authentification
+  - Routes critiques non régressées : `/api/categories`, `/api/daily/quiz`, `/api/auth/me`
+
+## Recommandations techniques relevées (à traiter en P2)
+- **Concurrence régénération** : `asyncio.create_task(mistral_regenerate_all())` est fire-and-forget — ajouter un `asyncio.Lock` ou un statut Mongo pour empêcher 2 régénérations simultanées (risque de doubler les coûts Mistral)
+- **Atomicité Mongo** : `delete_many` + `insert_many` non atomique — si le processus est tué entre les 2, la catégorie reste vide. Utiliser une approche "insert temp tag → atomic swap"
+- **Truncation JSON** : `max_tokens=4000` peut tronquer la sortie sur les longs prompts (warnings observés). Soit augmenter, soit splitter en plus petits batches
+- **Healthcheck Mistral** : ajouter une route `/api/admin/mistral/ping` qui appelle `client.models.list()` pour détecter les rotations de clé tôt
