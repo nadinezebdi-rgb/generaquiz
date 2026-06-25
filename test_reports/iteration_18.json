@@ -1,0 +1,35 @@
+{
+  "summary": "Iteration 18 — Validated the new MISTRAL_API_KEY (ybVF...) integration end-to-end on the FastAPI backend. Admin login OK, POST /api/admin/mistral/regenerate accepts admin JWT (200), rejects unauthenticated (401) and non-admin (403). Background regeneration started successfully — Mistral SDK accepted the key, NO 401/Unauthorized errors in backend logs. Critical regression routes (GET /api/categories, GET /api/daily/quiz, GET /api/auth/me) still green. 8/8 pytest cases pass.",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {"endpoint": "/api/admin/mistral/regenerate (background task)", "issue": "Occasional Mistral JSON parse warnings on some batches ('Extra data' / 'Expecting , delimiter') — handled by the 3-attempt retry loop in mistral_client._generate_one_batch, so not blocking, but worth noting (data quality risk if all 3 retries fail for a category, in which case the old pool is kept)."}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_iteration18_mistral.py",
+    "/app/test_reports/pytest/pytest_iter18_mistral.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "server.py l.59: asyncio.create_task(mistral_regenerate_all()) is fire-and-forget — there's no in-memory flag preventing concurrent triggers. An admin clicking the button twice (or two admins) will run TWO parallel full regenerations, doubling Mistral API spend and racing on db.questions.delete_many/insert_many per category. Suggest a module-level asyncio.Lock or a status doc in Mongo to guard against concurrent runs.",
+    "mistral_client.regenerate_category(): delete_many + insert_many is NOT atomic in Mongo without a transaction — if the process is killed between the delete and the insert, the category is left empty. Consider inserting first under a temp tag, then atomic swap (delete old + rename tag) or use a multi-doc transaction.",
+    "mistral_client._extract_json strips fences but doesn't enforce `response_format=json_object` to actually return an object — the prompt asks for a top-level array yet the SDK is called with json_object. Mistral may wrap the array in an object and the regex fallback masks that, but it can also produce truncation when max_tokens=4000 is reached on long outputs (this matches the 'Expecting , delimiter' warnings observed). Consider raising max_tokens or splitting into smaller batches.",
+    "MISTRAL_API_KEY (32 chars) is now valid; however there is no startup/healthcheck that pings Mistral to surface key rotations early. A simple /api/admin/mistral/ping route hitting `client.models.list()` would be a useful early-warning."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_iteration18_mistral.py (new)"
+  ],
+  "success_rate": {"backend": "100% (8/8)", "frontend": "not tested (per request)"},
+  "test_credentials": "admin@generaquiz.fr / Admin2026! (validated against /app/memory/test_credentials.md). Non-admin throwaway accounts created on-the-fly via /api/auth/register with TEST_ prefix.",
+  "seed_data_creation": "TestMistralRegenerate.test_rejects_non_admin registers a fresh TEST_mistral_<timestamp>@example.com account to validate the admin guard.",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Mistral integration is healthy with the new key (ybVF...). The admin endpoint POST /api/admin/mistral/regenerate is correctly guarded by get_admin_user (401 anon, 403 non-admin, 200 admin) and kicks off mistral_regenerate_all() as a background task that returns immediately. Backend logs confirm Mistral SDK calls succeed (no 401/Unauthorized); the only warnings are JSON parsing issues on a couple of batches that the retry loop handles. Pre-existing tests from iterations 7-15 remain green for the routes touched here (categories, daily/quiz, auth/me). Session-cookie pollution observed: /api/auth/login sets httpOnly cookies, so a shared requests.Session() will leak auth across tests. test_iteration18 fixes this with a per-test fresh Session. Future testers should follow the same pattern when mixing public and authenticated calls.",
+  "rca of the issue": "N/A — the previous 401 from Mistral was caused by an invalid API key; the new ybVF... key (32 chars) is accepted by the Mistral SDK (mistralai==1.5.0) and by Mistral's chat.complete endpoint. Validated via (1) direct SDK call success previously reported by main agent, (2) backend log inspection during this iteration showing only JSON-parsing warnings and zero authentication errors after triggering the regenerate endpoint."
+}
