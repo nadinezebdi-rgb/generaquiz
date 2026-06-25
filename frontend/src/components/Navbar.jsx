@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { LogOut, User as UserIcon } from "lucide-react";
+import { LogOut, User as UserIcon, Coins } from "lucide-react";
 import Logo from "@/components/Logo";
 
 export default function Navbar({ variant = "landing" }) {
@@ -29,6 +29,12 @@ export default function Navbar({ variant = "landing" }) {
               )}
               <Link to="/app/dashboard" data-testid="nav-dashboard" className="px-4 py-2 text-lg font-semibold text-navy hover:text-terracotta transition">Mes quiz</Link>
               <Link to="/app/challenges" data-testid="nav-challenges" className="px-4 py-2 text-lg font-semibold text-navy hover:text-terracotta transition">Défi famille</Link>
+              <Link to="/app/earn-credits" data-testid="nav-earn-credits" className="px-3 py-2 text-base font-semibold text-bordeaux hover:text-terracotta transition inline-flex items-center gap-1">
+                <Coins className="w-4 h-4" /> Crédits
+                {typeof user.credits === "number" && (
+                  <span className="ml-1 inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full bg-mustard text-navy text-xs font-bold">{user.credits}</span>
+                )}
+              </Link>
               <Link to="/app/account" data-testid="nav-account" className="px-4 py-2 text-lg font-semibold text-navy hover:text-terracotta transition">Mon compte</Link>
               {user.role === "admin" && (
                 <>

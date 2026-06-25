@@ -6,7 +6,7 @@ from datetime import datetime, timezone, timedelta
 
 import resend
 from bson import ObjectId
-from fastapi import APIRouter, Depends, HTTPException, Response
+from fastapi import APIRouter, Depends, HTTPException, Request, Response
 
 from core import (
     db, logger, FRONTEND_URL, RESEND_API_KEY, SENDER_EMAIL, WELCOME_CREDITS,
@@ -15,8 +15,23 @@ from core import (
     RegisterRequest, LoginRequest, ForgotPasswordRequest, ResetPasswordRequest,
     ChangePasswordRequest, UpdateProfileRequest, DailyEmailPrefRequest,
 )
+from routers.referral import generate_referral_code_for, find_user_by_code
 
 router = APIRouter(prefix="/auth", tags=["auth"])
+
+
+def _infer_country_code(request: Request) -> str:
+    """Best-effort country code from Accept-Language. Defaults to FR.
+
+    Accept-Language examples: 'fr-FR,fr;q=0.9' → FR, 'en-GB' → GB.
+    Used only for the "Pays/régions actifs" public counter — never gates features.
+    """
+    lang = (request.headers.get("accept-language") or "fr").lower()
+    first = lang.split(",")[0].strip()
+    if "-" in first:
+        return first.split("-")[1].upper()[:2]
+    # bare 'fr' → assume FR; bare 'en' → GB as a neutral default
+    return "FR" if first.startswith("fr") else first.upper()[:2] or "FR"
 
 
 def _build_reset_email_html(reset_link: str) -> str:
@@ -78,14 +93,29 @@ async def _send_reset_email(to_email: str, reset_link: str) -> bool:
 
 
 @router.post("/register")
-async def register(body: RegisterRequest, response: Response):
+async def register(body: RegisterRequest, request: Request, response: Response):
     email = body.email.lower().strip()
     if await db.users.find_one({"email": email}):
         raise HTTPException(status_code=400, detail="Cet email est déjà utilisé")
+
+    # Validate optional referral code (silently ignore if invalid to avoid blocking signup)
+    referred_by_user_id = None
+    if body.referral_code:
+        sponsor = await find_user_by_code(body.referral_code)
+        if sponsor:
+            referred_by_user_id = str(sponsor["_id"])
+
+    # Generate this new user's own referral code (so they can invite immediately)
+    own_code = await generate_referral_code_for(body.name, email)
+
     doc = {"email": email, "password_hash": hash_password(body.password),
            "name": body.name.strip(), "role": "user", "plan": "free",
            "plan_expires_at": None, "created_at": datetime.now(timezone.utc).isoformat(),
-           "credits": WELCOME_CREDITS, "xp_total": 0, "auth_provider": "email"}
+           "credits": WELCOME_CREDITS, "xp_total": 0, "auth_provider": "email",
+           "referral_code": own_code,
+           "referred_by_user_id": referred_by_user_id,
+           "referral_count": 0,
+           "country_code": _infer_country_code(request)}
     result = await db.users.insert_one(doc)
     doc["_id"] = result.inserted_id
     # Welcome bonus ledger entry (audit trail)

@@ -23,6 +23,7 @@ import CGU from "@/pages/legal/CGU";
 import CGV from "@/pages/legal/CGV";
 import Confidentialite from "@/pages/legal/Confidentialite";
 import AdminReports from "@/pages/AdminReports";
+import EarnCredits from "@/pages/EarnCredits";
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();
@@ -133,6 +134,14 @@ export default function App() {
             element={
               <ProtectedRoute>
                 <AdminReports />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/app/earn-credits"
+            element={
+              <ProtectedRoute>
+                <EarnCredits />
               </ProtectedRoute>
             }
           />

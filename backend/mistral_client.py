@@ -25,6 +25,12 @@ MISTRAL_MODEL = os.environ.get("MISTRAL_MODEL", "mistral-small-latest")
 QUESTIONS_PER_CATEGORY = 100
 BATCH_SIZE = 25  # Mistral handles ~25 well-structured items per call comfortably
 
+# Module-level lock — guards against two concurrent regenerations
+# (e.g. an admin double-clicks the button or the cron and a manual run overlap).
+# Without this guard, the same `delete_many + insert_many` race produces
+# duplicated questions and unnecessary Mistral API spend.
+_regen_lock = asyncio.Lock()
+
 
 class Question(BaseModel):
     id: str
@@ -177,17 +183,116 @@ async def regenerate_category(category: dict, target: int = QUESTIONS_PER_CATEGO
 
 
 async def regenerate_all() -> dict:
-    """Sequentially regenerate every category. Returns a summary dict."""
+    """Sequentially regenerate every category. Returns a summary dict.
+
+    Guarded by a module-level asyncio.Lock — if a regeneration is already
+    running, this call returns immediately with `skipped=True` and the
+    current run's started_at timestamp.
+    """
+    if _regen_lock.locked():
+        # Another run is in progress — skip to avoid doubling Mistral spend
+        state = await db.app_state.find_one({"key": "mistral_regen"}, {"_id": 0})
+        logger.warning("[mistral] régénération déjà en cours — skip")
+        return {
+            "skipped": True,
+            "reason": "regeneration_already_running",
+            "current_run": state or {},
+        }
+
+    async with _regen_lock:
+        started = datetime.now(timezone.utc)
+        await db.app_state.update_one(
+            {"key": "mistral_regen"},
+            {"$set": {
+                "key": "mistral_regen",
+                "status": "running",
+                "started_at": started.isoformat(),
+                "model": MISTRAL_MODEL,
+            }},
+            upsert=True,
+        )
+        results: dict[str, int] = {}
+        for cat in CATEGORIES:
+            try:
+                n = await regenerate_category(cat)
+                results[cat["id"]] = n
+            except Exception as e:  # never let one category break the whole run
+                logger.exception(f"[mistral] {cat['id']} failed: {e}")
+                results[cat["id"]] = 0
+        total = sum(results.values())
+        duration = (datetime.now(timezone.utc) - started).total_seconds()
+        summary = {
+            "total": total,
+            "by_category": results,
+            "duration_sec": int(duration),
+            "model": MISTRAL_MODEL,
+        }
+        await db.app_state.update_one(
+            {"key": "mistral_regen"},
+            {"$set": {
+                "status": "completed",
+                "finished_at": datetime.now(timezone.utc).isoformat(),
+                "last_summary": summary,
+            }},
+        )
+        logger.info(f"[mistral] Régénération complète terminée : {total} questions en {duration:.1f}s")
+        return summary
+
+
+
+async def ping() -> dict:
+    """Lightweight health check for the Mistral integration.
+
+    Calls `models.list` (a free, low-latency endpoint) and reports
+    OK/KO + latency. Also includes the timestamp of the last regeneration
+    run and the number of questions currently in each category, so
+    admins can spot a category that wasn't refreshed.
+    """
     started = datetime.now(timezone.utc)
-    results: dict[str, int] = {}
+    api_key = os.environ.get("MISTRAL_API_KEY")
+    if not api_key:
+        return {
+            "ok": False,
+            "error": "MISTRAL_API_KEY non configurée",
+            "model": MISTRAL_MODEL,
+        }
+
+    def _ping_call():
+        c = Mistral(api_key=api_key)
+        return c.models.list()
+
+    try:
+        await asyncio.to_thread(_ping_call)
+        latency_ms = int((datetime.now(timezone.utc) - started).total_seconds() * 1000)
+        ok = True
+        error: str | None = None
+    except Exception as e:
+        latency_ms = int((datetime.now(timezone.utc) - started).total_seconds() * 1000)
+        ok = False
+        error = f"{type(e).__name__}: {e}"
+
+    # Last regeneration state from DB
+    state = await db.app_state.find_one({"key": "mistral_regen"}, {"_id": 0}) or {}
+    last_run = {
+        "status": state.get("status"),
+        "started_at": state.get("started_at"),
+        "finished_at": state.get("finished_at"),
+        "summary": state.get("last_summary"),
+    }
+
+    # Per-category question counts (handy to detect a stale or empty category)
+    counts: dict[str, int] = {}
     for cat in CATEGORIES:
-        try:
-            n = await regenerate_category(cat)
-            results[cat["id"]] = n
-        except Exception as e:  # never let one category break the whole run
-            logger.exception(f"[mistral] {cat['id']} failed: {e}")
-            results[cat["id"]] = 0
-    total = sum(results.values())
-    duration = (datetime.now(timezone.utc) - started).total_seconds()
-    logger.info(f"[mistral] Régénération complète terminée : {total} questions en {duration:.1f}s")
-    return {"total": total, "by_category": results, "duration_sec": int(duration), "model": MISTRAL_MODEL}
+        counts[cat["id"]] = await db.questions.count_documents({"category_id": cat["id"]})
+
+    return {
+        "ok": ok,
+        "error": error,
+        "latency_ms": latency_ms,
+        "model": MISTRAL_MODEL,
+        "lock_held": _regen_lock.locked(),
+        "last_run": last_run,
+        "questions_per_category": counts,
+        "total_questions": sum(counts.values()),
+        "checked_at": datetime.now(timezone.utc).isoformat(),
+    }

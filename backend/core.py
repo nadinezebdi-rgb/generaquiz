@@ -55,6 +55,7 @@ AD_REWARD_DAILY_CAP = 5      # max rewarded ads / day
 CHALLENGE_COMPLETE_CREDITS = 1
 HINT_5050_COST = 2
 STREAK_SAVER_COST = 10
+REFERRAL_BONUS_CREDITS = 5   # bonus for BOTH parties when referred user plays 1st quiz
 
 # XP rewards (used by ladder/leagues weekly ranking)
 XP_PER_CORRECT_DAILY = 10        # each correct answer in /daily/submit
@@ -132,6 +133,8 @@ def user_to_public(u: dict) -> dict:
             "daily_email_optin": u.get("daily_email_optin", True),
             "credits": int(u.get("credits") or 0),
             "xp_total": int(u.get("xp_total") or 0),
+            "referral_code": u.get("referral_code"),
+            "referral_count": int(u.get("referral_count") or 0),
             "auth_provider": u.get("auth_provider", "email")}
 
 
@@ -195,6 +198,7 @@ class RegisterRequest(BaseModel):
     email: EmailStr
     password: str = Field(min_length=6)
     name: str = Field(min_length=1, max_length=80)
+    referral_code: Optional[str] = Field(None, max_length=40)
 
 
 class LoginRequest(BaseModel):

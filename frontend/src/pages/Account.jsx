@@ -1,11 +1,11 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { api, formatError } from "@/lib/api";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import {
-  User, Mail, Crown, Calendar, Lock, Loader2, Check, LogOut, Trash2, Save, ArrowRight, Bell, Flame,
+  User, Mail, Crown, Calendar, Lock, Loader2, Check, LogOut, Trash2, Save, ArrowRight, Bell, Flame, Gift, Copy,
 } from "lucide-react";
 
 export default function Account() {
@@ -26,7 +26,15 @@ export default function Account() {
   const [savingPref, setSavingPref] = useState(false);
   const [prefMsg, setPrefMsg] = useState("");
 
+  const [referral, setReferral] = useState(null); // {code, invite_link, referral_count, bonus}
+  const [copied, setCopied] = useState(null); // 'code' | 'link' | null
+
   const [deleting, setDeleting] = useState(false);
+
+  useEffect(() => {
+    if (!user) return;
+    api.get("/referral/my").then((r) => setReferral(r.data)).catch(() => {});
+  }, [user]);
 
   if (!user) return null;
 
@@ -250,6 +258,83 @@ export default function Account() {
           </div>
           {prefMsg && <p className="text-sm text-[#3D9970] font-medium mt-3" data-testid="account-pref-msg">{prefMsg}</p>}
         </div>
+
+        {/* ============ REFERRAL CARD ============ */}
+        {referral && (
+          <div className="bg-white border-2 border-cream-dark rounded-[28px] p-6 md:p-8 mb-6" data-testid="account-referral-card">
+            <h2 className="font-display text-2xl font-bold text-navy mb-2 flex items-center gap-2">
+              <Gift className="w-6 h-6 text-terracotta" /> Parrainer un proche
+            </h2>
+            <p className="text-navy/70 mb-5">
+              Pour chaque ami inscrit qui termine son 1ᵉʳ quiz, vous gagnez tous les deux <strong>+{referral.bonus} crédits</strong>.
+            </p>
+
+            <div className="grid sm:grid-cols-3 gap-4 mb-5">
+              <div className="sm:col-span-2 bg-cream border-2 border-cream-dark rounded-2xl p-4">
+                <div className="text-xs font-bold uppercase tracking-wider text-navy/60 mb-2">Votre code</div>
+                <div className="flex items-center gap-3 flex-wrap">
+                  <span
+                    data-testid="account-referral-code"
+                    className="font-display text-2xl md:text-3xl font-extrabold text-bordeaux tracking-wider select-all"
+                  >
+                    {referral.code}
+                  </span>
+                  <button
+                    type="button"
+                    data-testid="account-referral-copy-code"
+                    onClick={() => {
+                      navigator.clipboard.writeText(referral.code);
+                      setCopied("code");
+                      setTimeout(() => setCopied(null), 2000);
+                    }}
+                    className="inline-flex items-center gap-1.5 bg-navy hover:bg-navy-dark text-white font-bold text-sm px-3 py-2 rounded-full transition"
+                  >
+                    {copied === "code" ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                    {copied === "code" ? "Copié !" : "Copier"}
+                  </button>
+                </div>
+              </div>
+              <div className="bg-mustard/30 border-2 border-mustard-dark rounded-2xl p-4">
+                <div className="text-xs font-bold uppercase tracking-wider text-navy/60 mb-1">Filleuls accueillis</div>
+                <div className="font-display text-4xl font-extrabold text-navy" data-testid="account-referral-count">
+                  {referral.referral_count}
+                </div>
+                <div className="text-xs text-navy/60 mt-0.5">soit +{referral.referral_count * referral.bonus} crédits gagnés</div>
+              </div>
+            </div>
+
+            <div className="bg-cream/60 border-2 border-cream-dark rounded-2xl p-4 mb-3">
+              <div className="text-xs font-bold uppercase tracking-wider text-navy/60 mb-2">Lien d&apos;invitation</div>
+              <div className="flex items-center gap-2 flex-wrap">
+                <input
+                  data-testid="account-referral-link"
+                  readOnly
+                  value={referral.invite_link}
+                  onClick={(e) => e.target.select()}
+                  className="flex-1 min-w-0 bg-white border-2 border-cream-dark rounded-xl px-3 py-2 text-sm text-navy font-mono"
+                />
+                <button
+                  type="button"
+                  data-testid="account-referral-copy-link"
+                  onClick={() => {
+                    navigator.clipboard.writeText(referral.invite_link);
+                    setCopied("link");
+                    setTimeout(() => setCopied(null), 2000);
+                  }}
+                  className="inline-flex items-center gap-1.5 bg-terracotta hover:bg-terracotta-dark text-white font-bold text-sm px-3 py-2 rounded-full transition shrink-0"
+                >
+                  {copied === "link" ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                  {copied === "link" ? "Copié !" : "Copier le lien"}
+                </button>
+              </div>
+            </div>
+
+            <p className="text-xs text-navy/60">
+              Partagez votre code (ou le lien) à vos amis. Ils saisissent le code à l&apos;inscription et
+              les crédits sont crédités automatiquement dès leur 1ᵉʳ quiz terminé.
+            </p>
+          </div>
+        )}
 
         {/* ============ MOT DE PASSE CARD ============ */}
         <div className="bg-white border-2 border-cream-dark rounded-[28px] p-6 md:p-8 mb-6">

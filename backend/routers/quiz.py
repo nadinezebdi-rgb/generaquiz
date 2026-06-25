@@ -4,6 +4,7 @@ from datetime import datetime, timezone
 from fastapi import APIRouter, Depends, HTTPException
 
 from core import db, get_current_user, AttemptCreate
+from routers.referral import grant_referral_bonus_if_eligible
 
 router = APIRouter(tags=["quiz"])
 
@@ -35,7 +36,10 @@ async def save_attempt(body: AttemptCreate, user: dict = Depends(get_current_use
         "duration_seconds": body.duration_seconds,
         "created_at": datetime.now(timezone.utc).isoformat(),
     })
-    return {"ok": True}
+    # Trigger referral bonus on the FIRST successful quiz of a referred user.
+    # Idempotent via the `referral_bonus_granted` flag inside the helper.
+    bonus_granted = await grant_referral_bonus_if_eligible(user)
+    return {"ok": True, "referral_bonus_granted": bonus_granted}
 
 
 @router.get("/attempts")

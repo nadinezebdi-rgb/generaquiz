@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import StatsSection from "@/components/StatsSection";
 import { api, BACKEND_URL } from "@/lib/api";
 
 const ACTIVITIES = [
@@ -209,6 +210,9 @@ export default function Landing() {
           </motion.div>
         </div>
       </section>
+
+      {/* ============ STATS PUBLIQUES ============ */}
+      <StatsSection />
 
       {/* ============ CATEGORIES ============ */}
       <section id="categories" className="py-20 lg:py-28">

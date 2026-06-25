@@ -32,6 +32,9 @@ from routers import promo as promo_router
 from routers import daily as daily_router
 from routers import gamification as gamification_router
 from routers import reports as reports_router
+from routers import stats as stats_router
+from routers import referral as referral_router
+from routers.referral import generate_referral_code_for
 
 app = FastAPI(title="Quiz d'Antan API")
 api = APIRouter(prefix="/api")
@@ -63,6 +66,18 @@ async def admin_mistral_regenerate(user: dict = Depends(get_admin_user)):
     }
 
 
+@api.get("/admin/mistral/ping")
+async def admin_mistral_ping(user: dict = Depends(get_admin_user)):
+    """Admin-only healthcheck for the Mistral integration.
+
+    Returns OK/KO + latency, the last regeneration summary, and the current
+    questions-per-category counts. Use this to spot a rotated key or a stale
+    category before the user reports it.
+    """
+    from mistral_client import ping as mistral_ping
+    return await mistral_ping()
+
+
 # Mount routers under /api
 api.include_router(auth_router.router)
 api.include_router(social_auth_router.router)
@@ -73,6 +88,8 @@ api.include_router(promo_router.router)
 api.include_router(daily_router.router)
 api.include_router(gamification_router.router)
 api.include_router(reports_router.router)
+api.include_router(stats_router.router)
+api.include_router(referral_router.router)
 app.include_router(api)
 
 # CORS
@@ -116,6 +133,10 @@ async def startup():
     await db.league_scores.create_index([("week_key", 1), ("xp", -1)])
     await db.question_reports.create_index([("status", 1), ("question_id", 1)])
     await db.question_reports.create_index([("user_id", 1), ("question_id", 1)])
+    # Referral indexes (unique sparse: users created before P2 have no code yet)
+    await db.users.create_index("referral_code", unique=True, sparse=True)
+    # App-wide state (e.g. Mistral last regen) — single doc keyed by `key`
+    await db.app_state.create_index("key", unique=True)
 
     # Seed categories (always refresh metadata: title/description/mascot/count)
     for cat in CATEGORIES:
@@ -160,6 +181,22 @@ async def startup():
     )
     if backfilled.modified_count:
         logger.info(f"Crédits de bienvenue rétroactifs : {backfilled.modified_count} utilisateurs")
+
+    # Backfill referral_code for legacy users (one-time, idempotent — runs once per user).
+    legacy_users = db.users.find(
+        {"referral_code": {"$exists": False}},
+        {"_id": 1, "name": 1, "email": 1},
+    )
+    backfill_count = 0
+    async for u in legacy_users:
+        code = await generate_referral_code_for(u.get("name", ""), u.get("email", ""))
+        await db.users.update_one(
+            {"_id": u["_id"]},
+            {"$set": {"referral_code": code, "referral_count": 0}},
+        )
+        backfill_count += 1
+    if backfill_count:
+        logger.info(f"Codes parrainage rétroactifs : {backfill_count} utilisateurs")
 
     # Seed default promo codes (idempotent)
     # Note: les codes "à vie" (FAMILLE2026) ne sont plus seedés par défaut en prod.
