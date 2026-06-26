@@ -217,22 +217,32 @@ async def answer_coop_question(
     new_idx = idx + 1
     completed = new_idx >= len(questions)
 
-    # Incremental update for stats_coop — single update_one keeps it atomic
-    update_doc = {
-        "$set": {"current_index": new_idx},
-        "$push": {"answers_log": log_entry},
-        "$inc": {
-            "stats_coop.total_xp": xp_earned,
-            "stats_coop.correct_count": 1 if is_correct else 0,
-            "stats_coop.helps_used": 1 if body.help_used else 0,
-            "stats_coop.helps_successful": 1 if (body.help_used and is_correct) else 0,
-            "stats_coop.total_score": 1 if is_correct else 0,
-        },
-    }
+    # Conditional update guards against double-tap races: if the cursor has
+    # already moved (another in-flight POST won the race), we abort to avoid
+    # double-incrementing stats_coop / writing two log rows for the same Q.
+    set_fields = {"current_index": new_idx}
     if completed:
-        update_doc["$set"]["status"] = "completed"
-        update_doc["$set"]["completed_at"] = datetime.now(timezone.utc).isoformat()
-    await db.coop_challenges.update_one({"token": token}, update_doc)
+        set_fields["status"] = "completed"
+        set_fields["completed_at"] = datetime.now(timezone.utc).isoformat()
+    res = await db.coop_challenges.update_one(
+        {"token": token, "current_index": idx, "status": "in_progress"},
+        {
+            "$set": set_fields,
+            "$push": {"answers_log": log_entry},
+            "$inc": {
+                "stats_coop.total_xp": xp_earned,
+                "stats_coop.correct_count": 1 if is_correct else 0,
+                "stats_coop.helps_used": 1 if body.help_used else 0,
+                "stats_coop.helps_successful": 1 if (body.help_used and is_correct) else 0,
+                "stats_coop.total_score": 1 if is_correct else 0,
+            },
+        },
+    )
+    if res.modified_count == 0:
+        raise HTTPException(
+            status_code=409,
+            detail="Cette question a déjà été répondue (double-tap ?). Rechargez la page.",
+        )
 
     # Reload to return the freshest state to the client
     fresh = await db.coop_challenges.find_one({"token": token})

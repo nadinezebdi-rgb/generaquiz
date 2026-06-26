@@ -300,3 +300,61 @@ Le backend est **prêt à être consommé** par une app React Native :
 ### Variables d'env ajoutées
 - `REACT_APP_ADSENSE_CLIENT` (vide par défaut → fallback house ad)
 - `REACT_APP_ADSENSE_SLOT`
+
+## 2026-02-16 — Mode Coopératif "Défi Famille" Phase A (iteration 20) ✅
+
+### Concept livré (14/14 backend + 7/7 frontend)
+Refonte stratégique du Défi Famille : passe d'un quiz partagé "chacun pour soi" à un **jeu d'équipe asymétrique sur même appareil** (Senior + Jeune).
+Inspiration : *It Takes Two*, *Keep Talking and Nobody Explodes* appliqué à la culture générale française.
+
+### Mécaniques implémentées
+- **Création de défi** (`/app/coop/new`) : team_name, 2 joueurs avec rôles différents obligatoires (Senior/Jeune), catégorie au choix parmi les 8 existantes, 4–20 questions
+- **Alternance auto des questions** : Q0 → joueur 1, Q1 → joueur 2, etc. (annoté côté backend via `assigned_to: "senior"|"jeune"`)
+- **Bouton "Demander de l'aide à <partner>"** → overlay "Passe le téléphone à <name> 📱→👴/🧒" qui CACHE la question jusqu'à ce que le partenaire confirme "C'est moi, c'est parti !"
+- **Scoring asymétrique** :
+  - Solo correct : **100 XP**
+  - Avec aide correct : **50 XP**
+  - Faux : **0 XP**
+- **Stats finales** : total_xp, helps_used, helps_successful, correct_count, accuracy_pct
+- **Race-condition guard** : conditional update `{current_index: idx, status: "in_progress"}` → 409 si double-submit parallèle
+- **Accès libre (free + premium)** pour piloter l'engagement (volontairement non-gaté)
+
+### Backend
+- Nouveau router `/api/coop-challenges` (POST create, GET state, POST answer, GET mine/list)
+- Collection MongoDB `coop_challenges` (index unique sur `token`, index composite `creator_user_id + created_at`)
+- `_assign_role(idx)` alterne sur `idx % 2`
+- `_public_view()` strip `correct_index/explanation` des questions à venir (visible dans `answers_log` pour le récap)
+
+### Frontend
+- `CoopChallengeCreate.jsx` : formulaire avec validation rôles différents
+- `CoopChallengePlay.jsx` : gameplay complet avec overlay passe-plat, feedback animé, écran de résultats finaux
+- Hero card "Mode Coopératif" en haut de `/app/challenges` (toujours visible, même pour les free)
+- Section "Défi Classique" en dessous, gardée pour les Premium
+- Champ `birth_year` optionnel à l'inscription
+
+### Modèle utilisateur étendu
+- `birth_year` (optional int, 1900-2026)
+- `age_group` computed dans `user_to_public` : ≤25 = "jeune", ≥55 = "senior", autres = "libre" (préparation Phase B pour suggestions auto de duo)
+
+### Code review comments traités
+- ✅ Race-condition guard double-tap (conditional update)
+- ✅ Bump birth_year max année à 2026
+- ⏳ Strip `correct_index/explanation` du `answers_log` — laissé intentionnellement (récap éducatif)
+- ⏳ `starter_index` paramétrable — non requis pour MVP
+- ⏳ FinalResults state explicite — la dérivation actuelle est OK
+
+## Roadmap Mode Coopératif
+
+### Phase B (à venir — sur demande utilisateur)
+4 nouvelles catégories modernes à générer via Mistral (~400 questions, 1 nuit) :
+- 🎮 **Génération Écrans** (Léo le Streamer) — jeux vidéo, Twitch, YouTube
+- 📱 **Tech & Réseaux** (Léna l'Influenceuse) — TikTok, Instagram, IA, smartphones
+- 🎵 **Hits & Rap Actuel** (Rayan le Beatmaker) — rap français 2010-2026, hits Spotify
+- 🍔 **Street Food & Fooding** (Chloé la Foodie) — bubble tea, smash burger, ramen, vegan
+
+### Phase C (idées)
+- Mode à distance (WebSocket sync entre 2 téléphones)
+- Questions "Pont" (pop culture commune aux 2 générations) tagguées dans le pool
+- Match "Choc des Générations" : duels avec scoreboard temps réel
+- Suggestions auto de duo via `age_group` à la création (« Mamie + nièce de 12 ans »)
+

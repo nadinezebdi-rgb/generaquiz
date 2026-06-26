@@ -217,7 +217,7 @@ class RegisterRequest(BaseModel):
     password: str = Field(min_length=6)
     name: str = Field(min_length=1, max_length=80)
     referral_code: Optional[str] = Field(None, max_length=40)
-    birth_year: Optional[int] = Field(None, ge=1900, le=2025)
+    birth_year: Optional[int] = Field(None, ge=1900, le=2026)
 
 
 class LoginRequest(BaseModel):
@@ -241,7 +241,7 @@ class ChangePasswordRequest(BaseModel):
 
 class UpdateProfileRequest(BaseModel):
     name: str = Field(min_length=1, max_length=80)
-    birth_year: Optional[int] = Field(None, ge=1900, le=2025)
+    birth_year: Optional[int] = Field(None, ge=1900, le=2026)
 
 
 class DailyEmailPrefRequest(BaseModel):
