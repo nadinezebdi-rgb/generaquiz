@@ -36,6 +36,26 @@ async def save_attempt(body: AttemptCreate, user: dict = Depends(get_current_use
         "duration_seconds": body.duration_seconds,
         "created_at": datetime.now(timezone.utc).isoformat(),
     })
+    # Award category-quiz XP into the weekly league cohort so the leagues
+    # page reflects category play, not only daily-quiz play (Sprint 1 visible).
+    try:
+        from core import XP_PER_CORRECT_CATEGORY
+        from routers.gamification import _ensure_league_membership, _week_key
+        xp_gained = int(body.score) * XP_PER_CORRECT_CATEGORY
+        if xp_gained > 0:
+            user_id = str(user["_id"])
+            await db.users.update_one({"_id": user["_id"]}, {"$inc": {"xp_total": xp_gained}})
+            await _ensure_league_membership(user_id)
+            await db.league_scores.update_one(
+                {"user_id": user_id, "week_key": _week_key()},
+                {"$inc": {"xp": xp_gained}, "$setOnInsert": {
+                    "user_id": user_id, "week_key": _week_key(),
+                    "user_name": user.get("name") or user.get("email", "").split("@")[0],
+                }},
+                upsert=True,
+            )
+    except Exception:
+        pass  # XP is best-effort — never break the attempt save
     # Trigger referral bonus on the FIRST successful quiz of a referred user.
     # Idempotent via the `referral_bonus_granted` flag inside the helper.
     bonus_granted = await grant_referral_bonus_if_eligible(user)

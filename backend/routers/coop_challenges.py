@@ -244,6 +244,27 @@ async def answer_coop_question(
             detail="Cette question a déjà été répondue (double-tap ?). Rechargez la page.",
         )
 
+    # Feed the user's XP (from coop scoring) into both their total and the
+    # weekly league cohort — gives Sprint 1 leagues page real data and rewards
+    # the cooperative gameplay equally to solo play.
+    if xp_earned > 0:
+        try:
+            from routers.gamification import _ensure_league_membership, _week_key
+            user_id = str(user["_id"])
+            await db.users.update_one({"_id": user["_id"]}, {"$inc": {"xp_total": xp_earned}})
+            await _ensure_league_membership(user_id)
+            await db.league_scores.update_one(
+                {"user_id": user_id, "week_key": _week_key()},
+                {"$inc": {"xp": xp_earned}, "$setOnInsert": {
+                    "user_id": user_id, "week_key": _week_key(),
+                    "user_name": user.get("name") or user.get("email", "").split("@")[0],
+                }},
+                upsert=True,
+            )
+        except Exception:
+            # XP attribution is best-effort — never fail the answer endpoint
+            pass
+
     # Reload to return the freshest state to the client
     fresh = await db.coop_challenges.find_one({"token": token})
     next_q = None
