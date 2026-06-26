@@ -33,6 +33,16 @@ export default function QuizPlayer() {
   const [finished, setFinished] = useState(false);
   const startTime = useRef(Date.now());
 
+  // États du mode défi famille : plusieurs joueurs peuvent se relayer sur une même question.
+  const [familyMode, setFamilyMode] = useState(false);
+  const [members, setMembers] = useState([]);           // prénoms saisis
+  const [responderIdx, setResponderIdx] = useState(0);  // index du répondant actuel
+  const [passCount, setPassCount] = useState(0);        // nb de passes sur la question en cours
+  const [scoreByMember, setScoreByMember] = useState({}); // {prénom: nb bonnes réponses}
+  const [setupDone, setSetupDone] = useState(false);    // true quand l'écran setup est fermé
+  const [newMember, setNewMember] = useState("");
+  const [questionResponders, setQuestionResponders] = useState({}); // {questionId: prénom du bon répondant}
+
   useEffect(() => {
     api
       .get(`/categories/${categoryId}/questions`)
@@ -71,6 +81,9 @@ export default function QuizPlayer() {
   const { category, questions, is_premium } = data;
   const total = questions.length;
   const q = questions[idx];
+  const currentMember = familyMode && members.length > 0 ? members[responderIdx] : null;
+  const hasOtherResponders = familyMode && selected === null && members.length > 1 && passCount < members.length - 1;
+  const isLastFamilyChance = familyMode && selected === null && members.length > 1 && passCount >= members.length - 1;
 
   const speak = (text) => {
     try {
@@ -82,10 +95,61 @@ export default function QuizPlayer() {
     } catch {}
   };
 
+  // Ajoute un prénom au défi famille, avec une limite de 6 joueurs.
+  const addMember = () => {
+    const name = newMember.trim();
+    if (!name || members.length >= 6) return;
+    setMembers((prev) => [...prev, name]);
+    setScoreByMember((prev) => ({ ...prev, [name]: prev[name] ?? 0 }));
+    setNewMember("");
+  };
+
+  // Supprime un prénom saisi avant le lancement du défi famille.
+  const removeMember = (nameToRemove) => {
+    setMembers((prev) => prev.filter((name) => name !== nameToRemove));
+    setScoreByMember((prev) => {
+      const next = { ...prev };
+      delete next[nameToRemove];
+      return next;
+    });
+  };
+
+  // Lance le quiz en solo sans changer la mécanique existante.
+  const startSolo = () => {
+    setFamilyMode(false);
+    setSetupDone(true);
+    startTime.current = Date.now();
+  };
+
+  // Lance le défi famille après validation d'au moins deux prénoms.
+  const startFamilyChallenge = () => {
+    if (members.length < 2) return;
+    setFamilyMode(true);
+    setResponderIdx(0);
+    setPassCount(0);
+    setScoreByMember(members.reduce((acc, name) => ({ ...acc, [name]: 0 }), {}));
+    setQuestionResponders({});
+    setSetupDone(true);
+    startTime.current = Date.now();
+  };
+
   const onSelect = (i) => {
     if (selected !== null) return;
     setSelected(i);
-    if (shuffled && i === shuffled.newCorrectIdx) setScore((s) => s + 1);
+    if (shuffled && i === shuffled.newCorrectIdx) {
+      setScore((s) => s + 1);
+      if (familyMode && currentMember) {
+        // Le point revient au membre qui a effectivement trouvé la bonne réponse.
+        setScoreByMember((prev) => ({
+          ...prev,
+          [currentMember]: (prev[currentMember] ?? 0) + 1,
+        }));
+        setQuestionResponders((prev) => ({
+          ...prev,
+          [q.id ?? idx]: currentMember,
+        }));
+      }
+    }
   };
 
   const onNext = () => {
@@ -101,11 +165,30 @@ export default function QuizPlayer() {
     } else {
       setIdx((v) => v + 1);
       setSelected(null);
+      setPassCount(0);
+      if (familyMode && members.length > 0) {
+        setResponderIdx((v) => (v + 1) % members.length);
+      }
     }
+  };
+
+  // Passe la main au prochain membre ; si tout le monde passe, la question est ratée.
+  const onPass = () => {
+    if (!familyMode || selected !== null || members.length < 2) return;
+
+    if (passCount + 1 >= members.length) {
+      onNext();
+      return;
+    }
+
+    setPassCount((v) => v + 1);
+    setResponderIdx((v) => (v + 1) % members.length);
   };
 
   const restart = () => {
     setIdx(0); setSelected(null); setScore(0); setFinished(false);
+    setResponderIdx(0); setPassCount(0); setQuestionResponders({});
+    setScoreByMember(members.reduce((acc, name) => ({ ...acc, [name]: 0 }), {}));
     startTime.current = Date.now();
   };
 
@@ -141,7 +224,103 @@ export default function QuizPlayer() {
 
         {/* Quiz card */}
         <AnimatePresence mode="wait">
-          {!finished ? (
+          {!setupDone ? (
+            <motion.div
+              key="setup"
+              initial={{ opacity: 0, scale: 0.98 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0 }}
+              className="bg-white border-4 border-navy rounded-[32px] p-6 md:p-10 shadow-warm"
+            >
+              <div className="text-center mb-8">
+                <h2 className="font-display text-3xl md:text-4xl font-extrabold text-navy mb-3">
+                  Comment voulez-vous jouer ?
+                </h2>
+                <p className="text-navy/70 text-lg">
+                  Lancez une partie classique ou créez un défi où chaque génération peut aider la famille.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+                <button
+                  onClick={startSolo}
+                  data-testid="quiz-start-solo"
+                  className="bg-cream hover:bg-mustard border-2 border-cream-dark text-navy rounded-2xl p-6 text-left transition"
+                >
+                  <span className="font-display text-2xl font-extrabold block mb-2">Jouer seul</span>
+                  <span className="text-navy/70">Le quiz démarre avec les règles habituelles.</span>
+                </button>
+                <button
+                  onClick={() => setFamilyMode(true)}
+                  data-testid="quiz-choose-family"
+                  className="bg-white hover:bg-terracotta/5 border-2 border-terracotta text-navy rounded-2xl p-6 text-left transition"
+                >
+                  <span className="font-display text-2xl font-extrabold block mb-2">Défi famille</span>
+                  <span className="text-navy/70">Passez la main si quelqu'un ne sait pas répondre.</span>
+                </button>
+              </div>
+
+              {familyMode && (
+                <div className="bg-cream border-2 border-cream-dark rounded-2xl p-5">
+                  <h3 className="font-display text-2xl font-bold text-navy mb-4">Prénoms des joueurs</h3>
+                  <div className="flex flex-col sm:flex-row gap-3 mb-4">
+                    <input
+                      type="text"
+                      value={newMember}
+                      onChange={(e) => setNewMember(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          addMember();
+                        }
+                      }}
+                      data-testid="quiz-family-name"
+                      placeholder="Ex. Marie"
+                      disabled={members.length >= 6}
+                      className="flex-1 bg-white border-2 border-cream-dark rounded-full px-5 py-3 text-navy font-semibold outline-none focus:border-terracotta"
+                    />
+                    <button
+                      onClick={addMember}
+                      disabled={!newMember.trim() || members.length >= 6}
+                      data-testid="quiz-family-add"
+                      className="bg-navy hover:bg-navy-dark disabled:bg-navy/30 text-white font-bold px-6 py-3 rounded-full transition"
+                    >
+                      Ajouter
+                    </button>
+                  </div>
+
+                  <div className="flex flex-wrap gap-2 mb-5">
+                    {members.length === 0 ? (
+                      <p className="text-navy/60">Ajoutez 2 à 6 prénoms pour commencer.</p>
+                    ) : (
+                      members.map((name) => (
+                        <span key={name} className="inline-flex items-center gap-2 bg-white border-2 border-cream-dark rounded-full px-4 py-2 text-navy font-bold">
+                          {name}
+                          <button
+                            type="button"
+                            onClick={() => removeMember(name)}
+                            className="text-navy/50 hover:text-terracotta"
+                            aria-label={`Supprimer ${name}`}
+                          >
+                            ×
+                          </button>
+                        </span>
+                      ))
+                    )}
+                  </div>
+
+                  <button
+                    onClick={startFamilyChallenge}
+                    disabled={members.length < 2}
+                    data-testid="quiz-start-family"
+                    className="w-full sm:w-auto bg-terracotta hover:bg-terracotta-dark disabled:bg-terracotta/30 text-white font-bold px-8 py-4 rounded-full shadow-warm transition"
+                  >
+                    Commencer le défi
+                  </button>
+                </div>
+              )}
+            </motion.div>
+          ) : !finished ? (
             <motion.div
               key="quiz"
               initial={{ opacity: 0, scale: 0.98 }}
@@ -164,6 +343,17 @@ export default function QuizPlayer() {
                   style={{ width: `${((idx + (selected !== null ? 1 : 0)) / total) * 100}%` }}
                 />
               </div>
+
+              {familyMode && currentMember && (
+                <div className="bg-cream border-2 border-cream-dark rounded-2xl px-5 py-4 mb-6 text-center">
+                  <p className="text-navy font-display text-2xl font-extrabold">
+                    À {currentMember} de répondre
+                  </p>
+                  {isLastFamilyChance && (
+                    <p className="text-terracotta font-bold mt-1">Dernière chance !</p>
+                  )}
+                </div>
+              )}
 
               <div className="flex items-start gap-4 mb-8">
                 <h2 className="font-display text-3xl md:text-4xl lg:text-5xl font-extrabold text-navy leading-snug flex-1" data-testid="quiz-question">
@@ -215,6 +405,18 @@ export default function QuizPlayer() {
                 })}
               </div>
 
+              {hasOtherResponders && (
+                <div className="mb-6 text-center">
+                  <button
+                    onClick={onPass}
+                    data-testid="quiz-family-pass"
+                    className="w-full sm:w-auto border-2 border-dashed border-navy/30 text-navy/60 hover:text-navy hover:border-navy/50 font-bold px-6 py-4 rounded-2xl transition"
+                  >
+                    Je ne sais pas — passer
+                  </button>
+                </div>
+              )}
+
               <AnimatePresence>
                 {selected !== null && shuffled && (
                   <motion.div
@@ -265,6 +467,22 @@ export default function QuizPlayer() {
                 Votre score :{" "}
                 <span className="font-display font-extrabold text-bordeaux text-3xl">{score} / {total}</span>
               </p>
+
+              {familyMode && members.length > 0 && (
+                <div className="bg-cream border-2 border-cream-dark rounded-2xl p-5 my-6 text-left">
+                  <h3 className="font-display text-2xl font-bold text-navy mb-3 text-center">Contributions de la famille</h3>
+                  <p className="text-navy/80 text-lg text-center leading-relaxed">
+                    {members.map((name, i) => {
+                      const count = scoreByMember[name] ?? 0;
+                      const label = count === 0
+                        ? `${name} : 0 réponse`
+                        : `${name} a répondu à ${count} question${count > 1 ? "s" : ""}`;
+                      return `${label}${i < members.length - 1 ? " · " : ""}`;
+                    }).join("")}
+                  </p>
+                </div>
+              )}
+
               <p className="text-lg text-navy/60 mb-8">
                 {score === total
                   ? "Vous êtes une mémoire vivante !"
