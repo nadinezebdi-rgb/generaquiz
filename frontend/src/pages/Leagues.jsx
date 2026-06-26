@@ -36,6 +36,7 @@ function fmtCountdown(seconds) {
 export default function Leagues() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [err, setErr] = useState("");
   const [countdown, setCountdown] = useState(0);
 
   useEffect(() => {
@@ -44,6 +45,9 @@ export default function Leagues() {
         setData(r.data);
         setCountdown(r.data.seconds_until_close || 0);
       })
+      .catch((e) => setErr(e.response?.status === 401
+        ? "Session expirée — reconnectez-vous."
+        : "Impossible de charger votre ligue."))
       .finally(() => setLoading(false));
   }, []);
 
@@ -58,6 +62,27 @@ export default function Leagues() {
     return (
       <div className="min-h-screen paper-bg flex items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-terracotta" />
+      </div>
+    );
+  }
+
+  if (err) {
+    return (
+      <div className="min-h-screen paper-bg">
+        <Navbar variant="app" />
+        <div className="max-w-xl mx-auto px-4 py-20 text-center" data-testid="leagues-error">
+          <Trophy className="w-12 h-12 mx-auto text-bordeaux mb-3" />
+          <h1 className="font-display text-2xl font-bold text-navy mb-2">Oups</h1>
+          <p className="text-navy/70 mb-6">{err}</p>
+          <button
+            onClick={() => window.location.reload()}
+            data-testid="leagues-retry"
+            className="inline-flex items-center gap-2 bg-terracotta text-white font-bold px-5 py-3 rounded-full"
+          >
+            Réessayer
+          </button>
+        </div>
+        <Footer />
       </div>
     );
   }

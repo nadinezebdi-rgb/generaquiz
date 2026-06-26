@@ -358,3 +358,66 @@ Inspiration : *It Takes Two*, *Keep Talking and Nobody Explodes* appliqué à la
 - Match "Choc des Générations" : duels avec scoreboard temps réel
 - Suggestions auto de duo via `age_group` à la création (« Mamie + nièce de 12 ans »)
 
+
+## 2026-02-16 — Sprint 1 Gamification "Rendre visible l'existant" (iteration 21) ✅
+
+### Constat
+2 piliers de la spec gamification utilisateur étaient déjà implémentés côté BACKEND mais totalement invisibles côté frontend :
+- Ligues hebdomadaires (cohortes de 30, Bronze→Argent→Or→Diamant)
+- Streak Saver (10 crédits ou pub pour ressusciter sa flamme)
+
+Sprint 1 rectifie ça avec le minimum de code possible (10/10 backend pytest pass).
+
+### Livré
+
+**🏆 Page `/app/leagues`**
+- Hero card avec tier badge (🥉🥈🥇💎), my_rank, my_xp, countdown live jusqu'à dimanche 22h Paris
+- Section "Comment ça marche" expliquant promo (5 premiers) / relégation (3 derniers)
+- Leaderboard 30 joueurs max avec lignes promotion (verte pointillée) et relégation (rouge pointillée)
+- Ma ligne en surbrillance mustard + médailles 🥇🥈🥉 pour top 3
+- État vide explicite quand la cohorte n'a qu'un membre
+- Gestion erreur 401/réseau avec bouton "Réessayer"
+
+**🔥 StreakSaverModal (auto-trigger sur Dashboard)**
+- Détection client-side via `streakAtRisk(user)` — streak≥2 + last_date == J-2
+- Flamme animée Framer Motion, message "Votre flamme s'éteint !"
+- 2 boutons : "Sauver pour 10 crédits" (terracotta) OU "Gagner des crédits via pub" (lien EarnCredits)
+- Bouton "Tant pis, je laisse filer" + close croix
+- onSaved refresh le user state du contexte
+
+**📧 Email rappel ligue dimanche 20h Paris**
+- Nouveau cron APScheduler `league_reminder_sunday_20h`
+- Cible : ranks 6-8 (close to promote) + ranks (N-5..N-3) (close to relegate)
+- Skip cohortes < 9 joueurs pour éviter promote/relegate overlap
+- Idempotent : `reminder_sent_week` posé par user pour ne pas spammer
+- Sujet : "🚀 Plus que 2h pour grimper en ligue supérieure !" / "⚠️ Tu risques de perdre ta ligue"
+- Skip si RESEND_API_KEY absent (renvoie `{sent:0, reason:'no_resend_key'}`)
+
+**🔄 XP feeds toutes les voies vers les ligues**
+- `POST /api/attempts` (quiz catégorie) → +XP_PER_CORRECT_CATEGORY × score dans league_scores
+- `POST /api/coop-challenges/{token}/answer` → +xp_earned (100/50/0) dans league_scores
+- `POST /api/daily/submit` était déjà branché (no-op)
+
+**🐛 Cohorte bucketing**
+- `LEAGUE_BUCKETS_PER_TIER = 10` (était 10000) → cohortes se remplissent dès ~30 users actifs au lieu de jamais
+- Documenté pour montée à 50+ buckets quand DAU > 300
+
+### Navigation
+- Navbar : nouveau lien "Ligues" 🏆 entre "Mes quiz" et "Défi famille"
+- Route protégée `/app/leagues`
+
+### Tests
+- 10/10 backend pytest pass (`/app/backend/tests/test_iteration21_leagues.py`)
+- Frontend Leagues + Dashboard + Navbar : tous les data-testids vérifiés
+- Code review : 7 commentaires non-bloquants, 3 traités (cohort bucketing, n<9 guard, 401 UI)
+
+### Reste pour Sprint 2 (mode coop récompensé)
+- Combo multiplier ×1/×1.5/×2/×3 dans `/api/coop-challenges/{token}/answer`
+- Carte fin de partie partageable "Complicité 95%" (réutilise ScoreCard.jsx)
+- Badge "Sauveur" simplifié
+
+### Reste pour Sprint 3 (mascottes)
+- Système `users.mascot_levels` + tracking points par catégorie
+- 4 paliers cosmétiques par mascotte (skins générés via Nano Banana)
+- Page `/app/collection`
+

@@ -246,9 +246,14 @@ async def _ensure_league_membership(user_id: str) -> dict:
     if tier not in LEAGUES:
         tier = "bronze"
 
-    # Cohort assignment: hash(user_id + week_key + tier) % large_int → bucket; then group by 30.
+    # Cohort assignment: hash(user_id + week_key + tier) % bucket_count → bucket.
+    # Bucket count is tuned to keep cohorts populated even at low DAU.
+    # With 10 000 buckets, low-traffic users sit alone (bad UX). At ~30 users
+    # per active tier we want ≤ 10 buckets so cohorts of 3-10 form quickly.
+    # We start with `LEAGUE_BUCKETS_PER_TIER=10`; once DAU exceeds 300, lift it.
+    LEAGUE_BUCKETS_PER_TIER = 10
     bucket = int(hashlib.sha256(f"{user_id}|{week_key}|{tier}".encode()).hexdigest()[:8], 16)
-    cohort_id = f"{week_key}-{tier}-{bucket % 10000:04d}"
+    cohort_id = f"{week_key}-{tier}-{bucket % LEAGUE_BUCKETS_PER_TIER:02d}"
 
     doc = {
         "user_id": user_id,

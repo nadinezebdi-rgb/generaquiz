@@ -335,6 +335,11 @@ async def send_league_reminders() -> dict:
         ranked = sorted(members, key=lambda m: scores_map.get(m["user_id"], 0), reverse=True)
         n = len(ranked)
 
+        # If the cohort is too small, promote/relegate ranges overlap and we'd
+        # spam everyone — skip these tiny cohorts entirely.
+        if n < LEAGUE_PROMOTE + LEAGUE_RELEGATE + 3:
+            continue
+
         # Targets: close-to-promote (just-below the cut) AND close-to-relegate
         targets: list[tuple[dict, str]] = []
         for idx, m in enumerate(ranked):
