@@ -24,6 +24,8 @@ import CGV from "@/pages/legal/CGV";
 import Confidentialite from "@/pages/legal/Confidentialite";
 import AdminReports from "@/pages/AdminReports";
 import EarnCredits from "@/pages/EarnCredits";
+import CoopChallengeCreate from "@/pages/CoopChallengeCreate";
+import CoopChallengePlay from "@/pages/CoopChallengePlay";
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();
@@ -142,6 +144,22 @@ export default function App() {
             element={
               <ProtectedRoute>
                 <EarnCredits />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/app/coop/new"
+            element={
+              <ProtectedRoute>
+                <CoopChallengeCreate />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/app/coop/:token"
+            element={
+              <ProtectedRoute>
+                <CoopChallengePlay />
               </ProtectedRoute>
             }
           />

@@ -13,6 +13,7 @@ export default function Register() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [referralCode, setReferralCode] = useState(searchParams.get("code") || "");
+  const [birthYear, setBirthYear] = useState("");
   const [codeStatus, setCodeStatus] = useState(null); // null | 'checking' | {valid, sponsor_name, bonus} | {valid:false}
   const [showReferral, setShowReferral] = useState(!!searchParams.get("code"));
   const [err, setErr] = useState("");
@@ -43,7 +44,8 @@ export default function Register() {
     setLoading(true);
     try {
       const finalCode = codeStatus && codeStatus.valid ? referralCode.trim().toUpperCase() : null;
-      await register(name, email, password, finalCode);
+      const by = birthYear ? parseInt(birthYear, 10) : null;
+      await register(name, email, password, finalCode, by);
       navigate("/app/dashboard");
     } catch (e2) {
       setErr(formatError(e2.response?.data?.detail) || e2.message);
@@ -134,6 +136,21 @@ export default function Register() {
                   className="w-full pl-12 pr-4 py-4 text-lg rounded-2xl border-2 border-cream-dark focus:border-navy bg-white min-h-[56px]"
                 />
               </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-bold text-navy mb-2">Année de naissance <span className="text-navy/50 font-normal">(facultatif)</span></label>
+              <input
+                data-testid="register-birth-year"
+                type="number"
+                value={birthYear}
+                onChange={(e) => setBirthYear(e.target.value)}
+                placeholder="1955"
+                min={1900}
+                max={2025}
+                className="w-full px-4 py-4 text-lg rounded-2xl border-2 border-cream-dark focus:border-navy bg-white min-h-[56px]"
+              />
+              <p className="text-xs text-navy/60 mt-1.5">Sert à proposer des duos « Jeune + Senior » dans le mode coopératif.</p>
             </div>
 
             {/* ============ Referral code ============ */}
