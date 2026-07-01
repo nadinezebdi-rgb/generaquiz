@@ -366,6 +366,17 @@ async def settle_finished_week(when: Optional[datetime] = None) -> dict:
                 {"_id": m["_id"]},
                 {"$set": {"final_rank": idx + 1, "settled_to_tier": new_tier}},
             )
+            # Badge check for promotions / diamond tier (best-effort)
+            if new_tier != tier:
+                try:
+                    from badges import check_after_league_settle
+                    await check_after_league_settle(
+                        m["user_id"],
+                        new_tier,
+                        promoted=(idx < LEAGUE_PROMOTE),
+                    )
+                except Exception:
+                    pass
             # Seed next week's membership in the new tier (lazy: actual cohort assignment on first play)
             # We just remember the tier; cohort will be (re)hashed on next call to _ensure_league_membership.
 

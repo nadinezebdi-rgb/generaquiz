@@ -115,6 +115,12 @@ async def grant_referral_bonus_if_eligible(user: dict) -> bool:
         {"$inc": {"credits": REFERRAL_BONUS_CREDITS,
                   "referral_count": 1}},
     )
+    # Badge check for the referrer (best-effort)
+    try:
+        from badges import check_after_referral
+        await check_after_referral(referrer_id)
+    except Exception:
+        pass
     return True
 
 

@@ -35,6 +35,7 @@ from routers import reports as reports_router
 from routers import stats as stats_router
 from routers import referral as referral_router
 from routers import coop_challenges as coop_challenges_router
+from routers import progression as progression_router
 from routers.referral import generate_referral_code_for
 
 app = FastAPI(title="Quiz d'Antan API")
@@ -92,6 +93,7 @@ api.include_router(reports_router.router)
 api.include_router(stats_router.router)
 api.include_router(referral_router.router)
 api.include_router(coop_challenges_router.router)
+api.include_router(progression_router.router)
 app.include_router(api)
 
 # CORS
@@ -142,6 +144,10 @@ async def startup():
     # Cooperative challenges — token lookup + creator listing
     await db.coop_challenges.create_index("token", unique=True)
     await db.coop_challenges.create_index([("creator_user_id", 1), ("created_at", -1)])
+    # Badges — one row per (user, badge) with unique index for idempotent inserts
+    await db.user_badges.create_index([("user_id", 1), ("badge_id", 1)], unique=True)
+    # Category mastery — one row per (user, category)
+    await db.user_category_stats.create_index([("user_id", 1), ("category_id", 1)], unique=True)
 
     # Seed categories (always refresh metadata: title/description/mascot/count)
     for cat in CATEGORIES:

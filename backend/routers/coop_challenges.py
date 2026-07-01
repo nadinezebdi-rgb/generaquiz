@@ -277,6 +277,16 @@ async def answer_coop_question(
             "assigned_to": nq.get("assigned_to"),
             "index": new_idx,
         }
+
+    # ---- Badge checks on completion (best-effort) -------------------------
+    awarded_badges: list[str] = []
+    if completed:
+        try:
+            from badges import check_after_coop_completed
+            awarded_badges = await check_after_coop_completed(user, fresh["stats_coop"])
+        except Exception:
+            pass
+
     return {
         "is_correct": is_correct,
         "correct_index": q["correct_index"],
@@ -287,6 +297,7 @@ async def answer_coop_question(
         "stats_coop": fresh["stats_coop"],
         "next_question": next_q,
         "total": len(questions),
+        "awarded_badges": awarded_badges,
     }
 
 

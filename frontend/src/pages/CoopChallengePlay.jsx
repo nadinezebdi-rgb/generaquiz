@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { api, formatError } from "@/lib/api";
+import { showBadgeToasts } from "@/lib/badgeToast";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import {
@@ -73,6 +74,7 @@ export default function CoopChallengePlay() {
         help_used: helpRequested,
       });
       setFeedback(data);
+      showBadgeToasts(data?.awarded_badges);
     } catch (e) {
       setErr(formatError(e.response?.data?.detail) || "Erreur lors de l'envoi de la réponse");
     } finally {

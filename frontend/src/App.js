@@ -27,6 +27,7 @@ import EarnCredits from "@/pages/EarnCredits";
 import CoopChallengeCreate from "@/pages/CoopChallengeCreate";
 import CoopChallengePlay from "@/pages/CoopChallengePlay";
 import Leagues from "@/pages/Leagues";
+import Progression from "@/pages/Progression";
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();
@@ -169,6 +170,14 @@ export default function App() {
             element={
               <ProtectedRoute>
                 <Leagues />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/app/progression"
+            element={
+              <ProtectedRoute>
+                <Progression />
               </ProtectedRoute>
             }
           />
