@@ -91,7 +91,11 @@ async def _send_one(user: dict) -> bool:
         })
         return True
     except Exception as e:
-        logger.warning(f"[daily-email] échec pour {user.get('email')}: {e}")
+        msg = str(e)
+        if "testing" in msg.lower() or "verify a domain" in msg.lower():
+            logger.warning(f"[daily-email] {user.get('email')} non envoyé — Resend en mode test : vérifiez le domaine SENDER_EMAIL sur resend.com/domains")
+        else:
+            logger.warning(f"[daily-email] échec pour {user.get('email')}: {e}")
         return False
 
 
