@@ -476,3 +476,43 @@ Basé sur l'audit PDF externe (`generaquiz_analysis.pdf`). 15/15 backend pytest 
 - **Reco #9-10** real-time leaderboards → polling OK au MVP
 - **Reco #8** clean README Supabase → doc, low priority
 
+
+## 2026-02-16 — UX seniors : traduction FR + BadgeShareCard (iteration 23) ✅
+
+### Contexte
+Le cœur de cible (Françoise 72 ans, Papi Robert) a déjà des difficultés en informatique — les termes anglais sont un obstacle majeur. On simplifie le vocabulaire visible ET on ajoute le partage social des exploits.
+
+### Changements
+- ❌ **Retiré** : le badge "Plus de 12 000 seniors nous font confiance" sur la Landing (chiffre non-fondé)
+- ✅ **Remplacé par** : "Le jeu qui réunit les générations" (positionnement sans chiffre)
+- 🇫🇷 **XP → points** dans toute l'interface visible :
+  - `Leagues.jsx` : "Mes points" et "points" au lieu de "XP"
+  - `Progression.jsx` : "0 points au total, plus que 50 points pour le niveau 2"
+  - `CoopChallengePlay.jsx` : "+50 points au lieu de 100 si solo", "+xxx points", "xxx points" (5 occurrences)
+  - `Challenges.jsx` : "100 points en solo", "Terminé · X points" (3 occurrences)
+  - Variables internes (`xp_total`, `xp_gained`, `my_xp` dans l'API) **conservées** pour compat backend
+- 🏆 **Nouveau composant** `BadgeShareCard.jsx` : carte PNG partageable pour chaque badge débloqué
+  - Halo lumineux coloré selon `tier` (bronze/argent/or/diamant)
+  - Grand emoji du badge dans un cercle avec shadow-warm
+  - "Palier bronze/argent/or/diamant" en label
+  - Titre + description du badge
+  - "Débloqué par [PRÉNOM]" avec accent doré
+  - Date au format français ("1 juillet 2026")
+  - Footer : "generaquiz.fr · Le jeu qui rapproche les générations"
+  - 3 actions : Partager (Web Share API + fallback clipboard) / WhatsApp (wa.me deep link) / Télécharger PNG (html-to-image)
+- 🖱️ **Interaction Progression** :
+  - Badges débloqués → tuile cliquable avec icône Share2 en top-right (data-testid `badge-earned-<id>`)
+  - Clic ouvre modal `data-testid='badge-share-modal'` avec la BadgeShareCard
+  - Overlay `bg-navy/85 backdrop-blur-sm`, fermeture au clic hors modal ou bouton croix
+  - Message subtil : "Cliquez sur un badge pour partager votre exploit 🎉"
+  - Badges verrouillés → non-interactive `<div>` (pas de handler)
+
+### Tests
+- 100% frontend passed (iteration 23)
+- Phrase seniors bien absente
+- 0 occurrence de "XP" visible sur les pages testées
+- Modal ouvre/ferme correctement, 3 boutons fonctionnels
+- WhatsApp deep link vérifié avec le bon texte
+- PNG download avec nom `generaquiz-badge-<id>.png`
+- Badges verrouillés non-cliquables
+
