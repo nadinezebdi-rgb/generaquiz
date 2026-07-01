@@ -102,7 +102,7 @@ export default function Challenges() {
               </h2>
               <p className="text-cream/85 text-lg leading-relaxed mb-4">
                 Jouez à 2 sur le même téléphone. Si l&apos;un bloque, il <strong>passe le téléphone</strong> à l&apos;autre — la complicité avant la performance.
-                100 XP en solo, 50 XP avec un coup de main.
+                100 points en solo, 50 points avec un coup de main.
               </p>
             </div>
           </div>
@@ -129,8 +129,8 @@ export default function Challenges() {
                       <div className="font-bold truncate">{c.team_name}</div>
                       <div className="text-xs text-cream/70">
                         {c.status === "completed"
-                          ? `Terminé · ${c.stats_coop?.total_xp || 0} XP`
-                          : `Q${(c.current_index || 0) + 1}/${c.total_questions} · ${c.stats_coop?.total_xp || 0} XP`}
+                          ? `Terminé · ${c.stats_coop?.total_xp || 0} points`
+                          : `Q${(c.current_index || 0) + 1}/${c.total_questions} · ${c.stats_coop?.total_xp || 0} points`}
                       </div>
                     </div>
                     <ArrowRight className="w-4 h-4 shrink-0 text-cream/70" />

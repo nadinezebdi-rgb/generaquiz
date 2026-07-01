@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { api, BACKEND_URL } from "@/lib/api";
+import { useAuth } from "@/contexts/AuthContext";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import BadgeShareCard from "@/components/BadgeShareCard";
 import {
-  Trophy, Zap, TrendingUp, Loader2, Lock, Sparkles, Award, Flame,
+  Trophy, Zap, TrendingUp, Loader2, Lock, Sparkles, Award, Flame, X, Share2,
 } from "lucide-react";
 
 /**
@@ -31,9 +33,11 @@ const BADGE_TIER_STYLES = {
 };
 
 export default function Progression() {
+  const { user } = useAuth();
   const [prog, setProg] = useState(null);
   const [badges, setBadges] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [shareBadge, setShareBadge] = useState(null);
 
   useEffect(() => {
     Promise.all([
@@ -80,7 +84,7 @@ export default function Progression() {
                 Niveau <span className="text-mustard italic">{prog.level}</span>
               </h1>
               <p className="text-cream/80 text-sm mt-1" data-testid="progression-xp-summary">
-                {prog.xp_total.toLocaleString("fr-FR")} XP total · plus que {prog.xp_to_next} XP pour le niveau {prog.level + 1}
+                {prog.xp_total.toLocaleString("fr-FR")} points au total · plus que {prog.xp_to_next} points pour le niveau {prog.level + 1}
               </p>
             </div>
           </div>
@@ -111,6 +115,11 @@ export default function Progression() {
               </h2>
               <p className="text-sm text-navy/60">
                 <span data-testid="progression-badges-count">{earnedCount}</span> / {badges.length} débloqués
+                {earnedCount > 0 && (
+                  <span className="ml-2 text-terracotta font-medium">
+                    · Cliquez sur un badge pour <strong>partager votre exploit</strong> 🎉
+                  </span>
+                )}
               </p>
             </div>
           </div>
@@ -118,25 +127,35 @@ export default function Progression() {
           <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
             {badges.map((b) => {
               const tierStyle = BADGE_TIER_STYLES[b.tier] || BADGE_TIER_STYLES.bronze;
+              const Tag = b.earned ? "button" : "div";
               return (
                 <motion.div
                   key={b.id}
                   data-testid={`progression-badge-${b.id}`}
-                  whileHover={{ y: -3 }}
-                  className={`relative rounded-2xl p-3 text-center border-2 transition ${
-                    b.earned
-                      ? "bg-cream border-cream-dark"
-                      : "bg-cream-dark/40 border-cream-dark grayscale opacity-60"
-                  }`}
-                  title={b.desc}
+                  whileHover={b.earned ? { y: -3 } : {}}
+                  className="relative"
                 >
-                  {!b.earned && (
-                    <Lock className="absolute top-1.5 right-1.5 w-3.5 h-3.5 text-navy/40" />
-                  )}
-                  <div className={`inline-flex items-center justify-center w-12 h-12 rounded-full ${b.earned ? tierStyle : "bg-navy/10 text-navy/40"} text-2xl mb-1.5 shadow-sm`}>
-                    {b.emoji}
-                  </div>
-                  <div className="text-xs font-bold text-navy leading-tight line-clamp-2">{b.title}</div>
+                  <Tag
+                    onClick={b.earned ? () => setShareBadge(b) : undefined}
+                    disabled={!b.earned}
+                    className={`w-full rounded-2xl p-3 text-center border-2 transition ${
+                      b.earned
+                        ? "bg-cream border-cream-dark hover:border-terracotta cursor-pointer"
+                        : "bg-cream-dark/40 border-cream-dark grayscale opacity-60 cursor-default"
+                    }`}
+                    title={b.earned ? "Cliquez pour partager" : b.desc}
+                  >
+                    {!b.earned && (
+                      <Lock className="absolute top-1.5 right-1.5 w-3.5 h-3.5 text-navy/40" />
+                    )}
+                    {b.earned && (
+                      <Share2 className="absolute top-1.5 right-1.5 w-3.5 h-3.5 text-terracotta" data-testid={`badge-earned-${b.id}`} />
+                    )}
+                    <div className={`inline-flex items-center justify-center w-12 h-12 rounded-full ${b.earned ? tierStyle : "bg-navy/10 text-navy/40"} text-2xl mb-1.5 shadow-sm`}>
+                      {b.emoji}
+                    </div>
+                    <div className="text-xs font-bold text-navy leading-tight line-clamp-2">{b.title}</div>
+                  </Tag>
                 </motion.div>
               );
             })}
@@ -202,6 +221,46 @@ export default function Progression() {
           </Link>
         </div>
       </main>
+
+      {/* ============ SHARE BADGE MODAL ============ */}
+      <AnimatePresence>
+        {shareBadge && (
+          <motion.div
+            key="share-overlay"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 bg-navy/85 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto"
+            data-testid="badge-share-overlay"
+            onClick={() => setShareBadge(null)}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.94, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="w-full max-w-lg my-8"
+              onClick={(e) => e.stopPropagation()}
+              data-testid="badge-share-modal"
+            >
+              <button
+                onClick={() => setShareBadge(null)}
+                data-testid="badge-share-close"
+                className="mb-3 ml-auto flex items-center justify-center w-10 h-10 rounded-full bg-white/15 hover:bg-white/30 text-white transition"
+                aria-label="Fermer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+              <BadgeShareCard
+                badge={shareBadge}
+                playerName={user?.name || "Un joueur"}
+                earnedAt={shareBadge.earned_at}
+                shareUrl="https://generaquiz.fr"
+              />
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <Footer />
     </div>
   );

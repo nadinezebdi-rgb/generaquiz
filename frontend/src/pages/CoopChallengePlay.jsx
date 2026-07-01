@@ -163,7 +163,7 @@ export default function CoopChallengePlay() {
               <div className="text-right">
                 <div className="text-xs font-bold uppercase tracking-wider text-navy/60">Score</div>
                 <div className="font-display text-2xl font-extrabold text-terracotta" data-testid="coop-score">
-                  {score} XP
+                  {score} points
                 </div>
               </div>
             </div>
@@ -205,7 +205,7 @@ export default function CoopChallengePlay() {
                 C&apos;est moi, c&apos;est parti ! <ArrowRight className="w-5 h-5" />
               </button>
               <p className="text-xs text-cream/60 mt-3">
-                💡 Réponse correcte = +50 XP (au lieu de 100 si solo).
+                💡 Réponse correcte = +50 points (au lieu de 100 si solo).
               </p>
             </motion.div>
           )}
@@ -301,7 +301,7 @@ export default function CoopChallengePlay() {
                 <div className="text-right shrink-0">
                   <div className="text-xs font-bold uppercase tracking-wider text-navy/60">Gagné</div>
                   <div className="font-display text-3xl font-extrabold text-terracotta" data-testid="coop-feedback-xp">
-                    +{feedback.xp_earned} XP
+                    +{feedback.xp_earned} points
                   </div>
                 </div>
               </div>
@@ -351,7 +351,7 @@ function FinalResults({ challenge, onReplay }) {
             {challenge.team_name}
           </h1>
           <div className="font-display text-6xl font-extrabold text-mustard mb-1" data-testid="coop-final-xp">
-            {totalXp} XP
+            {totalXp} points
           </div>
           <p className="text-cream/80">
             {correct}/{total} bonnes réponses · {accuracy}% de réussite

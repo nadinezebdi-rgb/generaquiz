@@ -49,7 +49,7 @@ export default function Landing() {
             className="lg:col-span-7"
           >
             <div className="inline-flex items-center gap-2 bg-cream border-2 border-mustard-dark text-navy font-bold px-4 py-2 rounded-full text-sm mb-6">
-              <Star className="w-4 h-4 text-terracotta fill-terracotta" /> Plus de 12 000 seniors nous font confiance
+              <Star className="w-4 h-4 text-terracotta fill-terracotta" /> Le jeu qui réunit les générations
             </div>
             <h1 className="font-display text-5xl sm:text-6xl lg:text-7xl font-extrabold text-navy leading-[1.05] mb-6">
               Réveillez vos <span className="text-terracotta italic">souvenirs</span><br />

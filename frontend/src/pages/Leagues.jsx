@@ -125,7 +125,7 @@ export default function Leagues() {
 
           <div className="grid grid-cols-3 gap-3">
             <Stat label="Mon rang" value={data.my_rank ? `#${data.my_rank}` : "—"} testid="leagues-my-rank" />
-            <Stat label="Mes XP" value={data.my_xp || 0} testid="leagues-my-xp" />
+            <Stat label="Mes points" value={data.my_xp || 0} testid="leagues-my-xp" />
             <Stat
               label="Termine dans"
               value={fmtCountdown(countdown)}
@@ -199,7 +199,7 @@ export default function Leagues() {
                       </div>
                       <div className="text-right shrink-0">
                         <div className="font-display text-lg font-extrabold text-navy">{row.xp.toLocaleString("fr-FR")}</div>
-                        <div className="text-xs text-navy/60">XP</div>
+                        <div className="text-xs text-navy/60">points</div>
                       </div>
                     </li>
                     {showPromoLine && (
