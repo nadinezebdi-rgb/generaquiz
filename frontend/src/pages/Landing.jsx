@@ -8,6 +8,7 @@ import {
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import StatsSection from "@/components/StatsSection";
+import PlatformSection from "@/components/PlatformSection";
 import { api, BACKEND_URL } from "@/lib/api";
 
 const ACTIVITIES = [
@@ -336,6 +337,9 @@ export default function Landing() {
           </div>
         </div>
       </section>
+
+      {/* ============ PLATFORM (upcoming activities + word games) ============ */}
+      <PlatformSection />
 
       {/* ============ PRICING ============ */}
       <section id="tarifs" className="py-20 lg:py-28">

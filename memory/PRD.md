@@ -516,3 +516,37 @@ Le cœur de cible (Françoise 72 ans, Papi Robert) a déjà des difficultés en 
 - PNG download avec nom `generaquiz-badge-<id>.png`
 - Badges verrouillés non-cliquables
 
+
+## 2026-02-16 — Section "Une plateforme complète" sur la Landing (iteration 24) ✅
+
+### Contexte
+L'utilisateur a soumis un prototype HTML/CSS externe (`generaquiz-dashboard.zip`) présentant une nouvelle section positionnant GénéraQuiz comme une **plateforme d'activités seniors** au-delà des quiz. 7 activités mises en avant, toutes en cours de développement.
+
+Choix utilisateur: **1c/2a/3a** → section ajoutée à la Landing publique, cartes en placeholder "En développement", bouton "Tout découvrir" scrolle vers Tarifs.
+
+### Livré (100% frontend, 0 backend touché)
+- Nouveau composant `PlatformSection.jsx` injecté sur la Landing entre Categories et Pricing
+- **Sidebar gauche** (sticky en desktop) :
+  - Pill bordeaux "Au-delà des quiz"
+  - Titre "Une plateforme complète" (« complète » en terracotta italique)
+  - Description marketing
+  - Bouton navy "Tout découvrir →" qui scrolle smoothly vers `#tarifs`
+- **Section Quiz & Activités** (4 cartes, icônes terracotta) :
+  - 🧠 **Atelier Mémoire** — badge « Nouveau » (mustard)
+  - 📖 **Mon Journal de Vie** — badge « Populaire » (terracotta light)
+  - 🍽️ **Recettes d'Antan**
+  - 📷 **Photothèque**
+- **Séparateur pointillé** "JEUX DE MOTS"
+- **Section Jeux de Mots** (3 cartes, icônes navy) :
+  - ✏️ **Mots Croisés**
+  - 💬 **Charades**
+  - 🔍 **Mots Mêlés**
+- Toutes les cartes portent un badge "EN DEV." en haut à droite + `cursor-not-allowed` + tooltip "En cours de développement"
+- Note d'info en bas : "🚧 Toutes ces activités sont en cours de développement. Rejoignez Premium pour y accéder en avant-première"
+- Animation Framer Motion staggered à l'apparition (delay 0.05s par carte)
+- Palette parfaitement intégrée au design system existant (aucun nouveau token CSS)
+
+### Data-testids ajoutés
+- `platform-section`, `platform-pill`, `platform-discover-btn`, `platform-separator`, `platform-availability-note`
+- `platform-card-<key>` × 7, `platform-badge-dev-<key>` × 7
+
