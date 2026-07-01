@@ -2,6 +2,7 @@ import { useEffect, useState, useRef, useMemo } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { api, BACKEND_URL } from "@/lib/api";
+import { showBadgeToasts } from "@/lib/badgeToast";
 import Navbar from "@/components/Navbar";
 import { ArrowLeft, ChevronRight, RotateCcw, Volume2, Crown, Check, X } from "lucide-react";
 import ScoreCard from "@/components/ScoreCard";
@@ -31,6 +32,10 @@ export default function QuizPlayer() {
   const [selected, setSelected] = useState(null);
   const [score, setScore] = useState(0);
   const [finished, setFinished] = useState(false);
+  // Collected answers to send to the server for authoritative scoring.
+  // Each entry: {question_id, answer_index} using the ORIGINAL question index
+  // (mapped back from the shuffled display order).
+  const [answers, setAnswers] = useState([]);
   const startTime = useRef(Date.now());
 
   // États du mode défi famille : plusieurs joueurs peuvent se relayer sur une même question.
@@ -136,19 +141,24 @@ export default function QuizPlayer() {
   const onSelect = (i) => {
     if (selected !== null) return;
     setSelected(i);
-    if (shuffled && i === shuffled.newCorrectIdx) {
-      setScore((s) => s + 1);
-      if (familyMode && currentMember) {
-        // Le point revient au membre qui a effectivement trouvé la bonne réponse.
-        setScoreByMember((prev) => ({
-          ...prev,
-          [currentMember]: (prev[currentMember] ?? 0) + 1,
-        }));
-        setQuestionResponders((prev) => ({
-          ...prev,
-          [q.id ?? idx]: currentMember,
-        }));
+    if (shuffled) {
+      if (i === shuffled.newCorrectIdx) {
+        setScore((s) => s + 1);
+        if (familyMode && currentMember) {
+          // Le point revient au membre qui a effectivement trouvé la bonne réponse.
+          setScoreByMember((prev) => ({
+            ...prev,
+            [currentMember]: (prev[currentMember] ?? 0) + 1,
+          }));
+          setQuestionResponders((prev) => ({
+            ...prev,
+            [q.id ?? idx]: currentMember,
+          }));
+        }
       }
+      // Record this answer using the ORIGINAL option index for server verification
+      const originalIdx = shuffled.mapping[i];
+      setAnswers((prev) => [...prev, { question_id: currentQ.id, answer_index: originalIdx }]);
     }
   };
 
@@ -157,10 +167,9 @@ export default function QuizPlayer() {
       const dur = Math.round((Date.now() - startTime.current) / 1000);
       api.post("/attempts", {
         category_id: categoryId,
-        score,
-        total,
+        answers,
         duration_seconds: dur,
-      }).catch(() => {});
+      }).then((r) => showBadgeToasts(r.data?.awarded_badges)).catch(() => {});
       setFinished(true);
     } else {
       setIdx((v) => v + 1);
@@ -187,6 +196,7 @@ export default function QuizPlayer() {
 
   const restart = () => {
     setIdx(0); setSelected(null); setScore(0); setFinished(false);
+    setAnswers([]);
     setResponderIdx(0); setPassCount(0); setQuestionResponders({});
     setScoreByMember(members.reduce((acc, name) => ({ ...acc, [name]: 0 }), {}));
     startTime.current = Date.now();

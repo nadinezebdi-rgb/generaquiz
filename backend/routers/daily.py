@@ -8,7 +8,7 @@
 import hashlib
 import random
 from datetime import datetime, timezone, timedelta
-from typing import Optional
+from typing import Optional, List
 from zoneinfo import ZoneInfo
 
 import jwt
@@ -94,8 +94,15 @@ async def get_daily_questions_cached(date_key: str) -> list[dict]:
 
 
 # -------------------- request models --------------------
+class DailyAnswer(BaseModel):
+    """One answer for the daily quiz — server verifies the correct_index
+    from the cached daily questions, ignoring any client 'score' claim."""
+    question_id: str = Field(min_length=1, max_length=80)
+    answer_index: int = Field(..., ge=0, le=3)
+
+
 class DailySubmit(BaseModel):
-    score: int = Field(..., ge=0, le=DAILY_QUESTION_COUNT)
+    answers: List[DailyAnswer] = Field(..., min_length=1, max_length=20)
     duration_seconds: Optional[int] = Field(None, ge=0, le=3600)
 
 
@@ -127,12 +134,25 @@ async def get_daily_quiz(request: Request):
 
 @router.post("/daily/submit")
 async def submit_daily(body: DailySubmit, user: dict = Depends(get_current_user)):
-    """Save the user's daily score, update streak. One submission per user per day."""
+    """Save the user's daily attempt. Score is recomputed server-side from the
+    submitted `answers` array by comparing against the day's cached questions.
+    Any client-provided score is ignored. One submission per user per day."""
     date_key = _today_key()
     user_id = str(user["_id"])
     existing = await db.daily_attempts.find_one({"user_id": user_id, "date_key": date_key})
     if existing:
         raise HTTPException(status_code=409, detail="Vous avez déjà joué le Quiz du Jour aujourd'hui.")
+
+    # ---- Server-authoritative scoring ------------------------------------
+    day_questions = await get_daily_questions_cached(date_key)
+    correct_map = {q["id"]: int(q["correct_index"]) for q in day_questions}
+    if any(a.question_id not in correct_map for a in body.answers):
+        raise HTTPException(
+            status_code=400,
+            detail="Une ou plusieurs questions n'appartiennent pas au Quiz du Jour d'aujourd'hui.",
+        )
+    score = sum(1 for a in body.answers if correct_map[a.question_id] == a.answer_index)
+    total = len(day_questions)  # canonical daily length regardless of client submission
 
     # --- streak computation ---
     last_date = user.get("streak_last_date")
@@ -157,22 +177,24 @@ async def submit_daily(body: DailySubmit, user: dict = Depends(get_current_user)
         }},
     )
 
+    duration_seconds = body.duration_seconds or 0
     doc = {
         "user_id": user_id,
         "user_name": user.get("name") or user.get("email", "").split("@")[0],
         "date_key": date_key,
-        "score": body.score,
-        "total": DAILY_QUESTION_COUNT,
-        "duration_seconds": body.duration_seconds or 0,
+        "score": score,
+        "total": total,
+        "duration_seconds": duration_seconds,
         "created_at": datetime.now(timezone.utc).isoformat(),
     }
     await db.daily_attempts.insert_one(doc)
 
     # Award XP toward the user's weekly league cohort (lazy import to avoid cycles)
+    xp_gained = 0
     try:
         from core import XP_PER_CORRECT_DAILY
         from routers.gamification import _ensure_league_membership, _week_key
-        xp_gained = body.score * XP_PER_CORRECT_DAILY
+        xp_gained = score * XP_PER_CORRECT_DAILY
         if xp_gained > 0:
             await _ensure_league_membership(user_id)
             await db.league_scores.update_one(
@@ -187,11 +209,27 @@ async def submit_daily(body: DailySubmit, user: dict = Depends(get_current_user)
     except Exception as e:  # never block the daily submit
         logger.warning(f"[daily] XP award failed: {e}")
 
+    # ---- Badge checks (best-effort — never fail the submit) ---------------
+    awarded_badges: list[str] = []
+    try:
+        from badges import check_after_daily
+        fresh_user = await db.users.find_one({"_id": user["_id"]}) or user
+        hour_paris = datetime.now(PARIS_TZ).hour
+        awarded_badges = await check_after_daily(
+            fresh_user, score, total, duration_seconds, hour_paris, current,
+        )
+    except Exception as e:
+        logger.warning(f"[daily] badge check failed: {e}")
+
     return {
         "ok": True,
         "saved": True,
+        "score": score,
+        "total": total,
+        "xp_gained": xp_gained,
         "streak_current": current,
         "streak_best": best,
+        "awarded_badges": awarded_badges,
     }
 
 

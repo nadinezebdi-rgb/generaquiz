@@ -122,6 +122,7 @@ async def register(body: RegisterRequest, request: Request, response: Response):
            "referral_code": own_code,
            "referred_by_user_id": referred_by_user_id,
            "referral_count": 0,
+           "birth_year": body.birth_year,
            "country_code": _infer_country_code(request)}
     try:
         result = await db.users.insert_one(doc)
@@ -218,8 +219,10 @@ async def change_password(body: ChangePasswordRequest, user: dict = Depends(get_
 
 @router.patch("/profile")
 async def update_profile(body: UpdateProfileRequest, user: dict = Depends(get_current_user)):
-    await db.users.update_one({"_id": ObjectId(str(user["_id"]))},
-                              {"$set": {"name": body.name.strip()}})
+    update = {"name": body.name.strip()}
+    if body.birth_year is not None:
+        update["birth_year"] = body.birth_year
+    await db.users.update_one({"_id": ObjectId(str(user["_id"]))}, {"$set": update})
     fresh = await db.users.find_one({"_id": ObjectId(str(user["_id"]))})
     return user_to_public(fresh)
 

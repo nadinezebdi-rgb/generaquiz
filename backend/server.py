@@ -34,6 +34,8 @@ from routers import gamification as gamification_router
 from routers import reports as reports_router
 from routers import stats as stats_router
 from routers import referral as referral_router
+from routers import coop_challenges as coop_challenges_router
+from routers import progression as progression_router
 from routers.referral import generate_referral_code_for
 
 app = FastAPI(title="Quiz d'Antan API")
@@ -108,6 +110,8 @@ api.include_router(gamification_router.router)
 api.include_router(reports_router.router)
 api.include_router(stats_router.router)
 api.include_router(referral_router.router)
+api.include_router(coop_challenges_router.router)
+api.include_router(progression_router.router)
 app.include_router(api)
 
 # CORS
@@ -134,6 +138,9 @@ async def startup():
     await db.users.create_index("google_sub", sparse=True)
     await db.categories.create_index("id", unique=True)
     await db.questions.create_index("category_id")
+    # Composite index for the security lookup in POST /attempts
+    # (fetches questions by their id list restricted to the category)
+    await db.questions.create_index([("id", 1), ("category_id", 1)])
     await db.attempts.create_index([("user_id", 1), ("created_at", -1)])
     await db.payment_transactions.create_index("session_id", unique=True)
     await db.challenges.create_index("token", unique=True)
@@ -155,6 +162,13 @@ async def startup():
     await db.users.create_index("referral_code", unique=True, sparse=True)
     # App-wide state (e.g. Mistral last regen) — single doc keyed by `key`
     await db.app_state.create_index("key", unique=True)
+    # Cooperative challenges — token lookup + creator listing
+    await db.coop_challenges.create_index("token", unique=True)
+    await db.coop_challenges.create_index([("creator_user_id", 1), ("created_at", -1)])
+    # Badges — one row per (user, badge) with unique index for idempotent inserts
+    await db.user_badges.create_index([("user_id", 1), ("badge_id", 1)], unique=True)
+    # Category mastery — one row per (user, category)
+    await db.user_category_stats.create_index([("user_id", 1), ("category_id", 1)], unique=True)
 
     # Seed categories (always refresh metadata: title/description/mascot/count)
     for cat in CATEGORIES:

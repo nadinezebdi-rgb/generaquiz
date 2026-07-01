@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { api, formatError } from "@/lib/api";
+import { showBadgeToasts } from "@/lib/badgeToast";
 import { useAuth } from "@/contexts/AuthContext";
 import {
   Sparkles, Trophy, ArrowRight, Check, X, Calendar, Crown, LogIn, Medal, Flame,
@@ -37,6 +38,7 @@ export default function DailyQuiz() {
   const [selected, setSelected] = useState(null);
   const [revealed, setRevealed] = useState(false);
   const [score, setScore] = useState(0);
+  const [answers, setAnswers] = useState([]);
   const [leaderboard, setLeaderboard] = useState(null);
   const [submitResult, setSubmitResult] = useState(null);
   const [submitting, setSubmitting] = useState(false);
@@ -52,6 +54,7 @@ export default function DailyQuiz() {
 
   const start = () => {
     setIdx(0); setSelected(null); setRevealed(false); setScore(0);
+    setAnswers([]);
     startTime.current = Date.now();
     setStage("playing");
   };
@@ -63,6 +66,11 @@ export default function DailyQuiz() {
     if (shuffled && shuffled.mapping[i] === currentQ.correct_index) {
       setScore((s) => s + 1);
     }
+    // Record the answer using the ORIGINAL question index for server verification
+    if (shuffled) {
+      const originalIdx = shuffled.mapping[i];
+      setAnswers((prev) => [...prev, { question_id: currentQ.id, answer_index: originalIdx }]);
+    }
   };
 
   const next = async () => {
@@ -72,8 +80,9 @@ export default function DailyQuiz() {
       if (user) {
         try {
           setSubmitting(true);
-          const resp = await api.post("/daily/submit", { score, duration_seconds: duration });
+          const resp = await api.post("/daily/submit", { answers, duration_seconds: duration });
           setSubmitResult(resp.data);
+          showBadgeToasts(resp.data?.awarded_badges);
           const lb = await api.get("/daily/leaderboard");
           setLeaderboard(lb.data);
           // Refresh /me so streak fields propagate to navbar/dashboard

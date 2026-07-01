@@ -28,9 +28,10 @@ export function AuthProvider({ children }) {
     return data.user;
   };
 
-  const register = async (name, email, password, referralCode = null) => {
+  const register = async (name, email, password, referralCode = null, birthYear = null) => {
     const payload = { name, email, password };
     if (referralCode) payload.referral_code = referralCode;
+    if (birthYear) payload.birth_year = birthYear;
     const { data } = await api.post("/auth/register", payload);
     setUser(data.user);
     return data.user;

@@ -1,0 +1,27 @@
+{
+  "summary": "Iteration 20 — Coop Challenge MVP (same-device) + birth_year/age_group. 14/14 backend pytest cases pass. Full UI flow (register w/ birth_year → coop create → play with help → final results → challenges hero) passes end-to-end. No blocking issues found.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {"ui_bugs": [], "integration_issues": [], "design_issues": []},
+  "test_report_links": [
+    "/app/backend/tests/test_iteration20_coop.py",
+    "/app/test_reports/pytest/pytest_iter20.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "coop_challenges.create_coop_challenge: when len(pool) < num_questions returns 400 — fine, but if pool ≥ num_questions yet < 2 (impossible given ge=4) we still index pool[:n]. Min num_questions=4, OK.",
+    "_assign_role hardcodes 'player1 → even index'. If a future UI lets the user choose who starts, this needs to become explicit (starter_index field). Document.",
+    "answer endpoint returns full `explanation` even when the answer is correct — by design (educational), but consider gating behind `is_correct OR show_always` flag for game-show modes.",
+    "_public_view exposes `answers_log` which contains `correct_index` + `explanation` from previously-answered questions. This is intentional for the post-quiz recap, but the spec says correct_index / explanation must NOT be exposed in GET. Strictly: the *upcoming* questions don't expose them (verified), but *past* answers do via answers_log. Confirm this is intentional with product — if not, strip these fields in _public_view's answers_log mapping.",
+    "POST /coop-challenges/{token}/answer: no race-condition guard. Two parallel POSTs from the same client (double-tap) would both read current_index=N, both advance to N+1, both increment stats. Wrap with conditional update {token, current_index: idx} to make it idempotent against double-submits.",
+    "register: birth_year accepted via Pydantic ge=1900 le=2025 — January 2026 user born in 2026 cannot register with birth_year. Bump le to 2026 (or current year via Field validator) to future-proof.",
+    "CoopChallengePlay.jsx: when feedback.completed=true, clicking 'Question suivante' calls onNext which sets status='completed' locally — but `currentQ` was already null at that point because current_index is incremented PAST the array; re-render lands on FinalResults. Brittle if anything throws in between — consider explicit final-screen state instead of relying on derived status."
+  ],
+  "updated_files": ["/app/backend/tests/test_iteration20_coop.py (new)"],
+  "success_rate": {"backend": "100% (14/14)", "frontend": "100% (7/7 flows)"},
+  "test_credentials": "admin@generaquiz.fr / Admin2026!. Ad-hoc TEST_coop_* and test_ui_* users created at runtime.",
+  "seed_data_creation": "5 register-only throwaway users (birth_year matrix), 4 user_a coop challenges (TEST_Aventuriers, TEST_Get, TEST_Flow, TEST_List_0/1), 1 test_ui_*@example.com user with full 4-question coop challenge TEST_UI_Team completed.",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Coop endpoint = /api/coop-challenges (PAS /api/challenges/coop). Mongo collection db.coop_challenges with unique index on token. _public_view DOES expose correct_index+explanation inside answers_log for past answers (educational recap) but NOT in upcoming questions — verify with product. XP economy: 100/50/0. age_group helper in core.py: ≤25=jeune, ≥55=senior, between=libre. UI: pass-phone overlay correctly hides question (showQuestion = !helpRequested || partnerReady). Coop hero on /app/challenges is open to free users (no Premium gate), classic challenge button is replaced by challenges-upgrade-cta for free plan. Final flow tested with num_questions=4 → 150 XP / 1 help_used / 1 help_successful. All 14 backend tests pass in ~4s.",
+  "rca of the issue": "N/A — no issues. Initial pytest run failed because REACT_APP_BACKEND_URL is in frontend/.env (not backend/.env) so the test runner needs it exported. Worked around by exporting before pytest invocation; this is the same pattern used in iteration_19."
+}

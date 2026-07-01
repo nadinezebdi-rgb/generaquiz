@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { LogOut, User as UserIcon, Coins } from "lucide-react";
+import { LogOut, User as UserIcon, Coins, Trophy, Zap } from "lucide-react";
 import Logo from "@/components/Logo";
 
 export default function Navbar({ variant = "landing" }) {
@@ -28,6 +28,12 @@ export default function Navbar({ variant = "landing" }) {
                 <Link to="/quiz-du-jour" data-testid="nav-daily-auth" className="px-4 py-2 text-lg font-semibold text-bordeaux hover:text-terracotta transition">Quiz du Jour ✨</Link>
               )}
               <Link to="/app/dashboard" data-testid="nav-dashboard" className="px-4 py-2 text-lg font-semibold text-navy hover:text-terracotta transition">Mes quiz</Link>
+              <Link to="/app/leagues" data-testid="nav-leagues" className="px-3 py-2 text-base font-semibold text-navy hover:text-terracotta transition inline-flex items-center gap-1">
+                <Trophy className="w-4 h-4" /> Ligues
+              </Link>
+              <Link to="/app/progression" data-testid="nav-progression" className="px-3 py-2 text-base font-semibold text-navy hover:text-terracotta transition inline-flex items-center gap-1">
+                <Zap className="w-4 h-4 text-terracotta" /> Niv {typeof user.level === "number" ? user.level : 1}
+              </Link>
               <Link to="/app/challenges" data-testid="nav-challenges" className="px-4 py-2 text-lg font-semibold text-navy hover:text-terracotta transition">Défi famille</Link>
               <Link to="/app/earn-credits" data-testid="nav-earn-credits" className="px-3 py-2 text-base font-semibold text-bordeaux hover:text-terracotta transition inline-flex items-center gap-1">
                 <Coins className="w-4 h-4" /> Crédits

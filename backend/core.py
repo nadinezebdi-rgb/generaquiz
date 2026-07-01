@@ -9,7 +9,7 @@ import os
 import logging
 import time
 from datetime import datetime, timezone, timedelta
-from typing import Optional, Annotated, Any
+from typing import Optional, Annotated, Any, List
 
 import bcrypt
 import jwt
@@ -123,7 +123,30 @@ def clear_auth_cookies(response: Response) -> None:
     response.delete_cookie("refresh_token", path="/")
 
 
+def _age_group(birth_year: Optional[int]) -> Optional[str]:
+    """Map birth_year → "jeune" (≤25), "senior" (≥55), "libre" (between).
+
+    Returns None if birth_year not set. Used only as a hint for the
+    cooperative challenge UI — never gates features."""
+    if not birth_year:
+        return None
+    now_year = datetime.now(timezone.utc).year
+    age = now_year - birth_year
+    if age <= 25:
+        return "jeune"
+    if age >= 55:
+        return "senior"
+    return "libre"
+
+
 def user_to_public(u: dict) -> dict:
+    # Compute level info from xp_total for the client badges/progress ring.
+    # Lazy import to avoid circular ref.
+    try:
+        from progression import compute_level
+        level_info = compute_level(int(u.get("xp_total") or 0))
+    except Exception:
+        level_info = {"level": 1, "progress_pct": 0, "xp_to_next": 50, "next_level_at": 50, "xp_in_level": 0}
     return {"id": str(u["_id"]), "email": u["email"], "name": u.get("name", ""),
             "role": u.get("role", "user"), "plan": u.get("plan", "free"),
             "plan_expires_at": u.get("plan_expires_at"), "created_at": u.get("created_at"),
@@ -133,8 +156,13 @@ def user_to_public(u: dict) -> dict:
             "daily_email_optin": u.get("daily_email_optin", True),
             "credits": int(u.get("credits") or 0),
             "xp_total": int(u.get("xp_total") or 0),
+            "level": level_info["level"],
+            "level_progress_pct": level_info["progress_pct"],
+            "xp_to_next_level": level_info["xp_to_next"],
             "referral_code": u.get("referral_code"),
             "referral_count": int(u.get("referral_count") or 0),
+            "birth_year": u.get("birth_year"),
+            "age_group": _age_group(u.get("birth_year")),
             "auth_provider": u.get("auth_provider", "email")}
 
 
@@ -199,6 +227,7 @@ class RegisterRequest(BaseModel):
     password: str = Field(min_length=6)
     name: str = Field(min_length=1, max_length=80)
     referral_code: Optional[str] = Field(None, max_length=40)
+    birth_year: Optional[int] = Field(None, ge=1900, le=2026)
 
 
 class LoginRequest(BaseModel):
@@ -222,17 +251,26 @@ class ChangePasswordRequest(BaseModel):
 
 class UpdateProfileRequest(BaseModel):
     name: str = Field(min_length=1, max_length=80)
+    birth_year: Optional[int] = Field(None, ge=1900, le=2026)
 
 
 class DailyEmailPrefRequest(BaseModel):
     daily_email_optin: bool
 
 
+class AttemptAnswer(BaseModel):
+    """Single answer inside a POST /attempts payload — the client sends
+    the ORIGINAL question id + the user's picked answer index (0-3).
+    The server loads the question and compares to `correct_index` — the
+    client's own claim of "score" is IGNORED to prevent cheating."""
+    question_id: str = Field(min_length=1, max_length=80)
+    answer_index: int = Field(..., ge=0, le=3)
+
+
 class AttemptCreate(BaseModel):
     category_id: str
-    score: int
-    total: int
-    duration_seconds: Optional[int] = None
+    answers: List[AttemptAnswer] = Field(..., min_length=1, max_length=30)
+    duration_seconds: Optional[int] = Field(None, ge=0, le=7200)
 
 
 class CheckoutCreate(BaseModel):

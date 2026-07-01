@@ -5,14 +5,36 @@ import { api, BACKEND_URL } from "@/lib/api";
 import { useAuth } from "@/contexts/AuthContext";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import StreakSaverModal from "@/components/StreakSaverModal";
 import { ArrowRight, Crown, Trophy, Target, Zap, Sparkles, Calendar, Flame } from "lucide-react";
 
+/**
+ * Returns true if the user's streak is "at risk" — they had a streak of ≥2,
+ * their last play was the day before yesterday (Paris-aware via local-date
+ * approximation), and they haven't played today. Matches the server-side
+ * eligibility check in POST /api/gamification/streak-saver.
+ */
+function streakAtRisk(user) {
+  if (!user) return false;
+  if ((user.streak_current || 0) < 2) return false;
+  const last = user.streak_last_date;
+  if (!last) return false;
+  // Compute "day before yesterday" YYYY-MM-DD in browser local time.
+  // Server canonical TZ is Europe/Paris — close enough for the trigger heuristic.
+  const dby = new Date();
+  dby.setDate(dby.getDate() - 2);
+  const key = dby.toISOString().slice(0, 10);
+  return last === key;
+}
+
 export default function Dashboard() {
-  const { user } = useAuth();
+  const { user, refresh } = useAuth();
   const [categories, setCategories] = useState([]);
   const [stats, setStats] = useState(null);
   const [attempts, setAttempts] = useState([]);
   const [daily, setDaily] = useState(null);
+  const [showSaver, setShowSaver] = useState(false);
+  const [dismissed, setDismissed] = useState(false);
 
   useEffect(() => {
     api.get("/categories").then((r) => setCategories(r.data)).catch(() => {});
@@ -20,6 +42,23 @@ export default function Dashboard() {
     api.get("/attempts").then((r) => setAttempts(r.data || [])).catch(() => {});
     api.get("/daily/leaderboard").then((r) => setDaily(r.data)).catch(() => {});
   }, []);
+
+  // Auto-open the streak saver when the criteria matches and the user
+  // hasn't manually dismissed it this session.
+  useEffect(() => {
+    if (!dismissed && streakAtRisk(user)) {
+      setShowSaver(true);
+    }
+  }, [user, dismissed]);
+
+  const handleSaved = async () => {
+    await refresh();
+    setShowSaver(false);
+  };
+  const handleClose = () => {
+    setShowSaver(false);
+    setDismissed(true);  // Don't auto-reopen for this session
+  };
 
   const isPremium = user?.plan === "premium";
 
@@ -201,6 +240,10 @@ export default function Dashboard() {
           )}
         </div>
       </main>
+
+      {showSaver && (
+        <StreakSaverModal user={user} onClose={handleClose} onSaved={handleSaved} />
+      )}
 
       <Footer />
     </div>

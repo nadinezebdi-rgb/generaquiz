@@ -261,6 +261,136 @@ async def send_expiration_emails() -> dict:
     return {"sent": sent, "skipped": skipped, "failed": failed}
 
 
+# ---------------------------------------------------------------------------
+# LEAGUE REMINDER (Sunday 20:00 Paris)
+# ---------------------------------------------------------------------------
+
+def _build_league_reminder_html(name: str, tier: str, position: str, app_url: str) -> str:
+    tier_label = tier.capitalize()
+    headline = (
+        f"Plus que 2 heures pour grimper en Ligue {tier_label.upper()} !"
+        if position == "promote"
+        else f"Sauve ta place en Ligue {tier_label.upper()} avant 22h !"
+    )
+    body = (
+        f"Tu es à un cheveu d'atteindre le top 5 de ta ligue. Joue un quiz maintenant et grimpe d'une ligue ce soir !"
+        if position == "promote"
+        else f"Tu risques de perdre ta ligue actuelle si tu n'agis pas. Une partie suffit pour reprendre la main."
+    )
+    return f"""<!DOCTYPE html>
+<html lang="fr"><head><meta charset="UTF-8"><title>{headline}</title></head>
+<body style="margin:0;padding:0;background-color:#F4F1DE;font-family:Arial,Helvetica,sans-serif;color:#1A2530;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#F4F1DE;padding:40px 20px;">
+    <tr><td align="center">
+      <table width="560" cellpadding="0" cellspacing="0" style="background-color:#FFFFFF;border-radius:24px;border:2px solid #E8E2C9;overflow:hidden;">
+        <tr><td style="background-color:#1E3A5F;padding:28px;text-align:center;">
+          <div style="display:inline-block;background-color:#F2CC8F;color:#1A2530;font-weight:bold;font-size:13px;padding:6px 14px;border-radius:999px;letter-spacing:1px;text-transform:uppercase;">Ligue {tier_label} · GénéraQuiz</div>
+          <h1 style="color:#FFFFFF;font-size:24px;margin:14px 0 4px 0;">Salut {name} 🔥</h1>
+        </td></tr>
+        <tr><td style="padding:28px 28px 6px 28px;">
+          <h2 style="margin:0 0 10px 0;color:#1E3A5F;font-size:22px;">{headline}</h2>
+          <p style="font-size:16px;line-height:1.6;margin:0 0 14px 0;">{body}</p>
+          <p style="font-size:14px;color:#64748B;margin:0 0 14px 0;">La semaine se termine ce dimanche à 22h00 (Paris). Pas de panique : un quiz du jour + un défi suffit souvent à basculer.</p>
+        </td></tr>
+        <tr><td style="padding:6px 28px 28px 28px;text-align:center;">
+          <a href="{app_url}/app/leagues" style="display:inline-block;background-color:#E07A5F;color:#FFFFFF;font-weight:bold;font-size:16px;padding:14px 28px;border-radius:999px;text-decoration:none;">Voir ma ligue →</a>
+        </td></tr>
+        <tr><td style="background-color:#F4F1DE;padding:14px 28px;text-align:center;font-size:12px;color:#1E3A5F;">
+          Ne plus recevoir ces rappels ? <a href="{app_url}/app/account" style="color:#7A1F2B;">Mon compte</a>
+        </td></tr>
+      </table>
+    </td></tr>
+  </table>
+</body></html>"""
+
+
+async def send_league_reminders() -> dict:
+    """Sunday 20:00 Paris → poke users at the *edge* of promotion/relegation.
+
+    We compute, per cohort:
+      - "promote candidates": ranks LEAGUE_PROMOTE+1 .. LEAGUE_PROMOTE+3 (close but not in)
+      - "relegate candidates": ranks (size - LEAGUE_RELEGATE - 2) .. (size - LEAGUE_RELEGATE)
+    Each user receives at most one reminder per week.
+    """
+    if not RESEND_API_KEY:
+        logger.info("[league-reminder] RESEND_API_KEY manquant — envoi sauté")
+        return {"sent": 0, "skipped": 0, "reason": "no_resend_key"}
+
+    try:
+        from routers.gamification import _week_key, LEAGUE_PROMOTE, LEAGUE_RELEGATE
+    except Exception as e:
+        logger.warning(f"[league-reminder] import error: {e}")
+        return {"sent": 0, "error": "import"}
+
+    week_key = _week_key()
+    sent = skipped = failed = 0
+
+    cohorts = await db.league_memberships.distinct("cohort_id", {"week_key": week_key})
+    for cohort_id in cohorts:
+        members = await db.league_memberships.find(
+            {"cohort_id": cohort_id, "week_key": week_key},
+        ).to_list(60)
+        if not members:
+            continue
+        user_ids = [m["user_id"] for m in members]
+        scores_map: dict[str, int] = {}
+        async for s in db.league_scores.find({"user_id": {"$in": user_ids}, "week_key": week_key}):
+            scores_map[s["user_id"]] = int(s.get("xp", 0))
+        ranked = sorted(members, key=lambda m: scores_map.get(m["user_id"], 0), reverse=True)
+        n = len(ranked)
+
+        # If the cohort is too small, promote/relegate ranges overlap and we'd
+        # spam everyone — skip these tiny cohorts entirely.
+        if n < LEAGUE_PROMOTE + LEAGUE_RELEGATE + 3:
+            continue
+
+        # Targets: close-to-promote (just-below the cut) AND close-to-relegate
+        targets: list[tuple[dict, str]] = []
+        for idx, m in enumerate(ranked):
+            if LEAGUE_PROMOTE <= idx < LEAGUE_PROMOTE + 3:
+                targets.append((m, "promote"))
+            elif n - LEAGUE_RELEGATE - 3 <= idx < n - LEAGUE_RELEGATE:
+                targets.append((m, "relegate"))
+
+        for m, position in targets:
+            if m.get("reminder_sent_week") == week_key:
+                skipped += 1
+                continue
+            try:
+                from bson import ObjectId as _OID
+                u = await db.users.find_one({"_id": _OID(m["user_id"])})
+            except Exception:
+                u = None
+            if not u or not u.get("email"):
+                continue
+            name = u.get("name") or u["email"].split("@")[0]
+            html = _build_league_reminder_html(name, m.get("tier", "bronze"), position, FRONTEND_URL)
+            subject = (
+                "🚀 Plus que 2h pour grimper en ligue supérieure !"
+                if position == "promote"
+                else "⚠️ Tu risques de perdre ta ligue — vite, une partie !"
+            )
+            try:
+                await asyncio.to_thread(resend.Emails.send, {
+                    "from": SENDER_EMAIL,
+                    "to": [u["email"]],
+                    "subject": subject,
+                    "html": html,
+                })
+                sent += 1
+                await db.league_memberships.update_one(
+                    {"_id": m["_id"]},
+                    {"$set": {"reminder_sent_week": week_key}},
+                )
+            except Exception as e:
+                logger.warning(f"[league-reminder] échec {u.get('email')}: {e}")
+                failed += 1
+            await asyncio.sleep(0.2)
+
+    logger.info(f"[league-reminder] sent={sent} skipped={skipped} failed={failed} cohorts={len(cohorts)}")
+    return {"sent": sent, "skipped": skipped, "failed": failed, "cohorts": len(cohorts)}
+
+
 
 def start_daily_scheduler() -> None:
     """Start the APScheduler jobs:
@@ -302,9 +432,16 @@ def start_daily_scheduler() -> None:
         replace_existing=True,
         misfire_grace_time=3600,
     )
+    _scheduler.add_job(
+        send_league_reminders,
+        CronTrigger(day_of_week="sun", hour=20, minute=0, timezone="Europe/Paris"),
+        id="league_reminder_sunday_20h",
+        replace_existing=True,
+        misfire_grace_time=3600,
+    )
     _scheduler.start()
     logger.info(
-        "[scheduler] démarré — email quotidien 09:00 Paris + régénération Mistral 03:00 Paris + clôture ligues lundi 00:05 Paris + relance expiration J-7 10:00 Paris"
+        "[scheduler] démarré — email quotidien 09:00 Paris + régénération Mistral 03:00 Paris + clôture ligues lundi 00:05 Paris + relance expiration J-7 10:00 Paris + rappel ligues dimanche 20:00 Paris"
     )
 
 

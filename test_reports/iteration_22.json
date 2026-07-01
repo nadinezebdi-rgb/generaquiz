@@ -1,0 +1,35 @@
+{
+  "summary": "Sprint A+B+C — server-authoritative scoring + badges (15) + progression (level curve + mastery). 15/15 backend pytest PASS. Frontend Progression page renders all required data-testids (hero, level, progress bar/pct, 15 badge tiles, 8 mastery tiles). Navbar 'Niv 1' link present. No blockers.",
+  "backend_issues": { "critical": [], "minor": [] },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "Navbar (desktop)", "issues": ["With Ligues + Niv X + Défi famille + Crédits + Mon compte + Promos + Signalements all visible, 'Quiz du Jour' wraps onto 3 lines at 1920px. Cosmetic — consider shortening label or hiding secondary links behind a menu."]}
+    ]
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_iteration22_secure_progression.py",
+    "/app/test_reports/pytest/pytest_iter22.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "quiz.py POST /attempts: score is computed via `correct_map.get(qid) == answer_index`. Since AttemptAnswer restricts answer_index to 0..3 and correct_index is stored as int, this is robust — GOOD. Consider indexing db.questions on {id: 1, category_id: 1} to speed the security lookup; currently only category_id is indexed.",
+    "daily.py /daily/submit uses `total = len(day_questions)` (canonical), but if the client submits fewer than 5 answers, missing question_ids simply won't add to `score` — which is arguably correct (missed = wrong) but means a client sending an EMPTY answers array (rejected by min_length=1) OR 1 answer gets total=5, score∈{0,1}. Consider documenting this in the API contract.",
+    "progression.py compute_level uses a linear scan up to L500 on every /progression/me and every user_to_public call (which is triggered by /auth/me). Closed-form inverse: L = floor((-1 + sqrt(1 + xp/6.25))/2) + 1. Micro-optimisation, low impact today.",
+    "badges.check_after_attempt uses `count_documents` on attempts collection per-attempt to detect 1st quiz. Fine at low volume; consider a flag on the user doc (e.g. `first_quiz_awarded_at`) once traffic grows.",
+    "AttemptCreate model uses `extra` default (ignore) — sending {score:999} at top level is silently stripped (verified in test). If strictness is desired later, set model_config = ConfigDict(extra='forbid').",
+    "record_category_mastery upserts inside /attempts even when total=0 (impossible via API since min_length=1, so N/A). GOOD.",
+    "Progression.jsx not viewed in code review but renders correctly with all required data-testids and 15 badges rendered from /badges/catalog. Consider adding a data-testid to individual mastery tier badges (currently only tile id present) for finer selectors."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_iteration22_secure_progression.py (new)"
+  ],
+  "success_rate": { "backend": "100% (15/15)", "frontend": "100% (all required data-testids + counts verified)" },
+  "test_credentials": "admin@generaquiz.fr / Admin2026! (used for UI). Runtime TEST_prog_* / TEST_prog2_* / TEST_lvl_* users created per pytest run.",
+  "seed_data_creation": "Throwaway TEST_ users created per test class; no cleanup performed (small volume, TEST_ prefix per convention).",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Sprint A+B+C fully green. Verified: (A) POST /api/attempts strips client-provided score field (Pydantic default 'ignore'), returns 422 for answer_index>3, returns 400 when a question_id doesn't belong to category_id — server-authoritative score computed from db.questions.correct_index. Same rules on /api/daily/submit (400 for foreign question_id, 422 for answer_index>3). (B) /api/badges/catalog returns 15 badges with keys {id,title,desc,emoji,tier,family,earned,earned_at}; 401 without auth. /api/badges/mine returns []. 'first_quiz' awarded on 1st POST /api/attempts (awarded_badges:['first_quiz']), idempotent on 2nd (empty list) — unique idx (user_id, badge_id) on user_badges collection confirmed. (C) /api/progression/me returns {level,xp_total,xp_in_level,xp_to_next,next_level_at,progress_pct,mastery:[...]} with 1 mastery entry per category even when never played (tier='novice',correct=0,total=0). Level curve xp_for_level(L)=25*L*(L+1) confirmed: L1=0,L2=50,L3=150,L6=750. compute_level(100)={level:2, progress_pct:50}. /api/auth/me exposes level, level_progress_pct, xp_to_next_level, xp_total. UI: /app/progression renders progression-hero, progression-level, progression-progress-bar, progression-progress-pct, progression-badges (15 tiles data-testid='progression-badge-<id>'), progression-mastery (8 tiles). nav-progression link shows 'Niv 1'. No JS errors on the page. Coop/streak/league regression not re-run this iteration (already covered in iter21).",
+  "rca of the issue": "N/A — all specs met. Minor pytest launch note: REACT_APP_BACKEND_URL is only set in /app/frontend/.env; run pytest with `REACT_APP_BACKEND_URL=$(grep = /app/frontend/.env | cut -d= -f2) pytest ...` or export before running. Existing tests in tests/ use the same pattern."
+}

@@ -300,3 +300,219 @@ Le backend est **prêt à être consommé** par une app React Native :
 ### Variables d'env ajoutées
 - `REACT_APP_ADSENSE_CLIENT` (vide par défaut → fallback house ad)
 - `REACT_APP_ADSENSE_SLOT`
+
+## 2026-02-16 — Mode Coopératif "Défi Famille" Phase A (iteration 20) ✅
+
+### Concept livré (14/14 backend + 7/7 frontend)
+Refonte stratégique du Défi Famille : passe d'un quiz partagé "chacun pour soi" à un **jeu d'équipe asymétrique sur même appareil** (Senior + Jeune).
+Inspiration : *It Takes Two*, *Keep Talking and Nobody Explodes* appliqué à la culture générale française.
+
+### Mécaniques implémentées
+- **Création de défi** (`/app/coop/new`) : team_name, 2 joueurs avec rôles différents obligatoires (Senior/Jeune), catégorie au choix parmi les 8 existantes, 4–20 questions
+- **Alternance auto des questions** : Q0 → joueur 1, Q1 → joueur 2, etc. (annoté côté backend via `assigned_to: "senior"|"jeune"`)
+- **Bouton "Demander de l'aide à <partner>"** → overlay "Passe le téléphone à <name> 📱→👴/🧒" qui CACHE la question jusqu'à ce que le partenaire confirme "C'est moi, c'est parti !"
+- **Scoring asymétrique** :
+  - Solo correct : **100 XP**
+  - Avec aide correct : **50 XP**
+  - Faux : **0 XP**
+- **Stats finales** : total_xp, helps_used, helps_successful, correct_count, accuracy_pct
+- **Race-condition guard** : conditional update `{current_index: idx, status: "in_progress"}` → 409 si double-submit parallèle
+- **Accès libre (free + premium)** pour piloter l'engagement (volontairement non-gaté)
+
+### Backend
+- Nouveau router `/api/coop-challenges` (POST create, GET state, POST answer, GET mine/list)
+- Collection MongoDB `coop_challenges` (index unique sur `token`, index composite `creator_user_id + created_at`)
+- `_assign_role(idx)` alterne sur `idx % 2`
+- `_public_view()` strip `correct_index/explanation` des questions à venir (visible dans `answers_log` pour le récap)
+
+### Frontend
+- `CoopChallengeCreate.jsx` : formulaire avec validation rôles différents
+- `CoopChallengePlay.jsx` : gameplay complet avec overlay passe-plat, feedback animé, écran de résultats finaux
+- Hero card "Mode Coopératif" en haut de `/app/challenges` (toujours visible, même pour les free)
+- Section "Défi Classique" en dessous, gardée pour les Premium
+- Champ `birth_year` optionnel à l'inscription
+
+### Modèle utilisateur étendu
+- `birth_year` (optional int, 1900-2026)
+- `age_group` computed dans `user_to_public` : ≤25 = "jeune", ≥55 = "senior", autres = "libre" (préparation Phase B pour suggestions auto de duo)
+
+### Code review comments traités
+- ✅ Race-condition guard double-tap (conditional update)
+- ✅ Bump birth_year max année à 2026
+- ⏳ Strip `correct_index/explanation` du `answers_log` — laissé intentionnellement (récap éducatif)
+- ⏳ `starter_index` paramétrable — non requis pour MVP
+- ⏳ FinalResults state explicite — la dérivation actuelle est OK
+
+## Roadmap Mode Coopératif
+
+### Phase B (à venir — sur demande utilisateur)
+4 nouvelles catégories modernes à générer via Mistral (~400 questions, 1 nuit) :
+- 🎮 **Génération Écrans** (Léo le Streamer) — jeux vidéo, Twitch, YouTube
+- 📱 **Tech & Réseaux** (Léna l'Influenceuse) — TikTok, Instagram, IA, smartphones
+- 🎵 **Hits & Rap Actuel** (Rayan le Beatmaker) — rap français 2010-2026, hits Spotify
+- 🍔 **Street Food & Fooding** (Chloé la Foodie) — bubble tea, smash burger, ramen, vegan
+
+### Phase C (idées)
+- Mode à distance (WebSocket sync entre 2 téléphones)
+- Questions "Pont" (pop culture commune aux 2 générations) tagguées dans le pool
+- Match "Choc des Générations" : duels avec scoreboard temps réel
+- Suggestions auto de duo via `age_group` à la création (« Mamie + nièce de 12 ans »)
+
+
+## 2026-02-16 — Sprint 1 Gamification "Rendre visible l'existant" (iteration 21) ✅
+
+### Constat
+2 piliers de la spec gamification utilisateur étaient déjà implémentés côté BACKEND mais totalement invisibles côté frontend :
+- Ligues hebdomadaires (cohortes de 30, Bronze→Argent→Or→Diamant)
+- Streak Saver (10 crédits ou pub pour ressusciter sa flamme)
+
+Sprint 1 rectifie ça avec le minimum de code possible (10/10 backend pytest pass).
+
+### Livré
+
+**🏆 Page `/app/leagues`**
+- Hero card avec tier badge (🥉🥈🥇💎), my_rank, my_xp, countdown live jusqu'à dimanche 22h Paris
+- Section "Comment ça marche" expliquant promo (5 premiers) / relégation (3 derniers)
+- Leaderboard 30 joueurs max avec lignes promotion (verte pointillée) et relégation (rouge pointillée)
+- Ma ligne en surbrillance mustard + médailles 🥇🥈🥉 pour top 3
+- État vide explicite quand la cohorte n'a qu'un membre
+- Gestion erreur 401/réseau avec bouton "Réessayer"
+
+**🔥 StreakSaverModal (auto-trigger sur Dashboard)**
+- Détection client-side via `streakAtRisk(user)` — streak≥2 + last_date == J-2
+- Flamme animée Framer Motion, message "Votre flamme s'éteint !"
+- 2 boutons : "Sauver pour 10 crédits" (terracotta) OU "Gagner des crédits via pub" (lien EarnCredits)
+- Bouton "Tant pis, je laisse filer" + close croix
+- onSaved refresh le user state du contexte
+
+**📧 Email rappel ligue dimanche 20h Paris**
+- Nouveau cron APScheduler `league_reminder_sunday_20h`
+- Cible : ranks 6-8 (close to promote) + ranks (N-5..N-3) (close to relegate)
+- Skip cohortes < 9 joueurs pour éviter promote/relegate overlap
+- Idempotent : `reminder_sent_week` posé par user pour ne pas spammer
+- Sujet : "🚀 Plus que 2h pour grimper en ligue supérieure !" / "⚠️ Tu risques de perdre ta ligue"
+- Skip si RESEND_API_KEY absent (renvoie `{sent:0, reason:'no_resend_key'}`)
+
+**🔄 XP feeds toutes les voies vers les ligues**
+- `POST /api/attempts` (quiz catégorie) → +XP_PER_CORRECT_CATEGORY × score dans league_scores
+- `POST /api/coop-challenges/{token}/answer` → +xp_earned (100/50/0) dans league_scores
+- `POST /api/daily/submit` était déjà branché (no-op)
+
+**🐛 Cohorte bucketing**
+- `LEAGUE_BUCKETS_PER_TIER = 10` (était 10000) → cohortes se remplissent dès ~30 users actifs au lieu de jamais
+- Documenté pour montée à 50+ buckets quand DAU > 300
+
+### Navigation
+- Navbar : nouveau lien "Ligues" 🏆 entre "Mes quiz" et "Défi famille"
+- Route protégée `/app/leagues`
+
+### Tests
+- 10/10 backend pytest pass (`/app/backend/tests/test_iteration21_leagues.py`)
+- Frontend Leagues + Dashboard + Navbar : tous les data-testids vérifiés
+- Code review : 7 commentaires non-bloquants, 3 traités (cohort bucketing, n<9 guard, 401 UI)
+
+### Reste pour Sprint 2 (mode coop récompensé)
+- Combo multiplier ×1/×1.5/×2/×3 dans `/api/coop-challenges/{token}/answer`
+- Carte fin de partie partageable "Complicité 95%" (réutilise ScoreCard.jsx)
+- Badge "Sauveur" simplifié
+
+### Reste pour Sprint 3 (mascottes)
+- Système `users.mascot_levels` + tracking points par catégorie
+- 4 paliers cosmétiques par mascotte (skins générés via Nano Banana)
+- Page `/app/collection`
+
+
+## 2026-02-16 — Sprint A+B+C : Sécurité + Badges + Progression (iteration 22) ✅
+
+Basé sur l'audit PDF externe (`generaquiz_analysis.pdf`). 15/15 backend pytest + frontend OK.
+
+### 🔒 A. Server-authoritative scoring (Reco #1 audit, P0 sécurité)
+**Avant** : `POST /api/attempts { score:999, total:999 }` depuis la console navigateur → cheat instant #1 en Ligue Diamant.
+
+**Après** :
+- `AttemptCreate` payload = `{category_id, answers: [{question_id, answer_index}], duration_seconds}`
+- Serveur charge les `correct_index` depuis Mongo et recalcule le score
+- Refuse un `question_id` étranger à la `category_id` (400)
+- `answer_index` borné 0-3 par Pydantic (422 si tricheur)
+- Idem pour `/api/daily/submit` (contre les cached daily questions)
+- Frontend `QuizPlayer.jsx` et `DailyQuiz.jsx` mappent le `selected` shuffled → `original_index` avant envoi
+
+### 🏅 B. Badges persistants (Reco #5 audit)
+- Catalog `/app/backend/badges.py` : **15 badges** répartis en 5 familles (starter, streak, daily, coop, league, social)
+- Collection `user_badges` avec index unique `(user_id, badge_id)` → idempotent
+- Helper `award_badge()` + hooks in-line dans les endpoints (never breaks the request on failure)
+- Nouveaux endpoints : `GET /api/badges/catalog` (avec flag `earned` par user) + `GET /api/badges/mine`
+- Réponses des endpoints de jeu incluent `awarded_badges: string[]` → toast client via `sonner`
+- Frontend `lib/badgeToast.js` : `showBadgeToasts()` déclenche des toasts célébratoires avec délai staggeré
+
+### 📈 C. Progression solo (Reco #6 audit)
+- **Level curve** : `xp_for_level(L) = 25 * L * (L+1)` — L1=0, L2=50, L5=750, L10=2750, L20=10500 XP
+- `compute_level(xp)` retourne `{level, xp_in_level, xp_to_next, progress_pct}` → exposé dans `user_to_public`
+- **Category mastery** : collection `user_category_stats` upserted à chaque `/api/attempts`
+  - Tiers : Novice → Apprenti (20+ answered) → Confirmé (50+, ≥70%) → Expert (100+, ≥80%) → Maître (200+, ≥90%)
+- Nouveau endpoint `GET /api/progression/me` : level + mastery par catégorie
+- Nouvelle page `/app/progression` : hero niveau avec barre XP animée, grille 15 badges (verrouillés grisés), 8 bars mastery avec mascotte
+
+### 🧭 Navbar
+- Nouveau lien "Niv X" avec l'éclair ⚡ → `/app/progression`
+
+### 📊 Data model additions
+- `users.xp_total` (existait, maintenant utilisé)
+- `users.level` **computed** dans user_to_public (pas stocké — recalculé depuis xp_total)
+- Collection `user_badges` `{user_id, badge_id, earned_at, meta?}` (unique idx)
+- Collection `user_category_stats` `{user_id, category_id, correct, total, quizzes_played, created_at, updated_at}` (unique idx)
+- Index composite `questions.{id, category_id}` pour la security lookup performance
+
+### Code review comments (non traités, non bloquants)
+- `compute_level` scan linéaire jusqu'à L500 — closed-form dispo si perf devient un souci
+- `check_after_attempt` fait un `count_documents` — cheap à low volume, ajouter `first_quiz_awarded_at` sur user quand DAU > 1000
+- Navbar wrap sur desktop 1920px — cosmétique, tolérable pour l'instant
+- `model_config = ConfigDict(extra='forbid')` sur `AttemptCreate` pour bloquer les champs inconnus au lieu de les stripper
+
+### Ce qui n'est PAS fait (spec audit)
+- **Reco #2** collection unifiée `game_sessions` → refacto, low ROI
+- **Reco #4** extraction `challenges.participants` → seulement si volume élevé
+- **Reco #7** multijoueur live WebSocket → gros chantier séparé
+- **Reco #9-10** real-time leaderboards → polling OK au MVP
+- **Reco #8** clean README Supabase → doc, low priority
+
+
+## 2026-02-16 — UX seniors : traduction FR + BadgeShareCard (iteration 23) ✅
+
+### Contexte
+Le cœur de cible (Françoise 72 ans, Papi Robert) a déjà des difficultés en informatique — les termes anglais sont un obstacle majeur. On simplifie le vocabulaire visible ET on ajoute le partage social des exploits.
+
+### Changements
+- ❌ **Retiré** : le badge "Plus de 12 000 seniors nous font confiance" sur la Landing (chiffre non-fondé)
+- ✅ **Remplacé par** : "Le jeu qui réunit les générations" (positionnement sans chiffre)
+- 🇫🇷 **XP → points** dans toute l'interface visible :
+  - `Leagues.jsx` : "Mes points" et "points" au lieu de "XP"
+  - `Progression.jsx` : "0 points au total, plus que 50 points pour le niveau 2"
+  - `CoopChallengePlay.jsx` : "+50 points au lieu de 100 si solo", "+xxx points", "xxx points" (5 occurrences)
+  - `Challenges.jsx` : "100 points en solo", "Terminé · X points" (3 occurrences)
+  - Variables internes (`xp_total`, `xp_gained`, `my_xp` dans l'API) **conservées** pour compat backend
+- 🏆 **Nouveau composant** `BadgeShareCard.jsx` : carte PNG partageable pour chaque badge débloqué
+  - Halo lumineux coloré selon `tier` (bronze/argent/or/diamant)
+  - Grand emoji du badge dans un cercle avec shadow-warm
+  - "Palier bronze/argent/or/diamant" en label
+  - Titre + description du badge
+  - "Débloqué par [PRÉNOM]" avec accent doré
+  - Date au format français ("1 juillet 2026")
+  - Footer : "generaquiz.fr · Le jeu qui rapproche les générations"
+  - 3 actions : Partager (Web Share API + fallback clipboard) / WhatsApp (wa.me deep link) / Télécharger PNG (html-to-image)
+- 🖱️ **Interaction Progression** :
+  - Badges débloqués → tuile cliquable avec icône Share2 en top-right (data-testid `badge-earned-<id>`)
+  - Clic ouvre modal `data-testid='badge-share-modal'` avec la BadgeShareCard
+  - Overlay `bg-navy/85 backdrop-blur-sm`, fermeture au clic hors modal ou bouton croix
+  - Message subtil : "Cliquez sur un badge pour partager votre exploit 🎉"
+  - Badges verrouillés → non-interactive `<div>` (pas de handler)
+
+### Tests
+- 100% frontend passed (iteration 23)
+- Phrase seniors bien absente
+- 0 occurrence de "XP" visible sur les pages testées
+- Modal ouvre/ferme correctement, 3 boutons fonctionnels
+- WhatsApp deep link vérifié avec le bon texte
+- PNG download avec nom `generaquiz-badge-<id>.png`
+- Badges verrouillés non-cliquables
+

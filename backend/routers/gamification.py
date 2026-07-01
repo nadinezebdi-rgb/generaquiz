@@ -246,9 +246,14 @@ async def _ensure_league_membership(user_id: str) -> dict:
     if tier not in LEAGUES:
         tier = "bronze"
 
-    # Cohort assignment: hash(user_id + week_key + tier) % large_int → bucket; then group by 30.
+    # Cohort assignment: hash(user_id + week_key + tier) % bucket_count → bucket.
+    # Bucket count is tuned to keep cohorts populated even at low DAU.
+    # With 10 000 buckets, low-traffic users sit alone (bad UX). At ~30 users
+    # per active tier we want ≤ 10 buckets so cohorts of 3-10 form quickly.
+    # We start with `LEAGUE_BUCKETS_PER_TIER=10`; once DAU exceeds 300, lift it.
+    LEAGUE_BUCKETS_PER_TIER = 10
     bucket = int(hashlib.sha256(f"{user_id}|{week_key}|{tier}".encode()).hexdigest()[:8], 16)
-    cohort_id = f"{week_key}-{tier}-{bucket % 10000:04d}"
+    cohort_id = f"{week_key}-{tier}-{bucket % LEAGUE_BUCKETS_PER_TIER:02d}"
 
     doc = {
         "user_id": user_id,
@@ -361,6 +366,17 @@ async def settle_finished_week(when: Optional[datetime] = None) -> dict:
                 {"_id": m["_id"]},
                 {"$set": {"final_rank": idx + 1, "settled_to_tier": new_tier}},
             )
+            # Badge check for promotions / diamond tier (best-effort)
+            if new_tier != tier:
+                try:
+                    from badges import check_after_league_settle
+                    await check_after_league_settle(
+                        m["user_id"],
+                        new_tier,
+                        promoted=(idx < LEAGUE_PROMOTE),
+                    )
+                except Exception:
+                    pass
             # Seed next week's membership in the new tier (lazy: actual cohort assignment on first play)
             # We just remember the tier; cohort will be (re)hashed on next call to _ensure_league_membership.
 

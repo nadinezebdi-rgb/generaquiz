@@ -5,19 +5,27 @@ import { api, BACKEND_URL } from "@/lib/api";
 import { useAuth } from "@/contexts/AuthContext";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { Plus, Users, Crown, ArrowRight, Trophy, Clock, Share2 } from "lucide-react";
+import { Plus, Users, Crown, ArrowRight, Trophy, Clock, Share2, Heart, HandHelping } from "lucide-react";
 
 export default function Challenges() {
   const { user } = useAuth();
   const [items, setItems] = useState([]);
+  const [coopItems, setCoopItems] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!user || user === false || user.plan !== "premium") {
+    if (!user || user === false) {
       setLoading(false);
       return;
     }
-    api.get("/challenges/mine").then((r) => setItems(r.data)).catch(() => {}).finally(() => setLoading(false));
+    // Coop challenges are open to everyone (free + premium) to drive engagement.
+    api.get("/coop-challenges/mine/list").then((r) => setCoopItems(r.data)).catch(() => {});
+    // Classic challenges remain Premium-only
+    if (user.plan === "premium") {
+      api.get("/challenges/mine").then((r) => setItems(r.data)).catch(() => {}).finally(() => setLoading(false));
+    } else {
+      setLoading(false);
+    }
   }, [user]);
 
   const isPremium = user?.plan === "premium";
@@ -66,13 +74,80 @@ export default function Challenges() {
                 <Crown className="w-7 h-7 text-navy" strokeWidth={2.5} />
               </div>
               <div className="flex-1">
-                <h2 className="font-display text-2xl font-bold text-navy mb-2">Réservé aux Premium</h2>
+                <h2 className="font-display text-2xl font-bold text-navy mb-2">Défi Classique réservé aux Premium</h2>
                 <p className="text-navy/80 text-lg leading-relaxed">
-                  Le Défi Famille est l'occasion parfaite d'appeler vos petits-enfants pour leur lancer un quiz !
-                  Cette fonctionnalité est incluse dans l'abonnement Premium.
+                  Le Défi Famille Classique (jeu en équipe à distance) est inclus dans Premium.
+                  Le <strong>Mode Coopératif</strong> ci-dessous est <strong>accessible à tous</strong> — essayez-le !
                 </p>
               </div>
             </div>
+          </div>
+        )}
+
+        {/* ============ COOP HERO CARD ============ */}
+        <div className="bg-gradient-to-br from-navy via-navy to-bordeaux text-cream rounded-[28px] p-6 md:p-8 mb-8 relative overflow-hidden" data-testid="coop-hero">
+          <div className="absolute top-4 right-4 bg-mustard text-navy text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">
+            Nouveau
+          </div>
+          <div className="flex items-start gap-4 mb-5">
+            <div className="w-14 h-14 rounded-2xl bg-mustard flex items-center justify-center shrink-0">
+              <Heart className="w-7 h-7 text-bordeaux fill-current" />
+            </div>
+            <div className="flex-1">
+              <div className="inline-flex items-center gap-2 bg-white/15 text-cream font-bold px-2.5 py-1 rounded-full text-xs mb-2">
+                <HandHelping className="w-3.5 h-3.5" /> Mode Coopératif
+              </div>
+              <h2 className="font-display text-3xl md:text-4xl font-extrabold mb-2 leading-tight">
+                Senior + Jeune <span className="text-mustard italic">= une équipe</span>
+              </h2>
+              <p className="text-cream/85 text-lg leading-relaxed mb-4">
+                Jouez à 2 sur le même téléphone. Si l&apos;un bloque, il <strong>passe le téléphone</strong> à l&apos;autre — la complicité avant la performance.
+                100 points en solo, 50 points avec un coup de main.
+              </p>
+            </div>
+          </div>
+          <Link
+            to="/app/coop/new"
+            data-testid="coop-new-btn"
+            className="inline-flex items-center justify-center gap-2 bg-terracotta hover:bg-terracotta-dark text-white font-bold px-6 py-4 rounded-full text-lg shadow-warm transition"
+          >
+            <Plus className="w-5 h-5" /> Lancer un défi coopératif <ArrowRight className="w-5 h-5" />
+          </Link>
+
+          {coopItems.length > 0 && (
+            <div className="mt-6 pt-6 border-t-2 border-white/15">
+              <div className="text-xs font-bold uppercase tracking-wider text-cream/70 mb-3">Reprendre un défi coopératif</div>
+              <div className="grid sm:grid-cols-2 gap-3">
+                {coopItems.slice(0, 4).map((c) => (
+                  <Link
+                    key={c.token}
+                    to={`/app/coop/${c.token}`}
+                    data-testid={`coop-resume-${c.token}`}
+                    className="bg-white/10 hover:bg-white/20 rounded-2xl p-3 transition flex items-center justify-between gap-3"
+                  >
+                    <div className="min-w-0">
+                      <div className="font-bold truncate">{c.team_name}</div>
+                      <div className="text-xs text-cream/70">
+                        {c.status === "completed"
+                          ? `Terminé · ${c.stats_coop?.total_xp || 0} points`
+                          : `Q${(c.current_index || 0) + 1}/${c.total_questions} · ${c.stats_coop?.total_xp || 0} points`}
+                      </div>
+                    </div>
+                    <ArrowRight className="w-4 h-4 shrink-0 text-cream/70" />
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* ============ CLASSIC SECTION HEADER ============ */}
+        {isPremium && (
+          <div className="mb-4">
+            <h2 className="font-display text-2xl font-bold text-navy flex items-center gap-2">
+              <Users className="w-6 h-6 text-terracotta" /> Défi Classique
+            </h2>
+            <p className="text-sm text-navy/60">Quiz partagé par lien — chacun joue de son côté et compare les scores.</p>
           </div>
         )}
 
