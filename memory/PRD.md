@@ -550,3 +550,53 @@ Choix utilisateur: **1c/2a/3a** → section ajoutée à la Landing publique, car
 - `platform-section`, `platform-pill`, `platform-discover-btn`, `platform-separator`, `platform-availability-note`
 - `platform-card-<key>` × 7, `platform-badge-dev-<key>` × 7
 
+
+## 2026-02-16 — Sprint 2 Coop Récompensé (iteration 25) ✅
+
+### Combo multiplier — Backend
+Nouveau système dans `routers/coop_challenges.py` :
+- `COMBO_TIERS` : 3 correct-no-help d'affilée = ×1.5, 5 = ×2, 7+ = ×3
+- Streak reset par `is_correct == False` OU `help_used == true`
+- `stats_coop.current_combo` (streak en cours) + `stats_coop.best_combo` (max atteint)
+- `stats_coop.solo_correct_count` (pour le calcul de complicité)
+- Base XP × multiplier appliqué à `xp_earned` (100→300 sur combo ×3)
+- Réponse `/answer` retourne `combo`, `multiplier`, `combo_broken`, `base_xp`
+- Testé ×1.0 → ×1.5 → ×2 → ×3 → break sur help_used ✅
+
+### Combo UI — Frontend `CoopChallengePlay.jsx`
+- Bandeau `data-testid='coop-combo-banner'` en haut de la page quand combo ≥ 3
+- Affichage "🔥 Combo ×2 · 5 d'affilée sans aide" avec animation spring
+- Feedback après réponse : "+150 points" + label rouge "Combo ×1.5" ou "Combo perdu 💔"
+
+### Carte de fin partageable — Nouveau composant `CoopShareCard.jsx`
+Réutilise la mécanique html-to-image de `BadgeShareCard`.
+
+Contenu de la carte :
+- Header "GénéraQuiz · Duo" + date FR
+- **Complicité XX%** en géant (fontSize 96) sur fond mustard
+- Titre du tier :
+  - ≥95% : Fusion Temporelle Parfaite ✨🧡
+  - ≥85% : Duo Légendaire 🌟
+  - ≥70% : Complices de Toujours 🤝
+  - ≥50% : Belle Équipe 👍
+  - <50%  : Duo en Rodage 🌱
+- Grille 2×2 : Bonnes réponses, Combo max, Aides réussies, Points
+- Bloc "LE DUO — Player1 + Player2 — « TeamName »"
+- 3 boutons : Partager (Web Share API), WhatsApp (`wa.me`), Télécharger PNG
+
+Formule de complicité : `round((solo_correct + helps_successful × 0.75) / total × 100)`.
+Les aides réussies comptent 75% (récompense l'entraide sans dévaluer le solo).
+
+### FinalResults refonte
+- La carte partageable devient LA carte de résultats principale
+- 3 stats compactes en dessous : aides sauvées, combo max, précision %
+- 2 boutons : Refaire un défi / Mes défis
+- Suppression du header "Trophy" + team_name séparé (déjà dans la carte)
+
+### Data-testids
+- `coop-combo-banner`, `coop-combo-multiplier`
+- `coop-feedback-mult`, `coop-feedback-combo-broken`
+- `coop-share-wrapper`, `coop-share-visual`, `coop-share-complicity`
+- `coop-share-btn`, `coop-share-whatsapp`, `coop-share-download`
+- `coop-final-card`, `coop-final-combo`, `coop-final-accuracy`, `coop-final-helps`
+

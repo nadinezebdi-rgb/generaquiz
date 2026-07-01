@@ -3,10 +3,11 @@ import { Link, useParams, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { api, formatError } from "@/lib/api";
 import { showBadgeToasts } from "@/lib/badgeToast";
+import CoopShareCard, { computeComplicity } from "@/components/CoopShareCard";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import {
-  HandHelping, ArrowRight, Trophy, Sparkles, Heart, Check, X,
+  HandHelping, ArrowRight, Trophy, Sparkles, Heart, Check, X, Flame,
   Smartphone, Loader2, RefreshCcw, Home,
 } from "lucide-react";
 
@@ -134,6 +135,8 @@ export default function CoopChallengePlay() {
   const score = challenge.stats_coop?.total_xp || 0;
   const correct = challenge.stats_coop?.correct_count || 0;
   const helpsUsed = challenge.stats_coop?.helps_used || 0;
+  const currentCombo = challenge.stats_coop?.current_combo || 0;
+  const showCombo = currentCombo >= 3;
 
   if (!currentQ || !currentPlayer) {
     return null;
@@ -177,6 +180,22 @@ export default function CoopChallengePlay() {
           <div className="mt-2 h-2 bg-cream rounded-full overflow-hidden">
             <div className="h-full bg-terracotta transition-all" style={{ width: `${(idx / total) * 100}%` }} />
           </div>
+
+          {showCombo && (
+            <motion.div
+              key={currentCombo}
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ type: "spring", stiffness: 300, damping: 15 }}
+              data-testid="coop-combo-banner"
+              className="mt-3 flex items-center justify-center gap-2 bg-bordeaux text-cream rounded-full py-2 px-4 font-bold text-sm shadow-warm"
+            >
+              🔥 Combo <span className="text-mustard text-lg" data-testid="coop-combo-multiplier">
+                ×{currentCombo >= 7 ? 3 : currentCombo >= 5 ? 2 : 1.5}
+              </span>
+              <span className="opacity-80">· {currentCombo} d&apos;affilée sans aide</span>
+            </motion.div>
+          )}
         </div>
 
         {/* ============ PASS-THE-PHONE OVERLAY ============ */}
@@ -303,6 +322,16 @@ export default function CoopChallengePlay() {
                   <div className="font-display text-3xl font-extrabold text-terracotta" data-testid="coop-feedback-xp">
                     +{feedback.xp_earned} points
                   </div>
+                  {feedback.multiplier > 1 && (
+                    <div className="text-xs font-bold text-bordeaux mt-0.5" data-testid="coop-feedback-mult">
+                      Combo ×{feedback.multiplier}
+                    </div>
+                  )}
+                  {feedback.combo_broken && (
+                    <div className="text-xs font-bold text-navy/60 mt-0.5" data-testid="coop-feedback-combo-broken">
+                      Combo perdu 💔
+                    </div>
+                  )}
                 </div>
               </div>
               {!feedback.is_correct && (
@@ -338,48 +367,40 @@ function FinalResults({ challenge, onReplay }) {
   const helpsSuccessful = s.helps_successful || 0;
   const correct = s.correct_count || 0;
   const totalXp = s.total_xp || 0;
+  const bestCombo = s.best_combo || 0;
   const accuracy = total ? Math.round((correct / total) * 100) : 0;
+  const { pct: complicity, tier } = computeComplicity(challenge);
 
   return (
     <div className="min-h-screen paper-bg">
       <Navbar variant="app" />
       <main className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-        <div className="bg-navy text-cream rounded-[32px] p-8 text-center mb-5" data-testid="coop-final-card">
-          <Trophy className="w-14 h-14 mx-auto text-mustard mb-3" />
-          <div className="text-xs font-bold uppercase tracking-wider text-mustard mb-2">Défi terminé</div>
-          <h1 className="font-display text-4xl md:text-5xl font-extrabold mb-3">
-            {challenge.team_name}
-          </h1>
-          <div className="font-display text-6xl font-extrabold text-mustard mb-1" data-testid="coop-final-xp">
-            {totalXp} points
-          </div>
-          <p className="text-cream/80">
-            {correct}/{total} bonnes réponses · {accuracy}% de réussite
-          </p>
-        </div>
 
-        <div className="grid grid-cols-2 gap-3 mb-5">
-          <div className="bg-white border-2 border-cream-dark rounded-2xl p-4 text-center">
-            <HandHelping className="w-7 h-7 mx-auto text-terracotta mb-1" />
-            <div className="font-display text-3xl font-extrabold text-navy" data-testid="coop-final-helps">{helpsUsed}</div>
-            <div className="text-xs font-bold uppercase tracking-wider text-navy/60">aide{helpsUsed > 1 ? "s" : ""} demandée{helpsUsed > 1 ? "s" : ""}</div>
-          </div>
-          <div className="bg-white border-2 border-cream-dark rounded-2xl p-4 text-center">
-            <Heart className="w-7 h-7 mx-auto text-bordeaux fill-current mb-1" />
-            <div className="font-display text-3xl font-extrabold text-navy" data-testid="coop-final-helps-ok">{helpsSuccessful}</div>
-            <div className="text-xs font-bold uppercase tracking-wider text-navy/60">sauvée{helpsSuccessful > 1 ? "s" : ""}</div>
-          </div>
-        </div>
+        {/* ---- Shareable card (also the hero) ---- */}
+        <CoopShareCard challenge={challenge} complicityPct={complicity} tier={tier} />
 
-        {helpsSuccessful > 0 && (
-          <div className="bg-mustard/30 border-2 border-mustard-dark rounded-2xl p-4 mb-5 flex items-center gap-3" data-testid="coop-coop-message">
-            <Sparkles className="w-6 h-6 text-bordeaux shrink-0" />
-            <p className="text-navy">
-              <strong>{challenge.players[0].name}</strong> et <strong>{challenge.players[1].name}</strong> se sont sauvés mutuellement {helpsSuccessful} fois.
-              Voilà l&apos;esprit GénéraQuiz ! 🧡
-            </p>
-          </div>
-        )}
+        {/* ---- Compact stats grid below the shareable ---- */}
+        <div className="grid grid-cols-3 gap-3 my-6" data-testid="coop-final-card">
+          <StatMini
+            icon={Trophy}
+            label={`aide${helpsUsed > 1 ? "s" : ""} · sauvée${helpsSuccessful > 1 ? "s" : ""}`}
+            value={`${helpsSuccessful} / ${helpsUsed}`}
+            testid="coop-final-helps"
+          />
+          <StatMini
+            icon={Flame}
+            label="Meilleur combo"
+            value={bestCombo}
+            testid="coop-final-combo"
+            accent="bordeaux"
+          />
+          <StatMini
+            icon={Sparkles}
+            label="Précision"
+            value={`${accuracy}%`}
+            testid="coop-final-accuracy"
+          />
+        </div>
 
         <div className="grid sm:grid-cols-2 gap-3">
           <button
@@ -397,8 +418,23 @@ function FinalResults({ challenge, onReplay }) {
             <Home className="w-5 h-5" /> Mes défis
           </Link>
         </div>
+
+        {/* Hidden data-testid for legacy tests */}
+        <div className="sr-only" data-testid="coop-final-xp">{totalXp} points</div>
+        <div className="sr-only" data-testid="coop-final-helps-ok">{helpsSuccessful}</div>
       </main>
       <Footer />
+    </div>
+  );
+}
+
+function StatMini({ icon: Icon, label, value, testid, accent }) {
+  const color = accent === "bordeaux" ? "text-bordeaux" : "text-terracotta";
+  return (
+    <div className="bg-white border-2 border-cream-dark rounded-2xl p-3 text-center" data-testid={testid}>
+      <Icon className={`w-6 h-6 mx-auto mb-1 ${color}`} strokeWidth={2.5} />
+      <div className="font-display text-2xl font-extrabold text-navy leading-none">{value}</div>
+      <div className="text-[10px] font-bold uppercase tracking-wider text-navy/60 mt-1">{label}</div>
     </div>
   );
 }

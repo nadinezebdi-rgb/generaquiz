@@ -32,6 +32,22 @@ XP_HELP_CORRECT = 50
 XP_WRONG = 0
 DEFAULT_NUM_QUESTIONS = 10
 
+# Combo multipliers — reward SOLO correct streaks (no "demander de l'aide").
+# Reset by any wrong answer OR any help_used=true. Tier thresholds are
+# inclusive lower bounds — 3 correct-no-help in a row → ×1.5, etc.
+COMBO_TIERS = [
+    (7, 3.0),   # ×3.0  from 7 consecutive
+    (5, 2.0),   # ×2.0  from 5
+    (3, 1.5),   # ×1.5  from 3
+]
+
+
+def _combo_multiplier(streak: int) -> float:
+    for threshold, mult in COMBO_TIERS:
+        if streak >= threshold:
+            return mult
+    return 1.0
+
 
 # ---- Pydantic models -----------------------------------------------------
 
@@ -145,6 +161,9 @@ async def create_coop_challenge(
             "helps_used": 0,
             "helps_successful": 0,
             "correct_count": 0,
+            "solo_correct_count": 0,
+            "current_combo": 0,
+            "best_combo": 0,
         },
         "status": "in_progress",
         "created_at": datetime.now(timezone.utc).isoformat(),
@@ -191,11 +210,27 @@ async def answer_coop_question(
 
     q = questions[idx]
     is_correct = body.answer_index == q["correct_index"]
-    xp_earned = (
+
+    # ---- Combo tracking --------------------------------------------------
+    # Combo = consecutive `correct AND not help_used`. Reset on wrong OR
+    # help_used. Multiplier scales the base XP so streak-focused duos are
+    # rewarded ×1.5 / ×2 / ×3 the base 100.
+    stats = doc.get("stats_coop", {}) or {}
+    prev_combo = int(stats.get("current_combo", 0) or 0)
+    prev_best = int(stats.get("best_combo", 0) or 0)
+    if is_correct and not body.help_used:
+        new_combo = prev_combo + 1
+    else:
+        new_combo = 0
+    new_best = max(prev_best, new_combo)
+    multiplier = _combo_multiplier(new_combo) if is_correct else 1.0
+
+    base_xp = (
         XP_HELP_CORRECT if (is_correct and body.help_used)
         else XP_SOLO_CORRECT if is_correct
         else XP_WRONG
     )
+    xp_earned = int(round(base_xp * multiplier))
 
     # Build the log entry — we keep the question text + correct answer so the
     # final results screen can show the explanation per question.
@@ -209,6 +244,9 @@ async def answer_coop_question(
         "is_correct": is_correct,
         "help_used": body.help_used,
         "xp_earned": xp_earned,
+        "base_xp": base_xp,
+        "combo": new_combo,
+        "multiplier": multiplier,
         "assigned_to": q.get("assigned_to"),
         "explanation": q.get("explanation", ""),
         "answered_at": datetime.now(timezone.utc).isoformat(),
@@ -227,7 +265,8 @@ async def answer_coop_question(
     res = await db.coop_challenges.update_one(
         {"token": token, "current_index": idx, "status": "in_progress"},
         {
-            "$set": set_fields,
+            "$set": {**set_fields, "stats_coop.current_combo": new_combo,
+                     "stats_coop.best_combo": new_best},
             "$push": {"answers_log": log_entry},
             "$inc": {
                 "stats_coop.total_xp": xp_earned,
@@ -235,6 +274,7 @@ async def answer_coop_question(
                 "stats_coop.helps_used": 1 if body.help_used else 0,
                 "stats_coop.helps_successful": 1 if (body.help_used and is_correct) else 0,
                 "stats_coop.total_score": 1 if is_correct else 0,
+                "stats_coop.solo_correct_count": 1 if (is_correct and not body.help_used) else 0,
             },
         },
     )
@@ -292,6 +332,10 @@ async def answer_coop_question(
         "correct_index": q["correct_index"],
         "explanation": q.get("explanation", ""),
         "xp_earned": xp_earned,
+        "base_xp": base_xp,
+        "combo": new_combo,
+        "combo_broken": (prev_combo >= 3 and new_combo == 0),
+        "multiplier": multiplier,
         "help_used": body.help_used,
         "completed": completed,
         "stats_coop": fresh["stats_coop"],
