@@ -120,6 +120,9 @@ async def startup():
     await db.users.create_index("google_sub", sparse=True)
     await db.categories.create_index("id", unique=True)
     await db.questions.create_index("category_id")
+    # Composite index for the security lookup in POST /attempts
+    # (fetches questions by their id list restricted to the category)
+    await db.questions.create_index([("id", 1), ("category_id", 1)])
     await db.attempts.create_index([("user_id", 1), ("created_at", -1)])
     await db.payment_transactions.create_index("session_id", unique=True)
     await db.challenges.create_index("token", unique=True)

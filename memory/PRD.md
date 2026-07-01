@@ -421,3 +421,58 @@ Sprint 1 rectifie ça avec le minimum de code possible (10/10 backend pytest pas
 - 4 paliers cosmétiques par mascotte (skins générés via Nano Banana)
 - Page `/app/collection`
 
+
+## 2026-02-16 — Sprint A+B+C : Sécurité + Badges + Progression (iteration 22) ✅
+
+Basé sur l'audit PDF externe (`generaquiz_analysis.pdf`). 15/15 backend pytest + frontend OK.
+
+### 🔒 A. Server-authoritative scoring (Reco #1 audit, P0 sécurité)
+**Avant** : `POST /api/attempts { score:999, total:999 }` depuis la console navigateur → cheat instant #1 en Ligue Diamant.
+
+**Après** :
+- `AttemptCreate` payload = `{category_id, answers: [{question_id, answer_index}], duration_seconds}`
+- Serveur charge les `correct_index` depuis Mongo et recalcule le score
+- Refuse un `question_id` étranger à la `category_id` (400)
+- `answer_index` borné 0-3 par Pydantic (422 si tricheur)
+- Idem pour `/api/daily/submit` (contre les cached daily questions)
+- Frontend `QuizPlayer.jsx` et `DailyQuiz.jsx` mappent le `selected` shuffled → `original_index` avant envoi
+
+### 🏅 B. Badges persistants (Reco #5 audit)
+- Catalog `/app/backend/badges.py` : **15 badges** répartis en 5 familles (starter, streak, daily, coop, league, social)
+- Collection `user_badges` avec index unique `(user_id, badge_id)` → idempotent
+- Helper `award_badge()` + hooks in-line dans les endpoints (never breaks the request on failure)
+- Nouveaux endpoints : `GET /api/badges/catalog` (avec flag `earned` par user) + `GET /api/badges/mine`
+- Réponses des endpoints de jeu incluent `awarded_badges: string[]` → toast client via `sonner`
+- Frontend `lib/badgeToast.js` : `showBadgeToasts()` déclenche des toasts célébratoires avec délai staggeré
+
+### 📈 C. Progression solo (Reco #6 audit)
+- **Level curve** : `xp_for_level(L) = 25 * L * (L+1)` — L1=0, L2=50, L5=750, L10=2750, L20=10500 XP
+- `compute_level(xp)` retourne `{level, xp_in_level, xp_to_next, progress_pct}` → exposé dans `user_to_public`
+- **Category mastery** : collection `user_category_stats` upserted à chaque `/api/attempts`
+  - Tiers : Novice → Apprenti (20+ answered) → Confirmé (50+, ≥70%) → Expert (100+, ≥80%) → Maître (200+, ≥90%)
+- Nouveau endpoint `GET /api/progression/me` : level + mastery par catégorie
+- Nouvelle page `/app/progression` : hero niveau avec barre XP animée, grille 15 badges (verrouillés grisés), 8 bars mastery avec mascotte
+
+### 🧭 Navbar
+- Nouveau lien "Niv X" avec l'éclair ⚡ → `/app/progression`
+
+### 📊 Data model additions
+- `users.xp_total` (existait, maintenant utilisé)
+- `users.level` **computed** dans user_to_public (pas stocké — recalculé depuis xp_total)
+- Collection `user_badges` `{user_id, badge_id, earned_at, meta?}` (unique idx)
+- Collection `user_category_stats` `{user_id, category_id, correct, total, quizzes_played, created_at, updated_at}` (unique idx)
+- Index composite `questions.{id, category_id}` pour la security lookup performance
+
+### Code review comments (non traités, non bloquants)
+- `compute_level` scan linéaire jusqu'à L500 — closed-form dispo si perf devient un souci
+- `check_after_attempt` fait un `count_documents` — cheap à low volume, ajouter `first_quiz_awarded_at` sur user quand DAU > 1000
+- Navbar wrap sur desktop 1920px — cosmétique, tolérable pour l'instant
+- `model_config = ConfigDict(extra='forbid')` sur `AttemptCreate` pour bloquer les champs inconnus au lieu de les stripper
+
+### Ce qui n'est PAS fait (spec audit)
+- **Reco #2** collection unifiée `game_sessions` → refacto, low ROI
+- **Reco #4** extraction `challenges.participants` → seulement si volume élevé
+- **Reco #7** multijoueur live WebSocket → gros chantier séparé
+- **Reco #9-10** real-time leaderboards → polling OK au MVP
+- **Reco #8** clean README Supabase → doc, low priority
+
