@@ -176,16 +176,26 @@ async def startup():
             "name": "Administrateur",
             "role": "admin",
             "plan": "premium",
+            "plan_tier": "premium",
+            "plan_period": "yearly",
             "plan_expires_at": (datetime.now(timezone.utc) + timedelta(days=3650)).isoformat(),
             "created_at": datetime.now(timezone.utc).isoformat(),
         })
         logger.info(f"Admin créé : {ADMIN_EMAIL}")
-    elif not verify_password(ADMIN_PASSWORD, existing["password_hash"]):
-        await db.users.update_one(
-            {"email": ADMIN_EMAIL},
-            {"$set": {"password_hash": hash_password(ADMIN_PASSWORD)}},
-        )
-        logger.info("Admin password mis à jour")
+    else:
+        if not verify_password(ADMIN_PASSWORD, existing["password_hash"]):
+            await db.users.update_one(
+                {"email": ADMIN_EMAIL},
+                {"$set": {"password_hash": hash_password(ADMIN_PASSWORD)}},
+            )
+            logger.info("Admin password mis à jour")
+        # Idempotent backfill of Sprint B tier fields for admin seeded before 3-tier model
+        if not existing.get("plan_tier"):
+            await db.users.update_one(
+                {"email": ADMIN_EMAIL},
+                {"$set": {"plan_tier": "premium", "plan_period": "yearly"}},
+            )
+            logger.info("Admin plan_tier/plan_period backfilled (Sprint B)")
 
     # Backfill credits for users registered before the credits system.
     # Idempotent: only acts on users missing the `credits` field.

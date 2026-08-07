@@ -1,0 +1,15 @@
+{
+  "summary": "Sprint B retest - both UI regressions FIXED and verified. Unauthenticated /app/pricing renders all 4 tier cards without redirect to /login. Clicking Club CTA (unauth) correctly navigates to /login?next=/app/pricing. Admin login returns plan_tier='premium' plan_period='yearly' from /api/auth/me. On authenticated pricing view: Premium CTA='Formule actuelle' disabled, Free CTA='Formule actuelle inférieure' disabled, Club and Famille CTAs='Choisir cette formule' enabled. Mensuel/Annuel toggle works and 'Le plus populaire' badge persists on Famille tier.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {"ui_bugs": [], "integration_issues": [], "design_issues": []},
+  "test_report_links": ["/app/backend/tests/test_pricing_sprintb.py"],
+  "action_items": [],
+  "critical_code_review_comments": [],
+  "updated_files": [],
+  "success_rate": {"backend": "100%", "frontend": "100%"},
+  "test_credentials": "admin@generaquiz.fr / Admin2026! (verified working)",
+  "seed_data_creation": "None - used existing admin seed",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Sprint B pricing page complete. Both prior regressions (ProtectedRoute wrapping & missing admin plan_tier) fully verified fixed. Note: /api/auth/me includes plan_tier='premium' and plan_period='yearly' correctly. All 4 pricing CTAs behave per spec for both unauth and admin-premium users."
+}

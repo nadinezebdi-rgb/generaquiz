@@ -84,14 +84,7 @@ export default function App() {
               </ProtectedRoute>
             }
           />
-          <Route
-            path="/app/pricing"
-            element={
-              <ProtectedRoute>
-                <Pricing />
-              </ProtectedRoute>
-            }
-          />
+          <Route path="/app/pricing" element={<Pricing />} />
           <Route
             path="/app/success"
             element={
