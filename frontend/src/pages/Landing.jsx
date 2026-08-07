@@ -3,23 +3,15 @@ import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
   Play, Users, Heart, Sparkles, Check, ArrowRight, Star,
-  Brain, Music, Film, Phone, Landmark, Utensils, BookOpen, Mail, Camera, Newspaper, Type, Activity, Book,
+  Brain, Music, Film, Phone, Landmark, Utensils, Book,
 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import StatsSection from "@/components/StatsSection";
+import PlatformSection from "@/components/PlatformSection";
+import HeroPhoneDemo from "@/components/HeroPhoneDemo";
+import TestimonialsSection from "@/components/TestimonialsSection";
 import { api, BACKEND_URL } from "@/lib/api";
-
-const ACTIVITIES = [
-  { id: "atelier-memoire", title: "Atelier Mémoire", desc: "Séquences, associations, logique progressive.", icon: Brain, badge: "Nouveau" },
-  { id: "journal-vie", title: "Mon Journal de Vie", desc: "Racontez votre histoire, chapitre après chapitre.", icon: BookOpen, badge: "Populaire" },
-  { id: "recettes-antan", title: "Recettes d'Antan", desc: "Les saveurs de votre enfance et de votre terroir.", icon: Utensils },
-  { id: "gym-douce", title: "Gym Douce", desc: "Exercices adaptés, guidés pas à pas.", icon: Activity, badge: "Santé" },
-  { id: "correspondance", title: "Correspondance", desc: "Messagerie simplifiée pour vos proches.", icon: Mail },
-  { id: "phototheque", title: "Photothèque", desc: "Numérisez et organisez vos albums.", icon: Camera },
-  { id: "actualites", title: "Actualités simples", desc: "L'essentiel en gros caractères, sans pub.", icon: Newspaper, badge: "Quotidien" },
-  { id: "jeux-mots", title: "Jeux de Mots", desc: "Mots croisés, charades, mots mêlés.", icon: Type },
-];
 
 const ICON_MAP = { tv: Film, music: Music, film: Film, phone: Phone, landmark: Landmark, utensils: Utensils, sparkles: Sparkles, book: Book };
 
@@ -48,17 +40,31 @@ export default function Landing() {
             transition={{ duration: 0.6 }}
             className="lg:col-span-7"
           >
-            <div className="inline-flex items-center gap-2 bg-cream border-2 border-mustard-dark text-navy font-bold px-4 py-2 rounded-full text-sm mb-6">
-              <Star className="w-4 h-4 text-terracotta fill-terracotta" /> Le jeu qui réunit les générations
+            <div className="inline-flex items-center gap-2 bg-cream border-2 border-mustard-dark text-navy font-bold px-4 py-2 rounded-full text-sm mb-6" data-testid="hero-pill">
+              <Star className="w-4 h-4 text-terracotta fill-terracotta" /> Le premier club mémoire intergénérationnel
             </div>
-            <h1 className="font-display text-5xl sm:text-6xl lg:text-7xl font-extrabold text-navy leading-[1.05] mb-6">
-              Réveillez vos <span className="text-terracotta italic">souvenirs</span><br />
-              en vous amusant !
+            <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl font-extrabold text-navy leading-[1.1] mb-6" data-testid="hero-title">
+              5 minutes par jour<br />
+              pour <span className="text-terracotta italic">stimuler votre mémoire</span><br />
+              et partager un moment en famille.
             </h1>
-            <p className="text-xl sm:text-2xl text-navy/80 leading-relaxed max-w-2xl mb-10">
-              Des quiz culturels et ludiques pour entretenir votre mémoire, explorer la France d&apos;autrefois
-              et partager de bons moments avec vos petits-enfants.
+            <p className="text-lg sm:text-xl text-navy/80 leading-relaxed max-w-2xl mb-6" data-testid="hero-subtitle">
+              GénéraQuiz réunit seniors, enfants et petits-enfants autour de quiz culturels
+              inspirés des connaissances scientifiques sur la <strong>stimulation cognitive</strong> et le <strong>lien social</strong>.
             </p>
+
+            {/* Rating + social proof line */}
+            <div className="flex items-center gap-3 mb-8 flex-wrap" data-testid="hero-rating">
+              <div className="flex items-center gap-0.5" aria-label="5 étoiles sur 5">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <Star key={i} className="w-5 h-5 text-mustard-dark fill-mustard-dark" />
+                ))}
+              </div>
+              <span className="text-sm font-bold text-navy/80">
+                Déjà adopté par des familles partout en France
+              </span>
+            </div>
+
             <div className="flex flex-col sm:flex-row gap-4">
               <Link
                 to="/register"
@@ -68,74 +74,21 @@ export default function Landing() {
                 <Play className="w-6 h-6" fill="currentColor" />
                 Commencer gratuitement
               </Link>
-              <a
-                href="#demo"
-                data-testid="hero-cta-demo"
-                className="inline-flex items-center justify-center gap-3 bg-white border-2 border-navy text-navy hover:bg-navy hover:text-white font-bold text-xl px-8 py-5 rounded-full transition min-h-[64px]"
-              >
-                <Users className="w-6 h-6" />
-                Essayer un quiz
-              </a>
             </div>
 
-            <div className="mt-12 grid grid-cols-3 gap-6 max-w-xl border-t-2 border-cream-dark pt-8">
-              {[
-                { k: "800+", v: "Questions" },
-                { k: "8", v: "Catégories" },
-                { k: "12K+", v: "Joueurs actifs" },
-              ].map((s) => (
-                <div key={s.v}>
-                  <div className="font-display text-4xl font-extrabold text-bordeaux">{s.k}</div>
-                  <div className="text-navy/70 font-medium mt-1">{s.v}</div>
-                </div>
-              ))}
-            </div>
+            <p className="text-sm text-navy/60 mt-4" data-testid="hero-reassurance">
+              Sans engagement · Aucune carte bancaire requise · Prêt en 30 secondes
+            </p>
           </motion.div>
 
-          {/* Hero mascot card */}
+          {/* Animated phone demo */}
           <motion.div
             initial={{ opacity: 0, x: 30 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.7, delay: 0.15 }}
             className="lg:col-span-5 relative"
           >
-            <div className="relative">
-              <div className="absolute -inset-6 bg-mustard/40 rounded-[40px] rotate-3" />
-              <div className="relative bg-white border-4 border-navy rounded-[36px] p-6 shadow-warm">
-                <div className="aspect-square rounded-3xl overflow-hidden bg-cream border-2 border-cream-dark mb-4 float-anim">
-                  <img
-                    src={`${BACKEND_URL}/api/static/mascots/chansons.png`}
-                    alt="Yvette la chanteuse"
-                    className="w-full h-full object-cover"
-                    data-testid="hero-mascot-image"
-                  />
-                </div>
-                <div className="text-center">
-                  <div className="inline-block bg-terracotta text-white text-sm font-bold px-3 py-1 rounded-full mb-2">Quiz du Jour</div>
-                  <h3 className="font-display text-2xl font-bold text-navy mb-1">Chansons françaises</h3>
-                  <p className="text-navy/60 text-sm">avec Yvette la Chanteuse</p>
-                </div>
-                <div className="mt-5 bg-cream rounded-2xl p-4 text-center">
-                  <p className="text-navy font-semibold">« Qui a chanté <em>La Vie en rose</em> en 1945 ? »</p>
-                </div>
-                <div className="grid grid-cols-2 gap-2 mt-3">
-                  {["Charles Trenet", "Édith Piaf", "Brassens", "Brel"].map((o, i) => (
-                    <div
-                      key={o}
-                      className={`text-sm font-bold py-2 px-3 rounded-xl border-2 text-center ${
-                        i === 1 ? "bg-mustard border-mustard-dark text-navy" : "bg-white border-cream-dark text-navy/70"
-                      }`}
-                    >
-                      {i === 1 && <Check className="w-4 h-4 inline mr-1" />}
-                      {o}
-                    </div>
-                  ))}
-                </div>
-              </div>
-              <div className="absolute -bottom-5 -right-5 bg-bordeaux text-cream rounded-2xl px-5 py-3 font-bold shadow-warm rotate-3">
-                🏆 Score 4/5
-              </div>
-            </div>
+            <HeroPhoneDemo />
           </motion.div>
         </div>
 
@@ -150,6 +103,9 @@ export default function Landing() {
           </div>
         </div>
       </section>
+
+      {/* ============ TESTIMONIALS ============ */}
+      <TestimonialsSection />
 
       {/* ============ DAILY QUIZ CTA ============ */}
       <section className="py-12 lg:py-16">
@@ -281,61 +237,8 @@ export default function Landing() {
       {/* ============ DEMO QUIZ ============ */}
       <DemoQuiz />
 
-      {/* ============ ACTIVITIES ============ */}
-      <section className="py-20 lg:py-28 bg-cream relative overflow-hidden">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid lg:grid-cols-3 gap-12 items-start">
-            <div className="lg:col-span-1 lg:sticky lg:top-24">
-              <span className="inline-block bg-bordeaux text-cream font-bold px-4 py-1 rounded-full text-sm mb-4">Au-delà des quiz</span>
-              <h2 className="font-display text-4xl lg:text-5xl font-extrabold text-navy mb-4">
-                Une plateforme<br />
-                <span className="text-terracotta">complète</span>
-              </h2>
-              <p className="text-xl text-navy/70 leading-relaxed mb-6">
-                8 activités conçues spécialement pour les seniors : mémoire, gym douce, journal,
-                correspondance et plus encore.
-              </p>
-              <Link
-                to="/register"
-                className="inline-flex items-center gap-2 bg-navy hover:bg-navy-dark text-white font-bold px-6 py-4 rounded-full transition"
-              >
-                Tout découvrir <ArrowRight className="w-5 h-5" />
-              </Link>
-            </div>
-
-            <div className="lg:col-span-2 grid sm:grid-cols-2 gap-5">
-              {ACTIVITIES.map((a, idx) => {
-                const Icon = a.icon;
-                return (
-                  <motion.div
-                    key={a.id}
-                    initial={{ opacity: 0, y: 16 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: idx * 0.04 }}
-                    className="bg-white border-2 border-cream-dark rounded-2xl p-6 hover:border-terracotta hover:-translate-y-0.5 transition"
-                  >
-                    <div className="flex items-start gap-4">
-                      <div className="w-12 h-12 rounded-2xl bg-terracotta/15 flex items-center justify-center shrink-0">
-                        <Icon className="w-6 h-6 text-terracotta" strokeWidth={2.5} />
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-1">
-                          <h3 className="font-display text-xl font-bold text-navy">{a.title}</h3>
-                          {a.badge && (
-                            <span className="text-xs font-bold bg-mustard text-navy px-2 py-0.5 rounded-full">{a.badge}</span>
-                          )}
-                        </div>
-                        <p className="text-navy/70">{a.desc}</p>
-                      </div>
-                    </div>
-                  </motion.div>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* ============ PLATFORM (activities + word games) ============ */}
+      <PlatformSection />
 
       {/* ============ PRICING ============ */}
       <section id="tarifs" className="py-20 lg:py-28">

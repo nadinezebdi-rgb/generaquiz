@@ -108,3 +108,36 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
   100% { transform: scale(1); opacity: 1; }
 }
 .pop-anim { animation: pop 0.5s cubic-bezier(.34,1.56,.64,1) both; }
+
+
+/* ============ SENIOR MODE (accessibility toggle) ============
+ * Applied globally via a `.senior-mode` class on <html>. Keeps the palette
+ * intact but scales up base font, spacing, tap targets and adds stronger
+ * borders on interactive elements for readability.
+ */
+html.senior-mode,
+html.senior-mode body {
+  font-size: 20px;
+  line-height: 1.75;
+}
+html.senior-mode h1, html.senior-mode .font-display { letter-spacing: -0.01em; }
+html.senior-mode button,
+html.senior-mode a[role="button"],
+html.senior-mode .btn,
+html.senior-mode [data-testid*="cta"] {
+  min-height: 52px;
+  font-weight: 700;
+}
+html.senior-mode input,
+html.senior-mode textarea,
+html.senior-mode select {
+  font-size: 1.05rem !important;
+  padding: 0.85rem 1rem !important;
+  border-width: 2px !important;
+}
+html.senior-mode :focus-visible {
+  outline: 4px solid var(--terracotta) !important;
+  outline-offset: 4px !important;
+}
+html.senior-mode .text-xs { font-size: 0.9rem !important; }
+html.senior-mode .text-sm { font-size: 1rem !important; }

@@ -516,3 +516,267 @@ Le cœur de cible (Françoise 72 ans, Papi Robert) a déjà des difficultés en 
 - PNG download avec nom `generaquiz-badge-<id>.png`
 - Badges verrouillés non-cliquables
 
+
+## 2026-02-16 — Section "Une plateforme complète" sur la Landing (iteration 24) ✅
+
+### Contexte
+L'utilisateur a soumis un prototype HTML/CSS externe (`generaquiz-dashboard.zip`) présentant une nouvelle section positionnant GénéraQuiz comme une **plateforme d'activités seniors** au-delà des quiz. 7 activités mises en avant, toutes en cours de développement.
+
+Choix utilisateur: **1c/2a/3a** → section ajoutée à la Landing publique, cartes en placeholder "En développement", bouton "Tout découvrir" scrolle vers Tarifs.
+
+### Livré (100% frontend, 0 backend touché)
+- Nouveau composant `PlatformSection.jsx` injecté sur la Landing entre Categories et Pricing
+- **Sidebar gauche** (sticky en desktop) :
+  - Pill bordeaux "Au-delà des quiz"
+  - Titre "Une plateforme complète" (« complète » en terracotta italique)
+  - Description marketing
+  - Bouton navy "Tout découvrir →" qui scrolle smoothly vers `#tarifs`
+- **Section Quiz & Activités** (4 cartes, icônes terracotta) :
+  - 🧠 **Atelier Mémoire** — badge « Nouveau » (mustard)
+  - 📖 **Mon Journal de Vie** — badge « Populaire » (terracotta light)
+  - 🍽️ **Recettes d'Antan**
+  - 📷 **Photothèque**
+- **Séparateur pointillé** "JEUX DE MOTS"
+- **Section Jeux de Mots** (3 cartes, icônes navy) :
+  - ✏️ **Mots Croisés**
+  - 💬 **Charades**
+  - 🔍 **Mots Mêlés**
+- Toutes les cartes portent un badge "EN DEV." en haut à droite + `cursor-not-allowed` + tooltip "En cours de développement"
+- Note d'info en bas : "🚧 Toutes ces activités sont en cours de développement. Rejoignez Premium pour y accéder en avant-première"
+- Animation Framer Motion staggered à l'apparition (delay 0.05s par carte)
+- Palette parfaitement intégrée au design system existant (aucun nouveau token CSS)
+
+### Data-testids ajoutés
+- `platform-section`, `platform-pill`, `platform-discover-btn`, `platform-separator`, `platform-availability-note`
+- `platform-card-<key>` × 7, `platform-badge-dev-<key>` × 7
+
+
+## 2026-02-16 — Sprint 2 Coop Récompensé (iteration 25) ✅
+
+### Combo multiplier — Backend
+Nouveau système dans `routers/coop_challenges.py` :
+- `COMBO_TIERS` : 3 correct-no-help d'affilée = ×1.5, 5 = ×2, 7+ = ×3
+- Streak reset par `is_correct == False` OU `help_used == true`
+- `stats_coop.current_combo` (streak en cours) + `stats_coop.best_combo` (max atteint)
+- `stats_coop.solo_correct_count` (pour le calcul de complicité)
+- Base XP × multiplier appliqué à `xp_earned` (100→300 sur combo ×3)
+- Réponse `/answer` retourne `combo`, `multiplier`, `combo_broken`, `base_xp`
+- Testé ×1.0 → ×1.5 → ×2 → ×3 → break sur help_used ✅
+
+### Combo UI — Frontend `CoopChallengePlay.jsx`
+- Bandeau `data-testid='coop-combo-banner'` en haut de la page quand combo ≥ 3
+- Affichage "🔥 Combo ×2 · 5 d'affilée sans aide" avec animation spring
+- Feedback après réponse : "+150 points" + label rouge "Combo ×1.5" ou "Combo perdu 💔"
+
+### Carte de fin partageable — Nouveau composant `CoopShareCard.jsx`
+Réutilise la mécanique html-to-image de `BadgeShareCard`.
+
+Contenu de la carte :
+- Header "GénéraQuiz · Duo" + date FR
+- **Complicité XX%** en géant (fontSize 96) sur fond mustard
+- Titre du tier :
+  - ≥95% : Fusion Temporelle Parfaite ✨🧡
+  - ≥85% : Duo Légendaire 🌟
+  - ≥70% : Complices de Toujours 🤝
+  - ≥50% : Belle Équipe 👍
+  - <50%  : Duo en Rodage 🌱
+- Grille 2×2 : Bonnes réponses, Combo max, Aides réussies, Points
+- Bloc "LE DUO — Player1 + Player2 — « TeamName »"
+- 3 boutons : Partager (Web Share API), WhatsApp (`wa.me`), Télécharger PNG
+
+Formule de complicité : `round((solo_correct + helps_successful × 0.75) / total × 100)`.
+Les aides réussies comptent 75% (récompense l'entraide sans dévaluer le solo).
+
+### FinalResults refonte
+- La carte partageable devient LA carte de résultats principale
+- 3 stats compactes en dessous : aides sauvées, combo max, précision %
+- 2 boutons : Refaire un défi / Mes défis
+- Suppression du header "Trophy" + team_name séparé (déjà dans la carte)
+
+### Data-testids
+- `coop-combo-banner`, `coop-combo-multiplier`
+- `coop-feedback-mult`, `coop-feedback-combo-broken`
+- `coop-share-wrapper`, `coop-share-visual`, `coop-share-complicity`
+- `coop-share-btn`, `coop-share-whatsapp`, `coop-share-download`
+- `coop-final-card`, `coop-final-combo`, `coop-final-accuracy`, `coop-final-helps`
+
+
+## 2026-02-16 — Sprint A Vision "Duolingo de la mémoire" — Hero & positionnement (iteration 25) ✅
+
+### Refonte Hero
+- **Nouveau H1** : « 5 minutes par jour pour **stimuler votre mémoire** et partager un moment en famille » (positionnement précis, promesse temps + duo mémoire/famille)
+- **Sous-titre** citant la stimulation cognitive et le lien social (langage prudent, pas médical)
+- **Pill** : « Le premier club mémoire intergénérationnel »
+- **⭐⭐⭐⭐⭐** avec « Déjà adopté par des familles partout en France » (sans chiffre inventé)
+- **CTA unique** « Commencer gratuitement » (le bouton secondaire « Essayer un quiz » a été supprimé pour focaliser)
+- **Micro-copie de réassurance** sous le CTA : « Sans engagement · Aucune carte bancaire requise · Prêt en 30 secondes »
+
+### Nouveau composant `HeroPhoneDemo.jsx`
+Animation scriptée en boucle (Framer Motion) montrant le cœur de la valeur :
+- Header : mascotte + badge streak clignotant "🔥 3j"
+- Barre de progression qui remplit à chaque étape
+- Question affichée dans un cadre cream
+- 4 options → révélation de la bonne réponse (bounce + vert)
+- Écran "Excellente réponse ! 1/5" → bascule vers "Badge débloqué : Premier pas +100" avec confettis emojis 🎉✨🧡🥇🌟
+- Sticker corner "Ligue Or 🏆"
+- Loop entre 2 catégories (Chansons françaises, Cinéma français)
+- Score et streak s'incrémentent à chaque cycle
+
+### Nouveau composant `TestimonialsSection.jsx`
+Section « Ils jouent déjà avec GénéraQuiz » injectée entre le marquee et le Daily CTA :
+- 3 témoignages types : **Senior** (Françoise 72 ans), **Famille** (Marc 38 ans, Lyon), **EHPAD** (Sylvie animatrice, EHPAD Les Tilleuls)
+- Chaque carte : badge coloré du type + 5 étoiles + Quote icon + citation + nom + contexte
+- Animation staggered à l'apparition (delay 0.1s par carte)
+- Copy volontairement anonymisé pour ne pas inventer de faux témoignages — à personnaliser plus tard
+
+### Data-testids ajoutés
+- `hero-title`, `hero-subtitle`, `hero-pill`, `hero-rating`, `hero-reassurance`
+- `hero-phone-demo`
+- `testimonials-section`, `testimonial-0/1/2`
+
+### À venir (Sprints B → E)
+- **Sprint B** : 3 paliers tarifaires (Club Mémoire 4,99€ / Famille 7,99€ / Premium 12,99€) + Stripe multi-price
+- **Sprint C** : Score Mémoire 5 axes (Culture / Régularité / Attention / Rapidité / Mémoire) + radar chart
+- **Sprint D** : Landing EHPAD dédiée + Mode Senior (fonts XL, TTS)
+- **Sprint E** : Page /pourquoi (science) + Admin dashboard analytics
+
+
+
+---
+
+## Sprint B — 3 paliers tarifaires (2026-08-07) ✅
+
+Backend: `PACKAGES` dict in `core.py` étendu à 6 packages (club/famille/premium × monthly/yearly) —
+seule source de vérité, monnaie EUR :
+- club_monthly 4,99 € · club_yearly 49,99 €
+- famille_monthly 7,99 € · famille_yearly 79,99 €
+- premium_monthly 12,99 € · premium_yearly 129,99 €
+
+`/api/checkout/session` accepte les 6 `package_id` et persiste `tier`/`period` sur la transaction.
+Webhook et /checkout/status écrivent en parallèle `plan='premium'` (legacy) et `plan_tier`/`plan_period` (nouveau).
+
+Frontend `Pages/Pricing.jsx` :
+- Toggle Mensuel/Annuel avec badge économie
+- 4 cartes (Découverte gratuit + Club Mémoire + Famille + Premium)
+- Famille en carte "Le plus populaire"
+- Radar sur "Formule actuelle" quand user.plan_tier match
+- FAQ mini + bandeau réassurance
+
+Fixes suite iteration 25 :
+- Route `/app/pricing` sortie de `ProtectedRoute` → page publique (redirige au login au clic CTA)
+- `seed_admin` : ajout `plan_tier='premium'` + `plan_period='yearly'` + backfill idempotent pour l'admin existant
+
+Tests: iteration 25 (9/9 pytest backend) + iteration 26 (retest UI 100 %) — verts.
+
+## Sprint C — Score Mémoire 5 axes (2026-08-07) ✅
+
+Nouveau module `/app/backend/memory_score.py` — 5 axes cognitifs recalculés à chaque appel
+depuis les collections existantes (aucun stockage) :
+- **Culture** — précision globale sur `attempts` (cold-start si < 3 quiz)
+- **Régularité** — jours joués sur 30 j (attempts ∪ daily_attempts) + bonus streak
+- **Attention** — précision sur `daily_attempts` (cold-start si < 3)
+- **Rapidité** — moyenne secondes/question, mapping 6 s → 100 pts / 25 s → 0 pt
+- **Mémoire** — précision cumulée × multiplicateur de largeur (nombre de catégories jouées)
+
+Overall = moyenne des 5 axes. Tous les scores clampés 0-100.
+
+Endpoint : `GET /api/progression/memory-score` (auth requis).
+
+Composant frontend `/app/frontend/src/components/MemoryScoreRadar.jsx` — recharts RadarChart :
+- Card "Score Mémoire" avec badge tier (Cold start → Exceptionnel) et overall /100
+- Radar SVG à 5 axes
+- 5 boutons axis-*, panneau focus avec hint + flag cold_start
+- Intégré dans `Progression.jsx` au-dessus des badges
+
+Tests: iteration 27 — 5/5 pytest backend + UI e2e verts.
+
+### À venir
+- **Sprint D** : Landing EHPAD `/ehpad` + Mode Senior (fonts XL, contraste, TTS)
+- **Sprint E** : `/pourquoi` (science) + Admin Analytics
+- **Stripe Prod Keys** : bascule test → live
+- **Sprint 3 Mascottes** : 4 niveaux d'affection (Nano Banana skins)
+- **Refactor** : découper `server.py` (APScheduler), unifier attempts / daily_attempts / coop_challenges
+
+---
+
+## Sprint D + Atelier Mémoire + Mascot Affection (2026-08-07) ✅
+
+### Sprint D — EHPAD landing + Mode Senior
+- Nouvelle page publique **`/ehpad`** ciblée animateurs/directeurs (Hero, benefits, stats, CTA démo mail + tel)
+- **SeniorModeContext** + **SeniorModeToggle** (Confort+ dans la Navbar sur toutes les pages)
+  - Toggle une classe `.senior-mode` sur `<html>` → CSS boostent base font (20px), tap targets (52px min), border 2px, focus outline 4px terracotta
+  - Pref stockée dans `localStorage.gq_senior_mode`
+
+### Atelier Mémoire — première activité non-quiz
+- Nouveau routeur `/app/backend/routers/atelier.py` (mount sur `/api/atelier`)
+  - 5 thèmes × 5 prompts ouverts (annees-60/70/80/enfance/famille)
+  - `POST /atelier/sessions` sauvegarde les réponses libres dans `atelier_entries`, +25 pts, badge `premier_atelier` idempotent + `atelier_5` au 5ᵉ atelier
+  - `GET /atelier/entries` renvoie les sessions groupées
+- 2 nouvelles pages front : `/app/atelier` (flow 5 étapes) et `/app/atelier/mes-souvenirs` (carnet de souvenirs)
+- 2 nouveaux badges au catalogue : `premier_atelier` (argent), `atelier_5` (or)
+
+### Mascot Affection — Sprint 3 débloqué (Nano Banana)
+- Script `generate_mascot_skins.py` → **24 skins générés** via `emergentintegrations` (Gemini Nano Banana `gemini-3.1-flash-image-preview`)
+  - 3 skins par mascotte (level 1: friendly wave, level 2: in action, level 3: golden hero) × 8 catégories
+- Backend `progression.py`: `_affection_for(total)` → level 0/1/2/3 selon réponses cumulées (0/20/100/500)
+- Front `Progression.jsx`: rendu du skin correspondant + badge overlay `♥{level}` (fallback vers image de base si 404)
+
+Tests: iteration 28 — 20/21 pytest backend + Frontend 100 % — verts.
+Coût crédit LLM confirmé pour la génération des 18 skins (finalement 24 pour cohérence 8 catégories).
+
+### Backlog restant
+- **Stripe Prod Keys** : bascule test → live
+- **Sprint E** : `/pourquoi` (science) + Admin Analytics
+- **Refactor** : découper `server.py`, unifier attempts/daily_attempts/coop_challenges en `game_sessions`
+- **Mobile app** : Expo React Native
+- **CRM connect** : demandes EHPAD via mailto → HubSpot / Brevo
+
+
+---
+
+## Sprint E — /pourquoi + Admin Analytics (2026-08-07) ✅
+
+### Page publique `/pourquoi` — la science derrière l'app
+- Hero avec titre "Un quiz par jour, jusqu'à 38 % de démence en moins."
+- 4 chiffres-clés cliqués sur études réelles :
+  - 38 % risque démence en moins (Verghese, NEJM 2003)
+  - +5 ans espérance vie cognitive (Wilson, Neurology 2013)
+  - ×2 baisse dépression (Menec, Gerontology 2003)
+  - ≥ 3×/sem. seuil efficacité mesuré
+- 3 piliers : répétition espacée, progression adaptée, lien intergénérationnel
+- 4 cartes d'études cliquables (liens vers NEJM, Neurology, Oxford Academic)
+- Bandeau d'honnêteté : GénéraQuiz n'est pas un dispositif médical
+- CTA final vers `/ehpad` + `/register`
+
+### Dashboard Admin `/app/admin/analytics`
+Nouveau routeur `admin_analytics.py` monté sur `/api/admin/analytics/*` (guard `get_admin_user`) :
+- `GET /overview` — total users, new_30d/24h, paid, conversion_pct, DAU, MAU, dau_mau_pct, MRR estimé, revenue MTD, ARPU
+- `GET /signups?days=30` — timeseries inscriptions jour par jour (clamped 1-180)
+- `GET /revenue?days=30` — timeseries recettes journalières EUR
+- `GET /categories` — top catégories par attempts + accuracy
+- `GET /atelier` — sessions, entries, unique users, breakdown par thème
+
+Frontend `AdminAnalytics.jsx` :
+- 4 KPI cards (Users / Paid / MRR / DAU-MAU)
+- 2 recharts (LineChart signups + BarChart recettes)
+- Tableau top catégories
+- Bloc Atelier Mémoire (sessions / entries / unique / avg + by_theme)
+- Bouton Rafraîchir
+
+Navbar admin : nouveau lien `Analytics` (data-testid nav-admin-analytics) visible uniquement pour role=admin.
+Footer : nouveaux liens `footer-pourquoi` et `footer-ehpad`.
+
+Tests: iteration 29 — 19/19 pytest backend + Frontend 100 % — verts.
+
+### Notes tech (revue code)
+- Aggregations sur `created_at` stockés en ISO string (fragile si passage à datetime — à unifier)
+- MRR estimate duplique le prix par tier — à centraliser un jour avec `PACKAGES`
+- `signups` charge jusqu'à 20 000 docs en mémoire — OK à cette échelle, à passer en `$group` MongoDB au-delà
+
+### Backlog restant
+- **Onboarding Tour** (P1) : tour interactif 4-5 tooltips au premier login
+- **Coop Atelier** (P1) : session famille partagée (invitation par lien)
+- **EHPAD CRM** (P1) : Brevo/HubSpot/collection Mongo — à trancher
+- **Refactor** : découper `server.py`, unifier `attempts / daily_attempts / coop_challenges` en `game_sessions`
+- **Mobile app** : Expo React Native
+

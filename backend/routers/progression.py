@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends
 from core import db, get_current_user
 from progression import get_progression
 from badges import get_user_badges, get_catalog_for_user
+from memory_score import compute_memory_score
 
 router = APIRouter(tags=["progression"])
 
@@ -14,6 +15,13 @@ async def my_progression(user: dict = Depends(get_current_user)) -> dict:
     # Refresh the user doc to get the latest xp_total (avoid stale JWT cache)
     fresh = await db.users.find_one({"_id": user["_id"]}) or user
     return await get_progression(fresh)
+
+
+@router.get("/progression/memory-score")
+async def my_memory_score(user: dict = Depends(get_current_user)) -> dict:
+    """5-axes cognitive score: culture, régularité, attention, rapidité, mémoire."""
+    fresh = await db.users.find_one({"_id": user["_id"]}) or user
+    return await compute_memory_score(fresh)
 
 
 @router.get("/badges/mine")

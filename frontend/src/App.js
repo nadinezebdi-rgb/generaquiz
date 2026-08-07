@@ -3,6 +3,7 @@ import { Toaster } from "sonner";
 import "@/App.css";
 
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
+import { SeniorModeProvider } from "@/contexts/SeniorModeContext";
 import Landing from "@/pages/Landing";
 import Login from "@/pages/Login";
 import Register from "@/pages/Register";
@@ -24,11 +25,16 @@ import CGU from "@/pages/legal/CGU";
 import CGV from "@/pages/legal/CGV";
 import Confidentialite from "@/pages/legal/Confidentialite";
 import AdminReports from "@/pages/AdminReports";
+import AdminAnalytics from "@/pages/AdminAnalytics";
+import Pourquoi from "@/pages/Pourquoi";
 import EarnCredits from "@/pages/EarnCredits";
 import CoopChallengeCreate from "@/pages/CoopChallengeCreate";
 import CoopChallengePlay from "@/pages/CoopChallengePlay";
 import Leagues from "@/pages/Leagues";
 import Progression from "@/pages/Progression";
+import Ehpad from "@/pages/Ehpad";
+import Atelier from "@/pages/Atelier";
+import AtelierEntries from "@/pages/AtelierEntries";
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();
@@ -49,7 +55,8 @@ function ProtectedRoute({ children }) {
 export default function App() {
   return (
     <AuthProvider>
-      <BrowserRouter>
+      <SeniorModeProvider>
+        <BrowserRouter>
         <Toaster richColors position="top-right" />
         <Routes>
           <Route path="/" element={<Landing />} />
@@ -61,6 +68,23 @@ export default function App() {
           <Route path="/cgu" element={<CGU />} />
           <Route path="/cgv" element={<CGV />} />
           <Route path="/confidentialite" element={<Confidentialite />} />
+          <Route path="/ehpad" element={<Ehpad />} />
+          <Route
+            path="/app/atelier"
+            element={
+              <ProtectedRoute>
+                <Atelier />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/app/atelier/mes-souvenirs"
+            element={
+              <ProtectedRoute>
+                <AtelierEntries />
+              </ProtectedRoute>
+            }
+          />
           <Route
             path="/app/account"
             element={
@@ -85,14 +109,7 @@ export default function App() {
               </ProtectedRoute>
             }
           />
-          <Route
-            path="/app/pricing"
-            element={
-              <ProtectedRoute>
-                <Pricing />
-              </ProtectedRoute>
-            }
-          />
+          <Route path="/app/pricing" element={<Pricing />} />
           <Route
             path="/app/success"
             element={
@@ -142,6 +159,15 @@ export default function App() {
               </ProtectedRoute>
             }
           />
+          <Route
+            path="/app/admin/analytics"
+            element={
+              <ProtectedRoute>
+                <AdminAnalytics />
+              </ProtectedRoute>
+            }
+          />
+          <Route path="/pourquoi" element={<Pourquoi />} />
           <Route
             path="/app/earn-credits"
             element={
@@ -193,6 +219,7 @@ export default function App() {
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>
+      </SeniorModeProvider>
     </AuthProvider>
   );
 }

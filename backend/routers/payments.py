@@ -56,10 +56,16 @@ async def get_checkout_status(session_id: str, request: Request, user: dict = De
         raise HTTPException(status_code=404, detail="Transaction introuvable")
     if tx["payment_status"] != "paid" and status.payment_status == "paid":
         package_id = tx.get("package_id", "premium_monthly")
-        days = 365 if package_id == "premium_yearly" else 30
+        pkg = PACKAGES.get(package_id, {})
+        tier = pkg.get("tier", "premium")  # "club" | "famille" | "premium"
+        days = 365 if pkg.get("period") == "yearly" else 30
         expires = (datetime.now(timezone.utc) + timedelta(days=days)).isoformat()
+        # Legacy `plan` kept as "premium" for backward compat with existing gates;
+        # `plan_tier` is the authoritative value for the new 3-tier gating.
         await db.users.update_one({"_id": ObjectId(tx["user_id"])},
-                                  {"$set": {"plan": "premium", "plan_expires_at": expires}})
+                                  {"$set": {"plan": "premium", "plan_tier": tier,
+                                            "plan_period": pkg.get("period", "monthly"),
+                                            "plan_expires_at": expires}})
     await db.payment_transactions.update_one({"session_id": session_id},
                                               {"$set": {"payment_status": status.payment_status, "status": status.status}})
     return {"session_id": session_id, "payment_status": status.payment_status,
@@ -82,10 +88,14 @@ async def stripe_webhook(request: Request):
         tx = await db.payment_transactions.find_one({"session_id": evt.session_id})
         if tx and tx["payment_status"] != "paid":
             package_id = tx.get("package_id", "premium_monthly")
-            days = 365 if package_id == "premium_yearly" else 30
+            pkg = PACKAGES.get(package_id, {})
+            tier = pkg.get("tier", "premium")
+            days = 365 if pkg.get("period") == "yearly" else 30
             expires = (datetime.now(timezone.utc) + timedelta(days=days)).isoformat()
             await db.users.update_one({"_id": ObjectId(tx["user_id"])},
-                                      {"$set": {"plan": "premium", "plan_expires_at": expires}})
+                                      {"$set": {"plan": "premium", "plan_tier": tier,
+                                                "plan_period": pkg.get("period", "monthly"),
+                                                "plan_expires_at": expires}})
             await db.payment_transactions.update_one({"session_id": evt.session_id},
                                                       {"$set": {"payment_status": "paid", "status": "complete"}})
     return {"ok": True}

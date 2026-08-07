@@ -20,6 +20,14 @@ out/
 # Rapports générés
 reports/
 
+# Mobile development
+android-sdk/
+.env
+.env.*
+*.env
+credentials.json
+*.key
+.credentials
 # Divers
 .DS_Store
 *.log

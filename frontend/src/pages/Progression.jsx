@@ -6,6 +6,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import BadgeShareCard from "@/components/BadgeShareCard";
+import MemoryScoreRadar from "@/components/MemoryScoreRadar";
 import {
   Trophy, Zap, TrendingUp, Loader2, Lock, Sparkles, Award, Flame, X, Share2,
 } from "lucide-react";
@@ -106,6 +107,9 @@ export default function Progression() {
           </div>
         </motion.div>
 
+        {/* ============ MEMORY SCORE — 5 axes ============ */}
+        <MemoryScoreRadar />
+
         {/* ============ BADGES ============ */}
         <div className="bg-white border-2 border-cream-dark rounded-[28px] p-5 md:p-7 mb-6" data-testid="progression-badges">
           <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
@@ -169,28 +173,58 @@ export default function Progression() {
             <h2 className="font-display text-2xl font-bold text-navy">Maîtrise par catégorie</h2>
           </div>
           <p className="text-sm text-navy/60 mb-5">
-            Chaque quiz terminé fait progresser votre maîtrise. Devenez <strong>Maître</strong> avec 200+ réponses à 90% ou plus.
+            Chaque quiz terminé fait progresser votre maîtrise et le niveau d&apos;affection de la mascotte.
+            Devenez <strong>Maître</strong> avec 200+ réponses à 90% ou plus.
           </p>
 
           <div className="space-y-3">
             {prog.mastery.map((m) => {
               const tier = TIER_STYLES[m.tier.key] || TIER_STYLES.novice;
               const pct = m.tier.ratio_pct || 0;
+              const affLevel = m.affection?.level || 0;
+              const skinSuffix = affLevel > 0 ? `_skin${affLevel}` : "";
+              const mascotSrc = m.mascot_image
+                ? `${BACKEND_URL}${m.mascot_image.replace(/(\.png)$/, `${skinSuffix}$1`)}`
+                : null;
               return (
                 <div
                   key={m.category_id}
                   data-testid={`progression-mastery-${m.category_id}`}
                   className="bg-cream border-2 border-cream-dark rounded-2xl p-3 flex items-center gap-3"
                 >
-                  {m.mascot_image ? (
-                    <img
-                      src={`${BACKEND_URL}${m.mascot_image}`}
-                      alt=""
-                      className="w-12 h-12 rounded-xl object-cover shrink-0"
-                    />
-                  ) : (
-                    <div className="w-12 h-12 rounded-xl bg-navy/10 shrink-0" />
-                  )}
+                  <div className="relative shrink-0" data-testid={`mascot-affection-${m.category_id}`}>
+                    {mascotSrc ? (
+                      <img
+                        src={mascotSrc}
+                        alt=""
+                        className="w-12 h-12 rounded-xl object-cover"
+                        onError={(e) => {
+                          // Fallback to base image if the skin PNG is missing
+                          if (skinSuffix && !e.target.dataset.fallback) {
+                            e.target.dataset.fallback = "1";
+                            e.target.src = `${BACKEND_URL}${m.mascot_image}`;
+                          }
+                        }}
+                      />
+                    ) : (
+                      <div className="w-12 h-12 rounded-xl bg-navy/10" />
+                    )}
+                    {affLevel > 0 && (
+                      <span
+                        title={m.affection?.label}
+                        data-testid={`mascot-affection-${m.category_id}-level`}
+                        className={`absolute -bottom-1 -right-1 text-[10px] font-extrabold px-1.5 py-0.5 rounded-full ring-2 ring-cream ${
+                          affLevel === 3
+                            ? "bg-mustard-dark text-navy"
+                            : affLevel === 2
+                            ? "bg-terracotta text-white"
+                            : "bg-navy text-cream"
+                        }`}
+                      >
+                        ♥{affLevel}
+                      </span>
+                    )}
+                  </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between gap-2 mb-1 flex-wrap">
                       <div className="font-bold text-navy truncate">{m.title}</div>
@@ -203,6 +237,9 @@ export default function Progression() {
                     </div>
                     <div className="text-xs text-navy/60">
                       {m.correct} / {m.total} bonnes réponses ({pct}%) · {m.quizzes_played} quiz
+                      {m.affection?.next_level_at && (
+                        <span className="text-terracotta/80"> · {m.affection.next_level_at - m.total} réponses avant le niveau ♥{affLevel + 1}</span>
+                      )}
                     </div>
                   </div>
                 </div>

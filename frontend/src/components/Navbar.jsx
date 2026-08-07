@@ -2,6 +2,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { LogOut, User as UserIcon, Coins, Trophy, Zap } from "lucide-react";
 import Logo from "@/components/Logo";
+import SeniorModeToggle from "@/components/SeniorModeToggle";
 
 export default function Navbar({ variant = "landing" }) {
   const { user, logout } = useAuth();
@@ -28,6 +29,7 @@ export default function Navbar({ variant = "landing" }) {
                 <Link to="/quiz-du-jour" data-testid="nav-daily-auth" className="px-4 py-2 text-lg font-semibold text-bordeaux hover:text-terracotta transition">Quiz du Jour ✨</Link>
               )}
               <Link to="/app/dashboard" data-testid="nav-dashboard" className="px-4 py-2 text-lg font-semibold text-navy hover:text-terracotta transition">Mes quiz</Link>
+              <Link to="/app/atelier" data-testid="nav-atelier" className="px-3 py-2 text-base font-semibold text-navy hover:text-terracotta transition">Atelier</Link>
               <Link to="/app/leagues" data-testid="nav-leagues" className="px-3 py-2 text-base font-semibold text-navy hover:text-terracotta transition inline-flex items-center gap-1">
                 <Trophy className="w-4 h-4" /> Ligues
               </Link>
@@ -44,6 +46,7 @@ export default function Navbar({ variant = "landing" }) {
               <Link to="/app/account" data-testid="nav-account" className="px-4 py-2 text-lg font-semibold text-navy hover:text-terracotta transition">Mon compte</Link>
               {user.role === "admin" && (
                 <>
+                  <Link to="/app/admin/analytics" data-testid="nav-admin-analytics" className="px-4 py-2 text-lg font-semibold text-bordeaux hover:text-terracotta transition">Analytics</Link>
                   <Link to="/app/admin/promo" data-testid="nav-admin-promo" className="px-4 py-2 text-lg font-semibold text-bordeaux hover:text-terracotta transition">Promos</Link>
                   <Link to="/app/admin/reports" data-testid="nav-admin-reports" className="px-4 py-2 text-lg font-semibold text-bordeaux hover:text-terracotta transition">Signalements</Link>
                   <Link to="/app/admin/users" data-testid="nav-admin-users" className="px-4 py-2 text-lg font-semibold text-bordeaux hover:text-terracotta transition">Inscrits</Link>
@@ -56,6 +59,7 @@ export default function Navbar({ variant = "landing" }) {
               >
                 <LogOut className="w-4 h-4" /> Quitter
               </button>
+              <SeniorModeToggle compact />
             </>
           ) : (
             <>
@@ -67,6 +71,7 @@ export default function Navbar({ variant = "landing" }) {
               >
                 <UserIcon className="w-4 h-4" /> Commencer
               </Link>
+              <SeniorModeToggle compact />
             </>
           )}
         </nav>
