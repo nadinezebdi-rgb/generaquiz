@@ -3,6 +3,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { LogOut, User as UserIcon, Coins, Trophy, Zap } from "lucide-react";
 import Logo from "@/components/Logo";
 import SeniorModeToggle from "@/components/SeniorModeToggle";
+import MobileMenu from "@/components/MobileMenu";
 
 export default function Navbar({ variant = "landing" }) {
   const { user, logout } = useAuth();
@@ -13,7 +14,7 @@ export default function Navbar({ variant = "landing" }) {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between">
         <Logo size="md" showTagline={true} />
 
-        <nav className="hidden md:flex items-center gap-2">
+        <nav className="hidden lg:flex items-center gap-2">
           {variant === "landing" && (
             <>
               <Link to="/quiz-du-jour" data-testid="nav-daily" className="px-4 py-2 text-lg font-semibold text-bordeaux hover:text-terracotta transition">Quiz du Jour ✨</Link>
@@ -75,14 +76,8 @@ export default function Navbar({ variant = "landing" }) {
           )}
         </nav>
 
-        {/* Mobile: simple CTA */}
-        <div className="md:hidden">
-          {user && user !== false ? (
-            <Link to="/app/dashboard" className="px-4 py-2 rounded-full bg-terracotta text-white font-bold text-sm">Mes quiz</Link>
-          ) : (
-            <Link to="/register" className="px-4 py-2 rounded-full bg-terracotta text-white font-bold text-sm">Commencer</Link>
-          )}
-        </div>
+        {/* Mobile: full drawer menu (< md) */}
+        <MobileMenu variant={variant} />
       </div>
     </header>
   );

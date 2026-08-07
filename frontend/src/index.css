@@ -4,6 +4,13 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700;800;900&family=Work+Sans:wght@400;500;600;700;800&display=swap');
 
+/* Anti-overflow safety net (mobile) — belt & suspenders in case a child forces
+ * a width beyond the viewport (e.g., long unbroken strings, wide charts). */
+html, body, #root {
+  overflow-x: hidden;
+  max-width: 100%;
+}
+
 :root {
   --terracotta: #E07A5F;
   --terracotta-dark: #C9694E;

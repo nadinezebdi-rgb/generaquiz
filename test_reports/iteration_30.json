@@ -1,0 +1,27 @@
+{
+  "summary": "Frontend-only validation of the 4 mobile fixes on preview (Galaxy S10 / 360x760). All 9 requested checks PASS: (1) core-js/regenerator polyfills present — Object.hasOwn, Array.prototype.at, String.prototype.at all functions. (2) mobile-menu-open hamburger visible at 360px and hidden at 1440px. (3) Drawer opens (panel visible), body scroll lock engaged (document.body.style.overflow === 'hidden'); close button restores scroll (overflow becomes ''). (4) Unauth drawer shows mobile-nav-daily/login/register + Pourquoi + EHPAD links; clicking mobile-nav-daily navigates to /quiz-du-jour and closes drawer. (5) Auth admin drawer shows all 8 expected testids (dashboard, atelier, leagues, progression, challenges, earn-credits, account, admin-analytics) + logout; logout button navigates away and closes drawer. (6) Desktop nav intact at 1440x900: nav-dashboard, nav-atelier, nav-admin-analytics visible, hamburger hidden. (7) No horizontal overflow on any tested route at 360px: scrollWidth === innerWidth (360) on /, /pourquoi, /ehpad, /app/dashboard. (8) SeniorModeToggle rendered in drawer footer. (9) No JS runtime errors; 401 console logs are expected auth pre-checks pre-login.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "Desktop navbar @1440 (authenticated admin)", "issues": ["Nav is very cramped — labels 'Quiz du Jour', 'Mes quiz', 'Défi famille', 'Mon compte' wrap to 2-3 lines and 'Signalements' clips off the right edge. Not in scope of the mobile fix but worth trimming labels or increasing md-breakpoint threshold to lg for full nav."]}
+    ]
+  },
+  "test_report_links": [],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "MobileMenu.jsx: body-scroll cleanup relies on effect cleanup; if a component unmounts while drawer is open (e.g. logout redirect), the previous overflow value is restored correctly — verified working (overflow returned to '').",
+    "index.js: core-js/stable + regenerator-runtime imported first — correct. Note this increases initial bundle size ~30KB gz; acceptable trade-off for Samsung Galaxy S10 compatibility.",
+    "Navbar hidden at md breakpoint (768px). Given how packed the desktop nav is at 1440 (labels wrapping), consider bumping to lg (1024px) for the split or trimming labels.",
+    "MobileMenu Pourquoi/EHPAD links do not have data-testid attributes (only asserted by text). Consider adding mobile-nav-pourquoi / mobile-nav-ehpad for future testability."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "N/A (not tested per request)", "frontend": "100%"},
+  "test_credentials": "admin@generaquiz.fr / Admin2026! — worked",
+  "seed_data_creation": "None",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Mobile fixes iteration 30 fully validated on preview at 360x760 and 1440x900. Polyfills, hamburger, drawer open/close, body-scroll lock, unauth+admin drawer link sets, no horizontal overflow on Landing/Pourquoi/EHPAD/Dashboard, and desktop no-regression all confirmed. Safe for user to redeploy to production (generaquiz.fr).",
+  "rca of the issue": "N/A — this was a fix-validation iteration, not a bug hunt. All 4 preview fixes (core-js polyfills, MobileMenu drawer, index.css overflow-x guard, Navbar integration) verified functional."
+}
