@@ -600,3 +600,43 @@ Les aides réussies comptent 75% (récompense l'entraide sans dévaluer le solo)
 - `coop-share-btn`, `coop-share-whatsapp`, `coop-share-download`
 - `coop-final-card`, `coop-final-combo`, `coop-final-accuracy`, `coop-final-helps`
 
+
+## 2026-02-16 — Sprint A Vision "Duolingo de la mémoire" — Hero & positionnement (iteration 25) ✅
+
+### Refonte Hero
+- **Nouveau H1** : « 5 minutes par jour pour **stimuler votre mémoire** et partager un moment en famille » (positionnement précis, promesse temps + duo mémoire/famille)
+- **Sous-titre** citant la stimulation cognitive et le lien social (langage prudent, pas médical)
+- **Pill** : « Le premier club mémoire intergénérationnel »
+- **⭐⭐⭐⭐⭐** avec « Déjà adopté par des familles partout en France » (sans chiffre inventé)
+- **CTA unique** « Commencer gratuitement » (le bouton secondaire « Essayer un quiz » a été supprimé pour focaliser)
+- **Micro-copie de réassurance** sous le CTA : « Sans engagement · Aucune carte bancaire requise · Prêt en 30 secondes »
+
+### Nouveau composant `HeroPhoneDemo.jsx`
+Animation scriptée en boucle (Framer Motion) montrant le cœur de la valeur :
+- Header : mascotte + badge streak clignotant "🔥 3j"
+- Barre de progression qui remplit à chaque étape
+- Question affichée dans un cadre cream
+- 4 options → révélation de la bonne réponse (bounce + vert)
+- Écran "Excellente réponse ! 1/5" → bascule vers "Badge débloqué : Premier pas +100" avec confettis emojis 🎉✨🧡🥇🌟
+- Sticker corner "Ligue Or 🏆"
+- Loop entre 2 catégories (Chansons françaises, Cinéma français)
+- Score et streak s'incrémentent à chaque cycle
+
+### Nouveau composant `TestimonialsSection.jsx`
+Section « Ils jouent déjà avec GénéraQuiz » injectée entre le marquee et le Daily CTA :
+- 3 témoignages types : **Senior** (Françoise 72 ans), **Famille** (Marc 38 ans, Lyon), **EHPAD** (Sylvie animatrice, EHPAD Les Tilleuls)
+- Chaque carte : badge coloré du type + 5 étoiles + Quote icon + citation + nom + contexte
+- Animation staggered à l'apparition (delay 0.1s par carte)
+- Copy volontairement anonymisé pour ne pas inventer de faux témoignages — à personnaliser plus tard
+
+### Data-testids ajoutés
+- `hero-title`, `hero-subtitle`, `hero-pill`, `hero-rating`, `hero-reassurance`
+- `hero-phone-demo`
+- `testimonials-section`, `testimonial-0/1/2`
+
+### À venir (Sprints B → E)
+- **Sprint B** : 3 paliers tarifaires (Club Mémoire 4,99€ / Famille 7,99€ / Premium 12,99€) + Stripe multi-price
+- **Sprint C** : Score Mémoire 5 axes (Culture / Régularité / Attention / Rapidité / Mémoire) + radar chart
+- **Sprint D** : Landing EHPAD dédiée + Mode Senior (fonts XL, TTS)
+- **Sprint E** : Page /pourquoi (science) + Admin dashboard analytics
+
