@@ -731,3 +731,52 @@ Coût crédit LLM confirmé pour la génération des 18 skins (finalement 24 pou
 - **Mobile app** : Expo React Native
 - **CRM connect** : demandes EHPAD via mailto → HubSpot / Brevo
 
+
+---
+
+## Sprint E — /pourquoi + Admin Analytics (2026-08-07) ✅
+
+### Page publique `/pourquoi` — la science derrière l'app
+- Hero avec titre "Un quiz par jour, jusqu'à 38 % de démence en moins."
+- 4 chiffres-clés cliqués sur études réelles :
+  - 38 % risque démence en moins (Verghese, NEJM 2003)
+  - +5 ans espérance vie cognitive (Wilson, Neurology 2013)
+  - ×2 baisse dépression (Menec, Gerontology 2003)
+  - ≥ 3×/sem. seuil efficacité mesuré
+- 3 piliers : répétition espacée, progression adaptée, lien intergénérationnel
+- 4 cartes d'études cliquables (liens vers NEJM, Neurology, Oxford Academic)
+- Bandeau d'honnêteté : GénéraQuiz n'est pas un dispositif médical
+- CTA final vers `/ehpad` + `/register`
+
+### Dashboard Admin `/app/admin/analytics`
+Nouveau routeur `admin_analytics.py` monté sur `/api/admin/analytics/*` (guard `get_admin_user`) :
+- `GET /overview` — total users, new_30d/24h, paid, conversion_pct, DAU, MAU, dau_mau_pct, MRR estimé, revenue MTD, ARPU
+- `GET /signups?days=30` — timeseries inscriptions jour par jour (clamped 1-180)
+- `GET /revenue?days=30` — timeseries recettes journalières EUR
+- `GET /categories` — top catégories par attempts + accuracy
+- `GET /atelier` — sessions, entries, unique users, breakdown par thème
+
+Frontend `AdminAnalytics.jsx` :
+- 4 KPI cards (Users / Paid / MRR / DAU-MAU)
+- 2 recharts (LineChart signups + BarChart recettes)
+- Tableau top catégories
+- Bloc Atelier Mémoire (sessions / entries / unique / avg + by_theme)
+- Bouton Rafraîchir
+
+Navbar admin : nouveau lien `Analytics` (data-testid nav-admin-analytics) visible uniquement pour role=admin.
+Footer : nouveaux liens `footer-pourquoi` et `footer-ehpad`.
+
+Tests: iteration 29 — 19/19 pytest backend + Frontend 100 % — verts.
+
+### Notes tech (revue code)
+- Aggregations sur `created_at` stockés en ISO string (fragile si passage à datetime — à unifier)
+- MRR estimate duplique le prix par tier — à centraliser un jour avec `PACKAGES`
+- `signups` charge jusqu'à 20 000 docs en mémoire — OK à cette échelle, à passer en `$group` MongoDB au-delà
+
+### Backlog restant
+- **Onboarding Tour** (P1) : tour interactif 4-5 tooltips au premier login
+- **Coop Atelier** (P1) : session famille partagée (invitation par lien)
+- **EHPAD CRM** (P1) : Brevo/HubSpot/collection Mongo — à trancher
+- **Refactor** : découper `server.py`, unifier `attempts / daily_attempts / coop_challenges` en `game_sessions`
+- **Mobile app** : Expo React Native
+
