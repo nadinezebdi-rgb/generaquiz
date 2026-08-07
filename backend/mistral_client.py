@@ -56,10 +56,24 @@ def _build_prompt(category: dict, n: int, batch_idx: int) -> str:
         3: "8 FACILES, 9 MOYENNES, 8 DIFFICILES.",
     }.get(batch_idx, "Mélange équilibré")
 
+    # Description enrichie pour éviter que la nouvelle catégorie jeune soit trop vague.
+    category_details = f"**DESCRIPTION** : {category['description']}"
+    if category.get("id") == "generation-z":
+        category_details = f"""**DESCRIPTION** : {category['description']}
+
+Sous-thèmes obligatoires à couvrir (au moins 10 questions par sous-thème) :
+- Jeux vidéo (Minecraft, Fortnite, Among Us, Roblox, Pokémon GO, League of Legends)
+- Plateformes (YouTube, TikTok, Instagram, Twitch, Netflix, Disney+)
+- Musique (K-pop, rap français 2015-2025, pop internationale, Spotify)
+- Films/séries (Marvel MCU, Stranger Things, animation Pixar/DreamWorks récente)
+- Sport et e-sport (JO Paris 2024, nouvelles disciplines, streamers sportifs)
+- Culture web (mèmes devenus culture populaire, expressions virales devenues courantes)
+Les questions gen-Z doivent rester compréhensibles par tous : donner le contexte dans la question si nécessaire."""
+
     return f"""Tu es un expert en culture générale française qui conçoit des quiz pour un jeu familial intergénérationnel nommé "GénéraQuiz".
 
 **CATÉGORIE** : {category['title']}
-**DESCRIPTION** : {category['description']}
+{category_details}
 
 **MISSION** : Génère EXACTEMENT {n} nouvelles questions à choix multiples (QCM) en français pour cette catégorie.
 
@@ -71,6 +85,13 @@ def _build_prompt(category: dict, n: int, batch_idx: int) -> str:
 5. Les explications sont courtes (1-2 phrases max), pédagogiques et factuelles.
 6. **Mélange de difficulté** : {difficulty_mix}
 7. **Public** : enfants, parents, grands-parents jouent ensemble.
+8. **Équilibre générationnel OBLIGATOIRE** : dans chaque batch, inclure obligatoirement des questions pour CHAQUE tranche d'âge :
+   - Au moins 20 % pour les 10–20 ans (références 2010–2025 : Minecraft, Fortnite, TikTok, K-pop, Marvel, Netflix, rap FR récent, JO Paris 2024)
+   - Au moins 20 % pour les 20–40 ans (références 1990–2010 : Harry Potter, Friends, PS2, MSN, début internet)
+   - Au moins 30 % pour les 40–60 ans (références 1970–1995 : variété FR, Club Dorothée, Minitel, premiers PC)
+   - Au moins 30 % pour les 60+ ans (références 1950–1975 : radio, yéyés, ORTF, objets d'antan)
+   Pour la catégorie "generation-z", inverser : 50 % pour les 10–20 ans, 30 % pour les 20–40 ans, 20 % pour les 40+.
+   Une session où 0 question parle aux moins de 25 ans est un ÉCHEC.
 
 **FORMAT DE SORTIE STRICT** (un seul tableau JSON, RIEN avant ni après, AUCUN bloc markdown) :
 [
