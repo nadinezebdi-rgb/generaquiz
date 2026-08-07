@@ -59,7 +59,7 @@ export default function ResetPassword() {
               <div>
                 <label className="block text-sm font-bold text-navy mb-2">Nouveau mot de passe</label>
                 <div className="relative">
-                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-navy/40" />
+                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-navy/40 pointer-events-none" />
                   <input
                     data-testid="reset-pw1"
                     type="password"
@@ -76,7 +76,7 @@ export default function ResetPassword() {
               <div>
                 <label className="block text-sm font-bold text-navy mb-2">Confirmer le mot de passe</label>
                 <div className="relative">
-                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-navy/40" />
+                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-navy/40 pointer-events-none" />
                   <input
                     data-testid="reset-pw2"
                     type="password"

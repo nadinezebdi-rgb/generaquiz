@@ -139,9 +139,13 @@ html.senior-mode input,
 html.senior-mode textarea,
 html.senior-mode select {
   font-size: 1.05rem !important;
-  padding: 0.85rem 1rem !important;
+  padding-top: 0.85rem !important;
+  padding-bottom: 0.85rem !important;
   border-width: 2px !important;
 }
+/* IMPORTANT: horizontal padding must NOT be forced globally in senior mode,
+ * because inputs adjacent to absolute-positioned icons need their `pl-12`
+ * (or similar) to keep the icon from overlapping the value. */
 html.senior-mode :focus-visible {
   outline: 4px solid var(--terracotta) !important;
   outline-offset: 4px !important;

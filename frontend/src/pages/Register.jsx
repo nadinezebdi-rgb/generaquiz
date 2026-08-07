@@ -91,7 +91,7 @@ export default function Register() {
             <div>
               <label className="block text-sm font-bold text-navy mb-2">Votre prénom</label>
               <div className="relative">
-                <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-navy/40" />
+                <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-navy/40 pointer-events-none" />
                 <input
                   data-testid="register-name"
                   type="text"
@@ -108,7 +108,7 @@ export default function Register() {
             <div>
               <label className="block text-sm font-bold text-navy mb-2">Email</label>
               <div className="relative">
-                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-navy/40" />
+                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-navy/40 pointer-events-none" />
                 <input
                   data-testid="register-email"
                   type="email"
@@ -124,7 +124,7 @@ export default function Register() {
             <div>
               <label className="block text-sm font-bold text-navy mb-2">Mot de passe</label>
               <div className="relative">
-                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-navy/40" />
+                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-navy/40 pointer-events-none" />
                 <input
                   data-testid="register-password"
                   type="password"
