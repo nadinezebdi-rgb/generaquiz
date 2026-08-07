@@ -46,6 +46,7 @@ export default function Navbar({ variant = "landing" }) {
               <Link to="/app/account" data-testid="nav-account" className="px-4 py-2 text-lg font-semibold text-navy hover:text-terracotta transition">Mon compte</Link>
               {user.role === "admin" && (
                 <>
+                  <Link to="/app/admin/analytics" data-testid="nav-admin-analytics" className="px-4 py-2 text-lg font-semibold text-bordeaux hover:text-terracotta transition">Analytics</Link>
                   <Link to="/app/admin/promo" data-testid="nav-admin-promo" className="px-4 py-2 text-lg font-semibold text-bordeaux hover:text-terracotta transition">Promos</Link>
                   <Link to="/app/admin/reports" data-testid="nav-admin-reports" className="px-4 py-2 text-lg font-semibold text-bordeaux hover:text-terracotta transition">Signalements</Link>
                 </>

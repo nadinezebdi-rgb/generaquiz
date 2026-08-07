@@ -24,6 +24,8 @@ import CGU from "@/pages/legal/CGU";
 import CGV from "@/pages/legal/CGV";
 import Confidentialite from "@/pages/legal/Confidentialite";
 import AdminReports from "@/pages/AdminReports";
+import AdminAnalytics from "@/pages/AdminAnalytics";
+import Pourquoi from "@/pages/Pourquoi";
 import EarnCredits from "@/pages/EarnCredits";
 import CoopChallengeCreate from "@/pages/CoopChallengeCreate";
 import CoopChallengePlay from "@/pages/CoopChallengePlay";
@@ -156,6 +158,15 @@ export default function App() {
               </ProtectedRoute>
             }
           />
+          <Route
+            path="/app/admin/analytics"
+            element={
+              <ProtectedRoute>
+                <AdminAnalytics />
+              </ProtectedRoute>
+            }
+          />
+          <Route path="/pourquoi" element={<Pourquoi />} />
           <Route
             path="/app/earn-credits"
             element={

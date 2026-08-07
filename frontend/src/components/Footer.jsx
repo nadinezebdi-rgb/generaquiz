@@ -22,6 +22,8 @@ export default function Footer() {
           <ul className="space-y-2 text-cream/80">
             <li><Link to="/" className="hover:text-mustard">Accueil</Link></li>
             <li><Link to="/quiz-du-jour" className="hover:text-mustard">Quiz du Jour</Link></li>
+            <li><Link to="/pourquoi" data-testid="footer-pourquoi" className="hover:text-mustard">Pourquoi ça marche</Link></li>
+            <li><Link to="/ehpad" data-testid="footer-ehpad" className="hover:text-mustard">Pour les EHPAD</Link></li>
             <li><Link to="/login" className="hover:text-mustard">Connexion</Link></li>
             <li><Link to="/register" className="hover:text-mustard">Inscription</Link></li>
           </ul>
