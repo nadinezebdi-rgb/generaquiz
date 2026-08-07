@@ -139,7 +139,7 @@ export default function Account() {
             <div>
               <label className="block text-sm font-bold text-navy mb-2">Email</label>
               <div className="relative">
-                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-navy/40" />
+                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-navy/40 pointer-events-none" />
                 <input
                   type="email"
                   value={user.email}
