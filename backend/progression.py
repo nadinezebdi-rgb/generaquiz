@@ -66,6 +66,33 @@ MASTERY_TIERS = [
     (0,   0.0,  "novice",   "Novice"),
 ]
 
+# Affection level (Sprint 3 — Mascot Affection): a friendlier ladder driven by
+# volume of engagement per category (independent of accuracy). Maps to skin
+# files stored under /api/static/mascots/{slug}_skin{1|2|3}.png. Level 0 uses
+# the original base image {slug}.png.
+AFFECTION_THRESHOLDS = [
+    # (min_total_answers, level, label)
+    (500, 3, "Complice"),
+    (100, 2, "Complice"),
+    (20,  1, "Ami(e)"),
+    (0,   0, "Nouvel(le) ami(e)"),
+]
+
+
+def _affection_for(total: int) -> dict:
+    for min_total, level, label in AFFECTION_THRESHOLDS:
+        if total >= min_total:
+            next_level_at = next(
+                (t for t, lv, _ in AFFECTION_THRESHOLDS if lv == level + 1),
+                None,
+            )
+            return {
+                "level": level,
+                "label": label,
+                "next_level_at": next_level_at,   # None if maxed out
+            }
+    return {"level": 0, "label": "Nouvel(le) ami(e)", "next_level_at": 20}
+
 
 def _tier_for(correct: int, total: int) -> dict:
     ratio = (correct / total) if total else 0.0
@@ -117,6 +144,7 @@ async def get_progression(user: dict) -> dict:
         s = by_cat.get(c["id"], {})
         correct = int(s.get("correct", 0))
         total = int(s.get("total", 0))
+        affection = _affection_for(total)
         mastery.append({
             "category_id": c["id"],
             "title": c["title"],
@@ -126,5 +154,6 @@ async def get_progression(user: dict) -> dict:
             "total": total,
             "quizzes_played": int(s.get("quizzes_played", 0)),
             "tier": _tier_for(correct, total),
+            "affection": affection,
         })
     return {**level_info, "mastery": mastery}
