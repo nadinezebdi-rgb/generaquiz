@@ -640,3 +640,59 @@ Section « Ils jouent déjà avec GénéraQuiz » injectée entre le marquee et 
 - **Sprint D** : Landing EHPAD dédiée + Mode Senior (fonts XL, TTS)
 - **Sprint E** : Page /pourquoi (science) + Admin dashboard analytics
 
+
+
+---
+
+## Sprint B — 3 paliers tarifaires (2026-08-07) ✅
+
+Backend: `PACKAGES` dict in `core.py` étendu à 6 packages (club/famille/premium × monthly/yearly) —
+seule source de vérité, monnaie EUR :
+- club_monthly 4,99 € · club_yearly 49,99 €
+- famille_monthly 7,99 € · famille_yearly 79,99 €
+- premium_monthly 12,99 € · premium_yearly 129,99 €
+
+`/api/checkout/session` accepte les 6 `package_id` et persiste `tier`/`period` sur la transaction.
+Webhook et /checkout/status écrivent en parallèle `plan='premium'` (legacy) et `plan_tier`/`plan_period` (nouveau).
+
+Frontend `Pages/Pricing.jsx` :
+- Toggle Mensuel/Annuel avec badge économie
+- 4 cartes (Découverte gratuit + Club Mémoire + Famille + Premium)
+- Famille en carte "Le plus populaire"
+- Radar sur "Formule actuelle" quand user.plan_tier match
+- FAQ mini + bandeau réassurance
+
+Fixes suite iteration 25 :
+- Route `/app/pricing` sortie de `ProtectedRoute` → page publique (redirige au login au clic CTA)
+- `seed_admin` : ajout `plan_tier='premium'` + `plan_period='yearly'` + backfill idempotent pour l'admin existant
+
+Tests: iteration 25 (9/9 pytest backend) + iteration 26 (retest UI 100 %) — verts.
+
+## Sprint C — Score Mémoire 5 axes (2026-08-07) ✅
+
+Nouveau module `/app/backend/memory_score.py` — 5 axes cognitifs recalculés à chaque appel
+depuis les collections existantes (aucun stockage) :
+- **Culture** — précision globale sur `attempts` (cold-start si < 3 quiz)
+- **Régularité** — jours joués sur 30 j (attempts ∪ daily_attempts) + bonus streak
+- **Attention** — précision sur `daily_attempts` (cold-start si < 3)
+- **Rapidité** — moyenne secondes/question, mapping 6 s → 100 pts / 25 s → 0 pt
+- **Mémoire** — précision cumulée × multiplicateur de largeur (nombre de catégories jouées)
+
+Overall = moyenne des 5 axes. Tous les scores clampés 0-100.
+
+Endpoint : `GET /api/progression/memory-score` (auth requis).
+
+Composant frontend `/app/frontend/src/components/MemoryScoreRadar.jsx` — recharts RadarChart :
+- Card "Score Mémoire" avec badge tier (Cold start → Exceptionnel) et overall /100
+- Radar SVG à 5 axes
+- 5 boutons axis-*, panneau focus avec hint + flag cold_start
+- Intégré dans `Progression.jsx` au-dessus des badges
+
+Tests: iteration 27 — 5/5 pytest backend + UI e2e verts.
+
+### À venir
+- **Sprint D** : Landing EHPAD `/ehpad` + Mode Senior (fonts XL, contraste, TTS)
+- **Sprint E** : `/pourquoi` (science) + Admin Analytics
+- **Stripe Prod Keys** : bascule test → live
+- **Sprint 3 Mascottes** : 4 niveaux d'affection (Nano Banana skins)
+- **Refactor** : découper `server.py` (APScheduler), unifier attempts / daily_attempts / coop_challenges
