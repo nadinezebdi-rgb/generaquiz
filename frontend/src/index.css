@@ -135,6 +135,10 @@ html.senior-mode select {
   padding: 0.85rem 1rem !important;
   border-width: 2px !important;
 }
+
+/* Preserve left padding on icon-prefixed inputs so the leading icon
+   (e.g. Mail / Lock) does not overlap the text in Confort + mode. */
+html.senior-mode input.pl-12 { padding-left: 3rem !important; }
 html.senior-mode :focus-visible {
   outline: 4px solid var(--terracotta) !important;
   outline-offset: 4px !important;
