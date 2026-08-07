@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
   Play, Users, Heart, Sparkles, Check, ArrowRight, Star,
-  Brain, Music, Film, Phone, Landmark, Utensils, BookOpen, Mail, Camera, Newspaper, Type, Activity, Book,
+  Brain, Music, Film, Phone, Landmark, Utensils, Book,
 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -12,17 +12,6 @@ import PlatformSection from "@/components/PlatformSection";
 import HeroPhoneDemo from "@/components/HeroPhoneDemo";
 import TestimonialsSection from "@/components/TestimonialsSection";
 import { api, BACKEND_URL } from "@/lib/api";
-
-const ACTIVITIES = [
-  { id: "atelier-memoire", title: "Atelier Mémoire", desc: "Séquences, associations, logique progressive.", icon: Brain, badge: "Nouveau" },
-  { id: "journal-vie", title: "Mon Journal de Vie", desc: "Racontez votre histoire, chapitre après chapitre.", icon: BookOpen, badge: "Populaire" },
-  { id: "recettes-antan", title: "Recettes d'Antan", desc: "Les saveurs de votre enfance et de votre terroir.", icon: Utensils },
-  { id: "gym-douce", title: "Gym Douce", desc: "Exercices adaptés, guidés pas à pas.", icon: Activity, badge: "Santé" },
-  { id: "correspondance", title: "Correspondance", desc: "Messagerie simplifiée pour vos proches.", icon: Mail },
-  { id: "phototheque", title: "Photothèque", desc: "Numérisez et organisez vos albums.", icon: Camera },
-  { id: "actualites", title: "Actualités simples", desc: "L'essentiel en gros caractères, sans pub.", icon: Newspaper, badge: "Quotidien" },
-  { id: "jeux-mots", title: "Jeux de Mots", desc: "Mots croisés, charades, mots mêlés.", icon: Type },
-];
 
 const ICON_MAP = { tv: Film, music: Music, film: Film, phone: Phone, landmark: Landmark, utensils: Utensils, sparkles: Sparkles, book: Book };
 
@@ -248,63 +237,7 @@ export default function Landing() {
       {/* ============ DEMO QUIZ ============ */}
       <DemoQuiz />
 
-      {/* ============ ACTIVITIES ============ */}
-      <section className="py-20 lg:py-28 bg-cream relative overflow-hidden">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid lg:grid-cols-3 gap-12 items-start">
-            <div className="lg:col-span-1 lg:sticky lg:top-24">
-              <span className="inline-block bg-bordeaux text-cream font-bold px-4 py-1 rounded-full text-sm mb-4">Au-delà des quiz</span>
-              <h2 className="font-display text-4xl lg:text-5xl font-extrabold text-navy mb-4">
-                Une plateforme<br />
-                <span className="text-terracotta">complète</span>
-              </h2>
-              <p className="text-xl text-navy/70 leading-relaxed mb-6">
-                8 activités conçues spécialement pour les seniors : mémoire, gym douce, journal,
-                correspondance et plus encore.
-              </p>
-              <Link
-                to="/register"
-                className="inline-flex items-center gap-2 bg-navy hover:bg-navy-dark text-white font-bold px-6 py-4 rounded-full transition"
-              >
-                Tout découvrir <ArrowRight className="w-5 h-5" />
-              </Link>
-            </div>
-
-            <div className="lg:col-span-2 grid sm:grid-cols-2 gap-5">
-              {ACTIVITIES.map((a, idx) => {
-                const Icon = a.icon;
-                return (
-                  <motion.div
-                    key={a.id}
-                    initial={{ opacity: 0, y: 16 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: idx * 0.04 }}
-                    className="bg-white border-2 border-cream-dark rounded-2xl p-6 hover:border-terracotta hover:-translate-y-0.5 transition"
-                  >
-                    <div className="flex items-start gap-4">
-                      <div className="w-12 h-12 rounded-2xl bg-terracotta/15 flex items-center justify-center shrink-0">
-                        <Icon className="w-6 h-6 text-terracotta" strokeWidth={2.5} />
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-1">
-                          <h3 className="font-display text-xl font-bold text-navy">{a.title}</h3>
-                          {a.badge && (
-                            <span className="text-xs font-bold bg-mustard text-navy px-2 py-0.5 rounded-full">{a.badge}</span>
-                          )}
-                        </div>
-                        <p className="text-navy/70">{a.desc}</p>
-                      </div>
-                    </div>
-                  </motion.div>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ============ PLATFORM (upcoming activities + word games) ============ */}
+      {/* ============ PLATFORM (activities + word games) ============ */}
       <PlatformSection />
 
       {/* ============ PRICING ============ */}
