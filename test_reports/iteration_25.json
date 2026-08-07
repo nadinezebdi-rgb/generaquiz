@@ -1,0 +1,39 @@
+{
+  "summary": "Sprint B pricing tiers validation. Backend: all 9 pytest tests PASS (GET /packages returns exactly 6 correct packages; POST /checkout/session works for all 6 pkg IDs and returns Stripe URL; unknown package rejected with 400; auth required returns 401). Frontend: Pricing UI structure, testids, monthly/yearly toggle, Famille badge and 'Le plus populaire', savings lines all work when logged in. However 2 blocking bugs found that break spec: (A) /app/pricing is inside ProtectedRoute so unauthenticated users are redirected to /login instead of seeing the pricing page and getting the redirect-on-CTA behaviour; (B) the seeded admin user has no plan_tier field so the Premium card CTA shows 'Choisir cette formule' (enabled) instead of 'Formule actuelle' (disabled).",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "App.js route /app/pricing", "issue": "Route wrapped in <ProtectedRoute> — unauthenticated visitors are bounced to /login and never see the pricing page. Spec requires the page to be accessible unauthenticated so the CTA-click flow can redirect to /login?next=/app/pricing. Fix: remove ProtectedRoute around Pricing (Pricing.jsx already handles the !user case internally).", "selector": "/app/pricing", "priority": "HIGH"},
+      {"component": "Pricing.jsx Premium tier CTA (admin)", "issue": "Admin logged in shows plan='premium' but plan_tier=null in /api/auth/me, therefore currentTier is null and Premium CTA renders 'Choisir cette formule' (enabled) instead of 'Formule actuelle' (disabled). Free card also shows 'Formule actuelle' instead of 'Formule actuelle inférieure' for the premium admin, same root cause.", "selector": "pricing-tier-premium-cta", "priority": "HIGH"}
+    ],
+    "integration_issues": [
+      {"flow": "Admin identity → tier gating", "issue": "backend/server.py seed_admin() sets plan='premium' but not plan_tier/plan_period. Existing admin in DB was seeded before Sprint B and never backfilled. Fix in seed_admin: also set plan_tier='premium', plan_period='yearly', and add an idempotent backfill: db.users.update_one({email: ADMIN_EMAIL, plan: 'premium', plan_tier: {$exists: False}}, {$set: {plan_tier: 'premium', plan_period: 'yearly'}}).", "affected_selectors": ["pricing-tier-premium-cta", "pricing-tier-free-cta"]}
+    ],
+    "design_issues": [
+      {"screen": "Pricing yearly toggle", "issues": ["Yearly Club Mémoire monthly-equivalent shows '4,17 €' (49.99/12=4.1658 → toFixed(2)='4.17'). Spec expected '4,16'. Displayed value is mathematically correct — cosmetic only. Optional: use Math.floor(amount/12*100)/100 if strict '4,16' rounding is desired."]}
+    ]
+  },
+  "test_report_links": ["/app/backend/tests/test_pricing_sprintb.py", "/app/test_reports/pytest/pytest_iter25.xml"],
+  "action_items": [
+    "Remove <ProtectedRoute> wrapper around /app/pricing route in /app/frontend/src/App.js so unauthenticated visitors can view the pricing page and be redirected to /login?next=/app/pricing on CTA click.",
+    "In /app/backend/server.py seed_admin, add plan_tier='premium' and plan_period='yearly' to the insert payload AND add an idempotent backfill $set for the existing admin doc missing plan_tier.",
+    "(Optional) Adjust yearly monthly-equivalent rounding for Club Mémoire if strict '4,16 €' display is required."
+  ],
+  "critical_code_review_comments": [
+    "PACKAGES dict is clean and single source of truth — good architecture; frontend correctly derives everything from GET /packages.",
+    "payments.py: /checkout/session correctly validates package_id and persists a payment_transactions record. tier and period are pulled from PACKAGES on webhook/status update — good.",
+    "Legacy `plan='premium'` is written in parallel with new `plan_tier` on both webhook and status endpoints for backward compat — reasonable, but Free/Discovery gating in quiz.py still relies on `plan=='premium'`. Consider migrating gating to plan_tier progressively.",
+    "seed_admin does not initialise plan_tier — must be fixed for the new tier UI to render correctly for the admin account (see action items)."
+  ],
+  "updated_files": ["/app/backend/tests/test_pricing_sprintb.py"],
+  "success_rate": {"backend": "100% (9/9)", "frontend": "~80% — layout & data OK, but ProtectedRoute + missing admin.plan_tier break the 2 gating behaviours the spec calls out"},
+  "test_credentials": "admin@generaquiz.fr / Admin2026! (verified working)",
+  "seed_data_creation": "None — only inserted transient payment_transactions rows via /checkout/session tests (not cleaned; test-mode Stripe sessions).",
+  "retest_needed": true,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "After main agent fixes (1) removes ProtectedRoute from /app/pricing and (2) seeds/backfills plan_tier='premium' on admin, retest: (a) hitting /app/pricing in incognito shows the page and clicking any paid CTA navigates to /login?next=/app/pricing, (b) logged-in admin sees Premium CTA='Formule actuelle' and disabled, Free CTA='Formule actuelle inférieure'. Backend tests in /app/backend/tests/test_pricing_sprintb.py can be re-run as-is.",
+  "rca of the issue": "Bug A (route guard): App.js wraps Pricing in ProtectedRoute — inconsistent with Pricing.jsx which already has if (!user) navigate('/login?next=/app/pricing'). Simple removal of the guard fixes it. Bug B (admin plan_tier): seed_admin() in server.py predates the 3-tier model and only sets `plan`. Since the admin doc already exists in DB, no backfill runs. UI reads user.plan_tier from /api/auth/me and gates on it — with null it treats admin as 'no current tier', so no CTA is disabled and Free label degrades."
+}

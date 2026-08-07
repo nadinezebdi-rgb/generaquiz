@@ -68,10 +68,27 @@ LEAGUE_PROMOTE = 5  # top 5 promote each Sunday
 LEAGUE_RELEGATE = 3  # bottom 3 relegate
 
 PACKAGES = {
-    "premium_monthly": {"amount": 9.99, "currency": "eur", "label": "Premium Mensuel",
-                        "description": "Accès illimité aux quiz, activités et défis famille"},
-    "premium_yearly": {"amount": 89.99, "currency": "eur", "label": "Premium Annuel",
-                       "description": "12 mois — économisez 2 mois"},
+    # -- Club Mémoire : entrée de gamme (1 compte) --
+    "club_monthly":    {"amount": 4.99,  "currency": "eur", "label": "Club Mémoire — Mensuel",
+                        "tier": "club",    "period": "monthly",
+                        "description": "Quiz illimités, progression, badges, historique"},
+    "club_yearly":     {"amount": 49.99, "currency": "eur", "label": "Club Mémoire — Annuel",
+                        "tier": "club",    "period": "yearly",
+                        "description": "12 mois — économisez 10 €"},
+    # -- Famille : 5 comptes + classement familial --
+    "famille_monthly": {"amount": 7.99,  "currency": "eur", "label": "Famille — Mensuel",
+                        "tier": "famille", "period": "monthly",
+                        "description": "5 comptes, classement familial, défis, quiz privés"},
+    "famille_yearly":  {"amount": 79.99, "currency": "eur", "label": "Famille — Annuel",
+                        "tier": "famille", "period": "yearly",
+                        "description": "12 mois — économisez 16 €"},
+    # -- Premium : tout + exclusifs --
+    "premium_monthly": {"amount": 12.99, "currency": "eur", "label": "Premium — Mensuel",
+                        "tier": "premium", "period": "monthly",
+                        "description": "Tout Famille + quiz exclusifs, stats avancées, nouveautés en priorité"},
+    "premium_yearly":  {"amount": 129.99,"currency": "eur", "label": "Premium — Annuel",
+                        "tier": "premium", "period": "yearly",
+                        "description": "12 mois — économisez 26 €"},
 }
 
 client = AsyncIOMotorClient(MONGO_URL)
@@ -150,6 +167,8 @@ def user_to_public(u: dict) -> dict:
     return {"id": str(u["_id"]), "email": u["email"], "name": u.get("name", ""),
             "role": u.get("role", "user"), "plan": u.get("plan", "free"),
             "plan_expires_at": u.get("plan_expires_at"), "created_at": u.get("created_at"),
+            "plan_tier": u.get("plan_tier"),          # "club" | "famille" | "premium" | None
+            "plan_period": u.get("plan_period"),      # "monthly" | "yearly" | None
             "streak_current": int(u.get("streak_current") or 0),
             "streak_best": int(u.get("streak_best") or 0),
             "streak_last_date": u.get("streak_last_date"),
