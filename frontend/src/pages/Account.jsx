@@ -42,7 +42,7 @@ export default function Account() {
     e.preventDefault();
     setSavingName(true); setNameMsg("");
     try {
-      await api.patch("/auth/profile", { name });
+      await api.patch("/auth/profile", { name: name.trim() });
       await refresh();
       setNameMsg("Profil mis à jour");
       setTimeout(() => setNameMsg(""), 2500);
@@ -155,7 +155,7 @@ export default function Account() {
               <button
                 type="submit"
                 data-testid="account-save-name"
-                disabled={savingName || name === user.name || !name.trim()}
+                disabled={savingName || name.trim() === (user.name || "").trim() || !name.trim()}
                 className="inline-flex items-center gap-2 bg-terracotta hover:bg-terracotta-dark text-white font-bold px-5 py-3 rounded-full shadow-warm disabled:opacity-50"
               >
                 {savingName ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
