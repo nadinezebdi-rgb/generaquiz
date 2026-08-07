@@ -6,6 +6,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import BadgeShareCard from "@/components/BadgeShareCard";
+import MemoryScoreRadar from "@/components/MemoryScoreRadar";
 import {
   Trophy, Zap, TrendingUp, Loader2, Lock, Sparkles, Award, Flame, X, Share2,
 } from "lucide-react";
@@ -105,6 +106,9 @@ export default function Progression() {
             />
           </div>
         </motion.div>
+
+        {/* ============ MEMORY SCORE — 5 axes ============ */}
+        <MemoryScoreRadar />
 
         {/* ============ BADGES ============ */}
         <div className="bg-white border-2 border-cream-dark rounded-[28px] p-5 md:p-7 mb-6" data-testid="progression-badges">
