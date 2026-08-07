@@ -696,3 +696,38 @@ Tests: iteration 27 — 5/5 pytest backend + UI e2e verts.
 - **Stripe Prod Keys** : bascule test → live
 - **Sprint 3 Mascottes** : 4 niveaux d'affection (Nano Banana skins)
 - **Refactor** : découper `server.py` (APScheduler), unifier attempts / daily_attempts / coop_challenges
+
+---
+
+## Sprint D + Atelier Mémoire + Mascot Affection (2026-08-07) ✅
+
+### Sprint D — EHPAD landing + Mode Senior
+- Nouvelle page publique **`/ehpad`** ciblée animateurs/directeurs (Hero, benefits, stats, CTA démo mail + tel)
+- **SeniorModeContext** + **SeniorModeToggle** (Confort+ dans la Navbar sur toutes les pages)
+  - Toggle une classe `.senior-mode` sur `<html>` → CSS boostent base font (20px), tap targets (52px min), border 2px, focus outline 4px terracotta
+  - Pref stockée dans `localStorage.gq_senior_mode`
+
+### Atelier Mémoire — première activité non-quiz
+- Nouveau routeur `/app/backend/routers/atelier.py` (mount sur `/api/atelier`)
+  - 5 thèmes × 5 prompts ouverts (annees-60/70/80/enfance/famille)
+  - `POST /atelier/sessions` sauvegarde les réponses libres dans `atelier_entries`, +25 pts, badge `premier_atelier` idempotent + `atelier_5` au 5ᵉ atelier
+  - `GET /atelier/entries` renvoie les sessions groupées
+- 2 nouvelles pages front : `/app/atelier` (flow 5 étapes) et `/app/atelier/mes-souvenirs` (carnet de souvenirs)
+- 2 nouveaux badges au catalogue : `premier_atelier` (argent), `atelier_5` (or)
+
+### Mascot Affection — Sprint 3 débloqué (Nano Banana)
+- Script `generate_mascot_skins.py` → **24 skins générés** via `emergentintegrations` (Gemini Nano Banana `gemini-3.1-flash-image-preview`)
+  - 3 skins par mascotte (level 1: friendly wave, level 2: in action, level 3: golden hero) × 8 catégories
+- Backend `progression.py`: `_affection_for(total)` → level 0/1/2/3 selon réponses cumulées (0/20/100/500)
+- Front `Progression.jsx`: rendu du skin correspondant + badge overlay `♥{level}` (fallback vers image de base si 404)
+
+Tests: iteration 28 — 20/21 pytest backend + Frontend 100 % — verts.
+Coût crédit LLM confirmé pour la génération des 18 skins (finalement 24 pour cohérence 8 catégories).
+
+### Backlog restant
+- **Stripe Prod Keys** : bascule test → live
+- **Sprint E** : `/pourquoi` (science) + Admin Analytics
+- **Refactor** : découper `server.py`, unifier attempts/daily_attempts/coop_challenges en `game_sessions`
+- **Mobile app** : Expo React Native
+- **CRM connect** : demandes EHPAD via mailto → HubSpot / Brevo
+
