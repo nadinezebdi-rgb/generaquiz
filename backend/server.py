@@ -40,6 +40,7 @@ from routers import atelier as atelier_router
 from routers import admin_analytics as admin_analytics_router
 from routers import charades as charades_router
 from routers import mots_meles as mots_meles_router
+from routers import mots_fleches as mots_fleches_router
 from routers.referral import generate_referral_code_for
 
 app = FastAPI(title="Quiz d'Antan API")
@@ -102,6 +103,7 @@ api.include_router(atelier_router.router)
 api.include_router(admin_analytics_router.router)
 api.include_router(charades_router.router)
 api.include_router(mots_meles_router.router)
+api.include_router(mots_fleches_router.router)
 app.include_router(api)
 
 # CORS

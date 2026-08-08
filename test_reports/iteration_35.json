@@ -1,0 +1,30 @@
+{
+  "summary": "Iteration 35 — Charades expansion (admin generate + Mistral packs), Grid Themes IA rotation (10 families), Mots Fléchés MVP (5 hand-authored grids + interactive frontend). Backend 13/13 pytest passes. Frontend: /app/mots-fleches renders 5 grid cards, GridPlay shows 5×5=25 cells (9 blocks + 16 letters), typing auto-advances to next letter cell, Backspace on empty moves left, arrows navigate, correct submit awards 21 pts (16 letters + 5 bonus), reset clears result and disables submit. PlatformSection card 'mots-croises' is Live with live badge, Navbar has nav-mots-fleches link.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "Landing navbar (desktop 1920)", "issues": ["Navbar is very cramped: 'Quiz du Jour ✨' wraps to 3 lines, and Ligues/Niv 20/Défi famille/Crédits crowd the right. Consider consolidating the games menu into a dropdown, or hiding secondary items on <1280px."]}
+    ]
+  },
+  "test_report_links": ["/app/backend/tests/test_iteration35.py", "/app/test_reports/pytest/pytest_iter35.xml"],
+  "action_items": [
+    "(nice-to-have) De-clutter the desktop navbar — the growing list of game links wraps awkwardly. Consider a 'Jeux' dropdown grouping Charades / Mots Mêlés / Mots Fléchés / Atelier."
+  ],
+  "critical_code_review_comments": [
+    "wordsearch_mistral.THEME_FAMILIES: all 10 required families present, PROMPT_TEMPLATE correctly interpolates {family}/{hint} and picks a random family per generation call — good.",
+    "charades.py /admin/generate: correctly gated behind get_admin_user (403 for non-admin verified), idempotent on duplicate answers (rejected_reasons captures 'duplicate answer'), and merges Mistral extension via _all_charades().",
+    "mots_fleches_data._public_grid: correctly strips 'answer' from letter cells and preserves clue_h/clue_v on blocks — anti-cheat OK.",
+    "mots_fleches submit: xp_total credited only on delta (points - best_prior), so re-submitting a max score correctly yields points_gained=0 — verified.",
+    "MotsFleches.jsx GridPlay uses letters state shape derived from grid.cells (map row → map c to ''), consistent 5×5 payload sent to backend.",
+    "Auto-advance on typing uses setTimeout(...,0) which works but relies on the onChange also firing setLetter. Fine but note that fast typing could theoretically race — not observed in testing."
+  ],
+  "updated_files": ["/app/backend/tests/test_iteration35.py"],
+  "success_rate": {"backend": "100%", "frontend": "100%"},
+  "test_credentials": "admin@generaquiz.fr / Admin2026! (from /app/memory/test_credentials.md); dynamic TEST_iter35_*@example.com users registered per test session",
+  "seed_data_creation": "Test users registered via /api/auth/register with TEST_ prefix; two admin/generate calls added Mistral charades to mistral_charades collection (real Mistral live call, ~10s each).",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Backend URL must be exported: REACT_APP_BACKEND_URL=https://caricature-saas.preview.emergentagent.com when running pytest. Admin generate is idempotent — re-runs return accepted=0 if duplicates. Mots Fléchés mf01 correct matrix confirmed: 16 letter cells, score = 16 + 5 completion bonus = 21."
+}

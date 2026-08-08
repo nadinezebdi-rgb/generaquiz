@@ -13,7 +13,7 @@ from datetime import datetime, timezone
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 
-from core import db, get_current_user
+from core import db, get_current_user, get_admin_user
 from badges import award_badge, BADGE_INDEX
 from charades_data import CHARADES, PACKS, charades_for_pack, normalize
 
@@ -41,22 +41,35 @@ def _public_charade(c: dict) -> dict:
     }
 
 
+async def _all_charades() -> list[dict]:
+    """Static library + Mistral extension merged into a single list."""
+    ext = await db.mistral_charades.find({}, {"_id": 0}).to_list(200)
+    return list(CHARADES) + ext
+
+
 @router.get("/packs")
 async def list_packs(user: dict = Depends(get_current_user)) -> list[dict]:
-    """Pack catalog with counts (solved / total per pack)."""
+    """Pack catalog with counts (solved / total per pack). Includes Mistral extensions."""
     user_id = str(user["_id"])
     solved = set(await db.charade_attempts.distinct(
         "charade_id", {"user_id": user_id, "correct": True}
     ))
-    out = []
-    for p in PACKS:
-        pack_charades = [c for c in CHARADES if c["pack"] == p["id"]]
-        out.append({
-            **p,
-            "total": len(pack_charades),
-            "solved": sum(1 for c in pack_charades if c["id"] in solved),
-        })
-    return out
+    all_charades = await _all_charades()
+    # Build a dynamic pack map — start from static PACKS, but allow Mistral to
+    # introduce new pack ids (metiers, animaux, voyages...) with sensible defaults.
+    pack_map = {p["id"]: {**p, "total": 0, "solved": 0} for p in PACKS}
+    fallback_labels = {"metiers": ("Métiers", "👷"), "animaux": ("Animaux", "🐾"),
+                       "voyages": ("Voyages", "✈️")}
+    for c in all_charades:
+        pid = c["pack"]
+        if pid not in pack_map:
+            label, emoji = fallback_labels.get(pid, (pid.title(), "🎯"))
+            pack_map[pid] = {"id": pid, "label": label, "emoji": emoji,
+                             "desc": "Charades générées par IA", "total": 0, "solved": 0}
+        pack_map[pid]["total"] += 1
+        if c["id"] in solved:
+            pack_map[pid]["solved"] += 1
+    return list(pack_map.values())
 
 
 @router.get("/list")
@@ -66,7 +79,8 @@ async def list_charades(pack: str | None = None, user: dict = Depends(get_curren
     solved = await db.charade_attempts.distinct(
         "charade_id", {"user_id": user_id, "correct": True}
     )
-    filtered = charades_for_pack(pack)
+    all_charades = await _all_charades()
+    filtered = all_charades if not pack or pack == "all" else [c for c in all_charades if c["pack"] == pack]
     return {
         "charades": [_public_charade(c) for c in filtered],
         "solved_ids": solved,
@@ -84,6 +98,9 @@ async def attempt_charade(body: AttemptIn, user: dict = Depends(get_current_user
     the badge. Wrong attempts are logged but don't cost anything.
     """
     charade = next((c for c in CHARADES if c["id"] == body.charade_id), None)
+    if not charade:
+        # Fallback: check the Mistral-generated extension
+        charade = await db.mistral_charades.find_one({"id": body.charade_id}, {"_id": 0})
     if not charade:
         raise HTTPException(status_code=404, detail="Charade introuvable")
 
@@ -164,3 +181,13 @@ async def my_progress(user: dict = Depends(get_current_user)) -> dict:
         "attempts_correct": correct_attempts,
         "accuracy_pct": round((correct_attempts / total_attempts * 100), 1) if total_attempts else 0.0,
     }
+
+
+@router.post("/admin/generate")
+async def admin_generate(_: dict = Depends(get_admin_user)) -> dict:
+    """Manually trigger the Mistral charade generator (normally runs at 04:00 Paris).
+
+    Returns the same report as the nightly cron.
+    """
+    from charades_mistral import generate_nightly_charades
+    return await generate_nightly_charades()

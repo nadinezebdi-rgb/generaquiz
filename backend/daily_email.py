@@ -430,6 +430,14 @@ def start_daily_scheduler() -> None:
         replace_existing=True,
         misfire_grace_time=3600,
     )
+    from charades_mistral import generate_nightly_charades  # noqa: WPS433
+    _scheduler.add_job(
+        generate_nightly_charades,
+        CronTrigger(hour=4, minute=0, timezone="Europe/Paris"),
+        id="charades_generate_nightly",
+        replace_existing=True,
+        misfire_grace_time=3600,
+    )
     _scheduler.add_job(
         send_expiration_emails,
         CronTrigger(hour=10, minute=0, timezone="Europe/Paris"),

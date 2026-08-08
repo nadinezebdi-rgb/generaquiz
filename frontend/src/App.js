@@ -36,6 +36,7 @@ import Atelier from "@/pages/Atelier";
 import AtelierEntries from "@/pages/AtelierEntries";
 import Charades from "@/pages/Charades";
 import MotsMeles from "@/pages/MotsMeles";
+import MotsFleches from "@/pages/MotsFleches";
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();
@@ -99,6 +100,14 @@ export default function App() {
             element={
               <ProtectedRoute>
                 <MotsMeles />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/app/mots-fleches"
+            element={
+              <ProtectedRoute>
+                <MotsFleches />
               </ProtectedRoute>
             }
           />

@@ -57,7 +57,8 @@ const WORD_GAMES = [
     href: "/app/mots-meles",
     tag: { label: "Nouveau", cls: "bg-mustard text-navy" },
   },
-  { key: "mots-croises", title: "Mots Croisés", desc: "La grille classique, en français.", icon: PenLine },
+  { key: "mots-croises", title: "Mots Fléchés", desc: "5 grilles 5×5 hand-authored — MVP interactif.", icon: PenLine,
+    href: "/app/mots-fleches", tag: { label: "Nouveau", cls: "bg-mustard text-navy" } },
 ];
 
 export default function PlatformSection() {
