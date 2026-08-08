@@ -940,3 +940,30 @@ Tests: iteration 36 — 6/6 pytest backend + Frontend 100 % — verts. Aucun act
 - Refactor `server.py` (8 jobs APScheduler)
 - Mobile app Expo
 
+
+---
+
+## Mots Fléchés v3 : Croisements verticaux + look journal (2026-08-08) ✅
+
+### Livrable honnête (scope réaliste)
+Génération automatique de vrais mots croisés avec intersections = problème combinatoire dur (backtracking, solver, wordlist filtré). Trop lourd pour MVP. Deux volets délivrés à la place :
+
+**1. Look "journal" — arrow markers**
+- Frontend `MotsFleches.jsx` : les cases noires affichent maintenant des flèches ▶ (clue_h → droite) et ▼ (clue_v → bas) en couleur mustard, positionnées en bas-droite de chaque case
+- Applied à toutes les grilles existantes (mf01..mf05 + mf06 + grilles Mistral) — visuellement, cela ressemble maintenant à un vrai mots fléchés de journal français
+
+**2. Grille mf06 — Carré magique (preuve de concept avec croisements)**
+- 3×3 magic square : MER / EAU / RUE en lignes ET en colonnes = 6 mots français, chaque lettre croise 2 mots
+- Champ `words: [{answer, direction, row, col}]` ajouté au modèle (pour validation avancée future)
+- Difficulté "difficile" (car les intersections rendent chaque erreur pénalisante)
+- 9 lettres × 1 pt + 5 bonus complétion = 14 pts
+
+Tests: iteration 37 — 5/5 pytest backend + Frontend 100 % — verts. Aucun action item.
+
+### Backlog restant (mots fléchés v4 et au-delà)
+- **v4 — Solver automatique** : générateur backtracking à partir d'un wordlist français validé + template de grille avec black cells (structurel comme les journaux). Nécessite ~2000 lignes de code (dict lookup, arc consistency, MRV heuristic). Alternative : intégrer bibliothèque tierce (`crossword-composer`, `qxw`) ou puzzle library premium.
+- **v4 bis — Mistral avec template contraint** : plutôt qu'un solver, forcer Mistral à remplir un template pré-authoré (positions fixes, mots à trouver qui matchent) — plus rapide mais qualité variable
+- Onboarding Tour, Coop Atelier, EHPAD CRM
+- Charades bibliothèque expansion (laisser le cron 04:00 accumuler)
+- Refactor `server.py` (8 jobs APScheduler)
+
