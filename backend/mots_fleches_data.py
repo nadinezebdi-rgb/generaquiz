@@ -207,6 +207,52 @@ GRIDS: list[dict] = [
              {"type": "letter", "answer": "N"}],
         ],
     },
+    # ============ GRID 6 — VRAIE grille avec croisements ✅ ============
+    # Carré magique 3×3 : chaque LIGNE et chaque COLONNE forme un vrai mot français.
+    # Rendu newspaper-style : 1 rangée + 1 colonne de blocs avec définitions,
+    # les lettres croisent verticalement ET horizontalement.
+    #   Lignes:    MER, EAU, RUE
+    #   Colonnes:  MER, EAU, RUE
+    {
+        "id": "mf06",
+        "theme": "Carré magique — Ville & Nature",
+        "emoji": "🎯",
+        "difficulty": "difficile",
+        "size": 4,
+        "rows": 4,
+        "cols": 4,
+        "cells": [
+            # row 0 — column clue banner (arrows point ↓ down to the answer)
+            [{"type": "block"},
+             {"type": "block", "clue_v": "Étendue salée"},
+             {"type": "block", "clue_v": "Liquide vital"},
+             {"type": "block", "clue_v": "Voie urbaine"}],
+            # row 1 — first horizontal word (MER)
+            [{"type": "block", "clue_h": "Étendue salée"},
+             {"type": "letter", "answer": "M"},
+             {"type": "letter", "answer": "E"},
+             {"type": "letter", "answer": "R"}],
+            # row 2 — EAU
+            [{"type": "block", "clue_h": "Liquide vital"},
+             {"type": "letter", "answer": "E"},
+             {"type": "letter", "answer": "A"},
+             {"type": "letter", "answer": "U"}],
+            # row 3 — RUE
+            [{"type": "block", "clue_h": "Voie urbaine"},
+             {"type": "letter", "answer": "R"},
+             {"type": "letter", "answer": "U"},
+             {"type": "letter", "answer": "E"}],
+        ],
+        "words": [
+            {"answer": "MER", "direction": "h", "row": 1, "col": 1},
+            {"answer": "EAU", "direction": "h", "row": 2, "col": 1},
+            {"answer": "RUE", "direction": "h", "row": 3, "col": 1},
+            {"answer": "MER", "direction": "v", "row": 1, "col": 1},
+            {"answer": "EAU", "direction": "v", "row": 1, "col": 2},
+            {"answer": "RUE", "direction": "v", "row": 1, "col": 3},
+        ],
+        "notes": "Vraie grille — les 6 mots (3 h + 3 v) sont français, chaque lettre croise 2 mots.",
+    },
 ]
 
 

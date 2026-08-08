@@ -213,17 +213,32 @@ function GridPlay({ gridId, onExit }) {
           {grid.cells.flatMap((row, r) => row.map((cell, c) => {
             const key = `${r}-${c}`;
             if (cell.type === "block") {
+              const isEmpty = !cell.clue_h && !cell.clue_v;
               return (
                 <div
                   key={key}
                   data-testid={`mf-cell-block-${r}-${c}`}
-                  className="aspect-square bg-navy text-cream text-[10px] leading-tight p-1 rounded-sm relative overflow-hidden"
+                  className={`aspect-square text-cream text-[9px] leading-tight rounded-sm relative overflow-hidden ${
+                    isEmpty ? "bg-navy/70" : "bg-navy"
+                  }`}
                 >
                   {cell.clue_h && (
-                    <div className="font-bold" title="→ à droite">→ {cell.clue_h}</div>
+                    <div className="absolute inset-0 p-1 pr-3 flex flex-col justify-center font-semibold" title="→ à droite">
+                      <span>{cell.clue_h}</span>
+                      <span aria-hidden="true" className="absolute bottom-0.5 right-0.5 text-mustard text-[13px] leading-none font-bold">▶</span>
+                    </div>
                   )}
-                  {cell.clue_v && (
-                    <div className="font-bold mt-0.5" title="↓ en bas">↓ {cell.clue_v}</div>
+                  {cell.clue_v && !cell.clue_h && (
+                    <div className="absolute inset-0 p-1 pb-3 flex flex-col justify-center font-semibold" title="↓ en bas">
+                      <span>{cell.clue_v}</span>
+                      <span aria-hidden="true" className="absolute bottom-0.5 right-0.5 text-mustard text-[13px] leading-none font-bold">▼</span>
+                    </div>
+                  )}
+                  {cell.clue_h && cell.clue_v && (
+                    /* Both clues share one block — split diagonally with 2 arrows */
+                    <div className="absolute inset-0 flex items-end justify-end pr-0.5 pb-0.5">
+                      <span aria-hidden="true" className="text-mustard text-[10px] leading-none font-bold">▼</span>
+                    </div>
                   )}
                 </div>
               );
