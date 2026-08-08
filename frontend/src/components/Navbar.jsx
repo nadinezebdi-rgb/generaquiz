@@ -31,6 +31,7 @@ export default function Navbar({ variant = "landing" }) {
               )}
               <Link to="/app/dashboard" data-testid="nav-dashboard" className="px-4 py-2 text-lg font-semibold text-navy hover:text-terracotta transition">Mes quiz</Link>
               <Link to="/app/atelier" data-testid="nav-atelier" className="px-3 py-2 text-base font-semibold text-navy hover:text-terracotta transition">Atelier</Link>
+              <Link to="/app/charades" data-testid="nav-charades" className="px-3 py-2 text-base font-semibold text-navy hover:text-terracotta transition">Charades</Link>
               <Link to="/app/leagues" data-testid="nav-leagues" className="px-3 py-2 text-base font-semibold text-navy hover:text-terracotta transition inline-flex items-center gap-1">
                 <Trophy className="w-4 h-4" /> Ligues
               </Link>

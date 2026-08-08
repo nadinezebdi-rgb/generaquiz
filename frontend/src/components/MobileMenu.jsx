@@ -85,6 +85,7 @@ export default function MobileMenu({ variant = "landing" }) {
                   )}
                   <MobileLink to="/app/dashboard" onClick={close} testid="mobile-nav-dashboard">Mes quiz</MobileLink>
                   <MobileLink to="/app/atelier" onClick={close} testid="mobile-nav-atelier">Atelier Mémoire</MobileLink>
+                  <MobileLink to="/app/charades" onClick={close} testid="mobile-nav-charades">Charades</MobileLink>
                   <MobileLink to="/app/leagues" onClick={close} testid="mobile-nav-leagues" icon={<Trophy className="w-4 h-4" />}>Ligues</MobileLink>
                   <MobileLink to="/app/progression" onClick={close} testid="mobile-nav-progression" icon={<Zap className="w-4 h-4 text-terracotta" />}>
                     Progression · Niv {typeof user.level === "number" ? user.level : 1}

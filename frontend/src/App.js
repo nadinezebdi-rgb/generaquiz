@@ -34,6 +34,7 @@ import Progression from "@/pages/Progression";
 import Ehpad from "@/pages/Ehpad";
 import Atelier from "@/pages/Atelier";
 import AtelierEntries from "@/pages/AtelierEntries";
+import Charades from "@/pages/Charades";
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();
@@ -81,6 +82,14 @@ export default function App() {
             element={
               <ProtectedRoute>
                 <AtelierEntries />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/app/charades"
+            element={
+              <ProtectedRoute>
+                <Charades />
               </ProtectedRoute>
             }
           />

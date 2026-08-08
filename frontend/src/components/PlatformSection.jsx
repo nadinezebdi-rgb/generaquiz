@@ -1,14 +1,12 @@
+import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Brain, BookOpen, ChefHat, Camera, PenLine, MessageCircle, Search, ArrowRight, Sparkles, Clock } from "lucide-react";
+import { Brain, BookOpen, ChefHat, Camera, PenLine, MessageCircle, Search, ArrowRight, Sparkles, Clock, Check } from "lucide-react";
 
 /**
  * PlatformSection — "Au-delà des quiz : une plateforme complète".
  *
- * Marketing-focused hub that positions GénéraQuiz as more than a quiz app:
- * 4 upcoming senior-friendly activities + 3 word games. All cards are
- * placeholders (badge "En développement") — cliquer ne redirige pas encore
- * mais scrolle vers la section tarifs pour convertir le visiteur.
- *
+ * Marketing-focused hub. Cards with `href` are LIVE (clickable Link);
+ * cards without `href` are still in development (badge "En dev." shown).
  * Injected between the categories and the pricing on the Landing page.
  */
 
@@ -16,9 +14,10 @@ const QUIZ_ACTIVITIES = [
   {
     key: "atelier-memoire",
     title: "Atelier Mémoire",
-    desc: "Séquences, associations, logique progressive.",
+    desc: "Réminiscence guidée par thème — 5 questions, votre carnet privé.",
     icon: Brain,
-    tag: { label: "Nouveau", cls: "bg-mustard text-navy" },
+    href: "/app/atelier",
+    tag: { label: "En ligne", cls: "bg-[#3D9970]/20 text-[#2A7350]" },
   },
   {
     key: "journal-vie",
@@ -42,8 +41,15 @@ const QUIZ_ACTIVITIES = [
 ];
 
 const WORD_GAMES = [
+  {
+    key: "charades",
+    title: "Charades",
+    desc: "Mon premier, mon deuxième… 13 charades classiques, +5 pts par bonne réponse.",
+    icon: MessageCircle,
+    href: "/app/charades",
+    tag: { label: "Nouveau", cls: "bg-mustard text-navy" },
+  },
   { key: "mots-croises", title: "Mots Croisés", desc: "La grille classique, en français.", icon: PenLine },
-  { key: "charades",     title: "Charades",     desc: "Mon premier, mon deuxième… Trouvez le mot caché.", icon: MessageCircle },
   { key: "mots-meles",   title: "Mots Mêlés",   desc: "Retrouvez les mots cachés dans la grille de lettres.", icon: Search },
 ];
 
@@ -71,7 +77,8 @@ export default function PlatformSection() {
               <span className="text-terracotta italic">complète</span>
             </h2>
             <p className="text-navy/70 text-base leading-relaxed mb-6">
-              4 activités conçues spécialement pour les seniors : mémoire, journal, recettes d&apos;antan, photothèque — et des jeux de mots pour garder l&apos;esprit vif.
+              Des activités conçues pour les seniors : mémoire, journal, recettes, photothèque — et des jeux de mots pour garder l&apos;esprit vif.
+              <strong className="text-navy"> Deux sont déjà en ligne.</strong>
             </p>
             <button
               type="button"
@@ -94,7 +101,7 @@ export default function PlatformSection() {
                 </div>
                 <span className="font-display text-xl font-extrabold text-navy">Quiz &amp; Activités</span>
                 <span className="text-xs font-semibold text-navy/60 bg-cream-dark border border-cream-dark rounded-full px-2.5 py-0.5">
-                  4 nouveautés
+                  {QUIZ_ACTIVITIES.filter((a) => a.href).length} en ligne · {QUIZ_ACTIVITIES.filter((a) => !a.href).length} bientôt
                 </span>
               </div>
               <hr className="border-t-2 border-cream-dark mb-5" />
@@ -121,7 +128,7 @@ export default function PlatformSection() {
                 </div>
                 <span className="font-display text-xl font-extrabold text-navy">Jeux de Mots</span>
                 <span className="text-xs font-semibold text-navy/60 bg-cream-dark border border-cream-dark rounded-full px-2.5 py-0.5">
-                  3 jeux
+                  {WORD_GAMES.filter((w) => w.href).length} en ligne · {WORD_GAMES.filter((w) => !w.href).length} bientôt
                 </span>
               </div>
               <hr className="border-t-2 border-cream-dark mb-5" />
@@ -134,7 +141,7 @@ export default function PlatformSection() {
             </div>
 
             <p className="text-xs text-navy/50 text-center pt-2" data-testid="platform-availability-note">
-              🚧 Toutes ces activités sont <strong>en cours de développement</strong>. Rejoignez GénéraQuiz Premium pour y accéder en avant-première dès leur sortie.
+              🚀 <strong>Atelier Mémoire</strong> et <strong>Charades</strong> sont déjà accessibles. Les autres arrivent bientôt.
             </p>
           </div>
         </div>
@@ -146,16 +153,10 @@ export default function PlatformSection() {
 function ActivityCard({ item, accent, delay }) {
   const Icon = item.icon;
   const iconBg = accent === "blue" ? "bg-navy/10 text-navy" : "bg-terracotta/20 text-terracotta";
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 12 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      transition={{ delay, duration: 0.35 }}
-      data-testid={`platform-card-${item.key}`}
-      className="bg-white border-2 border-cream-dark rounded-2xl p-4 flex items-start gap-3 relative overflow-hidden cursor-not-allowed hover:-translate-y-0.5 hover:shadow-warm transition"
-      title="En cours de développement"
-    >
+  const isLive = Boolean(item.href);
+
+  const inner = (
+    <>
       <div className={`w-11 h-11 rounded-xl ${iconBg} flex items-center justify-center shrink-0`}>
         <Icon className="w-5 h-5" strokeWidth={2.5} />
       </div>
@@ -170,9 +171,49 @@ function ActivityCard({ item, accent, delay }) {
         </div>
         <p className="text-sm text-navy/60 leading-snug">{item.desc}</p>
       </div>
-      <span className="absolute top-2 right-2 inline-flex items-center gap-1 text-[9px] font-bold uppercase tracking-widest text-navy/40" data-testid={`platform-badge-dev-${item.key}`}>
-        <Clock className="w-3 h-3" /> En dev.
+      <span
+        className={`absolute top-2 right-2 inline-flex items-center gap-1 text-[9px] font-bold uppercase tracking-widest ${
+          isLive ? "text-[#2A7350]" : "text-navy/40"
+        }`}
+        data-testid={`platform-badge-${isLive ? "live" : "dev"}-${item.key}`}
+      >
+        {isLive ? <><Check className="w-3 h-3" /> Jouer</> : <><Clock className="w-3 h-3" /> En dev.</>}
       </span>
+    </>
+  );
+
+  const commonClasses = "bg-white border-2 border-cream-dark rounded-2xl p-4 flex items-start gap-3 relative overflow-hidden hover:-translate-y-0.5 hover:shadow-warm transition";
+
+  if (isLive) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ delay, duration: 0.35 }}
+      >
+        <Link
+          to={item.href}
+          data-testid={`platform-card-${item.key}`}
+          className={`${commonClasses} hover:border-terracotta cursor-pointer`}
+        >
+          {inner}
+        </Link>
+      </motion.div>
+    );
+  }
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 12 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ delay, duration: 0.35 }}
+      data-testid={`platform-card-${item.key}`}
+      className={`${commonClasses} cursor-not-allowed`}
+      title="En cours de développement"
+    >
+      {inner}
     </motion.div>
   );
 }
