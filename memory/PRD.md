@@ -780,3 +780,45 @@ Tests: iteration 29 — 19/19 pytest backend + Frontend 100 % — verts.
 - **Refactor** : découper `server.py`, unifier `attempts / daily_attempts / coop_challenges` en `game_sessions`
 - **Mobile app** : Expo React Native
 
+
+---
+
+## Jeux de Mots — Étape 0 + 1 : Charades (2026-08-08) ✅
+
+### Étape 0 — PlatformSection assainie
+- Carte **Atelier Mémoire** : maintenant Link cliquable vers `/app/atelier`, badge "En ligne" vert + pill "Jouer" (au lieu de "EN DEV")
+- Carte **Charades** : ajoutée comme Link vers `/app/charades`, badge "Nouveau"
+- Les autres cartes (Journal de Vie, Recettes d'Antan, Photothèque, Mots Croisés, Mots Mêlés) restent en "EN DEV" avec `cursor-not-allowed`
+- Sidebar réécrite : "Deux sont déjà en ligne."
+
+### Étape 1 — Charades françaises 🎭
+Backend nouveau `charades_data.py` + router `/api/charades/*` :
+- 13 charades classiques françaises vérifiées manuellement (Château, Bonjour, Poulet, Vinaigre, Souris, Lapin, Chaton, Marmite, Chapeau, Bonbon, Sapin, Orange, Carotte)
+- **Anti-cheat** : `_public_charade()` strip la réponse avant tout retour au client
+- Normalisation tolérante : minuscules + accents supprimés + non-alphanumériques retirés (`CHÂTEAU` = `chateau` = ` château `)
+- Récompense : **+5 pts par bonne réponse**, idempotent (pas de double comptage), attribué au 1er correct uniquement
+- Ligue hebdomadaire créditée en même temps
+- Nouveau badge **`amateur_mots`** (or) débloqué au 10ᵉ charade résolue distincte
+
+Frontend `/app/charades` :
+- Card avec 3 lignes de charade, input, bouton indice, bouton valider
+- Panneau reveal (vert bravo / rouge ce n'est pas ça), badge "Déjà résolue"
+- Précédent / Suivant / Passer + progression `X / 13 résolues`
+- Toast récompense +5 pts
+
+Navbar & MobileMenu : nouveau lien `Charades` visible pour utilisateurs connectés.
+
+Tests: iteration 33 — 13/13 pytest backend + Frontend 100 % — verts.
+
+### Backlog Jeux de Mots restant
+- **Mots Mêlés** (option b — Mistral IA) : cron nocturne génère un thème + 10 mots + placement algorithmique dans une grille MongoDB
+- **Mots Croisés** (options e + f) : MVP grille 5×5 fléchée pré-authorée × 10, puis génération IA
+- **Autres activités** (Journal de Vie, Recettes d'Antan, Photothèque) : à scoper
+
+### Autre backlog
+- Onboarding Tour (P1)
+- Coop Atelier (P1)
+- EHPAD CRM (P1)
+- Refactor `server.py`, unifier attempts/daily/coop en `game_sessions`
+- Mobile app Expo
+
