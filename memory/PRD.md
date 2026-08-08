@@ -860,3 +860,48 @@ Tests: iteration 34 — 9/9 pytest backend + Frontend 100 % — 1 mini bug UX de
 - Onboarding Tour, Coop Atelier, EHPAD CRM
 - Refactor `server.py` (APScheduler prend de l'ampleur — 6 jobs quotidiens/hebdo maintenant)
 
+
+---
+
+## Jeux de Mots — Vague 2 : Grid Themes IA + Charades Expansion + Mots Fléchés MVP (2026-08-08) ✅
+
+### Grid Themes IA
+- `wordsearch_mistral.py` : liste `THEME_FAMILIES` (10 catégories culturelles françaises) tirée au sort à chaque exécution nocturne (Régions, Années 60, Métiers d'autrefois, Cuisine régionale, Jardin & saisons, Chansons, Cinéma classique, Sport, Écrivains, Vie quotidienne d'antan)
+- Prompt Mistral paramétré `{family}/{hint}` — chaque grille générée porte le champ `family` en base pour analytics futurs
+
+### Charades Expansion
+- Nouveau module `charades_mistral.py` : job nocturne 04:00 Paris via APScheduler
+- Prompt strict avec rotation `PACKS_ROTATION` (classique, cuisine, nature, metiers, animaux, voyages) selon `day_of_year`
+- **QA automatique** : chaque candidate testée sur (parts 2-3 items, longueur, doublon avec bibliothèque statique OU précédemment générée, longueur hint 5-220 chars) — les rejets sont loggués
+- Stockage `mistral_charades` collection, pruning au-delà de 60
+- `/api/charades/list` et `/api/charades/packs` fusionnent dynamiquement bibliothèque statique + Mistral (avec labels fallback pour packs découverts : Métiers, Animaux, Voyages)
+- **Endpoint admin** : `POST /api/charades/admin/generate` déclenche manuellement le job (gated `get_admin_user`, retourne report {pack, attempted, accepted, rejected_reasons})
+- Test réussi : 5 candidats → 4 acceptés (1 doublon "souris" détecté), pack "animaux" ajouté dynamiquement
+
+### Mots Fléchés MVP
+- 5 grilles 5×5 hand-authored dans `mots_fleches_data.py` : Cuisine du dimanche, À la ferme, Fleurs et arbres, Années 60, Voyages en France
+- Modèle cellule : `block` (avec `clue_h` et/ou `clue_v`) ou `letter` (avec `answer` — jamais envoyé au client, anti-cheat)
+- Router `/api/mots-fleches/*` : list, get (public), submit (validation lettre par lettre + bonus +5 grille complète)
+- Idempotent : `xp_total` crédité uniquement du delta `points - best_prior`
+- Frontend `MotsFleches.jsx` :
+  - Liste des 5 grilles avec meilleur score + badge Complète
+  - GridPlay avec grid 5×5 (input par cellule), auto-advance à droite après frappe, Backspace vide + recule, flèches ↑↓←→ naviguent uniquement sur les cellules `letter`
+  - Feedback visuel : mistake rouge, cursor mustard, submit + reset
+  - Anti-cheat total : le backend n'envoie jamais les réponses
+
+Landing PlatformSection : la carte "Mots Croisés" est désormais Live vers `/app/mots-fleches`. Navbar + MobileMenu : nouveau lien "Mots Fléchés".
+
+Tests: iteration 35 — 13/13 pytest backend + Frontend 100 % — verts.
+
+### Note design signalée
+Le testing agent remonte que la navbar desktop devient encombrée sur < 1280px avec l'ajout de nouveaux liens jeu. Un menu déroulant "Jeux" (Charades / Mots Mêlés / Mots Fléchés / Atelier) est recommandé pour la prochaine passe UX.
+
+### Backlog restant
+- **Navbar Jeux dropdown** (P2) — décongestionner desktop 1024-1280px
+- **Charades expansion** : laisser le cron 04:00 tourner 1-2 semaines pour arriver à 50+ charades
+- **Mots Fléchés v2** : passer de 5×5 à 8×10 grille classique + génération Mistral
+- **Onboarding Tour** (P1)
+- **Coop Atelier** (P1)
+- **EHPAD CRM** (P1)
+- Refactor `server.py` (APScheduler : 7 jobs quotidiens/hebdomadaires maintenant)
+
