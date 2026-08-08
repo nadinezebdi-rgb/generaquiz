@@ -41,7 +41,10 @@ export default function Charades() {
 
   const current = list?.charades?.[idx];
   const solvedSet = useMemo(() => new Set(list?.solved_ids || []), [list]);
-  const solvedCount = list?.solved_ids?.length || 0;
+  // Only count the ids that belong to the CURRENT pack — /list already filters by pack,
+  // so intersecting with the charades in the response gives the pack-local count.
+  const packCharadeIds = useMemo(() => new Set((list?.charades || []).map((c) => c.id)), [list]);
+  const solvedCount = list?.solved_ids?.filter((id) => packCharadeIds.has(id)).length || 0;
   const total = list?.charades?.length || 0;
 
   async function submit() {

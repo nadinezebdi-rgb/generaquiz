@@ -153,7 +153,7 @@ SEED_THEMES: list[dict] = [
          "OIGNON", "SAUCE", "SOUPE", "GATEAU"]},
     {"theme": "Chansons françaises", "emoji": "🎶", "words":
         ["PIAF", "AZNAVOUR", "BREL", "BARBARA", "TRENET", "MONTAND", "FERRE",
-         "BREL", "SARDOU", "MOUSTAKI"]},
+         "SARDOU", "MOUSTAKI", "BECAUD"]},
     {"theme": "Cinéma français", "emoji": "🎬", "words":
         ["BELMONDO", "DELON", "GABIN", "SIGNORET", "MONTAND", "DEPARDIEU",
          "MOREAU", "BARDOT", "TAUTOU", "AUTEUIL"]},

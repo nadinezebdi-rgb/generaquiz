@@ -822,3 +822,41 @@ Tests: iteration 33 — 13/13 pytest backend + Frontend 100 % — verts.
 - Refactor `server.py`, unifier attempts/daily/coop en `game_sessions`
 - Mobile app Expo
 
+
+---
+
+## Jeux de Mots — Vague 1 : Charades packs + Mots Mêlés IA (2026-08-08) ✅
+
+### Charades — enrichissement thématique
+- Restructuration en 3 packs : `classique` (13), `nature` (4), `cuisine` (2) → **19 charades total** (toutes validées manuellement)
+- Nouveaux endpoints : `GET /charades/packs` (avec compteurs), `GET /charades/list?pack=<id>`
+- Frontend : onglets pack cliquables (charades-pack-*) qui rechargent la liste, compteur trophée par pack
+
+### Mots Mêlés IA — nouveau jeu complet 🧩
+Backend :
+- `wordsearch_data.py` — algorithme de placement 8 directions (h/v/diag), grid 12×12, retries jusqu'à succès, remplissage aléatoire des cases libres
+- 5 grilles seed thématiques (Cuisine française, Chansons françaises, Cinéma français, La ferme, Les fleurs) insérées au 1er boot
+- `wordsearch_mistral.py` — générateur IA : prompt Mistral JSON strict (thème + 10 mots) → placement algo → insert Mongo. Fallback silencieux si Mistral fail
+- Cron **APScheduler 03:30 Europe/Paris** ajoute 1 grille par nuit (jusqu'à 40, puis prune des plus anciennes)
+- Router `mots_meles.py` : `/grids`, `/grids/{id}`, `POST /grids/{id}/find`
+- **Anti-cheat** : les positions des mots ne sont **jamais** envoyées au client, seule la liste des mots + statut trouvé/non-trouvé. Le backend valide la ligne (start→end) contre les mots cibles
+- Scoring server-side : **+2 pts / mot trouvé**, **+10 pts bonus** grille complétée, idempotent (double-clic sur le même mot = 0 pt)
+- League hebdomadaire créditée en parallèle
+
+Frontend `/app/mots-meles` :
+- Liste des grilles avec preview (emoji, difficulté, progression, badge Complète)
+- GridPlay : grille interactive 12×12 (144 boutons `mots-meles-cell-r-c`), sélection en 2 clics (1ʳᵉ lettre + dernière lettre), preview de la ligne pendant hover, feedback visuel (surbrillance verte permanente sur mots trouvés + pulse mustard sur nouveau trouvé)
+- Liste des mots à droite (case ✓ + strike-through quand trouvé)
+- Toasts +2 pts / +10 bonus complétion
+- Sur ligne invalide (non droite/diagonale) : toast d'erreur, sélection reset
+
+Landing PlatformSection : carte Mots Mêlés désormais cliquable ("Nouveau" + "Jouer" vert). Navbar + MobileMenu : nouveau lien.
+
+Tests: iteration 34 — 9/9 pytest backend + Frontend 100 % — 1 mini bug UX de compteur (fixé) + doublon BREL seed (fixé).
+
+### Backlog restant
+- **Mots Croisés MVP** (prochaine vague) : 10 grilles fléchées 5×5 pré-authorées + interactive grid UI
+- **Charades expansion** : générateur Mistral pour passer de 19 à 50+ (bibliothèque évolutive)
+- Onboarding Tour, Coop Atelier, EHPAD CRM
+- Refactor `server.py` (APScheduler prend de l'ampleur — 6 jobs quotidiens/hebdo maintenant)
+
