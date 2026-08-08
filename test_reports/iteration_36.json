@@ -1,0 +1,25 @@
+{
+  "summary": "Iteration 36 — Navbar 'Jeux' dropdown + Mots Fléchés v2 (non-square grids, Mistral nightly generator, admin trigger). Backend 6/6 pytest passes (grids list includes 5 static + Mistral grids with rows/cols/source, anti-cheat OK, mf01 5x5 correct submit = 16 correct + completed:true, bad dimensions → 400, admin/generate 403 for regular users, Mistral generated grid appears with source:'mistral' and empty submit returns correct_cells:0/total_cells>0/completed:false/all mistakes false, wrong-dim submit → 400). Frontend @1440x900: individual nav-atelier/charades/mots-meles/mots-fleches links REMOVED; single [data-testid=nav-games-trigger] 'Jeux' opens [data-testid=nav-games-menu] with 4 items; aria-expanded toggles true/false; Escape closes; outside click closes; item click navigates + closes menu. MotsFleches page renders 6 cards (5 seed + 1 Mistral mfg-* with 24 letters + 12 blocks — non-square grid). Mobile @360x760 drawer still lists mobile-nav-atelier/charades/mots-meles/mots-fleches as flat items.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {"ui_bugs": [], "integration_issues": [], "design_issues": []},
+  "test_report_links": ["/app/backend/tests/test_iteration36_fleches_v2.py", "/app/test_reports/pytest/pytest_iter36.xml"],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "routers/mots_fleches._grid_by_id merges static GRIDS then falls back to db.fleches_generated with _id excluded — clean.",
+    "_rows_cols correctly derives rows/cols from generated grids (rows/cols keys) and static (size fallback).",
+    "_public_grid still strips 'answer' from letter cells — verified in test_get_grid_no_answer_leak. Confirmed for both static and Mistral grids by inspection.",
+    "fleches_mistral._build_grid_from_entries pads shorter answers with {'type':'block'} spacers to keep the matrix rectangular — good; cols = max_len+1 (1 clue column).",
+    "fleches_mistral.MAX_GENERATED=30 with pruning by oldest created_at — bounded.",
+    "daily_email.py registers CronTrigger 04:30 Paris for fleches_generate_nightly, non-overlapping with wordsearch(03:30) and charades(04:00) — good.",
+    "GamesDropdown handles Escape + outside click, cleans up listeners on close (deps [open]).",
+    "MotsFleches.jsx uses grid.cols || grid.size for gridTemplateColumns and moveCursor/filledCount handle rows/cols — verified rendering a Mistral non-square grid with 24 letter + 12 block cells.",
+    "Mobile drawer intentionally kept flat (per requirements) — verified all 4 mobile-nav-<game> testids present at 360x760."
+  ],
+  "updated_files": ["/app/backend/tests/test_iteration36_fleches_v2.py"],
+  "success_rate": {"backend": "100%", "frontend": "100%"},
+  "test_credentials": "admin@generaquiz.fr / Admin2026! + ephemeral TEST_iter36_<hex>@example.com registered per session",
+  "seed_data_creation": "None new — reused pre-existing Mistral-generated grid (mfg-*) from prior runs to avoid an extra ~15s Mistral live call. The test path also supports triggering fresh generation if none exists.",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Backend URL: REACT_APP_BACKEND_URL=https://caricature-saas.preview.emergentagent.com. If db.fleches_generated is empty, the admin_generate test will trigger a real Mistral call (~10-20s). mf01 correct matrix: row0=empty, row1=[_,R,I,T,S], row2=[_,A,B,H,O], row3=[_,W,L,Y,U], row4=[_,M,E,M,R] → 16 correct + completion bonus. Mistral grids have id prefix 'mfg-YYYYMMDD-<rand>' and cols=max_word_len+1, rows=n_words (6..8). Frontend Navbar Games dropdown lives at [data-testid=nav-games-trigger]; individual desktop links are gone; mobile drawer still flat."
+}

@@ -126,8 +126,9 @@ function GridPlay({ gridId, onExit }) {
     if (!cursor || !grid) return;
     let r = cursor.r + dr;
     let c = cursor.c + dc;
-    const size = grid.size;
-    while (r >= 0 && r < size && c >= 0 && c < size) {
+    const rows = grid.rows || grid.size;
+    const cols = grid.cols || grid.size;
+    while (r >= 0 && r < rows && c >= 0 && c < cols) {
       if (grid.cells[r][c].type === "letter") {
         setCursor({ r, c });
         cellRefs.current[`${r}-${c}`]?.focus();
@@ -170,9 +171,11 @@ function GridPlay({ gridId, onExit }) {
 
   const filledCount = useMemo(() => {
     if (!grid) return 0;
+    const rows = grid.rows || grid.size;
+    const cols = grid.cols || grid.size;
     let n = 0;
-    for (let r = 0; r < grid.size; r++)
-      for (let c = 0; c < grid.size; c++)
+    for (let r = 0; r < rows; r++)
+      for (let c = 0; c < cols; c++)
         if (grid.cells[r][c].type === "letter" && letters[r]?.[c]) n++;
     return n;
   }, [letters, grid]);
@@ -203,8 +206,8 @@ function GridPlay({ gridId, onExit }) {
         </div>
 
         <div
-          className="grid gap-[3px] mx-auto max-w-[420px]"
-          style={{ gridTemplateColumns: `repeat(${grid.size}, minmax(0, 1fr))` }}
+          className="grid gap-[3px] mx-auto max-w-[560px]"
+          style={{ gridTemplateColumns: `repeat(${grid.cols || grid.size}, minmax(0, 1fr))` }}
           data-testid="mots-fleches-grid"
         >
           {grid.cells.flatMap((row, r) => row.map((cell, c) => {

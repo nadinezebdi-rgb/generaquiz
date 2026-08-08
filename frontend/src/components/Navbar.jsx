@@ -4,6 +4,7 @@ import { LogOut, User as UserIcon, Coins, Trophy, Zap } from "lucide-react";
 import Logo from "@/components/Logo";
 import SeniorModeToggle from "@/components/SeniorModeToggle";
 import MobileMenu from "@/components/MobileMenu";
+import GamesDropdown from "@/components/GamesDropdown";
 
 export default function Navbar({ variant = "landing" }) {
   const { user, logout } = useAuth();
@@ -30,10 +31,7 @@ export default function Navbar({ variant = "landing" }) {
                 <Link to="/quiz-du-jour" data-testid="nav-daily-auth" className="px-4 py-2 text-lg font-semibold text-bordeaux hover:text-terracotta transition">Quiz du Jour ✨</Link>
               )}
               <Link to="/app/dashboard" data-testid="nav-dashboard" className="px-4 py-2 text-lg font-semibold text-navy hover:text-terracotta transition">Mes quiz</Link>
-              <Link to="/app/atelier" data-testid="nav-atelier" className="px-3 py-2 text-base font-semibold text-navy hover:text-terracotta transition">Atelier</Link>
-              <Link to="/app/charades" data-testid="nav-charades" className="px-3 py-2 text-base font-semibold text-navy hover:text-terracotta transition">Charades</Link>
-              <Link to="/app/mots-meles" data-testid="nav-mots-meles" className="px-3 py-2 text-base font-semibold text-navy hover:text-terracotta transition">Mots&nbsp;Mêlés</Link>
-              <Link to="/app/mots-fleches" data-testid="nav-mots-fleches" className="px-3 py-2 text-base font-semibold text-navy hover:text-terracotta transition">Mots&nbsp;Fléchés</Link>
+              <GamesDropdown />
               <Link to="/app/leagues" data-testid="nav-leagues" className="px-3 py-2 text-base font-semibold text-navy hover:text-terracotta transition inline-flex items-center gap-1">
                 <Trophy className="w-4 h-4" /> Ligues
               </Link>

@@ -438,6 +438,14 @@ def start_daily_scheduler() -> None:
         replace_existing=True,
         misfire_grace_time=3600,
     )
+    from fleches_mistral import generate_nightly_fleches  # noqa: WPS433
+    _scheduler.add_job(
+        generate_nightly_fleches,
+        CronTrigger(hour=4, minute=30, timezone="Europe/Paris"),
+        id="fleches_generate_nightly",
+        replace_existing=True,
+        misfire_grace_time=3600,
+    )
     _scheduler.add_job(
         send_expiration_emails,
         CronTrigger(hour=10, minute=0, timezone="Europe/Paris"),

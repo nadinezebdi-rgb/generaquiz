@@ -13,7 +13,7 @@ from datetime import datetime, timezone
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 
-from core import db, get_current_user
+from core import db, get_current_user, get_admin_user
 from mots_fleches_data import GRIDS, _public_grid
 
 router = APIRouter(prefix="/mots-fleches", tags=["mots-fleches"])
@@ -24,11 +24,21 @@ COMPLETION_BONUS = 5
 
 class SubmitIn(BaseModel):
     # 2D array of strings — same shape as the grid. Non-letter cells send "".
-    letters: list[list[str]] = Field(..., min_items=1, max_items=10)
+    letters: list[list[str]] = Field(..., min_items=1, max_items=15)
 
 
-def _grid_by_id(grid_id: str) -> dict | None:
-    return next((g for g in GRIDS if g["id"] == grid_id), None)
+async def _grid_by_id(grid_id: str) -> dict | None:
+    """Static grids first, then Mistral-generated collection."""
+    static = next((g for g in GRIDS if g["id"] == grid_id), None)
+    if static:
+        return static
+    return await db.fleches_generated.find_one({"id": grid_id}, {"_id": 0})
+
+
+def _rows_cols(g: dict) -> tuple[int, int]:
+    rows = g.get("rows") or g.get("size") or len(g["cells"])
+    cols = g.get("cols") or g.get("size") or (len(g["cells"][0]) if g["cells"] else 0)
+    return int(rows), int(cols)
 
 
 @router.get("/grids")
@@ -36,17 +46,24 @@ async def list_grids(user: dict = Depends(get_current_user)) -> list[dict]:
     user_id = str(user["_id"])
     progress = await db.fleches_progress.find(
         {"user_id": user_id}, {"_id": 0, "grid_id": 1, "completed_at": 1, "best_score": 1},
-    ).to_list(50)
+    ).to_list(200)
     pmap = {p["grid_id"]: p for p in progress}
+    all_grids: list[dict] = list(GRIDS)
+    generated = await db.fleches_generated.find({}, {"_id": 0}).sort("created_at", -1).to_list(60)
+    all_grids.extend(generated)
     out = []
-    for g in GRIDS:
+    for g in all_grids:
         p = pmap.get(g["id"], {})
+        rows, cols = _rows_cols(g)
         out.append({
             "id": g["id"],
             "theme": g["theme"],
             "emoji": g["emoji"],
-            "difficulty": g["difficulty"],
-            "size": g["size"],
+            "difficulty": g.get("difficulty", "moyen"),
+            "size": g.get("size", max(rows, cols)),
+            "rows": rows,
+            "cols": cols,
+            "source": g.get("source", "seed"),
             "completed": bool(p.get("completed_at")),
             "best_score": int(p.get("best_score") or 0),
         })
@@ -55,27 +72,31 @@ async def list_grids(user: dict = Depends(get_current_user)) -> list[dict]:
 
 @router.get("/grids/{grid_id}")
 async def get_grid(grid_id: str, user: dict = Depends(get_current_user)) -> dict:
-    grid = _grid_by_id(grid_id)
+    grid = await _grid_by_id(grid_id)
     if not grid:
         raise HTTPException(status_code=404, detail="Grille introuvable")
-    return _public_grid(grid)
+    payload = _public_grid(grid)
+    rows, cols = _rows_cols(grid)
+    payload["rows"] = rows
+    payload["cols"] = cols
+    return payload
 
 
 @router.post("/grids/{grid_id}/submit")
 async def submit_grid(grid_id: str, body: SubmitIn, user: dict = Depends(get_current_user)) -> dict:
-    grid = _grid_by_id(grid_id)
+    grid = await _grid_by_id(grid_id)
     if not grid:
         raise HTTPException(status_code=404, detail="Grille introuvable")
 
-    size = grid["size"]
-    if len(body.letters) != size or any(len(row) != size for row in body.letters):
+    rows, cols = _rows_cols(grid)
+    if len(body.letters) != rows or any(len(row) != cols for row in body.letters):
         raise HTTPException(status_code=400, detail="Dimensions incorrectes")
 
     correct_cells = 0
     total_cells = 0
-    mistakes_mask: list[list[bool]] = [[False] * size for _ in range(size)]
-    for r in range(size):
-        for c in range(size):
+    mistakes_mask: list[list[bool]] = [[False] * cols for _ in range(rows)]
+    for r in range(rows):
+        for c in range(cols):
             cell = grid["cells"][r][c]
             if cell["type"] != "letter":
                 continue
@@ -133,3 +154,11 @@ async def submit_grid(grid_id: str, body: SubmitIn, user: dict = Depends(get_cur
         "best_score": max(points, best_prior),
         "mistakes": mistakes_mask,
     }
+
+
+@router.post("/admin/generate")
+async def admin_generate(_: dict = Depends(get_admin_user)) -> dict:
+    """Manually trigger the Mistral fléchés generator. Returns the new grid id or null."""
+    from fleches_mistral import generate_nightly_fleches
+    gid = await generate_nightly_fleches()
+    return {"grid_id": gid, "ok": bool(gid)}
