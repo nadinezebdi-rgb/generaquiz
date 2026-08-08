@@ -905,3 +905,38 @@ Le testing agent remonte que la navbar desktop devient encombrée sur < 1280px a
 - **EHPAD CRM** (P1)
 - Refactor `server.py` (APScheduler : 7 jobs quotidiens/hebdomadaires maintenant)
 
+
+---
+
+## Vague 3 : Navbar Jeux dropdown + Mots Fléchés v2 (2026-08-08) ✅
+
+### Navbar Games Menu
+- Nouveau composant `GamesDropdown.jsx` : 1 trigger "Jeux" + menu avec 4 items (Atelier Mémoire / Charades / Mots Mêlés / Mots Fléchés) chacun avec icône + description
+- Accessibilité complète : `aria-expanded` togglé, ferme sur clic extérieur, ferme sur Escape
+- Navbar desktop : les 4 liens individuels supprimés → 1 seul bouton "Jeux". Décongestionnement à 1024-1280px
+- MobileMenu : structure plate conservée (drawer déjà spacieux)
+
+### Mots Fléchés v2
+- Modèle étendu : les grilles portent maintenant `rows` × `cols` (non-carré supporté). Backward compat via champ `size` legacy
+- `_public_grid` continue à masquer les réponses (anti-cheat)
+- `_grid_by_id` : merge des grilles statiques (mf01..mf05) + collection `fleches_generated` (Mistral)
+- Nouveau module `fleches_mistral.py` :
+  - `THEME_ROTATION` : 10 thèmes culturels français (Cuisine, Cinéma, Chansons, Régions, Ferme, Fleurs, Métiers, Vie d'antan, Sport, Écrivains)
+  - Prompt Mistral strict : {theme, emoji, entries: [{word, clue}]} × 6-8 lignes
+  - **QA automatique** par entrée : longueur mot 3-8 lettres, sans accent, clue 5-60 chars ne contenant pas le mot
+  - Assemblage row-based : chaque ligne = block(clue) + lettres, pad avec blocks pour rectangularité
+  - Cron **APScheduler 04:30 Europe/Paris** — 1 grille/nuit, pruning au-delà de 30
+- Endpoint admin manuel `POST /api/mots-fleches/admin/generate` (gated admin) — testé live, grille 6×6 "Vie quotidienne d'antan" générée
+- Frontend `MotsFleches.jsx` mis à jour : `grid.cols || grid.size` pour le CSS grid, `moveCursor`/`filledCount` gèrent rows/cols indépendamment
+
+Tests: iteration 36 — 6/6 pytest backend + Frontend 100 % — verts. Aucun action_item, aucun design_issue restant.
+
+### Backlog restant
+- **Onboarding Tour** (P1)
+- **Coop Atelier** (P1) — session famille partagée
+- **EHPAD CRM** (P1)
+- **Charades bibliothèque** : laisser le cron 04:00 accumuler 4-5 semaines pour dépasser 50
+- **Mots Fléchés v3** : grilles avec intersections verticales (vrais mots fléchés) — algorithme de placement plus complexe
+- Refactor `server.py` (8 jobs APScheduler)
+- Mobile app Expo
+
