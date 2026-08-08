@@ -35,6 +35,7 @@ import Ehpad from "@/pages/Ehpad";
 import Atelier from "@/pages/Atelier";
 import AtelierEntries from "@/pages/AtelierEntries";
 import Charades from "@/pages/Charades";
+import MotsMeles from "@/pages/MotsMeles";
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();
@@ -90,6 +91,14 @@ export default function App() {
             element={
               <ProtectedRoute>
                 <Charades />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/app/mots-meles"
+            element={
+              <ProtectedRoute>
+                <MotsMeles />
               </ProtectedRoute>
             }
           />

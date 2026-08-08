@@ -15,7 +15,7 @@ from pydantic import BaseModel, Field
 
 from core import db, get_current_user
 from badges import award_badge, BADGE_INDEX
-from charades_data import CHARADES, normalize
+from charades_data import CHARADES, PACKS, charades_for_pack, normalize
 
 
 router = APIRouter(prefix="/charades", tags=["charades"])
@@ -35,22 +35,43 @@ def _public_charade(c: dict) -> dict:
     """Strip the answer before sending to the client."""
     return {
         "id": c["id"],
+        "pack": c["pack"],
         "parts": c["parts"],
         "hint": c["hint"],
     }
 
 
+@router.get("/packs")
+async def list_packs(user: dict = Depends(get_current_user)) -> list[dict]:
+    """Pack catalog with counts (solved / total per pack)."""
+    user_id = str(user["_id"])
+    solved = set(await db.charade_attempts.distinct(
+        "charade_id", {"user_id": user_id, "correct": True}
+    ))
+    out = []
+    for p in PACKS:
+        pack_charades = [c for c in CHARADES if c["pack"] == p["id"]]
+        out.append({
+            **p,
+            "total": len(pack_charades),
+            "solved": sum(1 for c in pack_charades if c["id"] in solved),
+        })
+    return out
+
+
 @router.get("/list")
-async def list_charades(user: dict = Depends(get_current_user)) -> dict:
-    """All charades + which ones this user has already solved."""
+async def list_charades(pack: str | None = None, user: dict = Depends(get_current_user)) -> dict:
+    """All charades in a pack (or all packs) + which the user has solved."""
     user_id = str(user["_id"])
     solved = await db.charade_attempts.distinct(
         "charade_id", {"user_id": user_id, "correct": True}
     )
+    filtered = charades_for_pack(pack)
     return {
-        "charades": [_public_charade(c) for c in CHARADES],
+        "charades": [_public_charade(c) for c in filtered],
         "solved_ids": solved,
         "points_per_correct": POINTS_PER_CORRECT,
+        "pack": pack or "all",
     }
 
 

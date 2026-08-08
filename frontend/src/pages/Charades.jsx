@@ -17,6 +17,8 @@ import {
  */
 
 export default function Charades() {
+  const [packs, setPacks] = useState([]);
+  const [selectedPack, setSelectedPack] = useState("classique");
   const [list, setList] = useState(null);          // {charades[], solved_ids[], points_per_correct}
   const [idx, setIdx] = useState(0);
   const [answer, setAnswer] = useState("");
@@ -25,8 +27,17 @@ export default function Charades() {
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    api.get("/charades/list").then((r) => setList(r.data)).catch(() => {});
+    api.get("/charades/packs").then((r) => setPacks(r.data)).catch(() => {});
   }, []);
+
+  useEffect(() => {
+    setList(null);
+    setIdx(0);
+    setAnswer("");
+    setReveal(null);
+    setShowHint(false);
+    api.get(`/charades/list?pack=${selectedPack}`).then((r) => setList(r.data)).catch(() => {});
+  }, [selectedPack]);
 
   const current = list?.charades?.[idx];
   const solvedSet = useMemo(() => new Set(list?.solved_ids || []), [list]);
@@ -110,6 +121,31 @@ export default function Charades() {
             Devinez le mot caché — {list.points_per_correct} points par bonne réponse
           </span>
         </div>
+
+        {/* Pack tabs */}
+        {packs.length > 0 && (
+          <div className="flex gap-2 my-4 flex-wrap" data-testid="charades-packs">
+            {packs.map((p) => (
+              <button
+                key={p.id}
+                type="button"
+                onClick={() => setSelectedPack(p.id)}
+                data-testid={`charades-pack-${p.id}`}
+                className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-bold border-2 transition ${
+                  selectedPack === p.id
+                    ? "bg-navy border-navy text-cream"
+                    : "bg-white border-cream-dark text-navy hover:border-terracotta"
+                }`}
+              >
+                <span>{p.emoji}</span>
+                <span>{p.label}</span>
+                <span className={`text-xs ${selectedPack === p.id ? "text-cream/70" : "text-navy/50"}`}>
+                  {p.solved}/{p.total}
+                </span>
+              </button>
+            ))}
+          </div>
+        )}
 
         <div className="h-2 bg-cream-dark rounded-full overflow-hidden mb-6">
           <div className="h-full bg-terracotta transition-all" style={{ width: `${progressPct}%` }} data-testid="charades-progress-bar" />

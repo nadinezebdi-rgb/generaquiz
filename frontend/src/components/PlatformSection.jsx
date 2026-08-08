@@ -44,13 +44,20 @@ const WORD_GAMES = [
   {
     key: "charades",
     title: "Charades",
-    desc: "Mon premier, mon deuxième… 13 charades classiques, +5 pts par bonne réponse.",
+    desc: "Mon premier, mon deuxième… Charades classiques, +5 pts par bonne réponse.",
     icon: MessageCircle,
     href: "/app/charades",
+    tag: { label: "En ligne", cls: "bg-[#3D9970]/20 text-[#2A7350]" },
+  },
+  {
+    key: "mots-meles",
+    title: "Mots Mêlés",
+    desc: "Grilles thématiques générées chaque nuit par IA. Trouvez les mots cachés !",
+    icon: Search,
+    href: "/app/mots-meles",
     tag: { label: "Nouveau", cls: "bg-mustard text-navy" },
   },
   { key: "mots-croises", title: "Mots Croisés", desc: "La grille classique, en français.", icon: PenLine },
-  { key: "mots-meles",   title: "Mots Mêlés",   desc: "Retrouvez les mots cachés dans la grille de lettres.", icon: Search },
 ];
 
 export default function PlatformSection() {

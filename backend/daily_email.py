@@ -421,6 +421,15 @@ def start_daily_scheduler() -> None:
         replace_existing=True,
         misfire_grace_time=3600,
     )
+    # Mots Mêlés — one fresh grid nightly at 03:30 Paris (after quiz regen)
+    from wordsearch_mistral import generate_one_grid_from_mistral  # noqa: WPS433
+    _scheduler.add_job(
+        generate_one_grid_from_mistral,
+        CronTrigger(hour=3, minute=30, timezone="Europe/Paris"),
+        id="wordsearch_generate_nightly",
+        replace_existing=True,
+        misfire_grace_time=3600,
+    )
     _scheduler.add_job(
         send_expiration_emails,
         CronTrigger(hour=10, minute=0, timezone="Europe/Paris"),
