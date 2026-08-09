@@ -271,6 +271,7 @@ class ChangePasswordRequest(BaseModel):
 class UpdateProfileRequest(BaseModel):
     name: str = Field(min_length=1, max_length=80)
     birth_year: Optional[int] = Field(None, ge=1900, le=2026)
+    email: Optional[EmailStr] = None
 
 
 class DailyEmailPrefRequest(BaseModel):

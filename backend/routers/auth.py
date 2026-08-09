@@ -218,6 +218,21 @@ async def update_profile(body: UpdateProfileRequest, user: dict = Depends(get_cu
     update = {"name": body.name.strip()}
     if body.birth_year is not None:
         update["birth_year"] = body.birth_year
+    if body.email is not None:
+        new_email = body.email.strip().lower()
+        current_email = (user.get("email") or "").strip().lower()
+        if new_email != current_email:
+            # Uniqueness check — case-insensitive
+            clash = await db.users.find_one(
+                {"email": {"$regex": f"^{new_email}$", "$options": "i"},
+                 "_id": {"$ne": ObjectId(str(user["_id"]))}},
+                {"_id": 1},
+            )
+            if clash:
+                raise HTTPException(
+                    status_code=409, detail="Cette adresse e-mail est déjà utilisée par un autre compte."
+                )
+            update["email"] = new_email
     await db.users.update_one({"_id": ObjectId(str(user["_id"]))}, {"$set": update})
     fresh = await db.users.find_one({"_id": ObjectId(str(user["_id"]))})
     return user_to_public(fresh)
