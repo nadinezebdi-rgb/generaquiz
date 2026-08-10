@@ -25,7 +25,9 @@ DB_NAME = os.environ["DB_NAME"]
 JWT_SECRET = os.environ["JWT_SECRET"]
 JWT_ALG = "HS256"
 ADMIN_EMAIL = os.environ.get("ADMIN_EMAIL", "admin@quizdantan.fr")
-ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "Admin2026!")
+# ADMIN_PASSWORD must be provided via env var in production. Empty default
+# means no admin is auto-seeded (see server.py) — never hardcode a real password here.
+ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "")
 FRONTEND_URL = os.environ.get("FRONTEND_URL", "http://localhost:3000")
 STRIPE_API_KEY = os.environ.get("STRIPE_API_KEY", "sk_test_emergent")
 RESEND_API_KEY = os.environ.get("RESEND_API_KEY", "")
