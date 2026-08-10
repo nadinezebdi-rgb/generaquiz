@@ -26,7 +26,7 @@ export default function MobileMenu({ variant = "landing" }) {
   function close() { setOpen(false); }
 
   return (
-    <div className="lg:hidden">
+    <div className="min-[1400px]:hidden">
       <button
         type="button"
         aria-label="Ouvrir le menu"
@@ -85,6 +85,9 @@ export default function MobileMenu({ variant = "landing" }) {
                   )}
                   <MobileLink to="/app/dashboard" onClick={close} testid="mobile-nav-dashboard">Mes quiz</MobileLink>
                   <MobileLink to="/app/atelier" onClick={close} testid="mobile-nav-atelier">Atelier Mémoire</MobileLink>
+                  <MobileLink to="/app/charades" onClick={close} testid="mobile-nav-charades">Charades</MobileLink>
+                  <MobileLink to="/app/mots-meles" onClick={close} testid="mobile-nav-mots-meles">Mots Mêlés</MobileLink>
+                  <MobileLink to="/app/mots-fleches" onClick={close} testid="mobile-nav-mots-fleches">Mots Fléchés</MobileLink>
                   <MobileLink to="/app/leagues" onClick={close} testid="mobile-nav-leagues" icon={<Trophy className="w-4 h-4" />}>Ligues</MobileLink>
                   <MobileLink to="/app/progression" onClick={close} testid="mobile-nav-progression" icon={<Zap className="w-4 h-4 text-terracotta" />}>
                     Progression · Niv {typeof user.level === "number" ? user.level : 1}

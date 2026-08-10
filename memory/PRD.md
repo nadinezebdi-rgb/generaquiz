@@ -780,3 +780,305 @@ Tests: iteration 29 — 19/19 pytest backend + Frontend 100 % — verts.
 - **Refactor** : découper `server.py`, unifier `attempts / daily_attempts / coop_challenges` en `game_sessions`
 - **Mobile app** : Expo React Native
 
+
+---
+
+## Jeux de Mots — Étape 0 + 1 : Charades (2026-08-08) ✅
+
+### Étape 0 — PlatformSection assainie
+- Carte **Atelier Mémoire** : maintenant Link cliquable vers `/app/atelier`, badge "En ligne" vert + pill "Jouer" (au lieu de "EN DEV")
+- Carte **Charades** : ajoutée comme Link vers `/app/charades`, badge "Nouveau"
+- Les autres cartes (Journal de Vie, Recettes d'Antan, Photothèque, Mots Croisés, Mots Mêlés) restent en "EN DEV" avec `cursor-not-allowed`
+- Sidebar réécrite : "Deux sont déjà en ligne."
+
+### Étape 1 — Charades françaises 🎭
+Backend nouveau `charades_data.py` + router `/api/charades/*` :
+- 13 charades classiques françaises vérifiées manuellement (Château, Bonjour, Poulet, Vinaigre, Souris, Lapin, Chaton, Marmite, Chapeau, Bonbon, Sapin, Orange, Carotte)
+- **Anti-cheat** : `_public_charade()` strip la réponse avant tout retour au client
+- Normalisation tolérante : minuscules + accents supprimés + non-alphanumériques retirés (`CHÂTEAU` = `chateau` = ` château `)
+- Récompense : **+5 pts par bonne réponse**, idempotent (pas de double comptage), attribué au 1er correct uniquement
+- Ligue hebdomadaire créditée en même temps
+- Nouveau badge **`amateur_mots`** (or) débloqué au 10ᵉ charade résolue distincte
+
+Frontend `/app/charades` :
+- Card avec 3 lignes de charade, input, bouton indice, bouton valider
+- Panneau reveal (vert bravo / rouge ce n'est pas ça), badge "Déjà résolue"
+- Précédent / Suivant / Passer + progression `X / 13 résolues`
+- Toast récompense +5 pts
+
+Navbar & MobileMenu : nouveau lien `Charades` visible pour utilisateurs connectés.
+
+Tests: iteration 33 — 13/13 pytest backend + Frontend 100 % — verts.
+
+### Backlog Jeux de Mots restant
+- **Mots Mêlés** (option b — Mistral IA) : cron nocturne génère un thème + 10 mots + placement algorithmique dans une grille MongoDB
+- **Mots Croisés** (options e + f) : MVP grille 5×5 fléchée pré-authorée × 10, puis génération IA
+- **Autres activités** (Journal de Vie, Recettes d'Antan, Photothèque) : à scoper
+
+### Autre backlog
+- Onboarding Tour (P1)
+- Coop Atelier (P1)
+- EHPAD CRM (P1)
+- Refactor `server.py`, unifier attempts/daily/coop en `game_sessions`
+- Mobile app Expo
+
+
+---
+
+## Jeux de Mots — Vague 1 : Charades packs + Mots Mêlés IA (2026-08-08) ✅
+
+### Charades — enrichissement thématique
+- Restructuration en 3 packs : `classique` (13), `nature` (4), `cuisine` (2) → **19 charades total** (toutes validées manuellement)
+- Nouveaux endpoints : `GET /charades/packs` (avec compteurs), `GET /charades/list?pack=<id>`
+- Frontend : onglets pack cliquables (charades-pack-*) qui rechargent la liste, compteur trophée par pack
+
+### Mots Mêlés IA — nouveau jeu complet 🧩
+Backend :
+- `wordsearch_data.py` — algorithme de placement 8 directions (h/v/diag), grid 12×12, retries jusqu'à succès, remplissage aléatoire des cases libres
+- 5 grilles seed thématiques (Cuisine française, Chansons françaises, Cinéma français, La ferme, Les fleurs) insérées au 1er boot
+- `wordsearch_mistral.py` — générateur IA : prompt Mistral JSON strict (thème + 10 mots) → placement algo → insert Mongo. Fallback silencieux si Mistral fail
+- Cron **APScheduler 03:30 Europe/Paris** ajoute 1 grille par nuit (jusqu'à 40, puis prune des plus anciennes)
+- Router `mots_meles.py` : `/grids`, `/grids/{id}`, `POST /grids/{id}/find`
+- **Anti-cheat** : les positions des mots ne sont **jamais** envoyées au client, seule la liste des mots + statut trouvé/non-trouvé. Le backend valide la ligne (start→end) contre les mots cibles
+- Scoring server-side : **+2 pts / mot trouvé**, **+10 pts bonus** grille complétée, idempotent (double-clic sur le même mot = 0 pt)
+- League hebdomadaire créditée en parallèle
+
+Frontend `/app/mots-meles` :
+- Liste des grilles avec preview (emoji, difficulté, progression, badge Complète)
+- GridPlay : grille interactive 12×12 (144 boutons `mots-meles-cell-r-c`), sélection en 2 clics (1ʳᵉ lettre + dernière lettre), preview de la ligne pendant hover, feedback visuel (surbrillance verte permanente sur mots trouvés + pulse mustard sur nouveau trouvé)
+- Liste des mots à droite (case ✓ + strike-through quand trouvé)
+- Toasts +2 pts / +10 bonus complétion
+- Sur ligne invalide (non droite/diagonale) : toast d'erreur, sélection reset
+
+Landing PlatformSection : carte Mots Mêlés désormais cliquable ("Nouveau" + "Jouer" vert). Navbar + MobileMenu : nouveau lien.
+
+Tests: iteration 34 — 9/9 pytest backend + Frontend 100 % — 1 mini bug UX de compteur (fixé) + doublon BREL seed (fixé).
+
+### Backlog restant
+- **Mots Croisés MVP** (prochaine vague) : 10 grilles fléchées 5×5 pré-authorées + interactive grid UI
+- **Charades expansion** : générateur Mistral pour passer de 19 à 50+ (bibliothèque évolutive)
+- Onboarding Tour, Coop Atelier, EHPAD CRM
+- Refactor `server.py` (APScheduler prend de l'ampleur — 6 jobs quotidiens/hebdo maintenant)
+
+
+---
+
+## Jeux de Mots — Vague 2 : Grid Themes IA + Charades Expansion + Mots Fléchés MVP (2026-08-08) ✅
+
+### Grid Themes IA
+- `wordsearch_mistral.py` : liste `THEME_FAMILIES` (10 catégories culturelles françaises) tirée au sort à chaque exécution nocturne (Régions, Années 60, Métiers d'autrefois, Cuisine régionale, Jardin & saisons, Chansons, Cinéma classique, Sport, Écrivains, Vie quotidienne d'antan)
+- Prompt Mistral paramétré `{family}/{hint}` — chaque grille générée porte le champ `family` en base pour analytics futurs
+
+### Charades Expansion
+- Nouveau module `charades_mistral.py` : job nocturne 04:00 Paris via APScheduler
+- Prompt strict avec rotation `PACKS_ROTATION` (classique, cuisine, nature, metiers, animaux, voyages) selon `day_of_year`
+- **QA automatique** : chaque candidate testée sur (parts 2-3 items, longueur, doublon avec bibliothèque statique OU précédemment générée, longueur hint 5-220 chars) — les rejets sont loggués
+- Stockage `mistral_charades` collection, pruning au-delà de 60
+- `/api/charades/list` et `/api/charades/packs` fusionnent dynamiquement bibliothèque statique + Mistral (avec labels fallback pour packs découverts : Métiers, Animaux, Voyages)
+- **Endpoint admin** : `POST /api/charades/admin/generate` déclenche manuellement le job (gated `get_admin_user`, retourne report {pack, attempted, accepted, rejected_reasons})
+- Test réussi : 5 candidats → 4 acceptés (1 doublon "souris" détecté), pack "animaux" ajouté dynamiquement
+
+### Mots Fléchés MVP
+- 5 grilles 5×5 hand-authored dans `mots_fleches_data.py` : Cuisine du dimanche, À la ferme, Fleurs et arbres, Années 60, Voyages en France
+- Modèle cellule : `block` (avec `clue_h` et/ou `clue_v`) ou `letter` (avec `answer` — jamais envoyé au client, anti-cheat)
+- Router `/api/mots-fleches/*` : list, get (public), submit (validation lettre par lettre + bonus +5 grille complète)
+- Idempotent : `xp_total` crédité uniquement du delta `points - best_prior`
+- Frontend `MotsFleches.jsx` :
+  - Liste des 5 grilles avec meilleur score + badge Complète
+  - GridPlay avec grid 5×5 (input par cellule), auto-advance à droite après frappe, Backspace vide + recule, flèches ↑↓←→ naviguent uniquement sur les cellules `letter`
+  - Feedback visuel : mistake rouge, cursor mustard, submit + reset
+  - Anti-cheat total : le backend n'envoie jamais les réponses
+
+Landing PlatformSection : la carte "Mots Croisés" est désormais Live vers `/app/mots-fleches`. Navbar + MobileMenu : nouveau lien "Mots Fléchés".
+
+Tests: iteration 35 — 13/13 pytest backend + Frontend 100 % — verts.
+
+### Note design signalée
+Le testing agent remonte que la navbar desktop devient encombrée sur < 1280px avec l'ajout de nouveaux liens jeu. Un menu déroulant "Jeux" (Charades / Mots Mêlés / Mots Fléchés / Atelier) est recommandé pour la prochaine passe UX.
+
+### Backlog restant
+- **Navbar Jeux dropdown** (P2) — décongestionner desktop 1024-1280px
+- **Charades expansion** : laisser le cron 04:00 tourner 1-2 semaines pour arriver à 50+ charades
+- **Mots Fléchés v2** : passer de 5×5 à 8×10 grille classique + génération Mistral
+- **Onboarding Tour** (P1)
+- **Coop Atelier** (P1)
+- **EHPAD CRM** (P1)
+- Refactor `server.py` (APScheduler : 7 jobs quotidiens/hebdomadaires maintenant)
+
+
+---
+
+## Vague 3 : Navbar Jeux dropdown + Mots Fléchés v2 (2026-08-08) ✅
+
+### Navbar Games Menu
+- Nouveau composant `GamesDropdown.jsx` : 1 trigger "Jeux" + menu avec 4 items (Atelier Mémoire / Charades / Mots Mêlés / Mots Fléchés) chacun avec icône + description
+- Accessibilité complète : `aria-expanded` togglé, ferme sur clic extérieur, ferme sur Escape
+- Navbar desktop : les 4 liens individuels supprimés → 1 seul bouton "Jeux". Décongestionnement à 1024-1280px
+- MobileMenu : structure plate conservée (drawer déjà spacieux)
+
+### Mots Fléchés v2
+- Modèle étendu : les grilles portent maintenant `rows` × `cols` (non-carré supporté). Backward compat via champ `size` legacy
+- `_public_grid` continue à masquer les réponses (anti-cheat)
+- `_grid_by_id` : merge des grilles statiques (mf01..mf05) + collection `fleches_generated` (Mistral)
+- Nouveau module `fleches_mistral.py` :
+  - `THEME_ROTATION` : 10 thèmes culturels français (Cuisine, Cinéma, Chansons, Régions, Ferme, Fleurs, Métiers, Vie d'antan, Sport, Écrivains)
+  - Prompt Mistral strict : {theme, emoji, entries: [{word, clue}]} × 6-8 lignes
+  - **QA automatique** par entrée : longueur mot 3-8 lettres, sans accent, clue 5-60 chars ne contenant pas le mot
+  - Assemblage row-based : chaque ligne = block(clue) + lettres, pad avec blocks pour rectangularité
+  - Cron **APScheduler 04:30 Europe/Paris** — 1 grille/nuit, pruning au-delà de 30
+- Endpoint admin manuel `POST /api/mots-fleches/admin/generate` (gated admin) — testé live, grille 6×6 "Vie quotidienne d'antan" générée
+- Frontend `MotsFleches.jsx` mis à jour : `grid.cols || grid.size` pour le CSS grid, `moveCursor`/`filledCount` gèrent rows/cols indépendamment
+
+Tests: iteration 36 — 6/6 pytest backend + Frontend 100 % — verts. Aucun action_item, aucun design_issue restant.
+
+### Backlog restant
+- **Onboarding Tour** (P1)
+- **Coop Atelier** (P1) — session famille partagée
+- **EHPAD CRM** (P1)
+- **Charades bibliothèque** : laisser le cron 04:00 accumuler 4-5 semaines pour dépasser 50
+- **Mots Fléchés v3** : grilles avec intersections verticales (vrais mots fléchés) — algorithme de placement plus complexe
+- Refactor `server.py` (8 jobs APScheduler)
+- Mobile app Expo
+
+
+---
+
+## Mots Fléchés v3 : Croisements verticaux + look journal (2026-08-08) ✅
+
+### Livrable honnête (scope réaliste)
+Génération automatique de vrais mots croisés avec intersections = problème combinatoire dur (backtracking, solver, wordlist filtré). Trop lourd pour MVP. Deux volets délivrés à la place :
+
+**1. Look "journal" — arrow markers**
+- Frontend `MotsFleches.jsx` : les cases noires affichent maintenant des flèches ▶ (clue_h → droite) et ▼ (clue_v → bas) en couleur mustard, positionnées en bas-droite de chaque case
+- Applied à toutes les grilles existantes (mf01..mf05 + mf06 + grilles Mistral) — visuellement, cela ressemble maintenant à un vrai mots fléchés de journal français
+
+**2. Grille mf06 — Carré magique (preuve de concept avec croisements)**
+- 3×3 magic square : MER / EAU / RUE en lignes ET en colonnes = 6 mots français, chaque lettre croise 2 mots
+- Champ `words: [{answer, direction, row, col}]` ajouté au modèle (pour validation avancée future)
+- Difficulté "difficile" (car les intersections rendent chaque erreur pénalisante)
+- 9 lettres × 1 pt + 5 bonus complétion = 14 pts
+
+Tests: iteration 37 — 5/5 pytest backend + Frontend 100 % — verts. Aucun action item.
+
+### Backlog restant (mots fléchés v4 et au-delà)
+- **v4 — Solver automatique** : générateur backtracking à partir d'un wordlist français validé + template de grille avec black cells (structurel comme les journaux). Nécessite ~2000 lignes de code (dict lookup, arc consistency, MRV heuristic). Alternative : intégrer bibliothèque tierce (`crossword-composer`, `qxw`) ou puzzle library premium.
+- **v4 bis — Mistral avec template contraint** : plutôt qu'un solver, forcer Mistral à remplir un template pré-authoré (positions fixes, mots à trouver qui matchent) — plus rapide mais qualité variable
+- Onboarding Tour, Coop Atelier, EHPAD CRM
+- Charades bibliothèque expansion (laisser le cron 04:00 accumuler)
+- Refactor `server.py` (8 jobs APScheduler)
+
+
+
+---
+
+## Navbar Admin Dropdown + compactage responsive (2026-02-10) ✅
+
+### Contexte
+User admin ne voyait plus les liens admin car la navbar débordait sur laptop 1440px (10+ items, breakpoint `lg:flex` à 1024px = trop tôt).
+
+### Livrables
+1. **AdminDropdown.jsx** — nouveau composant qui regroupe Analytics / Promos / Signalements dans un menu déroulant "Admin" avec icône shield, click-outside + Escape, `data-testid`.
+2. **Navbar.jsx compactée** — text-lg → text-base, px-4 → px-3, `whitespace-nowrap` sur tous les items, container élargi à `max-w-[1600px]`, retrait de "Défi famille" (accessible via CTA du hero dashboard).
+3. **Breakpoint responsive rehaussé** — desktop nav visible à partir de 1400px (arbitrary Tailwind class `min-[1400px]:flex`), MobileMenu (drawer) prend le relais en-dessous. MobileMenu contient déjà les 3 liens admin.
+
+### Résultats vérifiés (screenshot tool)
+- 1920px : desktop nav propre, no overflow ✅
+- 1440px : desktop nav complète (Quiz du Jour, Mes quiz, Jeux, Ligues, Niv N, Crédits, Mon compte, Admin ⌄, Quitter, Confort +) ✅
+- 1399 → 375px : mobile drawer avec section Admin dédiée ✅
+- Admin dropdown → click Analytics → route `/app/admin/analytics` fonctionne ✅
+
+### Fichiers touchés
+- Créé : `/app/frontend/src/components/AdminDropdown.jsx`
+- Modifiés : `/app/frontend/src/components/Navbar.jsx`, `/app/frontend/src/components/MobileMenu.jsx`
+
+### Backlog restant
+- Onboarding Tour (P1)
+- Coop Atelier grand-parent / petit-enfant (P1)
+- EHPAD CRM (P2)
+- Refactor `server.py` scheduler → `scheduler.py` (technique)
+- Mobile app Expo (backlog)
+
+
+---
+
+## Mots Fléchés — Refonte grilles + feedback en direct (2026-02-10) ✅
+
+### Bug identifié (user report)
+Les grilles mf01-mf05 étaient des "5×5" (en réalité 4×4 zone jouable) avec des réponses stockées en charabia (`RITS/ABHO/WLYU/MEMR`) qui ne correspondaient pas aux définitions ("Céréale d'Asie" = RIZ 3 lettres, mais 4 cases…). Seule mf06 (MER/EAU/RUE) était valide.
+
+### Livrables
+1. **6 grilles 4×4 avec vrais croisements** — carrés magiques 3×3 (matrice symétrique) où chaque ligne ET chaque colonne forme un vrai mot français vérifié :
+   - mf01 Petit-déjeuner 🥐 · BOL/OSE/LES (facile)
+   - mf02 À la ferme 🐓 · OIE/IRA/EAU (facile)
+   - mf03 Nature & vigne 🍇 · ROC/OSE/CEP (moyen)
+   - mf04 Petits mots courants 📚 · ILE/LES/EST (moyen)
+   - mf05 Objets du quotidien 🔑 · SAC/AIL/CLE (difficile)
+   - mf06 Ville & Nature 🎯 · MER/EAU/RUE (difficile, inchangée)
+   - Symétrie vérifiée par `assert` au chargement (fail-fast)
+2. **Nouvel endpoint `POST /mots-fleches/grids/{id}/check`** — retourne `{correct_cells, total_cells, accuracy_pct, mistakes}` sans écrire en DB, sans XP, sans league update. Idéal pour la validation en direct.
+3. **Toggle front "Vérifier au fur et à mesure" (ON par défaut)** — debounce 400 ms sur `letters` : appelle `/check` et repeint les cases fausses en rouge en live. L'erreur d'une case disparaît instantanément dès que le joueur retape (avant même le debounce).
+4. **UI refresh** — badge "Grilles 4×4 croisées" + copy "Six grilles thématiques avec vrais croisements (carrés magiques 3×3)".
+
+### Fichiers touchés
+- Réécrit : `/app/backend/mots_fleches_data.py`
+- Modifié : `/app/backend/routers/mots_fleches.py` (ajout endpoint /check)
+- Modifié : `/app/frontend/src/pages/MotsFleches.jsx` (état liveCheck, debounce, toggle UI, copy)
+
+### Vérification
+- Backend : curl `/api/mots-fleches/grids/mf01/check` avec BOL/OSE/LES → correct_cells=9, accuracy=100 % ✅
+- Frontend (screenshot admin@1440px) : liste 6 grilles, ouverture mf01, saisie X → cellule rouge en direct, correction → rouge disparaît ✅
+
+
+---
+
+## Mots Fléchés v4 — Mistral avec vrais croisements + Word Complete Celebration (2026-02-10) ✅
+
+### Backend : générateur Mistral repensé
+- **Bank de 15 carrés magiques 3×3 pré-vérifiés** dans `fleches_mistral.py` (AIL/ILE/LES, VIN/IRE/NEZ, ARC/RUE/CEP, ANE/NUL/ELU, DES/EAU/SUD, etc.) — chaque triplet est une matrice symétrique où chaque ligne ET chaque colonne forment un vrai mot français commun.
+- **Le job nocturne** :
+  1. Choisit un triplet aléatoire dans la bank (garantie de crossings valides)
+  2. Demande à Mistral 3 clues fraîches pour ce triplet via `PROMPT_RECLUE` (validation stricte : 5-60 chars, pas de contamination)
+  3. Fallback sur les clues par défaut du bank si Mistral échoue ou renvoie du JSON invalide
+  4. Persiste la grille 4×4 magic-square (difficulté "difficile", champ `words` pour validation avancée)
+- **L'ancien mode row-based est supprimé** — plus jamais de grilles sans croisements verticaux.
+
+### Frontend : Word Complete Celebration
+- `completedCells` calculé via `useMemo` : pour chaque ligne et chaque colonne, si toutes les cases-lettres sont remplies ET aucune n'est marquée mistake → toutes les cases du mot deviennent vertes.
+- Fonctionne en direct via le mode "Vérifier au fur et à mesure" (les mistakes sont mises à jour par le debounce `/check` toutes les 400 ms).
+- Résultat : un carré magique 3×3 complètement résolu devient tout vert (9 cases + 6 mots) — récompense visuelle immédiate.
+
+### Vérification
+- 15 triples du bank tous confirmés symétriques par assertion ✅
+- 3 grilles Mistral générées via `POST /admin/generate` — toutes 4×4 difficulté "difficile" avec clues variées ✅
+- Screenshot admin@1440 : mf02 avec OIE tapé en row 1 → 3 cases vertes ✅ · OIE/IRA/EAU complet → 9 cases vertes ✅ · grille Mistral "Petits mots courants" (ART/RUE/TES) affiche clues fraîches ✅
+
+### Fichiers touchés
+- Réécrit : `/app/backend/fleches_mistral.py` (bank + reclue Mistral, ancien row-based supprimé)
+- Modifié : `/app/frontend/src/pages/MotsFleches.jsx` (`completedCells`, style vert)
+
+
+---
+
+## Mots Fléchés v5 — Grilles 4×4 pleines + son de victoire (2026-02-10) ✅
+
+### Backend : solver 4×4 + double bank
+- **Solver custom** : recherche exhaustive de matrices 4×4 symétriques (magic-squares) parmi ~290 mots français ultra-courants (4 lettres). 89 solutions viables trouvées, dont 15 sélectionnées à la main.
+- **`MAGIC_BANK_4`** (15 entrées) ajoutée dans `fleches_mistral.py` — themes CERF/EPEE/REVE/FEES ("Contes de fées"), ETAT/TOUR/AUTO/TROU ("Sur la route"), PORC/OEIL/RIRE/CLES, GROS/ROSE/OSER/SERA…
+- **`_pick_puzzle()`** : 60 % du temps 4×4 (grille 5×5 avec 16 cases jouables), 40 % du temps 3×3 (grille 4×4 avec 9 cases jouables).
+- `_build_magic_grid` et `_mistral_reclue` généralisés pour supporter n=3 ou n=4 mots.
+
+### Frontend : Son de victoire "ding"
+- Toggle "Son 🔔" (ON par défaut) à côté du toggle "Vérifier au fur et à mesure".
+- Web Audio API : dès qu'un NOUVEAU mot devient complet (nouvelle entrée dans `completedWords`), un ding doux (880 Hz + harmonique 1320 Hz, decay 0.45 s, gain 0.18) est joué.
+- `prevCompletedSigRef` évite de rejouer le son quand `completedWords` re-render sans changement.
+- Refactor `completedCells` dérivé de `completedWords` (source de vérité unifiée).
+
+### Vérification (screenshot admin@1440)
+- 8 grilles Mistral générées : mix 2×(4×4) + 6×(5×5) ✅
+- Ouverture grille 5×5 "Petits mots précis" (SEPT/ETUI/PURE/TIEN) — 16 cases vides + 8 clues Mistral fraîches ✅
+- Saisie SEPT → 4 cases vertes + 2 oscillateurs audio (1 ding) ✅
+- Saisie complète 16 lettres → 16 cases vertes + 14 oscillateurs (7 dings pour 4 lignes + 4 colonnes, quelques events fusionnés par le batching React) ✅
+
+### Fichiers touchés
+- Modifié : `/app/backend/fleches_mistral.py` (MAGIC_BANK_4, `_pick_puzzle`, `_build_magic_grid` généralisé)
+- Modifié : `/app/frontend/src/pages/MotsFleches.jsx` (Web Audio ding, `completedWords`, toggle Son, copy)

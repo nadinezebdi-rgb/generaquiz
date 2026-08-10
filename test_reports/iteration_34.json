@@ -1,0 +1,35 @@
+{
+  "summary": "Wave 1 word-games sprint (Charades packs enrichment + Mots Mêlés) fully verified. Backend: 9/9 pytest tests pass — /charades/packs returns 3 packs with correct totals (13/4/2), /charades/list filters by pack (4 for nature, 19 for all), attempts work across all packs (chateau/renard/poireau all validated), /mots-meles/grids returns >=5 seed grids, /mots-meles/grids/{id} correctly hides row/col/dr/dc positions (anti-cheat), /find validates correct/duplicate/invalid-line (400) and awards +2 per word + completion bonus, verified by programmatically solving one grid entirely. Frontend: platform-card-mots-meles is a Link with platform-badge-live-mots-meles; mots-croises stays platform-badge-dev; nav-mots-meles present when authed; /app/mots-meles renders 5 grid cards; clicking opens GridPlay with mots-meles-play-title, mots-meles-progress (12/12), mots-meles-grid, 144 mots-meles-cell buttons and mots-meles-words; invalid diagonal (0,0→2,3) shows sonner toast 'La sélection doit être en ligne droite ou diagonale'; charades-packs has 3 tabs, switching tab reloads list (idx resets, count updates).",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [
+      {"flow": "Charades header count on pack switch", "issue": "The trophy 'charades-solved-count' (e.g. '1 / 2 résolues') uses list.solved_ids.length which is the GLOBAL cross-pack solved count from /charades/list, divided by the CURRENT pack total. This can look inconsistent with the tab pill (which is correctly pack-filtered via /charades/packs). Example observed: admin solved renard (nature) → on cuisine tab, header showed '1 / 2' while the cuisine tab pill showed '0/2'. Not a blocker but confusing UX.", "affected_selectors": ["charades-solved-count"]}
+    ],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_mots_meles_charades.py",
+    "/app/test_reports/pytest/mots_meles_results.xml"
+  ],
+  "action_items": [
+    "(Optional / minor UX) In Charades.jsx, filter list.solved_ids by the current pack's charade ids before computing solvedCount for the header trophy, OR read from the /packs response for the selected pack; otherwise the header count contradicts the tab pill."
+  ],
+  "critical_code_review_comments": [
+    "Anti-cheat is correctly enforced in /mots-meles/grids/{id}: word entries expose only {word, found} — no row/col/dr/dc leaked (verified programmatically).",
+    "_line_word() correctly rejects non-straight non-diagonal lines with HTTP 400 'Ligne invalide' — validated end-to-end.",
+    "Completion bonus of +10 is added atomically on the LAST word (last response points_gained == 12 = 2 + 10 verified in test_completion_bonus).",
+    "Seed idempotency: seed_grids_if_empty only inserts when collection empty — safe on startup restarts.",
+    "wordsearch_data SEED_THEMES 'Chansons françaises' contains duplicate 'BREL' entries — dedup happens via set() in build_grid so it's benign, but consider cleaning the source list.",
+    "list_grids sort by created_at desc puts newest Mistral grids first — nice for discoverability."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_mots_meles_charades.py"
+  ],
+  "success_rate": {"backend": "100% (9/9)", "frontend": "100%"},
+  "test_credentials": "admin@generaquiz.fr / Admin2026! ; fresh accounts via /api/auth/register (test.mm*.<uuid>@example.com)",
+  "seed_data_creation": "Tests register ~3 fresh users (test.mm.*, test.mm2.*, test.mm3.*) that only touch users, charade_attempts, wordsearch_progress, league_scores. Seed grids untouched.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Sprint verified end-to-end. Word-search grid solver helper _find_word_line() in test file iterates every cell × 8 directions × word length — reuse it for future tests. Note: seed grids collection is inserted only when empty; to reseed, drop wordsearch_grids collection in Mongo. Duplicate BREL in Chansons françaises seed is a data typo (deduped by set() so harmless)."
+}

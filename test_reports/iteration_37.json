@@ -1,0 +1,22 @@
+{
+  "summary": "Iter 37 — Mots Fléchés v3 (mf06 magic square + newspaper arrow markers). Backend pytest 5/5 pass: mf06 present in grids list with rows:4,cols:4,difficulty:difficile; GET /mots-fleches/grids/mf06 returns 4x4 with row-0 clue_v banner (3 blocks), col-0 clue_h banners (3 blocks), 9 letter cells at rows1-3/cols1-3 all without 'answer' (anti-cheat OK); correct submit of MER/EAU/RUE matrix → correct_cells:9, total_cells:9, completed:true, points_gained:14 (9×1 + 5 bonus); 2nd identical submit → points_gained:0, best_score:14 (idempotent); wrong-dimension submit → 400. Genuine crossword verified: col1=MER, col2=EAU, col3=RUE match rows. Frontend @1440x900 admin: mots-fleches-grid-mf06 card visible in list, click → GridPlay opens 'Carré magique — Ville & Nature', 4x4 renders 9 letter inputs + 7 block cells with 6 mustard arrows (3 ▼ banners on row 0 + 3 ▶ on col 0), all colored rgb(242,204,143) = mustard. Filling M/E/R/E/A/U/R/U/E + submit → mots-fleches-result 'Bravo ! Grille complète — 14 pts' (green banner). Reset clears inputs. Regression mf01: 16 letter inputs + 8 arrows (4 ▼ + 4 ▶) on all block cells — newspaper visual upgrade applied to all static grids as expected.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {"ui_bugs": [], "integration_issues": [], "design_issues": []},
+  "test_report_links": ["/app/backend/tests/test_iteration37_fleches_mf06.py", "/app/test_reports/pytest/pytest_iter37.xml"],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "mots_fleches_data.py mf06: 4x4 magic square with 9 letter cells, 7 blocks (1 empty top-left + 3 clue_v banner row 0 + 3 clue_h col 0). Grid is a genuine crossword — verified col1=MER, col2=EAU, col3=RUE match row1/2/3.",
+    "mf06 declares both size:4 and rows:4/cols:4 — router.get('rows') fallback works and returns rows=4 cols=4 in list + get endpoints.",
+    "MotsFleches.jsx block cells now render mustard ▶ (clue_h only) / ▼ (clue_v only) / ▼+▶ (both) — verified via computed style color rgb(242,204,143).",
+    "Anti-cheat still enforced: _public_grid strips answer field — verified 0 'answer' keys in GET response for mf06.",
+    "Idempotent scoring confirmed: 2nd submit of same correct matrix returns points_gained:0 even though best_score persists as 14.",
+    "Regression across mf01-mf05 unaffected — arrow markers additive (block cells only), letter grid unchanged."
+  ],
+  "updated_files": ["/app/backend/tests/test_iteration37_fleches_mf06.py", "/app/test_reports/iteration_37.json"],
+  "success_rate": {"backend": "100%", "frontend": "100%"},
+  "test_credentials": "admin@generaquiz.fr / Admin2026! + ephemeral TEST_iter37_<hex>@example.com registered per session for idempotency test",
+  "seed_data_creation": "None — mf06 is a static grid in mots_fleches_data.GRIDS.",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Backend URL from frontend/.env: REACT_APP_BACKEND_URL=https://caricature-saas.preview.emergentagent.com. mf06 correct matrix: row0=empty (all blocks), row1=[_,M,E,R], row2=[_,E,A,U], row3=[_,R,U,E] → 9 letters × 1pt + 5 completion bonus = 14 points on first submit. Frontend testids: mots-fleches-grid-<id> for cards (not 'card-<id>'), mots-fleches-submit, mots-fleches-reset, mots-fleches-result. Arrow markers use text-mustard class (rgb 242,204,143) with ▶/▼ chars inside span.absolute inside block cells."
+}

@@ -46,6 +46,8 @@ BADGES: list[dict] = [
     # -- Atelier Mémoire --
     {"id": "premier_atelier",  "title": "Premier atelier",    "desc": "Terminer votre 1ᵉʳ Atelier Mémoire",  "emoji": "📝", "tier": "argent",  "family": "atelier"},
     {"id": "atelier_5",        "title": "Écrivain de vie",    "desc": "5 ateliers mémoire terminés",         "emoji": "📖", "tier": "or",      "family": "atelier"},
+    # -- Charades / Jeux de mots --
+    {"id": "amateur_mots",     "title": "Amateur de mots",    "desc": "10 charades résolues",                "emoji": "🎭", "tier": "or",      "family": "words"},
 ]
 BADGE_INDEX = {b["id"]: b for b in BADGES}
 

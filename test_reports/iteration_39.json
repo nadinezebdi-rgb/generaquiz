@@ -1,0 +1,29 @@
+{
+  "summary": "Tested PATCH /api/auth/profile email update feature. All 6 backend tests PASS (login+me, name-only update, invalid=422, uniqueness=409, case-insensitive same-account=200, full update+relogin+revert). Frontend: email input is no longer disabled, type='email', onChange works, old helper text 'ne peut pas être modifié' removed, saving new email updates DB and /me reflects it, revert works. Bug is FIXED.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [
+      {"flow": "Account email update — invalid email UX", "issue": "When user types an invalid email (e.g. 'foobar') and clicks Enregistrer, backend correctly returns 422 but the frontend does NOT surface any error message in [data-testid=account-name-msg]. Spec expected either a frontend regex guard ('Adresse e-mail invalide') OR the backend 422 detail to be rendered. formatError() should format Pydantic's array response, but the account-name-msg element is empty after the click. Recommend: add a client-side email regex check before submit + ensure the 422 detail array is rendered.", "affected_selectors": ["[data-testid=account-email]", "[data-testid=account-name-msg]"]}
+    ],
+    "design_issues": [
+      {"screen": "/app/account — Mes informations", "issues": ["Success message after email change reads only 'Profil mis à jour'. Spec/UX expects 'Profil et e-mail mis à jour' (or 'e-mail mis à jour') when the email field was changed, so the user has explicit feedback that their login identifier now differs. Minor copy tweak — logic works."]}
+    ]
+  },
+  "test_report_links": ["/app/backend/tests/test_email_update.py", "/app/test_reports/pytest/pytest_iter39.xml"],
+  "action_items": [
+    "Optional: In Account.jsx saveName(), differentiate the success text when email changed (e.g. 'Profil et e-mail mis à jour').",
+    "Add client-side email regex validation (or ensure Pydantic 422 error surfaces in account-name-msg) so invalid emails show 'Adresse e-mail invalide' instead of a silent no-op."
+  ],
+  "critical_code_review_comments": [
+    "Backend uniqueness check uses regex '^{new_email}$' with $options:'i' — since new_email is already lowercased and stored lowercased, a simple {\"email\": new_email} would be equivalent and safer (avoids regex-injection edge cases if email contained regex metacharacters, though EmailStr filters most). Not blocking.",
+    "After email update, the existing access_token cookie still contains the old email in the JWT payload — cosmetic only (server re-fetches user by sub id), but if any code path trusts token.email instead of DB, it could drift. Consider re-issuing cookies on email change."
+  ],
+  "updated_files": ["/app/backend/tests/test_email_update.py"],
+  "success_rate": {"backend": "100% (6/6)", "frontend": "~85% (core flow works; error UX minor gap)"},
+  "test_credentials": "admin@generaquiz.fr / Admin2026!",
+  "seed_data_creation": "Test transiently registers occupied_{ts}@example.com to prove 409; cleaned up after run. Admin email was reverted to admin@generaquiz.fr and verified via re-login.",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Bug 'email not editable on Mon compte' is fixed and verified end-to-end. Two minor UX polish items left (see action_items). Admin credentials still admin@generaquiz.fr / Admin2026! — verified working after test."
+}

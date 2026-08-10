@@ -38,6 +38,9 @@ from routers import coop_challenges as coop_challenges_router
 from routers import progression as progression_router
 from routers import atelier as atelier_router
 from routers import admin_analytics as admin_analytics_router
+from routers import charades as charades_router
+from routers import mots_meles as mots_meles_router
+from routers import mots_fleches as mots_fleches_router
 from routers.referral import generate_referral_code_for
 
 app = FastAPI(title="Quiz d'Antan API")
@@ -116,6 +119,9 @@ api.include_router(coop_challenges_router.router)
 api.include_router(progression_router.router)
 api.include_router(atelier_router.router)
 api.include_router(admin_analytics_router.router)
+api.include_router(charades_router.router)
+api.include_router(mots_meles_router.router)
+api.include_router(mots_fleches_router.router)
 app.include_router(api)
 
 # CORS
@@ -270,6 +276,10 @@ async def startup():
                                              "created_at": datetime.now(timezone.utc).isoformat(),
                                              "created_by": "system"})
             logger.info(f"Promo seedé : {promo['code']}")
+
+    # Seed 5 word-search grids on first boot (idempotent).
+    from wordsearch_mistral import seed_grids_if_empty
+    await seed_grids_if_empty()
 
     # Schedule morning Quiz du Jour reminder emails (09:00 Europe/Paris)
     start_daily_scheduler()

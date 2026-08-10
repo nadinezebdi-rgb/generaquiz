@@ -1,0 +1,24 @@
+{
+  "summary": "Sprint 'Jeux de Mots — Étape 0 + 1' fully verified. Backend: 13/13 pytest tests pass covering list (no answer leak), attempt (correct/wrong/normalization/idempotence/404), badge amateur_mots awarded once at 10 solved and NOT re-awarded on 11th, and /progress. Frontend: PlatformSection makes Atelier + Charades clickable Links with live badges while other 5 cards remain DEV and non-links; nav-charades and mobile-nav-charades present; /app/charades page renders all required testids, correct flow reveals 'Bravo !' / 'Château', wrong flow shows 'Ce n'est pas ça' + retry, hint toggle works, next clears input.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {"ui_bugs": [], "integration_issues": [], "design_issues": []},
+  "test_report_links": [
+    "/app/backend/tests/test_charades.py",
+    "/app/test_reports/pytest/charades_results.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "Anti-cheat implemented cleanly: _public_charade() strips answer/answer_display before returning. Sanity assert at bottom of charades_data.py catches display/normalized mismatches at import time — good.",
+    "Attempt endpoint properly idempotent via prior_correct lookup; XP increment only on first correct — verified end-to-end.",
+    "Note (informational, not a bug): charades-next and charades-retry testids only render after submit (inside reveal). The requirement lists them as 'present' — this is by design and matches the flow tests."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_charades.py"
+  ],
+  "success_rate": {"backend": "100% (13/13)", "frontend": "100%"},
+  "test_credentials": "admin@generaquiz.fr / Admin2026! ; fresh accounts registered via /api/auth/register with example.com emails (test.local rejected by validator).",
+  "seed_data_creation": "Tests create ~5 fresh test.charades.<uuid>@example.com users; they only touch charade_attempts, user_badges, users.xp_total, and league_scores. No cleanup implemented since backend has no user-delete endpoint exposed.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Charades sprint is green. If retesting, use the answers map in test_charades.py (ch01→chateau ... ch13→carotte). Registration requires a real-looking TLD (@example.com works, @test.local is rejected)."
+}

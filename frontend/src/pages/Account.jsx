@@ -13,6 +13,7 @@ export default function Account() {
   const navigate = useNavigate();
 
   const [name, setName] = useState(user?.name || "");
+  const [email, setEmail] = useState(user?.email || "");
   const [savingName, setSavingName] = useState(false);
   const [nameMsg, setNameMsg] = useState("");
 
@@ -142,20 +143,24 @@ export default function Account() {
                 <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-navy/40 pointer-events-none" />
                 <input
                   type="email"
-                  value={user.email}
-                  disabled
-                  className="w-full pl-12 pr-4 py-4 text-lg rounded-2xl border-2 border-cream-dark bg-cream/50 text-navy/70 min-h-[56px]"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  maxLength={120}
+                  autoComplete="email"
+                  className="w-full pl-12 pr-4 py-4 text-lg rounded-2xl border-2 border-cream-dark focus:border-navy bg-white text-navy min-h-[56px]"
                   data-testid="account-email"
                 />
               </div>
-              <p className="text-xs text-navy/50 mt-1">L&apos;email ne peut pas être modifié.</p>
+              <p className="text-xs text-navy/50 mt-1">
+                Cet e-mail sert d&apos;identifiant pour vous connecter. Modifiez-le uniquement si nécessaire.
+              </p>
             </div>
 
             <div className="flex items-center gap-3">
               <button
                 type="submit"
                 data-testid="account-save-name"
-                disabled={savingName || name.trim() === (user.name || "").trim() || !name.trim()}
+                disabled={savingName || (name === user.name && email.trim().toLowerCase() === (user.email || "").toLowerCase()) || !name.trim() || !email.trim()}
                 className="inline-flex items-center gap-2 bg-terracotta hover:bg-terracotta-dark text-white font-bold px-5 py-3 rounded-full shadow-warm disabled:opacity-50"
               >
                 {savingName ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
