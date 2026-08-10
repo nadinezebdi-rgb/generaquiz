@@ -967,3 +967,33 @@ Tests: iteration 37 — 5/5 pytest backend + Frontend 100 % — verts. Aucun act
 - Charades bibliothèque expansion (laisser le cron 04:00 accumuler)
 - Refactor `server.py` (8 jobs APScheduler)
 
+
+
+---
+
+## Navbar Admin Dropdown + compactage responsive (2026-02-10) ✅
+
+### Contexte
+User admin ne voyait plus les liens admin car la navbar débordait sur laptop 1440px (10+ items, breakpoint `lg:flex` à 1024px = trop tôt).
+
+### Livrables
+1. **AdminDropdown.jsx** — nouveau composant qui regroupe Analytics / Promos / Signalements dans un menu déroulant "Admin" avec icône shield, click-outside + Escape, `data-testid`.
+2. **Navbar.jsx compactée** — text-lg → text-base, px-4 → px-3, `whitespace-nowrap` sur tous les items, container élargi à `max-w-[1600px]`, retrait de "Défi famille" (accessible via CTA du hero dashboard).
+3. **Breakpoint responsive rehaussé** — desktop nav visible à partir de 1400px (arbitrary Tailwind class `min-[1400px]:flex`), MobileMenu (drawer) prend le relais en-dessous. MobileMenu contient déjà les 3 liens admin.
+
+### Résultats vérifiés (screenshot tool)
+- 1920px : desktop nav propre, no overflow ✅
+- 1440px : desktop nav complète (Quiz du Jour, Mes quiz, Jeux, Ligues, Niv N, Crédits, Mon compte, Admin ⌄, Quitter, Confort +) ✅
+- 1399 → 375px : mobile drawer avec section Admin dédiée ✅
+- Admin dropdown → click Analytics → route `/app/admin/analytics` fonctionne ✅
+
+### Fichiers touchés
+- Créé : `/app/frontend/src/components/AdminDropdown.jsx`
+- Modifiés : `/app/frontend/src/components/Navbar.jsx`, `/app/frontend/src/components/MobileMenu.jsx`
+
+### Backlog restant
+- Onboarding Tour (P1)
+- Coop Atelier grand-parent / petit-enfant (P1)
+- EHPAD CRM (P2)
+- Refactor `server.py` scheduler → `scheduler.py` (technique)
+- Mobile app Expo (backlog)

@@ -26,7 +26,7 @@ export default function MobileMenu({ variant = "landing" }) {
   function close() { setOpen(false); }
 
   return (
-    <div className="lg:hidden">
+    <div className="min-[1400px]:hidden">
       <button
         type="button"
         aria-label="Ouvrir le menu"
