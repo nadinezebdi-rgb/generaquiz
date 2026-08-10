@@ -292,51 +292,69 @@ PROMPT_RECLUE = """Tu es un rédacteur de définitions de mots croisés, pour un
 
 Voici {n} mots français : {word_list}.
 
-Pour chaque mot, écris UNE définition courte (< 50 caractères), claire et évocatrice pour un senior, sans citer le mot lui-même. Une définition par mot, dans le même ordre.
+Pour chaque mot, écris DEUX définitions courtes DIFFÉRENTES (< 50 caractères chacune), claires et évocatrices pour un senior, sans citer le mot lui-même. Les deux définitions doivent définir le MÊME mot mais avec deux formulations distinctes (angles différents : sens propre / sens figuré, usage familier / soutenu, sensoriel / factuel, etc.).
+
+- La première définition sera affichée à côté du mot en HORIZONTAL.
+- La seconde sera affichée à côté du mot en VERTICAL.
+Aucune définition ne doit être identique à une autre dans la grille.
 
 Réponds STRICTEMENT en JSON valide :
 {{
-  "clues": [{example_list}]
+  "clues_h": [{example_list}],
+  "clues_v": [{example_list_v}]
 }}
 """
 
 
-async def _mistral_reclue(words: tuple[str, ...]) -> list[str] | None:
-    """Demande à Mistral n définitions fraîches pour n mots (n = 3 ou 4)."""
+async def _mistral_reclue(words: tuple[str, ...]) -> tuple[list[str], list[str]] | None:
+    """Demande à Mistral 2n définitions fraîches (n horizontales + n verticales) pour n mots.
+
+    Chaque mot reçoit DEUX formulations distinctes — une pour la lecture
+    horizontale, une pour la verticale — afin d'éviter le doublon visuel
+    inhérent aux carrés magiques symétriques.
+    """
     api_key = os.environ.get("MISTRAL_API_KEY")
     if not api_key:
         return None
     client = Mistral(api_key=api_key)
     n = len(words)
     word_list = ", ".join(words)
-    example_list = ", ".join([f'"définition de {w}"' for w in words])
-    prompt = PROMPT_RECLUE.format(n=n, word_list=word_list, example_list=example_list)
+    example_list = ", ".join([f'"définition H de {w}"' for w in words])
+    example_list_v = ", ".join([f'"définition V de {w}"' for w in words])
+    prompt = PROMPT_RECLUE.format(n=n, word_list=word_list, example_list=example_list, example_list_v=example_list_v)
     try:
         resp = await asyncio.to_thread(
             client.chat.complete,
             model=MISTRAL_MODEL,
             messages=[{"role": "user", "content": prompt}],
-            temperature=0.7,
+            temperature=0.8,
         )
         raw = resp.choices[0].message.content
         match = re.search(r"\{.*\}", raw, re.DOTALL)
         if not match:
             return None
         data = json.loads(match.group(0))
-        clues = data.get("clues", [])
-        if not isinstance(clues, list) or len(clues) != n:
+        clues_h = data.get("clues_h", [])
+        clues_v = data.get("clues_v", [])
+        if not (isinstance(clues_h, list) and isinstance(clues_v, list)):
             return None
-        # Validation : longueur, pas de contamination
-        for i, (word, clue) in enumerate(zip(words, clues)):
-            if not isinstance(clue, str):
+        if len(clues_h) != n or len(clues_v) != n:
+            return None
+        # Validation : longueur, pas de contamination, unicité (H_i != V_i)
+        for i, word in enumerate(words):
+            for arr in (clues_h, clues_v):
+                if not isinstance(arr[i], str):
+                    return None
+                c = arr[i].strip()
+                if len(c) < 5 or len(c) > 60:
+                    return None
+                if word.lower() in c.lower():
+                    return None
+                arr[i] = c
+            if clues_h[i].lower() == clues_v[i].lower():
+                # Refuse si Mistral a produit deux fois la même définition
                 return None
-            c = clue.strip()
-            if len(c) < 5 or len(c) > 60:
-                return None
-            if word.lower() in c.lower():
-                return None
-            clues[i] = c
-        return clues
+        return clues_h, clues_v
     except Exception as e:
         logger.warning(f"[fleches-gen] Mistral reclue error: {e}")
         return None
@@ -347,20 +365,25 @@ async def _mistral_reclue(words: tuple[str, ...]) -> list[str] | None:
 # =============================================================================
 
 def _build_magic_grid(theme_label: str, emoji: str, words: tuple[str, ...],
-                      clues: list[str], theme_family: str) -> dict:
+                      clues_h: list[str], clues_v: list[str], theme_family: str) -> dict:
     """Construit une grille (N+1)×(N+1) (N×N jouable) à partir d'un tuple symétrique.
 
     N=3 → grille 4×4 avec 9 cases jouables.
     N=4 → grille 5×5 avec 16 cases jouables.
+
+    clues_h : définitions affichées à côté des mots horizontaux (colonne 0).
+    clues_v : définitions affichées au-dessus des mots verticaux (ligne 0).
+    Elles décrivent les mêmes mots mais avec des formulations différentes.
     """
     n = len(words)
     assert n in (3, 4), "seul 3 ou 4 mots supportés"
+    assert len(clues_h) == n and len(clues_v) == n, "clues_h/clues_v doivent avoir n items"
     matrix = [list(w) for w in words]
 
     # Row 0 = bandeau de définitions verticales (▼)
-    cells = [[{"type": "block"}] + [{"type": "block", "clue_v": clues[k]} for k in range(n)]]
+    cells = [[{"type": "block"}] + [{"type": "block", "clue_v": clues_v[k]} for k in range(n)]]
     for i in range(n):
-        row = [{"type": "block", "clue_h": clues[i]}]
+        row = [{"type": "block", "clue_h": clues_h[i]}]
         for j in range(n):
             row.append({"type": "letter", "answer": matrix[i][j]})
         cells.append(row)
@@ -381,17 +404,28 @@ def _build_magic_grid(theme_label: str, emoji: str, words: tuple[str, ...],
         "source": "mistral",
         "family": theme_family,
         "created_at": datetime.now(timezone.utc).isoformat(),
-        "notes": f"Carré magique {'/'.join(words)} — {2 * n} mots croisés, chaque lettre en croise 2.",
+        "notes": f"Carré magique {'/'.join(words)} — {2 * n} mots croisés (H + V), 2 définitions distinctes par mot.",
     }
+
+
+def _fallback_clues_v(clues_h: list[str]) -> list[str]:
+    """Si Mistral échoue et que la bank ne fournit qu'un jeu de clues, on
+    dérive un jeu vertical minimaliste en préfixant "↓ " et en variant la
+    ponctuation. Fallback rare, uniquement quand l'API Mistral est indisponible.
+    """
+    return [f"↓ {c}" for c in clues_h]
 
 
 async def generate_nightly_fleches() -> str | None:
     """Job nocturne : construit UNE nouvelle grille carré magique (3×3 ou 4×4).
 
     Étapes :
-    1. Choisit une entrée dans MAGIC_BANK_3 (40 % du temps) ou MAGIC_BANK_4 (60 %)
-    2. Demande à Mistral N définitions fraîches (sinon utilise les défauts)
-    3. Persiste la grille et purge les anciennes au-delà de MAX_GENERATED
+    1. Choisit une entrée dans MAGIC_BANK_3 (40 %) ou MAGIC_BANK_4 (60 %)
+    2. Demande à Mistral 2N définitions fraîches (N horizontales + N verticales,
+       chacune différente pour le même mot)
+    3. Fallback : si Mistral échoue, réutilise les clues du bank pour H et
+       une variante minimale pour V (dernier recours)
+    4. Persiste la grille et purge les anciennes au-delà de MAX_GENERATED
 
     Retourne l'id de la grille ou None si aucune écriture DB n'a eu lieu.
     """
@@ -400,19 +434,26 @@ async def generate_nightly_fleches() -> str | None:
     default_clues = list(entry["clues"])
 
     fresh = await _mistral_reclue(words)
-    clues = fresh if fresh else default_clues
+    if fresh is not None:
+        clues_h, clues_v = fresh
+        source_clues = "mistral"
+    else:
+        clues_h = default_clues
+        clues_v = _fallback_clues_v(default_clues)
+        source_clues = "default+fallback"
 
     grid = _build_magic_grid(
         theme_label=entry["theme"],
         emoji=entry["emoji"],
         words=words,
-        clues=clues,
+        clues_h=clues_h,
+        clues_v=clues_v,
         theme_family=entry["theme"],
     )
     await db.fleches_generated.insert_one(grid)
     logger.info(
         f"[fleches-gen] added magic grid {grid['id']} — {grid['theme']} "
-        f"({'/'.join(words)}, {size}×{size}) source_clues={'mistral' if fresh else 'default'}"
+        f"({'/'.join(words)}, {size}×{size}) source_clues={source_clues}"
     )
 
     count = await db.fleches_generated.count_documents({})
