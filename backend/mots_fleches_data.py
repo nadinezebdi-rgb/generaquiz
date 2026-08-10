@@ -1,263 +1,172 @@
-"""Mots Fléchés MVP — 5 hand-authored 5×5 grids.
+"""Mots Fléchés — 6 vraies grilles 4×4 croisées (carrés magiques 3×3).
 
 Model
 -----
-Each grid is a 5×5 board. Cells are one of:
-  {"type": "block", "clue_h": "clue for row", "clue_v": "clue for col"}
-     → an arrow cell showing 1 or 2 clues. Player cannot type here.
+Grille 4×4 : la première ligne et la première colonne sont des "blocks" avec
+définitions (▶ pour un mot horizontal, ▼ pour un mot vertical). La zone
+jouable est un carré 3×3 où chaque ligne ET chaque colonne forme un vrai mot
+français. Grâce à la symétrie (matrice symétrique), les indices "row" et
+"col" sont identiques 3 par 3 — chaque définition est donc reprise 2 fois
+(une fois horizontale, une fois verticale), ce qui est cohérent visuellement.
+
+Cellules
+--------
+  {"type": "block", "clue_h": "..." , "clue_v": "..."}
+     → case définition. Le joueur ne peut pas y écrire.
   {"type": "letter", "answer": "X"}
-     → a fillable cell. Player types uppercase letter.
+     → case à remplir. Le joueur tape une lettre A-Z.
 
-Clue direction convention
-  clue_h → the answer runs to the RIGHT starting at the cell IMMEDIATELY to the right
-  clue_v → the answer runs DOWN starting at the cell IMMEDIATELY BELOW
-Both fields are optional; a block can hold either one, both, or none (pure separator).
+Conventions clue
+  clue_h → réponse à DROITE, commence à la case immédiatement à droite
+  clue_v → réponse EN BAS, commence à la case immédiatement en dessous
 
-Scoring: +1 pt per letter correctly placed on first submit, +5 bonus when
-the whole grid is solved. Server validates the whole grid on submit.
+Scoring : +1 pt par lettre correcte + 5 pts bonus si toute la grille est juste.
 """
 from __future__ import annotations
 
-# 5 hand-authored grids. Each keeps the same 5×5 structure with a mix of blocks
-# and letter cells. Clues are short and unambiguous, aimed at a senior audience.
-# Note: These grids are hand-verified — each letter cell has its answer set,
-# and each block clue points to the correct word direction.
 
-GRIDS: list[dict] = [
-    # ============ GRID 1 — Cuisine (very easy warm-up) ============
-    {
-        "id": "mf01",
-        "theme": "Cuisine du dimanche",
-        "emoji": "🍽️",
-        "difficulty": "facile",
-        "size": 5,
-        "cells": [
-            # row 0
-            [{"type": "block"},
-             {"type": "block", "clue_v": "Pas cuit"},
-             {"type": "block", "clue_v": "Un fromage bleu"},
-             {"type": "block", "clue_v": "Herbe aromatique"},
-             {"type": "block", "clue_v": "Petit rongeur"}],
-            # row 1
-            [{"type": "block", "clue_h": "Céréale d'Asie"},
-             {"type": "letter", "answer": "R"},
-             {"type": "letter", "answer": "I"},
-             {"type": "letter", "answer": "T"},
-             {"type": "letter", "answer": "S"}],
-            # row 2
-            [{"type": "block", "clue_h": "Fruit rouge sucré"},
-             {"type": "letter", "answer": "A"},
-             {"type": "letter", "answer": "B"},
-             {"type": "letter", "answer": "H"},
-             {"type": "letter", "answer": "O"}],
-            # row 3
-            [{"type": "block", "clue_h": "Article défini fém."},
-             {"type": "letter", "answer": "W"},
-             {"type": "letter", "answer": "L"},
-             {"type": "letter", "answer": "Y"},
-             {"type": "letter", "answer": "U"}],
-            # row 4
-            [{"type": "block", "clue_h": "Cri du chat"},
-             {"type": "letter", "answer": "M"},
-             {"type": "letter", "answer": "E"},
-             {"type": "letter", "answer": "M"},
-             {"type": "letter", "answer": "R"}],
+def _magic_grid(gid: str, theme: str, emoji: str, difficulty: str,
+                w1: str, w2: str, w3: str,
+                clue1: str, clue2: str, clue3: str,
+                notes: str | None = None) -> dict:
+    """Construit une grille 4×4 à partir d'un carré magique 3×3 symétrique.
+
+    Contrainte de validation (assert au load) : la matrice doit être symétrique,
+    donc w1[i] == wi[0], w1[j] == wj[0], w2[k] == w3[1] etc. Autrement dit, si
+    on écrit les 3 mots en lignes, les colonnes formeront les mêmes 3 mots.
+    """
+    assert len(w1) == len(w2) == len(w3) == 3, f"{gid}: mots doivent faire 3 lettres"
+    matrix = [list(w1), list(w2), list(w3)]
+    # Symétrie: matrix[i][j] == matrix[j][i]
+    for i in range(3):
+        for j in range(3):
+            assert matrix[i][j] == matrix[j][i], f"{gid}: non symétrique en ({i},{j})"
+    words = [w1, w2, w3]
+    clues = [clue1, clue2, clue3]
+
+    cells = [
+        # row 0 — bandeau de définitions verticales (▼)
+        [
+            {"type": "block"},
+            {"type": "block", "clue_v": clues[0]},
+            {"type": "block", "clue_v": clues[1]},
+            {"type": "block", "clue_v": clues[2]},
         ],
-        # simple flat answer summary for validation help / reveal
-        "notes": "Colonnes: RAWM (cru), IBLE (bleu — variante), THY M (thym), SOUR (souris).",
-    },
-    # ============ GRID 2 — La ferme ============
-    {
-        "id": "mf02",
-        "theme": "À la ferme",
-        "emoji": "🐓",
-        "difficulty": "facile",
-        "size": 5,
-        "cells": [
-            [{"type": "block"},
-             {"type": "block", "clue_v": "Elle donne du lait"},
-             {"type": "block", "clue_v": "Il chante à l'aube"},
-             {"type": "block", "clue_v": "Petit du chien"},
-             {"type": "block", "clue_v": "Poil de mouton"}],
-            [{"type": "block", "clue_h": "Cri du canard"},
-             {"type": "letter", "answer": "V"},
-             {"type": "letter", "answer": "C"},
-             {"type": "letter", "answer": "C"},
-             {"type": "letter", "answer": "L"}],
-            [{"type": "block", "clue_h": "Endroit à œufs"},
-             {"type": "letter", "answer": "A"},
-             {"type": "letter", "answer": "O"},
-             {"type": "letter", "answer": "H"},
-             {"type": "letter", "answer": "A"}],
-            [{"type": "block", "clue_h": "Sillon du champ"},
-             {"type": "letter", "answer": "C"},
-             {"type": "letter", "answer": "Q"},
-             {"type": "letter", "answer": "I"},
-             {"type": "letter", "answer": "I"}],
-            [{"type": "block", "clue_h": "Ustensile à foin"},
-             {"type": "letter", "answer": "H"},
-             {"type": "letter", "answer": "S"},
-             {"type": "letter", "answer": "O"},
-             {"type": "letter", "answer": "N"}],
-        ],
-        "notes": "Sur ce MVP les mots sont des rébus visuels — l'important est le placement des lettres.",
-    },
-    # ============ GRID 3 — Nature ============
-    {
-        "id": "mf03",
-        "theme": "Fleurs et arbres",
-        "emoji": "🌸",
-        "difficulty": "moyen",
-        "size": 5,
-        "cells": [
-            [{"type": "block"},
-             {"type": "block", "clue_v": "Fleur symbole"},
-             {"type": "block", "clue_v": "Arbre à aiguilles"},
-             {"type": "block", "clue_v": "Fleur du printemps"},
-             {"type": "block", "clue_v": "Arbre puissant"}],
-            [{"type": "block", "clue_h": "Fleur des champs"},
-             {"type": "letter", "answer": "R"},
-             {"type": "letter", "answer": "S"},
-             {"type": "letter", "answer": "T"},
-             {"type": "letter", "answer": "C"}],
-            [{"type": "block", "clue_h": "Arbre à fruits rouges"},
-             {"type": "letter", "answer": "O"},
-             {"type": "letter", "answer": "A"},
-             {"type": "letter", "answer": "U"},
-             {"type": "letter", "answer": "H"}],
-            [{"type": "block", "clue_h": "Feuille d'automne"},
-             {"type": "letter", "answer": "S"},
-             {"type": "letter", "answer": "P"},
-             {"type": "letter", "answer": "L"},
-             {"type": "letter", "answer": "E"}],
-            [{"type": "block", "clue_h": "Vert au printemps"},
-             {"type": "letter", "answer": "E"},
-             {"type": "letter", "answer": "I"},
-             {"type": "letter", "answer": "I"},
-             {"type": "letter", "answer": "N"}],
-        ],
-    },
-    # ============ GRID 4 — Les années 60 ============
-    {
-        "id": "mf04",
-        "theme": "Années 60",
-        "emoji": "📻",
-        "difficulty": "moyen",
-        "size": 5,
-        "cells": [
-            [{"type": "block"},
-             {"type": "block", "clue_v": "Chanteuse yéyé"},
-             {"type": "block", "clue_v": "Ancien poste"},
-             {"type": "block", "clue_v": "Icône BB"},
-             {"type": "block", "clue_v": "Beat célèbre"}],
-            [{"type": "block", "clue_h": "Sur les pistes"},
-             {"type": "letter", "answer": "S"},
-             {"type": "letter", "answer": "T"},
-             {"type": "letter", "answer": "B"},
-             {"type": "letter", "answer": "T"}],
-            [{"type": "block", "clue_h": "Mode courte"},
-             {"type": "letter", "answer": "H"},
-             {"type": "letter", "answer": "S"},
-             {"type": "letter", "answer": "A"},
-             {"type": "letter", "answer": "W"}],
-            [{"type": "block", "clue_h": "Voiture symbolique"},
-             {"type": "letter", "answer": "Y"},
-             {"type": "letter", "answer": "F"},
-             {"type": "letter", "answer": "R"},
-             {"type": "letter", "answer": "I"}],
-            [{"type": "block", "clue_h": "Photos souvenirs"},
-             {"type": "letter", "answer": "L"},
-             {"type": "letter", "answer": "M"},
-             {"type": "letter", "answer": "D"},
-             {"type": "letter", "answer": "S"}],
-        ],
-    },
-    # ============ GRID 5 — Voyages ============
-    {
-        "id": "mf05",
-        "theme": "Voyages en France",
-        "emoji": "🗺️",
-        "difficulty": "difficile",
-        "size": 5,
-        "cells": [
-            [{"type": "block"},
-             {"type": "block", "clue_v": "La cité rose"},
-             {"type": "block", "clue_v": "Mer du sud"},
-             {"type": "block", "clue_v": "Massif alpin"},
-             {"type": "block", "clue_v": "Fleuve parisien"}],
-            [{"type": "block", "clue_h": "Capitale"},
-             {"type": "letter", "answer": "T"},
-             {"type": "letter", "answer": "M"},
-             {"type": "letter", "answer": "A"},
-             {"type": "letter", "answer": "S"}],
-            [{"type": "block", "clue_h": "Bretonne breizh"},
-             {"type": "letter", "answer": "O"},
-             {"type": "letter", "answer": "E"},
-             {"type": "letter", "answer": "L"},
-             {"type": "letter", "answer": "E"}],
-            [{"type": "block", "clue_h": "Corse insulaire"},
-             {"type": "letter", "answer": "U"},
-             {"type": "letter", "answer": "D"},
-             {"type": "letter", "answer": "P"},
-             {"type": "letter", "answer": "I"}],
-            [{"type": "block", "clue_h": "Alsace du vin"},
-             {"type": "letter", "answer": "L"},
-             {"type": "letter", "answer": "I"},
-             {"type": "letter", "answer": "S"},
-             {"type": "letter", "answer": "N"}],
-        ],
-    },
-    # ============ GRID 6 — VRAIE grille avec croisements ✅ ============
-    # Carré magique 3×3 : chaque LIGNE et chaque COLONNE forme un vrai mot français.
-    # Rendu newspaper-style : 1 rangée + 1 colonne de blocs avec définitions,
-    # les lettres croisent verticalement ET horizontalement.
-    #   Lignes:    MER, EAU, RUE
-    #   Colonnes:  MER, EAU, RUE
-    {
-        "id": "mf06",
-        "theme": "Carré magique — Ville & Nature",
-        "emoji": "🎯",
-        "difficulty": "difficile",
+    ]
+    for i in range(3):
+        row = [{"type": "block", "clue_h": clues[i]}]
+        for j in range(3):
+            row.append({"type": "letter", "answer": matrix[i][j]})
+        cells.append(row)
+
+    grid = {
+        "id": gid,
+        "theme": theme,
+        "emoji": emoji,
+        "difficulty": difficulty,
         "size": 4,
         "rows": 4,
         "cols": 4,
-        "cells": [
-            # row 0 — column clue banner (arrows point ↓ down to the answer)
-            [{"type": "block"},
-             {"type": "block", "clue_v": "Étendue salée"},
-             {"type": "block", "clue_v": "Liquide vital"},
-             {"type": "block", "clue_v": "Voie urbaine"}],
-            # row 1 — first horizontal word (MER)
-            [{"type": "block", "clue_h": "Étendue salée"},
-             {"type": "letter", "answer": "M"},
-             {"type": "letter", "answer": "E"},
-             {"type": "letter", "answer": "R"}],
-            # row 2 — EAU
-            [{"type": "block", "clue_h": "Liquide vital"},
-             {"type": "letter", "answer": "E"},
-             {"type": "letter", "answer": "A"},
-             {"type": "letter", "answer": "U"}],
-            # row 3 — RUE
-            [{"type": "block", "clue_h": "Voie urbaine"},
-             {"type": "letter", "answer": "R"},
-             {"type": "letter", "answer": "U"},
-             {"type": "letter", "answer": "E"}],
-        ],
+        "cells": cells,
         "words": [
-            {"answer": "MER", "direction": "h", "row": 1, "col": 1},
-            {"answer": "EAU", "direction": "h", "row": 2, "col": 1},
-            {"answer": "RUE", "direction": "h", "row": 3, "col": 1},
-            {"answer": "MER", "direction": "v", "row": 1, "col": 1},
-            {"answer": "EAU", "direction": "v", "row": 1, "col": 2},
-            {"answer": "RUE", "direction": "v", "row": 1, "col": 3},
+            *[{"answer": w, "direction": "h", "row": i + 1, "col": 1} for i, w in enumerate(words)],
+            *[{"answer": w, "direction": "v", "row": 1, "col": j + 1} for j, w in enumerate(words)],
         ],
-        "notes": "Vraie grille — les 6 mots (3 h + 3 v) sont français, chaque lettre croise 2 mots.",
-    },
+    }
+    if notes:
+        grid["notes"] = notes
+    return grid
+
+
+GRIDS: list[dict] = [
+    # ============ mf01 — Petit-déjeuner ============
+    # BOL / OSE / LES  (symétrique)
+    _magic_grid(
+        gid="mf01",
+        theme="Petit-déjeuner",
+        emoji="🥐",
+        difficulty="facile",
+        w1="BOL", w2="OSE", w3="LES",
+        clue1="Récipient à café au lait",
+        clue2="N'hésite pas (verbe, 3e p. sg.)",
+        clue3="Article défini pluriel",
+        notes="Carré magique : BOL/OSE/LES en lignes ET en colonnes.",
+    ),
+
+    # ============ mf02 — À la ferme ============
+    # OIE / IRA / EAU  (symétrique)
+    _magic_grid(
+        gid="mf02",
+        theme="À la ferme",
+        emoji="🐓",
+        difficulty="facile",
+        w1="OIE", w2="IRA", w3="EAU",
+        clue1="Volaille grise à long cou",
+        clue2="Verbe aller au futur (3e p. sg.)",
+        clue3="Liquide vital (H₂O)",
+        notes="Carré magique : OIE/IRA/EAU en lignes ET en colonnes.",
+    ),
+
+    # ============ mf03 — Nature & vigne ============
+    # ROC / OSE / CEP  (symétrique)
+    _magic_grid(
+        gid="mf03",
+        theme="Nature & vigne",
+        emoji="🍇",
+        difficulty="moyen",
+        w1="ROC", w2="OSE", w3="CEP",
+        clue1="Grosse pierre solide",
+        clue2="Prend le risque (verbe, 3e p. sg.)",
+        clue3="Pied de vigne",
+        notes="Carré magique : ROC/OSE/CEP en lignes ET en colonnes.",
+    ),
+
+    # ============ mf04 — Petits mots courants ============
+    # ILE / LES / EST  (symétrique)
+    _magic_grid(
+        gid="mf04",
+        theme="Petits mots courants",
+        emoji="📚",
+        difficulty="moyen",
+        w1="ILE", w2="LES", w3="EST",
+        clue1="Terre entourée d'eau",
+        clue2="Article défini pluriel",
+        clue3="Point cardinal du soleil levant",
+        notes="Carré magique : ILE/LES/EST en lignes ET en colonnes.",
+    ),
+
+    # ============ mf05 — Objets du quotidien ============
+    # SAC / AIL / CLE  (symétrique)
+    _magic_grid(
+        gid="mf05",
+        theme="Objets du quotidien",
+        emoji="🔑",
+        difficulty="difficile",
+        w1="SAC", w2="AIL", w3="CLE",
+        clue1="Contient les courses",
+        clue2="Bulbe qui parfume l'aïoli",
+        clue3="Ouvre la porte",
+        notes="Carré magique : SAC/AIL/CLE en lignes ET en colonnes.",
+    ),
+
+    # ============ mf06 — Ville & Nature (grille historique) ============
+    # MER / EAU / RUE  (déjà en prod, on la garde)
+    _magic_grid(
+        gid="mf06",
+        theme="Ville & Nature",
+        emoji="🎯",
+        difficulty="difficile",
+        w1="MER", w2="EAU", w3="RUE",
+        clue1="Étendue salée",
+        clue2="Liquide vital",
+        clue3="Voie urbaine",
+        notes="Carré magique : MER/EAU/RUE en lignes ET en colonnes.",
+    ),
 ]
 
 
 def _public_grid(g: dict) -> dict:
-    """Return a version without cell answers — anti-cheat for player view."""
+    """Retourne la grille sans les réponses (anti-triche pour la vue joueur)."""
     return {
         "id": g["id"],
         "theme": g["theme"],

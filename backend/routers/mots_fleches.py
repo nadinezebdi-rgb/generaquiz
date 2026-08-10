@@ -82,6 +82,44 @@ async def get_grid(grid_id: str, user: dict = Depends(get_current_user)) -> dict
     return payload
 
 
+@router.post("/grids/{grid_id}/check")
+async def check_grid(grid_id: str, body: SubmitIn, user: dict = Depends(get_current_user)) -> dict:
+    """Validation en direct sans effet de bord : renvoie les erreurs case par
+    case sans toucher au score ni à la progression. Idéal pour un retour
+    visuel pendant la saisie (mode "Vérifier au fur et à mesure").
+    """
+    grid = await _grid_by_id(grid_id)
+    if not grid:
+        raise HTTPException(status_code=404, detail="Grille introuvable")
+
+    rows, cols = _rows_cols(grid)
+    if len(body.letters) != rows or any(len(row) != cols for row in body.letters):
+        raise HTTPException(status_code=400, detail="Dimensions incorrectes")
+
+    correct_cells = 0
+    total_cells = 0
+    mistakes_mask: list[list[bool]] = [[False] * cols for _ in range(rows)]
+    for r in range(rows):
+        for c in range(cols):
+            cell = grid["cells"][r][c]
+            if cell["type"] != "letter":
+                continue
+            total_cells += 1
+            expected = cell["answer"].upper()
+            given = (body.letters[r][c] or "").strip().upper()[:1]
+            if given == expected:
+                correct_cells += 1
+            elif given:
+                mistakes_mask[r][c] = True
+    accuracy_pct = int(round(correct_cells / total_cells * 100)) if total_cells else 0
+    return {
+        "correct_cells": correct_cells,
+        "total_cells": total_cells,
+        "accuracy_pct": accuracy_pct,
+        "mistakes": mistakes_mask,
+    }
+
+
 @router.post("/grids/{grid_id}/submit")
 async def submit_grid(grid_id: str, body: SubmitIn, user: dict = Depends(get_current_user)) -> dict:
     grid = await _grid_by_id(grid_id)

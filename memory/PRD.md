@@ -997,3 +997,33 @@ User admin ne voyait plus les liens admin car la navbar débordait sur laptop 14
 - EHPAD CRM (P2)
 - Refactor `server.py` scheduler → `scheduler.py` (technique)
 - Mobile app Expo (backlog)
+
+
+---
+
+## Mots Fléchés — Refonte grilles + feedback en direct (2026-02-10) ✅
+
+### Bug identifié (user report)
+Les grilles mf01-mf05 étaient des "5×5" (en réalité 4×4 zone jouable) avec des réponses stockées en charabia (`RITS/ABHO/WLYU/MEMR`) qui ne correspondaient pas aux définitions ("Céréale d'Asie" = RIZ 3 lettres, mais 4 cases…). Seule mf06 (MER/EAU/RUE) était valide.
+
+### Livrables
+1. **6 grilles 4×4 avec vrais croisements** — carrés magiques 3×3 (matrice symétrique) où chaque ligne ET chaque colonne forme un vrai mot français vérifié :
+   - mf01 Petit-déjeuner 🥐 · BOL/OSE/LES (facile)
+   - mf02 À la ferme 🐓 · OIE/IRA/EAU (facile)
+   - mf03 Nature & vigne 🍇 · ROC/OSE/CEP (moyen)
+   - mf04 Petits mots courants 📚 · ILE/LES/EST (moyen)
+   - mf05 Objets du quotidien 🔑 · SAC/AIL/CLE (difficile)
+   - mf06 Ville & Nature 🎯 · MER/EAU/RUE (difficile, inchangée)
+   - Symétrie vérifiée par `assert` au chargement (fail-fast)
+2. **Nouvel endpoint `POST /mots-fleches/grids/{id}/check`** — retourne `{correct_cells, total_cells, accuracy_pct, mistakes}` sans écrire en DB, sans XP, sans league update. Idéal pour la validation en direct.
+3. **Toggle front "Vérifier au fur et à mesure" (ON par défaut)** — debounce 400 ms sur `letters` : appelle `/check` et repeint les cases fausses en rouge en live. L'erreur d'une case disparaît instantanément dès que le joueur retape (avant même le debounce).
+4. **UI refresh** — badge "Grilles 4×4 croisées" + copy "Six grilles thématiques avec vrais croisements (carrés magiques 3×3)".
+
+### Fichiers touchés
+- Réécrit : `/app/backend/mots_fleches_data.py`
+- Modifié : `/app/backend/routers/mots_fleches.py` (ajout endpoint /check)
+- Modifié : `/app/frontend/src/pages/MotsFleches.jsx` (état liveCheck, debounce, toggle UI, copy)
+
+### Vérification
+- Backend : curl `/api/mots-fleches/grids/mf01/check` avec BOL/OSE/LES → correct_cells=9, accuracy=100 % ✅
+- Frontend (screenshot admin@1440px) : liste 6 grilles, ouverture mf01, saisie X → cellule rouge en direct, correction → rouge disparaît ✅

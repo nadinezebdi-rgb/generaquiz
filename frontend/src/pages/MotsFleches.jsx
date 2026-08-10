@@ -55,12 +55,12 @@ export default function MotsFleches() {
         </Link>
         <div className="mb-5">
           <span className="inline-flex items-center gap-2 bg-bordeaux text-cream font-bold px-3 py-1 rounded-full text-xs uppercase tracking-wider mb-3">
-            <PenLine className="w-3.5 h-3.5" /> Nouveau — MVP 5×5
+            <PenLine className="w-3.5 h-3.5" /> Grilles 4×4 croisées
           </span>
           <h1 className="font-display text-4xl md:text-5xl font-extrabold text-navy" data-testid="mots-fleches-title">
             Mots <span className="text-terracotta italic">Fléchés</span>
           </h1>
-          <p className="text-navy/70 mt-1">Cinq grilles thématiques 5×5. +1 pt par lettre correcte, +5 bonus grille complète.</p>
+          <p className="text-navy/70 mt-1">Six grilles thématiques avec vrais croisements (carrés magiques 3×3). +1 pt par lettre correcte, +5 bonus grille complète.</p>
         </div>
 
         <div className="grid sm:grid-cols-2 gap-4">
@@ -104,7 +104,9 @@ function GridPlay({ gridId, onExit }) {
   const [mistakes, setMistakes] = useState({}); // "r-c" → true briefly
   const [result, setResult] = useState(null);
   const [submitting, setSubmitting] = useState(false);
+  const [liveCheck, setLiveCheck] = useState(true); // Vérifier au fur et à mesure
   const cellRefs = useRef({});
+  const checkTimer = useRef(null);
 
   useEffect(() => {
     api.get(`/mots-fleches/grids/${gridId}`).then((r) => {
@@ -113,11 +115,43 @@ function GridPlay({ gridId, onExit }) {
     });
   }, [gridId]);
 
+  // Debounced live check — appelle /check (no-op DB) 400ms après la dernière frappe
+  useEffect(() => {
+    if (!liveCheck || !grid) return;
+    if (checkTimer.current) clearTimeout(checkTimer.current);
+    checkTimer.current = setTimeout(async () => {
+      // Ne rien envoyer si aucune lettre saisie
+      const hasAny = letters.some((row) => row.some((v) => v));
+      if (!hasAny) {
+        setMistakes({});
+        return;
+      }
+      try {
+        const { data } = await api.post(`/mots-fleches/grids/${gridId}/check`, { letters });
+        const m = {};
+        for (let r = 0; r < data.mistakes.length; r++) {
+          for (let c = 0; c < data.mistakes[r].length; c++) {
+            if (data.mistakes[r][c]) m[`${r}-${c}`] = true;
+          }
+        }
+        setMistakes(m);
+      } catch (_) { /* silencieux */ }
+    }, 400);
+    return () => { if (checkTimer.current) clearTimeout(checkTimer.current); };
+  }, [letters, liveCheck, grid, gridId]);
+
   function setLetter(r, c, ch) {
     if (!grid || grid.cells[r][c].type !== "letter") return;
     setLetters((prev) => {
       const next = prev.map((row) => [...row]);
       next[r][c] = ch.toUpperCase().slice(0, 1);
+      return next;
+    });
+    // Efface l'erreur locale de la case dès que le joueur retape (avant debounce)
+    setMistakes((prev) => {
+      if (!prev[`${r}-${c}`]) return prev;
+      const next = { ...prev };
+      delete next[`${r}-${c}`];
       return next;
     });
   }
@@ -280,7 +314,20 @@ function GridPlay({ gridId, onExit }) {
           }))}
         </div>
 
-        <div className="mt-6 flex justify-center gap-3 flex-wrap">
+        <div className="mt-6 flex justify-center gap-3 flex-wrap items-center">
+          <label className="inline-flex items-center gap-2 text-sm font-semibold text-navy select-none cursor-pointer" data-testid="mots-fleches-live-toggle-wrap">
+            <input
+              type="checkbox"
+              checked={liveCheck}
+              onChange={(e) => {
+                setLiveCheck(e.target.checked);
+                if (!e.target.checked) setMistakes({});
+              }}
+              data-testid="mots-fleches-live-toggle"
+              className="w-4 h-4 accent-terracotta"
+            />
+            Vérifier au fur et à mesure
+          </label>
           <button
             type="button"
             onClick={submit}
