@@ -1,11 +1,18 @@
 """Mistral generator for Mots Fléchés — nightly.
 
-Produces ONE new grid per night with the classic row-based structure:
-  Each row = [block with clue_h] + [letters of the answer]
-The number of rows is `n_words`; column count = max(word_length) + 1 (for the
-clue column). No vertical intersections — trivial to generate, always solvable.
+Approche v4 (2026-02) : bank de carrés magiques 3×3 pré-vérifiés + Mistral pour
+générer des définitions fraîches. Cela garantit une grille avec de vrais
+croisements verticaux ET horizontaux (contrairement à l'ancien mode row-based
+qui n'avait qu'un mot par ligne).
 
-Cron: 04:30 Europe/Paris (after wordsearch @ 03:30 and charades @ 04:00).
+Bank
+----
+Chaque entrée est un triplet (w1, w2, w3) qui forme une matrice symétrique 3×3
+(matrix[i][j] == matrix[j][i]). Chaque ligne ET chaque colonne du carré est
+donc un vrai mot français. La bank est vérifiée à la main. Elle exclut les
+6 triplets déjà utilisés par les grilles seed (mf01-mf06).
+
+Cron: 04:30 Europe/Paris (après wordsearch @ 03:30 et charades @ 04:00).
 """
 from __future__ import annotations
 
@@ -14,7 +21,6 @@ import json
 import os
 import random
 import re
-import unicodedata
 from datetime import datetime, timezone
 
 from mistralai import Mistral
@@ -23,166 +29,228 @@ from core import db, logger
 
 
 MISTRAL_MODEL = os.environ.get("MISTRAL_MODEL", "mistral-small-latest")
-MAX_GENERATED = 30           # keep bounded — old grids beyond this are pruned
-MIN_WORDS, MAX_WORDS = 6, 8  # each grid has this many word/clue rows
+MAX_GENERATED = 30
 
-
-THEME_ROTATION = [
-    ("Cuisine française",     "🍽️"),
-    ("Cinéma classique",       "🎬"),
-    ("Chansons françaises",    "🎶"),
-    ("Régions de France",      "🗺️"),
-    ("La ferme",               "🐓"),
-    ("Fleurs et arbres",       "🌸"),
-    ("Métiers d'autrefois",    "👷"),
-    ("Vie quotidienne d'antan", "📻"),
-    ("Sport à la française",   "🏆"),
-    ("Écrivains français",     "📖"),
+# =============================================================================
+# Bank de carrés magiques 3×3 (mots français courants, matrice symétrique)
+# =============================================================================
+# Chaque entrée: (triplet w1/w2/w3, thème/emoji, clues par défaut)
+# Les 3 clues sont associées 1-to-1 aux mots (w1_clue, w2_clue, w3_clue).
+# Les triplets déjà utilisés dans les seeds (mf01..mf06) sont EXCLUS.
+MAGIC_BANK: list[dict] = [
+    {
+        "words": ("AIL", "ILE", "LES"),
+        "theme": "Jardin & vocabulaire", "emoji": "🌿",
+        "clues": ("Bulbe qui parfume l'aïoli", "Terre entourée d'eau", "Article défini pluriel"),
+    },
+    {
+        "words": ("ART", "RUE", "TES"),
+        "theme": "Petits mots courants", "emoji": "📖",
+        "clues": ("Peinture, sculpture… tout ça", "Voie urbaine", "Possessif pluriel (à toi)"),
+    },
+    {
+        "words": ("BOL", "OIE", "LES"),
+        "theme": "Cuisine & basse-cour", "emoji": "🥣",
+        "clues": ("Récipient rond pour le café", "Volaille grise à long cou", "Article défini pluriel"),
+    },
+    {
+        "words": ("COL", "OSE", "LES"),
+        "theme": "Vêtements & petits mots", "emoji": "👔",
+        "clues": ("Partie haute de la chemise", "N'hésite pas (verbe)", "Article défini pluriel"),
+    },
+    {
+        "words": ("DES", "EAU", "SUD"),
+        "theme": "Petits mots & géographie", "emoji": "🧭",
+        "clues": ("Article partitif pluriel", "Liquide vital (H₂O)", "Point cardinal opposé au nord"),
+    },
+    {
+        "words": ("CES", "EAU", "SUD"),
+        "theme": "Petits mots & géographie", "emoji": "🌊",
+        "clues": ("Démonstratif pluriel (ceux-ci)", "Liquide vital (H₂O)", "Point cardinal chaud"),
+    },
+    {
+        "words": ("FIN", "ILE", "NEZ"),
+        "theme": "Corps & vocabulaire", "emoji": "👃",
+        "clues": ("Le mot du dernier chapitre", "Terre entourée d'eau", "Il sent bon ou mauvais"),
+    },
+    {
+        "words": ("VIN", "IRE", "NEZ"),
+        "theme": "Cave & humeur", "emoji": "🍷",
+        "clues": ("Boisson fermentée du raisin", "Colère (littéraire)", "Organe de l'odorat"),
+    },
+    {
+        "words": ("CLE", "LES", "EST"),
+        "theme": "Petits mots courants", "emoji": "🔑",
+        "clues": ("Elle ouvre la porte", "Article défini pluriel", "Point cardinal du soleil levant"),
+    },
+    {
+        "words": ("AME", "MET", "ETE"),
+        "theme": "Sentiments & saisons", "emoji": "☀️",
+        "clues": ("Elle habite en nous", "Verbe mettre (3ᵉ p. sg.)", "Saison des vacances"),
+    },
+    {
+        "words": ("ANE", "NUL", "ELU"),
+        "theme": "Vocabulaire & politique", "emoji": "🗳️",
+        "clues": ("Animal têtu à longues oreilles", "Zéro pointé, sans valeur", "Personne choisie par un vote"),
+    },
+    {
+        "words": ("FEE", "EST", "ETE"),
+        "theme": "Contes & saisons", "emoji": "🧚",
+        "clues": ("Elle a une baguette magique", "Point cardinal du levant", "Saison la plus chaude"),
+    },
+    {
+        "words": ("DON", "OSE", "NEZ"),
+        "theme": "Générosité & humeur", "emoji": "🎁",
+        "clues": ("Cadeau ou talent", "Prend le risque (verbe)", "Organe entre les yeux et la bouche"),
+    },
+    {
+        "words": ("ETE", "TES", "EST"),
+        "theme": "Saisons & petits mots", "emoji": "🌞",
+        "clues": ("Saison des cigales", "Possessif (à toi, pluriel)", "Point cardinal du levant"),
+    },
+    {
+        "words": ("ARC", "RUE", "CEP"),
+        "theme": "Vignes & voûtes", "emoji": "🍇",
+        "clues": ("Il tire des flèches", "Voie urbaine", "Pied de vigne"),
+    },
 ]
 
 
-def _pick_theme() -> tuple[str, str]:
-    return random.choice(THEME_ROTATION)
+def _pick_triple() -> dict:
+    return random.choice(MAGIC_BANK)
 
 
-def _normalize_answer(w: str) -> str:
-    s = w.strip().upper()
-    s = "".join(c for c in unicodedata.normalize("NFD", s) if unicodedata.category(c) != "Mn")
-    return "".join(c for c in s if "A" <= c <= "Z")
+# =============================================================================
+# Mistral : reformulation des définitions (optionnel)
+# =============================================================================
 
+PROMPT_RECLUE = """Tu es un rédacteur de définitions de mots croisés, pour un public senior français.
 
-PROMPT = """Tu es un créateur de "mots fléchés" français simples, pour un public senior.
+Voici trois mots français : {w1}, {w2}, {w3}.
 
-Thème imposé : « {theme} »
-
-Génère exactement {n} paires (mot français, définition courte).
-Contraintes strictes:
-- Le mot est un nom commun français simple, 3 à 8 lettres, en MAJUSCULES, sans accent ni espace ni tiret
-- La définition tient sur une seule ligne courte (< 60 caractères), lisible par un senior
-- Aucune définition ne peut contenir le mot lui-même
-- Aucune paire n'est doublée
+Pour chaque mot, écris UNE définition courte (< 50 caractères), claire et évocatrice pour un senior, sans citer le mot lui-même. Une définition par mot, dans le même ordre.
 
 Réponds STRICTEMENT en JSON valide :
 {{
-  "theme": "Un titre précis pour la grille",
-  "emoji": "🎯",
-  "entries": [
-    {{"word": "POMME", "clue": "Un fruit rouge ou vert du verger"}},
-    ...
-  ]
+  "clues": ["définition de {w1}", "définition de {w2}", "définition de {w3}"]
 }}
 """
 
 
-def _validate_entry(entry: dict) -> tuple[bool, str]:
-    w = entry.get("word", "")
-    c = entry.get("clue", "")
-    if not isinstance(w, str) or not isinstance(c, str):
-        return False, "not strings"
-    norm = _normalize_answer(w)
-    if not (3 <= len(norm) <= 8):
-        return False, f"length {len(norm)}"
-    if not norm.isalpha():
-        return False, "non-alpha"
-    if norm.lower() in c.lower():
-        return False, "clue contains answer"
-    if not (5 <= len(c) <= 60):
-        return False, "clue length"
-    return True, "ok"
+async def _mistral_reclue(w1: str, w2: str, w3: str) -> list[str] | None:
+    api_key = os.environ.get("MISTRAL_API_KEY")
+    if not api_key:
+        return None
+    client = Mistral(api_key=api_key)
+    prompt = PROMPT_RECLUE.format(w1=w1, w2=w2, w3=w3)
+    try:
+        resp = await asyncio.to_thread(
+            client.chat.complete,
+            model=MISTRAL_MODEL,
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0.7,
+        )
+        raw = resp.choices[0].message.content
+        match = re.search(r"\{.*\}", raw, re.DOTALL)
+        if not match:
+            return None
+        data = json.loads(match.group(0))
+        clues = data.get("clues", [])
+        if not isinstance(clues, list) or len(clues) != 3:
+            return None
+        # Validation : longueur, pas de contamination
+        for i, (word, clue) in enumerate(zip([w1, w2, w3], clues)):
+            if not isinstance(clue, str):
+                return None
+            c = clue.strip()
+            if len(c) < 5 or len(c) > 60:
+                return None
+            if word.lower() in c.lower():
+                return None
+            clues[i] = c
+        return clues
+    except Exception as e:
+        logger.warning(f"[fleches-gen] Mistral reclue error: {e}")
+        return None
 
 
-def _build_grid_from_entries(theme_label: str, emoji: str, entries: list[dict], theme_family: str) -> dict:
-    """Turn a validated list of {word, clue} into the fléchés cell matrix."""
-    words = [_normalize_answer(e["word"]) for e in entries]
-    max_len = max(len(w) for w in words)
-    cols = max_len + 1  # +1 clue column
-    rows = len(entries)
+# =============================================================================
+# Construction du document grille
+# =============================================================================
 
-    cells: list[list[dict]] = []
-    for i, entry in enumerate(entries):
-        row = [{"type": "block", "clue_h": entry["clue"]}]
-        w = _normalize_answer(entry["word"])
-        for k in range(max_len):
-            if k < len(w):
-                row.append({"type": "letter", "answer": w[k]})
-            else:
-                # Pad shorter words with a spacer block so the grid stays rectangular
-                row.append({"type": "block"})
+def _build_magic_grid(theme_label: str, emoji: str, words: tuple[str, str, str],
+                      clues: list[str], theme_family: str) -> dict:
+    """Construit une grille 4×4 (3×3 jouable) à partir d'un triplet symétrique."""
+    w1, w2, w3 = words
+    matrix = [list(w1), list(w2), list(w3)]
+
+    cells = [
+        [
+            {"type": "block"},
+            {"type": "block", "clue_v": clues[0]},
+            {"type": "block", "clue_v": clues[1]},
+            {"type": "block", "clue_v": clues[2]},
+        ],
+    ]
+    for i in range(3):
+        row = [{"type": "block", "clue_h": clues[i]}]
+        for j in range(3):
+            row.append({"type": "letter", "answer": matrix[i][j]})
         cells.append(row)
 
     return {
         "id": f"mfg-{datetime.now(timezone.utc).strftime('%Y%m%d')}-{random.randint(1000, 9999)}",
         "theme": theme_label,
         "emoji": emoji,
-        "difficulty": random.choice(["facile", "moyen", "difficile"]),
-        "size": max(rows, cols),   # legacy square hint (kept for backward compat)
-        "rows": rows,
-        "cols": cols,
+        "difficulty": "difficile",  # les croisements rendent chaque erreur pénalisante
+        "size": 4,
+        "rows": 4,
+        "cols": 4,
         "cells": cells,
+        "words": [
+            {"answer": w1, "direction": "h", "row": 1, "col": 1},
+            {"answer": w2, "direction": "h", "row": 2, "col": 1},
+            {"answer": w3, "direction": "h", "row": 3, "col": 1},
+            {"answer": w1, "direction": "v", "row": 1, "col": 1},
+            {"answer": w2, "direction": "v", "row": 1, "col": 2},
+            {"answer": w3, "direction": "v", "row": 1, "col": 3},
+        ],
         "source": "mistral",
         "family": theme_family,
         "created_at": datetime.now(timezone.utc).isoformat(),
+        "notes": f"Carré magique {w1}/{w2}/{w3} — 6 mots croisés, chaque lettre en croise 2.",
     }
 
 
-async def _mistral_generate_pack() -> tuple[dict, list[dict]] | None:
-    api_key = os.environ.get("MISTRAL_API_KEY")
-    if not api_key:
-        logger.warning("[fleches-gen] MISTRAL_API_KEY manquant — sauté")
-        return None
-    theme_family, emoji = _pick_theme()
-    n = random.randint(MIN_WORDS, MAX_WORDS)
-    prompt = PROMPT.format(theme=theme_family, n=n)
-    client = Mistral(api_key=api_key)
-    try:
-        resp = await asyncio.to_thread(
-            client.chat.complete,
-            model=MISTRAL_MODEL,
-            messages=[{"role": "user", "content": prompt}],
-            temperature=0.85,
-        )
-        raw = resp.choices[0].message.content
-        match = re.search(r"\{.*\}", raw, re.DOTALL)
-        if not match:
-            logger.warning("[fleches-gen] no JSON in Mistral response: %s", raw[:200])
-            return None
-        payload = json.loads(match.group(0))
-        if not isinstance(payload.get("entries"), list):
-            return None
-        # Validate and dedupe
-        clean = []
-        seen: set[str] = set()
-        for e in payload["entries"]:
-            ok, _ = _validate_entry(e)
-            if not ok:
-                continue
-            norm = _normalize_answer(e["word"])
-            if norm in seen:
-                continue
-            seen.add(norm)
-            clean.append({"word": norm, "clue": e["clue"].strip()})
-        if len(clean) < MIN_WORDS:
-            logger.warning("[fleches-gen] too few valid entries after QA: %d", len(clean))
-            return None
-        return ({"theme": payload.get("theme") or theme_family, "emoji": payload.get("emoji") or emoji,
-                 "family": theme_family}, clean)
-    except Exception as e:
-        logger.warning(f"[fleches-gen] Mistral error: {e}")
-        return None
-
-
 async def generate_nightly_fleches() -> str | None:
-    """Nightly job: build ONE new fléchés grid via Mistral and persist it.
+    """Job nocturne : construit UNE nouvelle grille carré magique 3×3.
 
-    Returns the grid id on success, None on failure. Prunes to MAX_GENERATED.
+    Étapes :
+    1. Choisit un triplet du bank (garanti symétrique)
+    2. Demande à Mistral 3 définitions fraîches (sinon utilise les défauts)
+    3. Persiste la grille et purge les anciennes au-delà de MAX_GENERATED
+
+    Retourne l'id de la grille ou None si aucune écriture DB n'a eu lieu.
     """
-    result = await _mistral_generate_pack()
-    if not result:
-        return None
-    meta, entries = result
-    grid = _build_grid_from_entries(meta["theme"], meta["emoji"], entries, meta["family"])
+    triple = _pick_triple()
+    w1, w2, w3 = triple["words"]
+    default_clues = list(triple["clues"])
+
+    fresh = await _mistral_reclue(w1, w2, w3)
+    clues = fresh if fresh else default_clues
+
+    grid = _build_magic_grid(
+        theme_label=triple["theme"],
+        emoji=triple["emoji"],
+        words=triple["words"],
+        clues=clues,
+        theme_family=triple["theme"],
+    )
     await db.fleches_generated.insert_one(grid)
-    logger.info(f"[fleches-gen] added grid {grid['id']} — {grid['theme']} ({grid['rows']}x{grid['cols']})")
+    logger.info(
+        f"[fleches-gen] added magic grid {grid['id']} — {grid['theme']} "
+        f"({w1}/{w2}/{w3}) source_clues={'mistral' if fresh else 'default'}"
+    )
 
     count = await db.fleches_generated.count_documents({})
     if count > MAX_GENERATED:

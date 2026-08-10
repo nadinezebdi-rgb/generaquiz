@@ -1027,3 +1027,31 @@ Les grilles mf01-mf05 étaient des "5×5" (en réalité 4×4 zone jouable) avec 
 ### Vérification
 - Backend : curl `/api/mots-fleches/grids/mf01/check` avec BOL/OSE/LES → correct_cells=9, accuracy=100 % ✅
 - Frontend (screenshot admin@1440px) : liste 6 grilles, ouverture mf01, saisie X → cellule rouge en direct, correction → rouge disparaît ✅
+
+
+---
+
+## Mots Fléchés v4 — Mistral avec vrais croisements + Word Complete Celebration (2026-02-10) ✅
+
+### Backend : générateur Mistral repensé
+- **Bank de 15 carrés magiques 3×3 pré-vérifiés** dans `fleches_mistral.py` (AIL/ILE/LES, VIN/IRE/NEZ, ARC/RUE/CEP, ANE/NUL/ELU, DES/EAU/SUD, etc.) — chaque triplet est une matrice symétrique où chaque ligne ET chaque colonne forment un vrai mot français commun.
+- **Le job nocturne** :
+  1. Choisit un triplet aléatoire dans la bank (garantie de crossings valides)
+  2. Demande à Mistral 3 clues fraîches pour ce triplet via `PROMPT_RECLUE` (validation stricte : 5-60 chars, pas de contamination)
+  3. Fallback sur les clues par défaut du bank si Mistral échoue ou renvoie du JSON invalide
+  4. Persiste la grille 4×4 magic-square (difficulté "difficile", champ `words` pour validation avancée)
+- **L'ancien mode row-based est supprimé** — plus jamais de grilles sans croisements verticaux.
+
+### Frontend : Word Complete Celebration
+- `completedCells` calculé via `useMemo` : pour chaque ligne et chaque colonne, si toutes les cases-lettres sont remplies ET aucune n'est marquée mistake → toutes les cases du mot deviennent vertes.
+- Fonctionne en direct via le mode "Vérifier au fur et à mesure" (les mistakes sont mises à jour par le debounce `/check` toutes les 400 ms).
+- Résultat : un carré magique 3×3 complètement résolu devient tout vert (9 cases + 6 mots) — récompense visuelle immédiate.
+
+### Vérification
+- 15 triples du bank tous confirmés symétriques par assertion ✅
+- 3 grilles Mistral générées via `POST /admin/generate` — toutes 4×4 difficulté "difficile" avec clues variées ✅
+- Screenshot admin@1440 : mf02 avec OIE tapé en row 1 → 3 cases vertes ✅ · OIE/IRA/EAU complet → 9 cases vertes ✅ · grille Mistral "Petits mots courants" (ART/RUE/TES) affiche clues fraîches ✅
+
+### Fichiers touchés
+- Réécrit : `/app/backend/fleches_mistral.py` (bank + reclue Mistral, ancien row-based supprimé)
+- Modifié : `/app/frontend/src/pages/MotsFleches.jsx` (`completedCells`, style vert)

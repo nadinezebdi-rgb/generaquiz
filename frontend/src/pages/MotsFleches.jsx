@@ -214,6 +214,42 @@ function GridPlay({ gridId, onExit }) {
     return n;
   }, [letters, grid]);
 
+  // Cases appartenant à un mot ENTIÈREMENT correct (ligne ou colonne).
+  // Utilisé pour l'effet "Word Complete Celebration" (vert).
+  const completedCells = useMemo(() => {
+    if (!grid) return {};
+    const rows = grid.rows || grid.size;
+    const cols = grid.cols || grid.size;
+    const out = {};
+    // Horizontal words : parcourir chaque ligne
+    for (let r = 0; r < rows; r++) {
+      const cells = [];
+      for (let c = 0; c < cols; c++) {
+        if (grid.cells[r][c].type === "letter") cells.push({ r, c });
+      }
+      if (cells.length === 0) continue;
+      const allFilled = cells.every(({ r, c }) => letters[r]?.[c]);
+      const noMistake = cells.every(({ r, c }) => !mistakes[`${r}-${c}`]);
+      if (allFilled && noMistake) {
+        for (const { r, c } of cells) out[`${r}-${c}`] = true;
+      }
+    }
+    // Vertical words : parcourir chaque colonne
+    for (let c = 0; c < cols; c++) {
+      const cells = [];
+      for (let r = 0; r < rows; r++) {
+        if (grid.cells[r][c].type === "letter") cells.push({ r, c });
+      }
+      if (cells.length === 0) continue;
+      const allFilled = cells.every(({ r, c }) => letters[r]?.[c]);
+      const noMistake = cells.every(({ r, c }) => !mistakes[`${r}-${c}`]);
+      if (allFilled && noMistake) {
+        for (const { r, c } of cells) out[`${r}-${c}`] = true;
+      }
+    }
+    return out;
+  }, [letters, mistakes, grid]);
+
   if (!grid) {
     return (
       <div className="min-h-screen paper-bg">
@@ -279,6 +315,7 @@ function GridPlay({ gridId, onExit }) {
             }
             const isCursor = cursor && cursor.r === r && cursor.c === c;
             const isMistake = mistakes[key];
+            const isCompleted = completedCells[key];
             const val = letters[r]?.[c] ?? "";
             return (
               <input
@@ -305,6 +342,8 @@ function GridPlay({ gridId, onExit }) {
                 className={`aspect-square text-center font-bold uppercase text-lg md:text-xl rounded-sm border-2 focus:outline-none transition ${
                   isMistake
                     ? "bg-[#D9534F]/20 border-[#D9534F] text-[#D9534F]"
+                    : isCompleted
+                    ? "bg-[#3D9970]/20 border-[#3D9970] text-[#2A7350] shadow-sm"
                     : isCursor
                     ? "bg-mustard/40 border-terracotta text-navy"
                     : "bg-white border-cream-dark text-navy focus:border-terracotta"
