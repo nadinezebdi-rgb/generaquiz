@@ -37,7 +37,7 @@ MAX_GENERATED = 30
 # Chaque entrée: (triplet w1/w2/w3, thème/emoji, clues par défaut)
 # Les 3 clues sont associées 1-to-1 aux mots (w1_clue, w2_clue, w3_clue).
 # Les triplets déjà utilisés dans les seeds (mf01..mf06) sont EXCLUS.
-MAGIC_BANK: list[dict] = [
+MAGIC_BANK_3: list[dict] = [
     {
         "words": ("AIL", "ILE", "LES"),
         "theme": "Jardin & vocabulaire", "emoji": "🌿",
@@ -116,8 +116,172 @@ MAGIC_BANK: list[dict] = [
 ]
 
 
-def _pick_triple() -> dict:
-    return random.choice(MAGIC_BANK)
+# =============================================================================
+# Bank de carrés magiques 4×4 (16 cases jouables, générée par un solver exhaustif
+# puis triée à la main sur un pool de ~290 mots français ultra-courants)
+# =============================================================================
+MAGIC_BANK_4: list[dict] = [
+    {
+        "words": ("CERF", "EPEE", "REVE", "FEES"),
+        "theme": "Contes de fées", "emoji": "🧚",
+        "clues": (
+            "Cervidé aux bois majestueux",
+            "Arme du chevalier",
+            "Ce que fait dormir la belle au bois",
+            "Créatures magiques à baguette",
+        ),
+    },
+    {
+        "words": ("JOLI", "OEIL", "LIRE", "ILES"),
+        "theme": "Douceurs du regard", "emoji": "📖",
+        "clues": (
+            "Agréable à regarder",
+            "Organe de la vue",
+            "Parcourir un livre",
+            "Terres entourées d'eau",
+        ),
+    },
+    {
+        "words": ("AMIS", "MIDI", "IDEE", "SIEN"),
+        "theme": "Repas entre amis", "emoji": "🍽️",
+        "clues": (
+            "Personnes chères et fidèles",
+            "Heure du déjeuner",
+            "Pensée ou petit projet",
+            "Possessif (à lui, elle)",
+        ),
+    },
+    {
+        "words": ("BAIN", "AIDE", "IDEE", "NEES"),
+        "theme": "Vie de famille", "emoji": "🛁",
+        "clues": (
+            "Moment dans la baignoire",
+            "Coup de main donné",
+            "Petite trouvaille",
+            "Venues au monde (féminin pluriel)",
+        ),
+    },
+    {
+        "words": ("ANSE", "NOEL", "SERA", "ELAN"),
+        "theme": "Fêtes de fin d'année", "emoji": "🎄",
+        "clues": (
+            "Poignée d'une tasse",
+            "Fête du 25 décembre",
+            "Verbe être au futur (3ᵉ p. sg.)",
+            "Grand cervidé du Nord",
+        ),
+    },
+    {
+        "words": ("VRAI", "REND", "ANSE", "IDEE"),
+        "theme": "Réflexions", "emoji": "💡",
+        "clues": (
+            "Contraire de faux",
+            "Verbe rendre (3ᵉ p. sg.)",
+            "Poignée d'un panier",
+            "Petite trouvaille de l'esprit",
+        ),
+    },
+    {
+        "words": ("ETAT", "TOUR", "AUTO", "TROU"),
+        "theme": "Sur la route", "emoji": "🚗",
+        "clues": (
+            "Pays ou condition",
+            "Édifice de la dame de fer",
+            "Voiture familière",
+            "Cavité dans le sol",
+        ),
+    },
+    {
+        "words": ("NAIF", "AIDE", "IDEE", "FEES"),
+        "theme": "Contes d'enfance", "emoji": "🧸",
+        "clues": (
+            "Innocent, trop confiant",
+            "Coup de main généreux",
+            "Petite trouvaille de l'esprit",
+            "Créatures magiques ailées",
+        ),
+    },
+    {
+        "words": ("SEPT", "ETUI", "PURE", "TIEN"),
+        "theme": "Petits mots précis", "emoji": "🔢",
+        "clues": (
+            "Nombre des jours de la semaine",
+            "Petite boîte pour lunettes",
+            "Sans mélange, cristalline",
+            "Possessif (à toi)",
+        ),
+    },
+    {
+        "words": ("PORC", "OEIL", "RIRE", "CLES"),
+        "theme": "Instants du quotidien", "emoji": "😄",
+        "clues": (
+            "Cochon de la ferme",
+            "Organe qui voit",
+            "Ce que fait une bonne blague",
+            "Elles ouvrent les portes",
+        ),
+    },
+    {
+        "words": ("GAIN", "AIDE", "IDEE", "NEES"),
+        "theme": "Idée gagnante", "emoji": "🏆",
+        "clues": (
+            "Bénéfice ou victoire",
+            "Coup de main précieux",
+            "Éclair de génie",
+            "Venues au monde",
+        ),
+    },
+    {
+        "words": ("HERO", "ETUI", "RUSE", "OIES"),
+        "theme": "Récits de bravoure", "emoji": "🦸",
+        "clues": (
+            "Personnage courageux",
+            "Petite boîte allongée",
+            "Astuce ingénieuse",
+            "Volailles blanches à long cou",
+        ),
+    },
+    {
+        "words": ("VERS", "ETUI", "RUSE", "SIEN"),
+        "theme": "Poésie & logique", "emoji": "✒️",
+        "clues": (
+            "Une ligne de poème",
+            "Contenant pour un stylo",
+            "Astuce pour arriver à ses fins",
+            "Possessif (à lui, à elle)",
+        ),
+    },
+    {
+        "words": ("PROF", "RIRE", "ORME", "FEES"),
+        "theme": "École enchantée", "emoji": "🎓",
+        "clues": (
+            "Enseignant familier",
+            "Éclat de bonne humeur",
+            "Grand arbre à écorce épaisse",
+            "Créatures magiques ailées",
+        ),
+    },
+    {
+        "words": ("GROS", "ROSE", "OSER", "SERA"),
+        "theme": "Jardin & avenir", "emoji": "🌹",
+        "clues": (
+            "Contraire de mince",
+            "Fleur reine du jardin",
+            "Prendre le risque",
+            "Verbe être au futur",
+        ),
+    },
+]
+
+# Backwards-compat alias for external callers (aucun autre module n'y touche mais on garde).
+MAGIC_BANK = MAGIC_BANK_3
+
+
+def _pick_puzzle() -> tuple[dict, int]:
+    """Retourne (entry, size). 60 % des nuits = 4×4 (plus riche), 40 % = 3×3."""
+    if random.random() < 0.6:
+        return random.choice(MAGIC_BANK_4), 4
+    return random.choice(MAGIC_BANK_3), 3
 
 
 # =============================================================================
@@ -126,23 +290,27 @@ def _pick_triple() -> dict:
 
 PROMPT_RECLUE = """Tu es un rédacteur de définitions de mots croisés, pour un public senior français.
 
-Voici trois mots français : {w1}, {w2}, {w3}.
+Voici {n} mots français : {word_list}.
 
 Pour chaque mot, écris UNE définition courte (< 50 caractères), claire et évocatrice pour un senior, sans citer le mot lui-même. Une définition par mot, dans le même ordre.
 
 Réponds STRICTEMENT en JSON valide :
 {{
-  "clues": ["définition de {w1}", "définition de {w2}", "définition de {w3}"]
+  "clues": [{example_list}]
 }}
 """
 
 
-async def _mistral_reclue(w1: str, w2: str, w3: str) -> list[str] | None:
+async def _mistral_reclue(words: tuple[str, ...]) -> list[str] | None:
+    """Demande à Mistral n définitions fraîches pour n mots (n = 3 ou 4)."""
     api_key = os.environ.get("MISTRAL_API_KEY")
     if not api_key:
         return None
     client = Mistral(api_key=api_key)
-    prompt = PROMPT_RECLUE.format(w1=w1, w2=w2, w3=w3)
+    n = len(words)
+    word_list = ", ".join(words)
+    example_list = ", ".join([f'"définition de {w}"' for w in words])
+    prompt = PROMPT_RECLUE.format(n=n, word_list=word_list, example_list=example_list)
     try:
         resp = await asyncio.to_thread(
             client.chat.complete,
@@ -156,10 +324,10 @@ async def _mistral_reclue(w1: str, w2: str, w3: str) -> list[str] | None:
             return None
         data = json.loads(match.group(0))
         clues = data.get("clues", [])
-        if not isinstance(clues, list) or len(clues) != 3:
+        if not isinstance(clues, list) or len(clues) != n:
             return None
         # Validation : longueur, pas de contamination
-        for i, (word, clue) in enumerate(zip([w1, w2, w3], clues)):
+        for i, (word, clue) in enumerate(zip(words, clues)):
             if not isinstance(clue, str):
                 return None
             c = clue.strip()
@@ -178,23 +346,22 @@ async def _mistral_reclue(w1: str, w2: str, w3: str) -> list[str] | None:
 # Construction du document grille
 # =============================================================================
 
-def _build_magic_grid(theme_label: str, emoji: str, words: tuple[str, str, str],
+def _build_magic_grid(theme_label: str, emoji: str, words: tuple[str, ...],
                       clues: list[str], theme_family: str) -> dict:
-    """Construit une grille 4×4 (3×3 jouable) à partir d'un triplet symétrique."""
-    w1, w2, w3 = words
-    matrix = [list(w1), list(w2), list(w3)]
+    """Construit une grille (N+1)×(N+1) (N×N jouable) à partir d'un tuple symétrique.
 
-    cells = [
-        [
-            {"type": "block"},
-            {"type": "block", "clue_v": clues[0]},
-            {"type": "block", "clue_v": clues[1]},
-            {"type": "block", "clue_v": clues[2]},
-        ],
-    ]
-    for i in range(3):
+    N=3 → grille 4×4 avec 9 cases jouables.
+    N=4 → grille 5×5 avec 16 cases jouables.
+    """
+    n = len(words)
+    assert n in (3, 4), "seul 3 ou 4 mots supportés"
+    matrix = [list(w) for w in words]
+
+    # Row 0 = bandeau de définitions verticales (▼)
+    cells = [[{"type": "block"}] + [{"type": "block", "clue_v": clues[k]} for k in range(n)]]
+    for i in range(n):
         row = [{"type": "block", "clue_h": clues[i]}]
-        for j in range(3):
+        for j in range(n):
             row.append({"type": "letter", "answer": matrix[i][j]})
         cells.append(row)
 
@@ -203,53 +370,49 @@ def _build_magic_grid(theme_label: str, emoji: str, words: tuple[str, str, str],
         "theme": theme_label,
         "emoji": emoji,
         "difficulty": "difficile",  # les croisements rendent chaque erreur pénalisante
-        "size": 4,
-        "rows": 4,
-        "cols": 4,
+        "size": n + 1,
+        "rows": n + 1,
+        "cols": n + 1,
         "cells": cells,
         "words": [
-            {"answer": w1, "direction": "h", "row": 1, "col": 1},
-            {"answer": w2, "direction": "h", "row": 2, "col": 1},
-            {"answer": w3, "direction": "h", "row": 3, "col": 1},
-            {"answer": w1, "direction": "v", "row": 1, "col": 1},
-            {"answer": w2, "direction": "v", "row": 1, "col": 2},
-            {"answer": w3, "direction": "v", "row": 1, "col": 3},
+            *[{"answer": w, "direction": "h", "row": i + 1, "col": 1} for i, w in enumerate(words)],
+            *[{"answer": w, "direction": "v", "row": 1, "col": j + 1} for j, w in enumerate(words)],
         ],
         "source": "mistral",
         "family": theme_family,
         "created_at": datetime.now(timezone.utc).isoformat(),
-        "notes": f"Carré magique {w1}/{w2}/{w3} — 6 mots croisés, chaque lettre en croise 2.",
+        "notes": f"Carré magique {'/'.join(words)} — {2 * n} mots croisés, chaque lettre en croise 2.",
     }
 
 
 async def generate_nightly_fleches() -> str | None:
-    """Job nocturne : construit UNE nouvelle grille carré magique 3×3.
+    """Job nocturne : construit UNE nouvelle grille carré magique (3×3 ou 4×4).
 
     Étapes :
-    1. Choisit un triplet du bank (garanti symétrique)
-    2. Demande à Mistral 3 définitions fraîches (sinon utilise les défauts)
+    1. Choisit une entrée dans MAGIC_BANK_3 (40 % du temps) ou MAGIC_BANK_4 (60 %)
+    2. Demande à Mistral N définitions fraîches (sinon utilise les défauts)
     3. Persiste la grille et purge les anciennes au-delà de MAX_GENERATED
 
     Retourne l'id de la grille ou None si aucune écriture DB n'a eu lieu.
     """
-    triple = _pick_triple()
-    w1, w2, w3 = triple["words"]
-    default_clues = list(triple["clues"])
+    entry, size = _pick_puzzle()
+    words = entry["words"]
+    default_clues = list(entry["clues"])
 
-    fresh = await _mistral_reclue(w1, w2, w3)
+    fresh = await _mistral_reclue(words)
     clues = fresh if fresh else default_clues
 
     grid = _build_magic_grid(
-        theme_label=triple["theme"],
-        emoji=triple["emoji"],
-        words=triple["words"],
+        theme_label=entry["theme"],
+        emoji=entry["emoji"],
+        words=words,
         clues=clues,
-        theme_family=triple["theme"],
+        theme_family=entry["theme"],
     )
     await db.fleches_generated.insert_one(grid)
     logger.info(
         f"[fleches-gen] added magic grid {grid['id']} — {grid['theme']} "
-        f"({w1}/{w2}/{w3}) source_clues={'mistral' if fresh else 'default'}"
+        f"({'/'.join(words)}, {size}×{size}) source_clues={'mistral' if fresh else 'default'}"
     )
 
     count = await db.fleches_generated.count_documents({})

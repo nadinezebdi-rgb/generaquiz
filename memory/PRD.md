@@ -1055,3 +1055,30 @@ Les grilles mf01-mf05 étaient des "5×5" (en réalité 4×4 zone jouable) avec 
 ### Fichiers touchés
 - Réécrit : `/app/backend/fleches_mistral.py` (bank + reclue Mistral, ancien row-based supprimé)
 - Modifié : `/app/frontend/src/pages/MotsFleches.jsx` (`completedCells`, style vert)
+
+
+---
+
+## Mots Fléchés v5 — Grilles 4×4 pleines + son de victoire (2026-02-10) ✅
+
+### Backend : solver 4×4 + double bank
+- **Solver custom** : recherche exhaustive de matrices 4×4 symétriques (magic-squares) parmi ~290 mots français ultra-courants (4 lettres). 89 solutions viables trouvées, dont 15 sélectionnées à la main.
+- **`MAGIC_BANK_4`** (15 entrées) ajoutée dans `fleches_mistral.py` — themes CERF/EPEE/REVE/FEES ("Contes de fées"), ETAT/TOUR/AUTO/TROU ("Sur la route"), PORC/OEIL/RIRE/CLES, GROS/ROSE/OSER/SERA…
+- **`_pick_puzzle()`** : 60 % du temps 4×4 (grille 5×5 avec 16 cases jouables), 40 % du temps 3×3 (grille 4×4 avec 9 cases jouables).
+- `_build_magic_grid` et `_mistral_reclue` généralisés pour supporter n=3 ou n=4 mots.
+
+### Frontend : Son de victoire "ding"
+- Toggle "Son 🔔" (ON par défaut) à côté du toggle "Vérifier au fur et à mesure".
+- Web Audio API : dès qu'un NOUVEAU mot devient complet (nouvelle entrée dans `completedWords`), un ding doux (880 Hz + harmonique 1320 Hz, decay 0.45 s, gain 0.18) est joué.
+- `prevCompletedSigRef` évite de rejouer le son quand `completedWords` re-render sans changement.
+- Refactor `completedCells` dérivé de `completedWords` (source de vérité unifiée).
+
+### Vérification (screenshot admin@1440)
+- 8 grilles Mistral générées : mix 2×(4×4) + 6×(5×5) ✅
+- Ouverture grille 5×5 "Petits mots précis" (SEPT/ETUI/PURE/TIEN) — 16 cases vides + 8 clues Mistral fraîches ✅
+- Saisie SEPT → 4 cases vertes + 2 oscillateurs audio (1 ding) ✅
+- Saisie complète 16 lettres → 16 cases vertes + 14 oscillateurs (7 dings pour 4 lignes + 4 colonnes, quelques events fusionnés par le batching React) ✅
+
+### Fichiers touchés
+- Modifié : `/app/backend/fleches_mistral.py` (MAGIC_BANK_4, `_pick_puzzle`, `_build_magic_grid` généralisé)
+- Modifié : `/app/frontend/src/pages/MotsFleches.jsx` (Web Audio ding, `completedWords`, toggle Son, copy)

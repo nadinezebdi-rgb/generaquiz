@@ -55,12 +55,12 @@ export default function MotsFleches() {
         </Link>
         <div className="mb-5">
           <span className="inline-flex items-center gap-2 bg-bordeaux text-cream font-bold px-3 py-1 rounded-full text-xs uppercase tracking-wider mb-3">
-            <PenLine className="w-3.5 h-3.5" /> Grilles 4×4 croisées
+            <PenLine className="w-3.5 h-3.5" /> Grilles croisées 3×3 & 4×4
           </span>
           <h1 className="font-display text-4xl md:text-5xl font-extrabold text-navy" data-testid="mots-fleches-title">
             Mots <span className="text-terracotta italic">Fléchés</span>
           </h1>
-          <p className="text-navy/70 mt-1">Six grilles thématiques avec vrais croisements (carrés magiques 3×3). +1 pt par lettre correcte, +5 bonus grille complète.</p>
+          <p className="text-navy/70 mt-1">Grilles thématiques avec vrais croisements — carrés magiques 3×3 (9 cases) ou 4×4 (16 cases). +1 pt par lettre correcte, +5 bonus grille complète.</p>
         </div>
 
         <div className="grid sm:grid-cols-2 gap-4">
@@ -105,8 +105,11 @@ function GridPlay({ gridId, onExit }) {
   const [result, setResult] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const [liveCheck, setLiveCheck] = useState(true); // Vérifier au fur et à mesure
+  const [soundOn, setSoundOn] = useState(true); // Ding sonore à chaque mot complété
   const cellRefs = useRef({});
   const checkTimer = useRef(null);
+  const audioCtxRef = useRef(null);
+  const prevCompletedSigRef = useRef(""); // signature des mots déjà célébrés
 
   useEffect(() => {
     api.get(`/mots-fleches/grids/${gridId}`).then((r) => {
@@ -214,14 +217,13 @@ function GridPlay({ gridId, onExit }) {
     return n;
   }, [letters, grid]);
 
-  // Cases appartenant à un mot ENTIÈREMENT correct (ligne ou colonne).
-  // Utilisé pour l'effet "Word Complete Celebration" (vert).
-  const completedCells = useMemo(() => {
-    if (!grid) return {};
+  // Ensemble des mots (h-i / v-j) ENTIÈREMENT corrects. Sert au son + au style vert.
+  const completedWords = useMemo(() => {
+    if (!grid) return new Set();
     const rows = grid.rows || grid.size;
     const cols = grid.cols || grid.size;
-    const out = {};
-    // Horizontal words : parcourir chaque ligne
+    const done = new Set();
+    // Lignes
     for (let r = 0; r < rows; r++) {
       const cells = [];
       for (let c = 0; c < cols; c++) {
@@ -230,11 +232,9 @@ function GridPlay({ gridId, onExit }) {
       if (cells.length === 0) continue;
       const allFilled = cells.every(({ r, c }) => letters[r]?.[c]);
       const noMistake = cells.every(({ r, c }) => !mistakes[`${r}-${c}`]);
-      if (allFilled && noMistake) {
-        for (const { r, c } of cells) out[`${r}-${c}`] = true;
-      }
+      if (allFilled && noMistake) done.add(`h-${r}`);
     }
-    // Vertical words : parcourir chaque colonne
+    // Colonnes
     for (let c = 0; c < cols; c++) {
       const cells = [];
       for (let r = 0; r < rows; r++) {
@@ -243,12 +243,67 @@ function GridPlay({ gridId, onExit }) {
       if (cells.length === 0) continue;
       const allFilled = cells.every(({ r, c }) => letters[r]?.[c]);
       const noMistake = cells.every(({ r, c }) => !mistakes[`${r}-${c}`]);
-      if (allFilled && noMistake) {
-        for (const { r, c } of cells) out[`${r}-${c}`] = true;
+      if (allFilled && noMistake) done.add(`v-${c}`);
+    }
+    return done;
+  }, [letters, mistakes, grid]);
+
+  // Cases appartenant à un mot ENTIÈREMENT correct (dérivé de completedWords).
+  const completedCells = useMemo(() => {
+    if (!grid) return {};
+    const rows = grid.rows || grid.size;
+    const cols = grid.cols || grid.size;
+    const out = {};
+    for (const wid of completedWords) {
+      const [dir, idxStr] = wid.split("-");
+      const idx = parseInt(idxStr, 10);
+      if (dir === "h") {
+        for (let c = 0; c < cols; c++) {
+          if (grid.cells[idx][c].type === "letter") out[`${idx}-${c}`] = true;
+        }
+      } else {
+        for (let r = 0; r < rows; r++) {
+          if (grid.cells[r][idx].type === "letter") out[`${r}-${idx}`] = true;
+        }
       }
     }
     return out;
-  }, [letters, mistakes, grid]);
+  }, [completedWords, grid]);
+
+  // Son "ding" via Web Audio API dès qu'un NOUVEAU mot est complété.
+  useEffect(() => {
+    const sig = [...completedWords].sort().join(",");
+    if (sig === prevCompletedSigRef.current) return;
+    const prev = new Set(prevCompletedSigRef.current.split(",").filter(Boolean));
+    const hasNew = [...completedWords].some((w) => !prev.has(w));
+    prevCompletedSigRef.current = sig;
+    if (!hasNew || !soundOn) return;
+    try {
+      if (!audioCtxRef.current) {
+        const Ctx = window.AudioContext || window.webkitAudioContext;
+        if (!Ctx) return;
+        audioCtxRef.current = new Ctx();
+      }
+      const ctx = audioCtxRef.current;
+      // "Ding" doux : sinus 880Hz avec harmonique 1320Hz, decay exponentiel 0.4s
+      const now = ctx.currentTime;
+      const master = ctx.createGain();
+      master.gain.setValueAtTime(0.0001, now);
+      master.gain.exponentialRampToValueAtTime(0.18, now + 0.02);
+      master.gain.exponentialRampToValueAtTime(0.0001, now + 0.45);
+      master.connect(ctx.destination);
+      for (const [freq, gain] of [[880, 1.0], [1320, 0.35]]) {
+        const osc = ctx.createOscillator();
+        osc.type = "sine";
+        osc.frequency.value = freq;
+        const g = ctx.createGain();
+        g.gain.value = gain;
+        osc.connect(g).connect(master);
+        osc.start(now);
+        osc.stop(now + 0.5);
+      }
+    } catch (_) { /* audio bloqué (permission) → silencieux */ }
+  }, [completedWords, soundOn]);
 
   if (!grid) {
     return (
@@ -366,6 +421,16 @@ function GridPlay({ gridId, onExit }) {
               className="w-4 h-4 accent-terracotta"
             />
             Vérifier au fur et à mesure
+          </label>
+          <label className="inline-flex items-center gap-2 text-sm font-semibold text-navy select-none cursor-pointer" data-testid="mots-fleches-sound-toggle-wrap">
+            <input
+              type="checkbox"
+              checked={soundOn}
+              onChange={(e) => setSoundOn(e.target.checked)}
+              data-testid="mots-fleches-sound-toggle"
+              className="w-4 h-4 accent-terracotta"
+            />
+            Son 🔔
           </label>
           <button
             type="button"
