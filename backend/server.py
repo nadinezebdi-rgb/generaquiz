@@ -88,6 +88,24 @@ async def admin_mistral_ping(user: dict = Depends(get_admin_user)):
     return await mistral_ping()
 
 
+@api.get("/admin/users")
+async def admin_list_users(user: dict = Depends(get_admin_user)):
+    """Admin-only: list registered users with email, name, signup date and email opt-in."""
+    users = []
+    projection = {"email": 1, "name": 1, "role": 1, "plan": 1, "created_at": 1, "daily_email_optin": 1}
+    cursor = db.users.find({}, projection).sort("created_at", -1)
+    async for u in cursor:
+        users.append({
+            "email": u.get("email"),
+            "name": u.get("name"),
+            "role": u.get("role", "user"),
+            "plan": u.get("plan", "free"),
+            "created_at": u.get("created_at"),
+            "daily_email_optin": u.get("daily_email_optin", True),
+        })
+    return {"count": len(users), "users": users}
+
+
 # Mount routers under /api
 api.include_router(auth_router.router)
 api.include_router(social_auth_router.router)
@@ -183,34 +201,42 @@ async def startup():
         logger.info(f"{existing_q} questions déjà en DB — seed sauté (Mistral gère la régénération)")
 
     # Seed admin
-    existing = await db.users.find_one({"email": ADMIN_EMAIL})
-    if existing is None:
-        await db.users.insert_one({
-            "email": ADMIN_EMAIL,
-            "password_hash": hash_password(ADMIN_PASSWORD),
-            "name": "Administrateur",
-            "role": "admin",
-            "plan": "premium",
-            "plan_tier": "premium",
-            "plan_period": "yearly",
-            "plan_expires_at": (datetime.now(timezone.utc) + timedelta(days=3650)).isoformat(),
-            "created_at": datetime.now(timezone.utc).isoformat(),
-        })
-        logger.info(f"Admin créé : {ADMIN_EMAIL}")
+    # Guard: never auto-seed or reset the admin account when ADMIN_PASSWORD is
+    # unset. This prevents creating an admin with an empty/guessable password.
+    if not ADMIN_PASSWORD:
+        logger.warning(
+            "ADMIN_PASSWORD non defini - seed admin saute. "
+            "Definir la variable ADMIN_PASSWORD pour gerer le compte admin."
+        )
     else:
-        if not verify_password(ADMIN_PASSWORD, existing["password_hash"]):
-            await db.users.update_one(
-                {"email": ADMIN_EMAIL},
-                {"$set": {"password_hash": hash_password(ADMIN_PASSWORD)}},
-            )
-            logger.info("Admin password mis à jour")
-        # Idempotent backfill of Sprint B tier fields for admin seeded before 3-tier model
-        if not existing.get("plan_tier"):
-            await db.users.update_one(
-                {"email": ADMIN_EMAIL},
-                {"$set": {"plan_tier": "premium", "plan_period": "yearly"}},
-            )
-            logger.info("Admin plan_tier/plan_period backfilled (Sprint B)")
+        existing = await db.users.find_one({"email": ADMIN_EMAIL})
+        if existing is None:
+            await db.users.insert_one({
+                "email": ADMIN_EMAIL,
+                "password_hash": hash_password(ADMIN_PASSWORD),
+                "name": "Administrateur",
+                "role": "admin",
+                "plan": "premium",
+                "plan_tier": "premium",
+                "plan_period": "yearly",
+                "plan_expires_at": (datetime.now(timezone.utc) + timedelta(days=3650)).isoformat(),
+                "created_at": datetime.now(timezone.utc).isoformat(),
+            })
+            logger.info(f"Admin créé : {ADMIN_EMAIL}")
+        else:
+            if not verify_password(ADMIN_PASSWORD, existing["password_hash"]):
+                await db.users.update_one(
+                    {"email": ADMIN_EMAIL},
+                    {"$set": {"password_hash": hash_password(ADMIN_PASSWORD)}},
+                )
+                logger.info("Admin password mis à jour")
+            # Idempotent backfill of Sprint B tier fields for admin seeded before 3-tier model
+            if not existing.get("plan_tier"):
+                await db.users.update_one(
+                    {"email": ADMIN_EMAIL},
+                    {"$set": {"plan_tier": "premium", "plan_period": "yearly"}},
+                )
+                logger.info("Admin plan_tier/plan_period backfilled (Sprint B)")
 
     # Backfill credits for users registered before the credits system.
     # Idempotent: only acts on users missing the `credits` field.

@@ -43,7 +43,7 @@ export default function Account() {
     e.preventDefault();
     setSavingName(true); setNameMsg("");
     try {
-      await api.patch("/auth/profile", { name });
+      await api.patch("/auth/profile", { name: name.trim() });
       await refresh();
       setNameMsg("Profil mis à jour");
       setTimeout(() => setNameMsg(""), 2500);

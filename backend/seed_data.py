@@ -65,6 +65,16 @@ CATEGORIES = [
         "mascot_image": "/api/static/mascots/culture-70-ans.png",
         "mascot_name": "Pierre le Sage", "count": 100,
     },
+    {
+        "id": "generation-z",
+        "title": "Génération Z",
+        "description": "Jeux vidéo, streaming, réseaux sociaux, musique et culture des années 2010-2025.",
+        "color": "#7B61FF",
+        "icon": "smartphone",
+        "mascot_image": "/api/static/mascots/generation-z.png",
+        "mascot_name": "Zélie la Gameuse",
+        "count": 100,
+    },
 ]
 
 
