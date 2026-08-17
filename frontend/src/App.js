@@ -35,6 +35,8 @@ import Ehpad from "@/pages/Ehpad";
 import Atelier from "@/pages/Atelier";
 import AtelierEntries from "@/pages/AtelierEntries";
 import MonLivre from "@/pages/MonLivre";
+import EhpadDashboard from "@/pages/EhpadDashboard";
+import { EhpadNewSession, EhpadSessionView } from "@/pages/EhpadSession";
 import Charades from "@/pages/Charades";
 import MotsMeles from "@/pages/MotsMeles";
 import MotsFleches from "@/pages/MotsFleches";
@@ -93,6 +95,30 @@ export default function App() {
             element={
               <ProtectedRoute>
                 <MonLivre />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/app/ehpad"
+            element={
+              <ProtectedRoute>
+                <EhpadDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/app/ehpad/nouvelle-seance"
+            element={
+              <ProtectedRoute>
+                <EhpadNewSession />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/app/ehpad/seance/:sessionId"
+            element={
+              <ProtectedRoute>
+                <EhpadSessionView />
               </ProtectedRoute>
             }
           />

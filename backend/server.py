@@ -39,6 +39,7 @@ from routers import coop_challenges as coop_challenges_router
 from routers import progression as progression_router
 from routers import atelier as atelier_router
 from routers import livre as livre_router
+from routers import ehpad as ehpad_router
 from routers import admin_analytics as admin_analytics_router
 from routers import charades as charades_router
 from routers import mots_meles as mots_meles_router
@@ -103,6 +104,7 @@ api.include_router(coop_challenges_router.router)
 api.include_router(progression_router.router)
 api.include_router(atelier_router.router)
 api.include_router(livre_router.router)
+api.include_router(ehpad_router.router)
 api.include_router(admin_analytics_router.router)
 api.include_router(charades_router.router)
 api.include_router(mots_meles_router.router)

@@ -1200,3 +1200,40 @@ Nouvelle carte "📖 Souvenir du jour · {chapitre}" avec le prompt du jour et C
 - Grille des chapitres avec aquarelles Nano Banana (ourson+landau, cahier+encrier, transistor+cassette) ✅
 - Endpoint `/livre/covers` : 10 URLs `/api/static/livre_covers/*.png` ✅
 - Endpoint `/livre/export/pdf` : 1.1 MB PDF-1.4 avec covers + photos ✅
+
+
+---
+
+## Version EHPAD — Espace animateur B2B (2026-02-10) ✅
+
+### Backend — `/app/backend/routers/ehpad.py` (nouveau, ~230 lignes)
+Nouveau rôle `role: "ehpad_animator"` (les admins passent aussi les checks).
+
+Collections :
+- `ehpad_residents` : fiches sans e-mail pour respecter la vie privée.
+- `ehpad_sessions` : séance collective (kind quiz OU prompt).
+- `ehpad_session_responses` : 1 réponse par résident par séance (upsert).
+
+Endpoints principaux : CRUD résidents, sessions, réponses, dashboard stats, `POST /admin/promote` pour passer un compte en animateur.
+
+### Frontend — 3 pages sous `/app/ehpad`
+- `EhpadDashboard.jsx` — hero + 3 stats (résidents / séances / souvenirs) + 3 tabs.
+- `EhpadNewSession.jsx` — assistant 3 étapes (support quiz|prompt / résidents / notes).
+- `EhpadSessionView.jsx` — saisie par résident : score 0-5 pour quiz, textarea auto-save pour souvenir.
+
+Guard `_require_animator` renvoie 403 non-animateurs → le front redirige vers `/app/dashboard`.
+
+### Vérifications
+- Backend curl : `POST /ehpad/residents` ✅, `GET /ehpad/dashboard` ✅.
+- Frontend screenshots @1440 : dashboard EHPAD propre ✅, Nouvelle séance avec 8 catégories + chip résident ✅.
+
+### Fichiers créés / touchés
+- Créé : `/app/backend/routers/ehpad.py`, `/app/frontend/src/pages/EhpadDashboard.jsx`, `/app/frontend/src/pages/EhpadSession.jsx`
+- Modifié : `/app/backend/server.py`, `/app/frontend/src/App.js`.
+
+### Backlog EHPAD V2
+- Stripe B2B checkout dédié pour créer directement les comptes animateurs
+- Multi-animateurs par établissement + rôle directeur avec vue agrégée
+- Export PDF des séances (compte-rendu imprimable pour les familles)
+- Photos de la séance (groupe, ambiance) dans le compte-rendu
+- Facturation à la séance ou forfait mensuel par résident
