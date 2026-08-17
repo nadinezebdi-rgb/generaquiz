@@ -1,4 +1,4 @@
-# Quiz d'Antan — Plateforme de quiz intergénérationnel
+# GENERAQUIZ — Plateforme de quiz intergénérationnel
 
 Plateforme complète de quiz intergénérationnel propulsée par **Mistral AI**, avec leaderboard en temps réel, gestion des familles, cache Redis, et suivi mensuel des performances.
 
