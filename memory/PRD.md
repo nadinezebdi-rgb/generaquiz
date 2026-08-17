@@ -1323,3 +1323,57 @@ Ajouter aveuglément des deps aux setters (stables React) ou refs aurait cassé 
 - Frontend E2E (screenshots) : join screen → main view → composer → send → entry appears ✅
 - Owner flow (screenshots) : ouvrir chapitre → bouton coop → modal partage avec code `4HTRJB` ✅
 
+
+## 2026-02-17 — Repositionnement "Jouer. Se souvenir. Transmettre." (Phases 1→4)
+
+### Nouvelle promesse produit ✅
+GénéraQuiz devient une plateforme intergénérationnelle : JOUER → SE SOUVENIR → RACONTER → TRANSMETTRE.
+
+### Phase 1 — Landing repositionnée
+- Hero H1 : "5 minutes pour jouer. Toute une vie à raconter."
+- Sous-titre : "GénéraQuiz fait revivre les souvenirs grâce au jeu et rapproche les générations pour mieux transmettre les histoires familiales."
+- Pill : "Jouer. Se souvenir. Transmettre." (remplace "Le premier club mémoire intergénérationnel")
+- 2 CTAs : "Commencer gratuitement" + "Découvrir GénéraQuiz" (scroll vers #how-it-works)
+- Nouvelle section `HowItWorksSection.jsx` (4 étapes visuelles Je joue / Je me souviens / Je raconte / Je transmets)
+
+### Phase 2 — Livre de Vie à 12 chapitres
+- Ajout de 4 nouveaux chapitres : `origines` (1), `couple` (6), `enfants` (7), `evenements` (11)
+- Migration douce idempotente : `famille` → `enfants`, `epreuves` → `transmission` (via `_migrate_legacy_chapters` au startup)
+- Nouveau widget Dashboard `LivreProgressCard.jsx` : "Votre Livre de Vie prend forme" + barre de progression + 4 stats + CTA "Feuilleter"
+- Nouvel endpoint `GET /api/livre/progression` (agrégats souvenirs / photos / chapitres complétés / pages estimées)
+
+### Phase 3 — Assistance rédactionnelle IA
+- Nouveau routeur `routers/livre_ai.py` avec 2 endpoints :
+  - `POST /api/livre/entries/{id}/rewrite` : propose une reformulation sans écraser le texte source
+  - `POST /api/livre/entries/{id}/accept-rewrite` : archive l'original dans `original_text`, applique la version acceptée
+- **Guardrails stricts** dans le prompt système : interdiction absolue d'inventer personne, date, lieu, événement, émotion (6 règles inviolables)
+- Modèle : **gpt-5.5** via Emergent LLM key (gpt-5.6 pas encore listé dans emergentintegrations)
+- Composant `RewriteAssistantModal.jsx` : 3 boutons "❤️ Ça me ressemble", "✏️ Modifier", "🔄 Reformuler autrement" + 3 tons (natural / warmer / concise)
+- Bouton "✨ Reformuler" ajouté à `EntryPreview` (visible uniquement si mode=text et text >= 20 caractères)
+
+### Phase 4 — Boucle Quiz → Livre (feature signature)
+- Nouveau endpoint `POST /api/livre/from-quiz` avec mapping automatique catégorie → chapitre :
+  - chansons/cinema/culture-70/culture-40/cuisine-terroir → passions
+  - voyages-france → voyages
+  - histoire-france → evenements
+  - annees-50-60 → adolescence
+  - objets-antan → enfance
+- Nouveau composant `QuizMemoryBridge.jsx` injecté dans `QuizPlayer.jsx` sous le feedback : "💭 Ce moment vous rappelle un souvenir ?" avec zone de saisie et confirmation "Souvenir ajouté à votre Livre de Vie · [chapitre]"
+- Champs `source="quiz"` + `quiz_question_id` + `quiz_category_slug` tracés sur l'entrée
+- Fix bonus : `QUIZ_MEMORY_MAP["histoire"]` corrigé (`epreuves` → `evenements`)
+
+### Fichiers touchés
+- **Modifiés** : `Landing.jsx`, `Dashboard.jsx`, `MonLivre.jsx`, `QuizPlayer.jsx`, `livre.py` (12 chapitres + progression + from-quiz + QUIZ_MEMORY_MAP), `server.py` (registre routeur + migration startup)
+- **Créés** : `HowItWorksSection.jsx`, `LivreProgressCard.jsx`, `RewriteAssistantModal.jsx`, `QuizMemoryBridge.jsx`, `livre_ai.py`, `tests/test_iteration40_livre_ai_boucle.py`
+
+### Tests
+- Testing agent iteration 40 : **100% backend + 100% frontend** ✅
+- 12 chapitres visibles dans le bon ordre, migration OK (0 orpheline)
+- Rewrite AI testé avec input "Marie" → aucun autre prénom inventé, guardrails respectés
+- from-quiz testé pour 6 mappings catégorie → chapitre : tous corrects
+- Aucun casse-flow : login, dashboard, coop, quiz classique fonctionnent
+
+### Notes de production
+- Modèle IA actuel : gpt-5.5 (mettre à jour vers gpt-5.6 dès qu'il est ajouté au catalogue emergentintegrations)
+- Refactor recommandé (non urgent) : `livre.py` fait 1113 lignes, à découper en submodules (chapters/entries/family/coop/pdf/ai) — reporté en backlog technique
+

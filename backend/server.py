@@ -39,6 +39,7 @@ from routers import coop_challenges as coop_challenges_router
 from routers import progression as progression_router
 from routers import atelier as atelier_router
 from routers import livre as livre_router
+from routers import livre_ai as livre_ai_router
 from routers import ehpad as ehpad_router
 from routers import admin_analytics as admin_analytics_router
 from routers import charades as charades_router
@@ -104,6 +105,7 @@ api.include_router(coop_challenges_router.router)
 api.include_router(progression_router.router)
 api.include_router(atelier_router.router)
 api.include_router(livre_router.router)
+api.include_router(livre_ai_router.router)
 api.include_router(ehpad_router.router)
 api.include_router(admin_analytics_router.router)
 api.include_router(charades_router.router)
@@ -196,6 +198,10 @@ async def startup():
     # Enrichit les questions existantes avec des relances de conversation EHPAD
     from discussion_prompts import enrich_existing_questions
     await enrich_existing_questions()
+
+    # Migration douce des anciens chapitres Livre → nouveaux (10 → 12 chapitres)
+    from routers.livre import _migrate_legacy_chapters
+    await _migrate_legacy_chapters()
 
     # Seed admin
     existing = await db.users.find_one({"email": ADMIN_EMAIL})

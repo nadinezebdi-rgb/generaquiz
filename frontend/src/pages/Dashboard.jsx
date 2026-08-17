@@ -7,6 +7,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import StreakSaverModal from "@/components/StreakSaverModal";
 import OnboardingTour from "@/components/OnboardingTour";
+import LivreProgressCard from "@/components/LivreProgressCard";
 import { ArrowRight, Crown, Trophy, Target, Zap, Sparkles, Calendar, Flame, BookOpen } from "lucide-react";
 
 /**
@@ -187,6 +188,9 @@ export default function Dashboard() {
             </div>
           </div>
         )}
+
+        {/* Livre de Vie — progression (visible dès la 1ère entrée) */}
+        <LivreProgressCard />
 
         {/* Categories grid */}
         <div className="mb-12">

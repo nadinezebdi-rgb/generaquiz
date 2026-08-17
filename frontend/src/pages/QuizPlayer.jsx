@@ -7,6 +7,7 @@ import Navbar from "@/components/Navbar";
 import { ArrowLeft, ChevronRight, RotateCcw, Volume2, Crown, Check, X } from "lucide-react";
 import ScoreCard from "@/components/ScoreCard";
 import ReportButton from "@/components/ReportButton";
+import QuizMemoryBridge from "@/components/QuizMemoryBridge";
 
 // Fisher-Yates shuffle helper that returns the new options + the new correct index.
 function shuffleOptions(options, correctIndex) {
@@ -248,6 +249,8 @@ export default function QuizPlayer() {
                         <p className="text-navy italic">{q.discussion_prompt}</p>
                       </div>
                     )}
+                    {/* Boucle Quiz → Livre : proposer d'ajouter un souvenir personnel */}
+                    <QuizMemoryBridge question={q} categorySlug={categoryId} />
                   </motion.div>
                 )}
               </AnimatePresence>

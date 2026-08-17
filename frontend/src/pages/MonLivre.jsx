@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { api, formatError } from "@/lib/api";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import RewriteAssistantModal from "@/components/RewriteAssistantModal";
 import {
   BookOpen, ArrowLeft, Mic, MicOff, Pen, Users, Camera,
   Send, Loader2, Sparkles, Inbox, Heart, X, ChevronRight,
@@ -28,6 +29,7 @@ export default function MonLivre() {
   const [progress, setProgress] = useState({ total_entries: 0, total_prompts: 50, progress_pct: 0 });
   const [openChapter, setOpenChapter] = useState(null); // full chapter with prompts+entries
   const [openPrompt, setOpenPrompt] = useState(null);   // {chapter_id, prompt_id, prompt_text}
+  const [rewriteEntry, setRewriteEntry] = useState(null); // entry being rewritten by AI
 
   useEffect(() => { refresh(); }, []);
 
@@ -135,6 +137,14 @@ export default function MonLivre() {
           chapter={openChapter}
           onClose={() => { setOpenChapter(null); refresh(); }}
           onPromptClick={(p) => setOpenPrompt({ chapter_id: openChapter.id, prompt_id: p.id, prompt_text: p.text })}
+          onRewriteClick={setRewriteEntry}
+        />
+      )}
+      {rewriteEntry && (
+        <RewriteAssistantModal
+          entry={rewriteEntry}
+          onClose={() => setRewriteEntry(null)}
+          onAccepted={() => { setRewriteEntry(null); if (openChapter) openChapterFn(openChapter.id); refresh(); }}
         />
       )}
       {openPrompt && (
@@ -237,7 +247,7 @@ function ChapterTile({ chapter, coverUrl, onClick }) {
   );
 }
 
-function ChapterModal({ chapter, onClose, onPromptClick }) {
+function ChapterModal({ chapter, onClose, onPromptClick, onRewriteClick }) {
   const [coopSession, setCoopSession] = useState(null);
   const entriesByPrompt = useMemo(() => {
     const map = {};
@@ -287,7 +297,7 @@ function ChapterModal({ chapter, onClose, onPromptClick }) {
                     <p className="font-semibold text-navy">{p.text}</p>
                     {written.length > 0 && (
                       <div className="mt-2 space-y-2">
-                        {written.map((e) => <EntryPreview key={e.id} entry={e} />)}
+                        {written.map((e) => <EntryPreview key={e.id} entry={e} onRewriteClick={onRewriteClick} />)}
                       </div>
                     )}
                   </div>
@@ -364,13 +374,27 @@ function CoopShareModal({ session, onClose }) {
 }
 
 
-function EntryPreview({ entry }) {
+function EntryPreview({ entry, onRewriteClick }) {
   const badge = { text: "✍️ écrit", audio: "🎙️ audio", delegated: `👨‍👩‍👧 raconté` }[entry.mode] || "";
   const author = entry.mode === "delegated" && entry.delegated_author_name
     ? ` par ${entry.delegated_author_name}` : "";
+  const canRewrite = onRewriteClick && entry.text && entry.text.length >= 20 && entry.mode !== "delegated";
   return (
     <div className="bg-cream rounded-lg p-3 border border-cream-dark">
-      <div className="text-xs text-navy/50 mb-1">{badge}{author} · {new Date(entry.created_at).toLocaleDateString("fr-FR")}</div>
+      <div className="text-xs text-navy/50 mb-1 flex items-center justify-between gap-2">
+        <span>{badge}{author} · {new Date(entry.created_at).toLocaleDateString("fr-FR")}</span>
+        {canRewrite && (
+          <button
+            type="button"
+            onClick={() => onRewriteClick(entry)}
+            data-testid={`entry-rewrite-${entry.id}`}
+            className="inline-flex items-center gap-1 text-terracotta hover:text-terracotta-dark font-bold text-xs uppercase tracking-wider"
+            title="Reformuler joliment avec l'assistance IA"
+          >
+            ✨ Reformuler
+          </button>
+        )}
+      </div>
       {entry.text && <p className="text-sm text-navy whitespace-pre-wrap">{entry.text.slice(0, 220)}{entry.text.length > 220 ? "…" : ""}</p>}
       {entry.audio_b64 && <audio controls src={`data:audio/webm;base64,${entry.audio_b64}`} className="w-full mt-2" />}
       {entry.photos?.length > 0 && (
