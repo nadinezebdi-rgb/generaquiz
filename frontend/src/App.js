@@ -34,6 +34,7 @@ import Progression from "@/pages/Progression";
 import Ehpad from "@/pages/Ehpad";
 import Atelier from "@/pages/Atelier";
 import AtelierEntries from "@/pages/AtelierEntries";
+import MonLivre from "@/pages/MonLivre";
 import Charades from "@/pages/Charades";
 import MotsMeles from "@/pages/MotsMeles";
 import MotsFleches from "@/pages/MotsFleches";
@@ -84,6 +85,14 @@ export default function App() {
             element={
               <ProtectedRoute>
                 <AtelierEntries />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/app/livre"
+            element={
+              <ProtectedRoute>
+                <MonLivre />
               </ProtectedRoute>
             }
           />

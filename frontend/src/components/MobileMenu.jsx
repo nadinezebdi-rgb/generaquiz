@@ -84,7 +84,7 @@ export default function MobileMenu({ variant = "landing" }) {
                     <MobileLink to="/quiz-du-jour" onClick={close} accent testid="mobile-nav-daily-auth">Quiz du Jour ✨</MobileLink>
                   )}
                   <MobileLink to="/app/dashboard" onClick={close} testid="mobile-nav-dashboard">Mes quiz</MobileLink>
-                  <MobileLink to="/app/atelier" onClick={close} testid="mobile-nav-atelier">Atelier Mémoire</MobileLink>
+                  <MobileLink to="/app/livre" onClick={close} testid="mobile-nav-livre">📖 Mon Livre de Vie</MobileLink>
                   <MobileLink to="/app/charades" onClick={close} testid="mobile-nav-charades">Charades</MobileLink>
                   <MobileLink to="/app/mots-meles" onClick={close} testid="mobile-nav-mots-meles">Mots Mêlés</MobileLink>
                   <MobileLink to="/app/mots-fleches" onClick={close} testid="mobile-nav-mots-fleches">Mots Fléchés</MobileLink>

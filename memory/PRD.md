@@ -1082,3 +1082,53 @@ Les grilles mf01-mf05 étaient des "5×5" (en réalité 4×4 zone jouable) avec 
 ### Fichiers touchés
 - Modifié : `/app/backend/fleches_mistral.py` (MAGIC_BANK_4, `_pick_puzzle`, `_build_magic_grid` généralisé)
 - Modifié : `/app/frontend/src/pages/MotsFleches.jsx` (Web Audio ding, `completedWords`, toggle Son, copy)
+
+
+---
+
+## Mon Livre de Vie — MVP + V1 (2026-02-10) ✅
+
+### Refonte stratégique
+Positionnement app enrichi : **« Jouez. Souvenez-vous. Transmettez. »**. L'ancien "Atelier Mémoire" évolue en **"📖 Mon Livre de Vie"** — module central de mémoire intergénérationnelle privé par défaut.
+
+### Backend — `/app/backend/routers/livre.py` (nouveau, ~400 lignes)
+- **10 chapitres progressifs** hardcodés : Enfance 🍼 · École 🎒 · Adolescence 🎵 · Rencontres 💑 · Métier 👷 · Famille 👨‍👩‍👧‍👦 · Voyages ✈️ · Passions 🎨 · Épreuves 🌱 · Transmission 💌. 5 prompts par chapitre (50 au total).
+- Collection `livre_entries` : `{chapter_id, prompt_id, mode: text|audio|delegated, text, audio_b64, photos, delegated_author_name, visibility}`.
+- Endpoints principaux :
+  - `GET /livre/chapters` — 10 chapitres + compteur d'entrées
+  - `GET /livre/chapters/{id}` — prompts + entrées de ce chapitre
+  - `POST /livre/entries` — création d'un souvenir (+10 XP)
+  - `GET /livre/entries` — vue Livre regroupée par chapitre
+  - `GET /livre/souvenir-du-jour` — prompt aléatoire déterministe par user + date
+- Endpoints Famille (P1) : questions envoyées/reçues/répondues, invitations avec 4 permissions (view/comment/contribute/manage).
+
+### Frontend — `/app/frontend/src/pages/MonLivre.jsx` (nouveau, ~700 lignes)
+- Hero avec tagline et rappel privacy.
+- 2 onglets : "Mon livre" et "Ma famille".
+- Jauge de progression douce avec messages chaleureux évolutifs.
+- Grille 10 chapitres cliquables.
+- Modal chapitre : liste des 5 prompts + previews des entrées existantes (texte / audio player / photos).
+- Modal saisie avec 3 modes : ✍️ Texte, 🎙️ Audio (MediaRecorder Web API, 60 s max, base64), 👨‍👩‍👧 Délégué + photos (3 max, base64).
+- Onglet Famille : envoi de question, inbox/sent, invitations avec permissions.
+
+### Dashboard enrichi
+Nouvelle carte "📖 Souvenir du jour · {chapitre}" avec le prompt du jour et CTA "Raconter →" vers `/app/livre`.
+
+### Navigation
+- Menu Jeux : "Atelier Mémoire" → **"Mon Livre de Vie"** pointant vers `/app/livre`.
+- Ancien `/app/atelier` conservé pour rétrocompat (entrées existantes visibles).
+
+### Vérifications (screenshot admin@1440)
+- Dashboard : carte Souvenir du jour + CTA ✅
+- /app/livre : hero + jauge + 10 chapitres ✅
+- Modal chapitre : 5 prompts visibles ✅
+- Modal saisie Texte : sauvegarde OK, toast "🌱", entry preview ✅
+- Onglet Ma famille : formulaire question + invite + listings ✅
+
+### V2 restants (backlog)
+- Whisper transcription audio auto
+- Génération PDF téléchargeable
+- Impression print-on-demand
+- Version EHPAD complète
+- Souvenirs déclenchés par les quiz (memory triggers)
+- Nano Banana couverture illustrée par chapitre

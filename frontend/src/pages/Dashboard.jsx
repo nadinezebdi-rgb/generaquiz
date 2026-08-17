@@ -6,7 +6,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import StreakSaverModal from "@/components/StreakSaverModal";
-import { ArrowRight, Crown, Trophy, Target, Zap, Sparkles, Calendar, Flame } from "lucide-react";
+import { ArrowRight, Crown, Trophy, Target, Zap, Sparkles, Calendar, Flame, BookOpen } from "lucide-react";
 
 /**
  * Returns true if the user's streak is "at risk" — they had a streak of ≥2,
@@ -33,6 +33,7 @@ export default function Dashboard() {
   const [stats, setStats] = useState(null);
   const [attempts, setAttempts] = useState([]);
   const [daily, setDaily] = useState(null);
+  const [souvenir, setSouvenir] = useState(null);
   const [showSaver, setShowSaver] = useState(false);
   const [dismissed, setDismissed] = useState(false);
 
@@ -41,6 +42,7 @@ export default function Dashboard() {
     api.get("/stats").then((r) => setStats(r.data)).catch(() => {});
     api.get("/attempts").then((r) => setAttempts(r.data || [])).catch(() => {});
     api.get("/daily/leaderboard").then((r) => setDaily(r.data)).catch(() => {});
+    api.get("/livre/souvenir-du-jour").then((r) => setSouvenir(r.data)).catch(() => {});
   }, []);
 
   // Auto-open the streak saver when the criteria matches and the user
@@ -156,6 +158,33 @@ export default function Dashboard() {
             </Link>
           </div>
         </div>
+
+        {/* Souvenir du jour — Mon Livre de Vie */}
+        {souvenir && (
+          <div className="bg-gradient-to-br from-terracotta/10 to-mustard/20 rounded-[24px] border-2 border-terracotta/40 p-6 md:p-7 mb-10 relative overflow-hidden" data-testid="dashboard-souvenir-card">
+            <div className="flex flex-col md:flex-row items-start md:items-center gap-5">
+              <div className="bg-terracotta text-white rounded-2xl p-3 shrink-0">
+                <BookOpen className="w-8 h-8" />
+              </div>
+              <div className="flex-1">
+                <span className="inline-flex items-center gap-2 bg-bordeaux text-cream font-bold px-3 py-1 rounded-full text-xs uppercase tracking-wider mb-2">
+                  📖 Souvenir du jour · {souvenir.chapter_emoji} {souvenir.chapter_label}
+                </span>
+                <h3 className="font-display text-xl md:text-2xl font-extrabold text-navy leading-snug mb-1.5">
+                  « {souvenir.prompt_text} »
+                </h3>
+                <p className="text-navy/70">Un souvenir à raconter, à votre rythme — pour votre livre, pour ceux que vous aimez.</p>
+              </div>
+              <Link
+                to="/app/livre"
+                data-testid="dashboard-souvenir-cta"
+                className="inline-flex items-center gap-2 bg-terracotta text-white font-bold px-5 py-3 rounded-full hover:bg-terracotta-dark transition shadow-warm shrink-0"
+              >
+                Raconter <ArrowRight className="w-4 h-4" />
+              </Link>
+            </div>
+          </div>
+        )}
 
         {/* Categories grid */}
         <div className="mb-12">
