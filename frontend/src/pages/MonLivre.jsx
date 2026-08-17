@@ -269,7 +269,7 @@ function ChapterModal({ chapter, onClose, onPromptClick }) {
                     <p className="font-semibold text-navy">{p.text}</p>
                     {written.length > 0 && (
                       <div className="mt-2 space-y-2">
-                        {written.map((e, i) => <EntryPreview key={i} entry={e} />)}
+                        {written.map((e) => <EntryPreview key={e.id} entry={e} />)}
                       </div>
                     )}
                   </div>
@@ -608,7 +608,7 @@ function FamilyTab() {
         api.get("/livre/family/members"),
       ]);
       setInbox(i.data); setSent(s.data); setMembers(m.data);
-    } catch (e) { /* silencieux */ }
+    } catch (err) { console.debug("Non-blocking livre op failed:", err); }
   }
 
   async function sendQuestion() {

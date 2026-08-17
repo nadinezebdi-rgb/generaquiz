@@ -84,7 +84,7 @@ export default function QuizPlayer() {
       u.rate = 0.92;
       window.speechSynthesis.cancel();
       window.speechSynthesis.speak(u);
-    } catch { /* speech synthesis indisponible */ }
+    } catch (err) { console.warn("Speech synthesis unavailable:", err); }
   };
 
   const onSelect = (i) => {

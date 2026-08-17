@@ -314,7 +314,7 @@ async def souvenir_du_jour(user: dict = Depends(get_current_user)) -> dict:
     import hashlib
     user_id = str(user["_id"])
     today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
-    seed = int(hashlib.md5(f"{user_id}:{today}".encode()).hexdigest(), 16)
+    seed = int(hashlib.sha256(f"{user_id}:{today}".encode()).hexdigest(), 16)
     # Pick chapitre + prompt déterministe
     chapter_ids = sorted(CHAPTERS.keys(), key=lambda k: CHAPTERS[k]["order"])
     cid = chapter_ids[seed % len(chapter_ids)]

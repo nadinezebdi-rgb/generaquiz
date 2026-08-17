@@ -10,6 +10,7 @@ Covers:
 - Rate-limit (3 calls / 15 min) on forgot-password and isolation
 """
 import os
+import subprocess
 import time
 import uuid
 import pytest
@@ -224,7 +225,10 @@ class TestRateLimit:
     @classmethod
     def setup_class(cls):
         # Clear the rate-limit buckets by restarting backend
-        os.system("sudo supervisorctl restart backend > /dev/null 2>&1")
+        subprocess.run(
+            ["sudo", "supervisorctl", "restart", "backend"],
+            check=False, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+        )
         # wait for backend ready
         for _ in range(30):
             try:
