@@ -56,6 +56,21 @@ export default function MonLivre() {
     }
   }
 
+  async function downloadPdf() {
+    try {
+      const res = await api.get("/livre/export/pdf", { responseType: "blob" });
+      const url = window.URL.createObjectURL(new Blob([res.data], { type: "application/pdf" }));
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `mon-livre-de-vie-${new Date().toISOString().slice(0,10)}.pdf`;
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => window.URL.revokeObjectURL(url), 5000);
+      toast.success("PDF téléchargé 📕");
+    } catch (e) {
+      toast.error(formatError(e.response?.data?.detail) || "Aucun souvenir à exporter pour l'instant");
+    }
+  }
+
   return (
     <div className="min-h-screen bg-cream text-navy">
       <Navbar />
@@ -67,9 +82,25 @@ export default function MonLivre() {
           <h1 className="font-display text-4xl md:text-5xl font-extrabold" data-testid="livre-title">
             📖 Mon <span className="text-terracotta italic">Livre de Vie</span>
           </h1>
-          <p className="text-navy/70 mt-2 max-w-2xl">
-            Mes souvenirs. Mon histoire. Pour ceux que j&apos;aime. Répondez à une question, un souvenir à la fois — tout reste <b>privé par défaut</b>.
-          </p>
+          <div className="flex items-center gap-3 mt-2">
+            <p className="text-navy/70 max-w-2xl flex-1">
+              Mes souvenirs. Mon histoire. Pour ceux que j&apos;aime. Répondez à une question, un souvenir à la fois — tout reste <b>privé par défaut</b>.
+            </p>
+            <a
+              href={`${process.env.REACT_APP_BACKEND_URL}/api/livre/export/pdf`}
+              target="_blank"
+              rel="noreferrer"
+              data-testid="livre-export-pdf"
+              className="hidden md:inline-flex items-center gap-2 bg-navy text-cream text-sm font-bold px-4 py-2 rounded-full hover:bg-navy-dark transition shrink-0"
+              onClick={(e) => {
+                // Passe le JWT via un fetch-then-download côté client car <a> ne peut pas envoyer les cookies+headers axios
+                e.preventDefault();
+                downloadPdf();
+              }}
+            >
+              📕 Télécharger mon Livre en PDF
+            </a>
+          </div>
         </header>
 
         <div className="mb-6 flex gap-2 border-b-2 border-cream-dark" data-testid="livre-tabs">
@@ -271,8 +302,21 @@ function EntryModal({ chapterId, promptId, promptText, onClose, onSaved }) {
   const [delegatedName, setDelegatedName] = useState("");
   const [saving, setSaving] = useState(false);
   const [recording, setRecording] = useState(false);
+  const [transcribing, setTranscribing] = useState(false);
   const mediaRecorderRef = useRef(null);
   const chunksRef = useRef([]);
+
+  async function transcribeAudio() {
+    if (!audioB64) return;
+    setTranscribing(true);
+    try {
+      const { data } = await api.post("/livre/transcribe", { audio_b64: audioB64 });
+      setText(data.transcript || "");
+      toast.success("Transcription terminée ✨");
+    } catch (e) {
+      toast.error(formatError(e.response?.data?.detail) || "Transcription impossible");
+    } finally { setTranscribing(false); }
+  }
 
   async function startRecording() {
     try {
@@ -395,20 +439,32 @@ function EntryModal({ chapterId, promptId, promptText, onClose, onSaved }) {
               ) : (
                 <>
                   <audio controls src={`data:audio/webm;base64,${audioB64}`} className="w-full" data-testid="livre-entry-audio-preview" />
-                  <button
-                    type="button"
-                    onClick={() => setAudioB64(null)}
-                    data-testid="livre-entry-audio-redo"
-                    className="mt-3 text-sm font-bold text-bordeaux hover:underline"
-                  >
-                    Réenregistrer
-                  </button>
+                  <div className="mt-3 flex gap-2 justify-center flex-wrap">
+                    <button
+                      type="button"
+                      onClick={() => setAudioB64(null)}
+                      data-testid="livre-entry-audio-redo"
+                      className="text-sm font-bold text-bordeaux hover:underline"
+                    >
+                      Réenregistrer
+                    </button>
+                    <button
+                      type="button"
+                      onClick={transcribeAudio}
+                      disabled={transcribing}
+                      data-testid="livre-entry-transcribe"
+                      className="text-sm font-bold inline-flex items-center gap-1 bg-navy text-cream px-3 py-1.5 rounded-full hover:bg-navy-dark disabled:opacity-50"
+                    >
+                      {transcribing ? <Loader2 className="w-3 h-3 animate-spin" /> : "✨"} Transcrire en texte
+                    </button>
+                  </div>
                   <textarea
                     value={text}
                     onChange={(e) => setText(e.target.value)}
-                    placeholder="Optionnel : ajoutez une petite légende ou une transcription"
+                    placeholder="Transcription automatique ou légende (modifiable)"
                     className="w-full mt-3 p-3 rounded-lg border-2 border-cream-dark bg-white outline-none text-navy text-sm"
-                    rows={3}
+                    rows={4}
+                    data-testid="livre-entry-audio-transcript"
                   />
                 </>
               )}

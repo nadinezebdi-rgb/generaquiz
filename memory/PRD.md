@@ -1130,5 +1130,37 @@ Nouvelle carte "📖 Souvenir du jour · {chapitre}" avec le prompt du jour et C
 - Génération PDF téléchargeable
 - Impression print-on-demand
 - Version EHPAD complète
+
+---
+
+## Mon Livre de Vie V2 — 4 fonctionnalités (2026-02-10) ✅
+
+### 1. Whisper transcription automatique
+- Nouvel endpoint `POST /livre/transcribe` — utilise `emergentintegrations.llm.openai.OpenAISpeechToText` avec `whisper-1` + `EMERGENT_LLM_KEY`.
+- Bouton "✨ Transcrire en texte" dans le mode audio du modal souvenir — remplit automatiquement la légende avec la transcription française.
+- Testé end-to-end via curl (silence WAV → transcription renvoyée) ✅.
+
+### 2. PDF téléchargeable
+- Nouvel endpoint `GET /livre/export/pdf` — construit un PDF ReportLab avec couverture (titre / nom / date en gros), sommaire chapitres, et pour chaque chapitre les prompts + entrées (texte ou "audio non transcrit") + auteur délégué.
+- Bouton "📕 Télécharger mon Livre en PDF" dans le hero de `MonLivre.jsx` — fetch axios en `responseType: blob` puis download programmatique.
+- Testé : HTTP 200, 2.9 KB, magic bytes `%PDF-1.4` ✅.
+
+### 3. Quiz Memory Triggers
+- Nouvel endpoint `GET /livre/memory-trigger/{category_slug}` — mapping manuel 12 catégories quiz → chapitre du Livre + prompt-hint.
+- Composant `<MemoryTrigger>` dans `QuizPlayer.jsx` : après le score final, affiche une carte chaleureuse « Vous avez un souvenir à raconter ? » + prompt-hint + CTA "Aller raconter →" vers `/app/livre`.
+- Testé : GET cuisine → `{chapter_id: enfance, prompt_hint: "Une odeur ou un plat…"}` ✅.
+
+### 4. Couvertures illustrées Nano Banana
+- Script `generate_livre_covers.py` — 10 aquarelles douces (palette maison : terracotta / navy / mustard / cream / bordeaux) via Gemini 3.1 Flash Image Preview + `EMERGENT_LLM_KEY`.
+- Endpoint `GET /livre/covers` — retourne pour chaque chapitre l'URL statique de sa couverture (vide tant que le script n'a pas été exécuté).
+- ⚠️ **À exécuter une fois manuellement** : `cd /app/backend && python generate_livre_covers.py` — coûte ~10 requêtes Nano Banana. Non lancé automatiquement pour maîtriser les coûts.
+
+### Fichiers touchés
+- Modifié : `/app/backend/routers/livre.py` (transcribe + export/pdf + memory-trigger + covers endpoints)
+- Créé : `/app/backend/generate_livre_covers.py`
+- Modifié : `/app/frontend/src/pages/MonLivre.jsx` (bouton PDF + bouton Transcrire + textarea transcript)
+- Modifié : `/app/frontend/src/pages/QuizPlayer.jsx` (composant MemoryTrigger)
+- Dépendance ajoutée : `reportlab==5.0.0`
+
 - Souvenirs déclenchés par les quiz (memory triggers)
 - Nano Banana couverture illustrée par chapitre

@@ -2,49 +2,22 @@
 
 Refonte de l'ancien Atelier Mémoire. Structure en 10 chapitres progressifs,
 3 modes de saisie (texte / audio / famille délégué), photos, permissions
-familiales et questions envoyées entre membres.
-
-Data model
-----------
-livre_entries (nouvelle collection, remplace progressivement atelier_entries)
-  {
-    id, user_id,
-    chapter_id: "enfance" | "ecole" | …,
-    prompt_id: str,
-    prompt_text: str,          # dénormalisé pour évolution future des prompts
-    mode: "text" | "audio" | "delegated",
-    text: str,                 # transcription si audio, texte si écrit
-    audio_b64: str | None,     # base64 mp3/webm, jusqu'à ~1 Mo (MVP)
-    photos: [{b64, caption, who, where, when}],
-    author_user_id: str,       # peut différer de user_id si "raconté avec la famille"
-    visibility: "private" | "family",
-    created_at, updated_at
-  }
-
-family_members (partage du Livre de Vie)
-  {
-    id, owner_id, invitee_email, invitee_user_id | None,
-    permission: "view" | "comment" | "contribute" | "manage",
-    status: "invited" | "accepted" | "revoked",
-    invited_at, accepted_at | None, token: str
-  }
-
-family_questions (question posée par un proche)
-  {
-    id, from_user_id, to_user_id, question: str,
-    response_entry_id: str | None,
-    status: "pending" | "answered",
-    created_at, answered_at | None
-  }
+familiales, questions envoyées entre membres, transcription Whisper et
+export PDF téléchargeable.
 """
 from __future__ import annotations
 
+import base64
+import io
+import os
 import secrets
 import uuid
 from datetime import datetime, timezone
+from pathlib import Path
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
 
 from core import db, get_current_user
@@ -496,3 +469,200 @@ async def revoke_member(member_id: str, user: dict = Depends(get_current_user)) 
     if r.matched_count == 0:
         raise HTTPException(status_code=404, detail="Membre introuvable")
     return {"ok": True}
+
+
+# =============================================================================
+# Whisper — transcription automatique d'un enregistrement audio base64
+# =============================================================================
+
+class TranscribeIn(BaseModel):
+    audio_b64: str = Field(..., max_length=3_500_000)
+
+
+@router.post("/transcribe")
+async def transcribe(body: TranscribeIn, user: dict = Depends(get_current_user)) -> dict:
+    """Transcrit un audio base64 (webm/mp3/wav) en français via OpenAI Whisper.
+
+    Utilise l'EMERGENT_LLM_KEY : coût facturé au user Emergent, aucun compte
+    OpenAI direct requis. Le fichier est encapsulé en BytesIO et passé au SDK.
+    """
+    api_key = os.environ.get("EMERGENT_LLM_KEY")
+    if not api_key:
+        raise HTTPException(status_code=503, detail="Service de transcription indisponible")
+    try:
+        from emergentintegrations.llm.openai import OpenAISpeechToText
+    except Exception as e:
+        raise HTTPException(status_code=503, detail=f"Module STT absent : {e}")
+    try:
+        raw = base64.b64decode(body.audio_b64)
+    except Exception:
+        raise HTTPException(status_code=400, detail="Audio base64 invalide")
+    if len(raw) > 5_000_000:
+        raise HTTPException(status_code=400, detail="Audio trop lourd (max ~5 Mo)")
+
+    # BytesIO doit avoir un attribut `name` avec une extension supportée sinon
+    # l'API OpenAI refuse.
+    audio_file = io.BytesIO(raw)
+    audio_file.name = "souvenir.webm"
+
+    stt = OpenAISpeechToText(api_key=api_key)
+    try:
+        resp = await stt.transcribe(
+            file=audio_file,
+            model="whisper-1",
+            response_format="json",
+            language="fr",
+            temperature=0.0,
+        )
+    except Exception as e:
+        raise HTTPException(status_code=502, detail=f"Transcription impossible : {e}")
+    transcript = getattr(resp, "text", "") or ""
+    return {"transcript": transcript.strip()}
+
+
+# =============================================================================
+# PDF — export téléchargeable du Livre de Vie
+# =============================================================================
+
+@router.get("/export/pdf")
+async def export_pdf(user: dict = Depends(get_current_user)) -> StreamingResponse:
+    """Génère un PDF simple mais chaleureux du Livre de Vie de l'utilisateur.
+
+    Structure : couverture (nom + tagline + date) → sommaire des chapitres →
+    pour chaque chapitre : bandeau titre + toutes les entrées (texte ou
+    transcription si audio) avec date. Les photos et audios sont exclus (V2).
+    """
+    from reportlab.lib.pagesizes import A4
+    from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+    from reportlab.lib.units import cm
+    from reportlab.lib.colors import HexColor
+    from reportlab.lib.enums import TA_CENTER
+    from reportlab.platypus import (
+        SimpleDocTemplate, Paragraph, Spacer, PageBreak, Image as RLImage,
+    )
+
+    user_id = str(user["_id"])
+    docs = await db.livre_entries.find({"user_id": user_id}, {"_id": 0}).sort("created_at", 1).to_list(2000)
+    if not docs:
+        raise HTTPException(status_code=400, detail="Votre Livre est encore vide")
+
+    grouped: dict[str, list] = {}
+    for d in docs:
+        grouped.setdefault(d["chapter_id"], []).append(d)
+
+    buf = io.BytesIO()
+    doc = SimpleDocTemplate(
+        buf, pagesize=A4,
+        rightMargin=2.2 * cm, leftMargin=2.2 * cm,
+        topMargin=2.4 * cm, bottomMargin=2 * cm,
+        title=f"Mon Livre de Vie - {user.get('name', '')}",
+        author=user.get("name") or user.get("email", ""),
+    )
+    styles = getSampleStyleSheet()
+    navy = HexColor("#1E3A5F")
+    terracotta = HexColor("#E07A5F")
+    styles.add(ParagraphStyle("CoverTitle", parent=styles["Title"], fontSize=42, leading=48, alignment=TA_CENTER, textColor=terracotta, spaceAfter=20))
+    styles.add(ParagraphStyle("CoverSub", parent=styles["Normal"], fontSize=16, leading=22, alignment=TA_CENTER, textColor=navy, spaceAfter=12))
+    styles.add(ParagraphStyle("ChapterTitle", parent=styles["Heading1"], fontSize=24, leading=28, textColor=terracotta, spaceBefore=6, spaceAfter=14))
+    styles.add(ParagraphStyle("PromptQ", parent=styles["Italic"], fontSize=12, leading=16, textColor=navy, spaceAfter=6))
+    styles.add(ParagraphStyle("EntryTxt", parent=styles["Normal"], fontSize=11, leading=17, spaceAfter=14))
+
+    story: list = []
+    # === Couverture ===
+    story.append(Spacer(1, 6 * cm))
+    story.append(Paragraph("Mon Livre de Vie", styles["CoverTitle"]))
+    story.append(Paragraph(f"— {user.get('name') or user.get('email','').split('@')[0]} —", styles["CoverSub"]))
+    story.append(Spacer(1, 2 * cm))
+    story.append(Paragraph("<i>Mes souvenirs. Mon histoire.<br/>Pour ceux que j&apos;aime.</i>", styles["CoverSub"]))
+    story.append(Spacer(1, 3 * cm))
+    story.append(Paragraph(datetime.now().strftime("%B %Y").capitalize(), styles["CoverSub"]))
+    story.append(PageBreak())
+
+    # === Chapitres ===
+    for cid, c in sorted(CHAPTERS.items(), key=lambda kv: kv[1]["order"]):
+        entries = grouped.get(cid, [])
+        if not entries:
+            continue
+        story.append(Paragraph(f"{c['emoji']} {c['label']}", styles["ChapterTitle"]))
+        story.append(Paragraph(f"<i>{c['description']}</i>", styles["PromptQ"]))
+        story.append(Spacer(1, 0.4 * cm))
+        for e in entries:
+            story.append(Paragraph(e.get("prompt_text", ""), styles["PromptQ"]))
+            txt = (e.get("text") or "").replace("\n", "<br/>")
+            if not txt and e.get("mode") == "audio":
+                txt = "<i>(souvenir enregistré en audio, non transcrit)</i>"
+            when = e.get("created_at", "")[:10]
+            author = ""
+            if e.get("mode") == "delegated" and e.get("delegated_author_name"):
+                author = f' <font color="#722F37">— raconté par {e["delegated_author_name"]}</font>'
+            story.append(Paragraph(f'{txt}<br/><font size="8" color="#888">{when}{author}</font>', styles["EntryTxt"]))
+        story.append(PageBreak())
+
+    doc.build(story)
+    buf.seek(0)
+    filename = f"livre-de-vie-{datetime.now().strftime('%Y%m%d')}.pdf"
+    return StreamingResponse(
+        buf, media_type="application/pdf",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )
+
+
+# =============================================================================
+# Quiz Memory Triggers — mapping catégorie de quiz → chapitre du Livre
+# =============================================================================
+
+# Association manuelle : quelle catégorie de quiz "invite" à raconter quel
+# chapitre du Livre ? Utilisé côté front en fin de quiz pour proposer un CTA
+# doux "Vous avez un souvenir à raconter à ce sujet ?".
+QUIZ_MEMORY_MAP: dict[str, dict] = {
+    "annees-50-60":     {"chapter_id": "adolescence", "prompt_hint": "Quelle chanson vous rappelle vos 20 ans ?"},
+    "annees-70":        {"chapter_id": "adolescence", "prompt_hint": "Quelle mode ou musique des années 70 vous représentait ?"},
+    "annees-80":        {"chapter_id": "metier",      "prompt_hint": "Racontez votre premier travail ou votre bureau des années 80."},
+    "chansons":         {"chapter_id": "adolescence", "prompt_hint": "Quelle chanson vous fait fondre à chaque écoute ?"},
+    "cinema":           {"chapter_id": "passions",    "prompt_hint": "Un film qui vous a bouleversé — racontez."},
+    "cuisine":          {"chapter_id": "enfance",     "prompt_hint": "Une odeur ou un plat de votre enfance ?"},
+    "sport":            {"chapter_id": "passions",    "prompt_hint": "Un moment de sport dont vous êtes fier(ère) ?"},
+    "geographie":       {"chapter_id": "voyages",     "prompt_hint": "Une destination qui vous a émerveillé(e) ?"},
+    "histoire":         {"chapter_id": "epreuves",    "prompt_hint": "Un événement historique que vous avez vécu — racontez."},
+    "litterature":      {"chapter_id": "passions",    "prompt_hint": "Un livre qui vous a marqué(e) ?"},
+    "sciences":         {"chapter_id": "ecole",       "prompt_hint": "Une matière ou expérience qui vous a fasciné(e) à l'école ?"},
+    "personnages":      {"chapter_id": "rencontres",  "prompt_hint": "Une personnalité que vous auriez aimé rencontrer ?"},
+}
+
+
+@router.get("/memory-trigger/{category_slug}")
+async def memory_trigger(category_slug: str, user: dict = Depends(get_current_user)) -> dict:
+    """Renvoie le chapitre + prompt-hint associé à une catégorie de quiz.
+    Le front l'affiche en fin de quiz comme CTA doux vers le Livre.
+    """
+    mapping = QUIZ_MEMORY_MAP.get(category_slug)
+    if not mapping:
+        return {"has_trigger": False}
+    ch = CHAPTERS.get(mapping["chapter_id"])
+    if not ch:
+        return {"has_trigger": False}
+    return {
+        "has_trigger": True,
+        "chapter_id": mapping["chapter_id"],
+        "chapter_label": ch["label"],
+        "chapter_emoji": ch["emoji"],
+        "prompt_hint": mapping["prompt_hint"],
+    }
+
+
+# =============================================================================
+# Couvertures illustrées — expose les URLs statiques par chapitre
+# =============================================================================
+
+COVERS_DIR = Path(__file__).parent.parent / "static" / "livre_covers"
+
+
+@router.get("/covers")
+async def list_covers() -> dict:
+    """Retourne pour chaque chapitre l'URL de sa couverture (si générée)."""
+    out = {}
+    for cid in CHAPTERS.keys():
+        path = COVERS_DIR / f"{cid}.png"
+        if path.exists() and path.stat().st_size > 5000:
+            out[cid] = f"/static/livre_covers/{cid}.png"
+    return out
