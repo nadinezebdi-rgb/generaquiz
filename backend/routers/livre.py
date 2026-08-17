@@ -710,3 +710,234 @@ async def list_covers() -> dict:
         if path.exists() and path.stat().st_size > 5000:
             out[cid] = f"/api/static/livre_covers/{cid}.png"
     return out
+
+
+# =============================================================================
+# Coop Atelier — session partagée grand-parent ↔ petit-enfant
+# =============================================================================
+# Le propriétaire du Livre (grand-parent connecté) ouvre une session coop
+# pour un chapitre donné. Il obtient un code d'invitation à 6 caractères et
+# un lien partageable. Le petit-enfant rejoint sans compte, saisit son nom,
+# et peut alors ajouter des souvenirs qui s'ajoutent au Livre du grand-parent
+# (attribution automatique en mode "delegated"). Sync via polling léger.
+
+
+class CoopCreate(BaseModel):
+    chapter_id: str
+
+
+class CoopJoin(BaseModel):
+    code: str = Field(..., min_length=6, max_length=8)
+    guest_name: str = Field(..., min_length=1, max_length=60)
+
+
+class CoopHeartbeat(BaseModel):
+    guest_name: str = Field(..., min_length=1, max_length=60)
+
+
+class CoopEntry(BaseModel):
+    prompt_id: str
+    guest_name: str = Field(..., min_length=1, max_length=60)
+    text: str = Field(..., min_length=1, max_length=8000)
+
+
+def _gen_invite_code() -> str:
+    """6 caractères non ambigus (pas de 0/O/I/1)."""
+    alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
+    return "".join(secrets.choice(alphabet) for _ in range(6))
+
+
+async def _find_session(code: str) -> dict | None:
+    return await db.livre_coop_sessions.find_one({"invite_code": code.upper()})
+
+
+@router.post("/coop/create")
+async def coop_create(body: CoopCreate, user: dict = Depends(get_current_user)) -> dict:
+    """Crée une session coop pour un chapitre. Réutilise le code existant si actif."""
+    ch = _chapter_by_id(body.chapter_id)
+    if not ch:
+        raise HTTPException(status_code=400, detail="Chapitre inconnu")
+    owner_id = str(user["_id"])
+    now = datetime.now(timezone.utc)
+    # Réutilise une session active existante pour ce chapitre (idempotent)
+    existing = await db.livre_coop_sessions.find_one({
+        "owner_user_id": owner_id,
+        "chapter_id": body.chapter_id,
+        "status": "active",
+    })
+    if existing:
+        existing.pop("_id", None)
+        return {"ok": True, "session": existing, "reused": True}
+
+    # Génère un code unique (retry si collision improbable)
+    for _ in range(5):
+        code = _gen_invite_code()
+        if not await db.livre_coop_sessions.find_one({"invite_code": code}):
+            break
+    else:
+        raise HTTPException(status_code=500, detail="Impossible de générer un code")
+
+    owner_name = user.get("name") or user.get("email", "").split("@")[0]
+    doc = {
+        "id": str(uuid.uuid4()),
+        "owner_user_id": owner_id,
+        "owner_name": owner_name,
+        "chapter_id": body.chapter_id,
+        "chapter_label": ch["label"],
+        "chapter_emoji": ch["emoji"],
+        "invite_code": code,
+        "status": "active",
+        "participants": [
+            {"name": owner_name, "is_owner": True, "joined_at": now.isoformat(), "last_seen": now.isoformat()},
+        ],
+        "created_at": now.isoformat(),
+    }
+    await db.livre_coop_sessions.insert_one(doc)
+    doc.pop("_id", None)
+    return {"ok": True, "session": doc, "reused": False}
+
+
+@router.get("/coop/mine")
+async def coop_mine(user: dict = Depends(get_current_user)) -> list[dict]:
+    """Liste des sessions coop actives du propriétaire connecté."""
+    owner_id = str(user["_id"])
+    docs = await db.livre_coop_sessions.find(
+        {"owner_user_id": owner_id, "status": "active"}, {"_id": 0},
+    ).sort("created_at", -1).to_list(50)
+    return docs
+
+
+@router.post("/coop/{code}/close")
+async def coop_close(code: str, user: dict = Depends(get_current_user)) -> dict:
+    """Le propriétaire ferme la session coop."""
+    owner_id = str(user["_id"])
+    r = await db.livre_coop_sessions.update_one(
+        {"invite_code": code.upper(), "owner_user_id": owner_id, "status": "active"},
+        {"$set": {"status": "closed", "closed_at": datetime.now(timezone.utc).isoformat()}},
+    )
+    if r.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Session introuvable")
+    return {"ok": True}
+
+
+@router.post("/coop/join")
+async def coop_join(body: CoopJoin) -> dict:
+    """Un invité rejoint via le code. Ajoute son nom aux participants."""
+    sess = await _find_session(body.code)
+    if not sess or sess.get("status") != "active":
+        raise HTTPException(status_code=404, detail="Session introuvable ou fermée")
+    guest = body.guest_name.strip()
+    now = datetime.now(timezone.utc).isoformat()
+    # Ajoute le participant s'il n'est pas déjà présent (case-insensitive)
+    participants = sess.get("participants", [])
+    known = any(p["name"].lower() == guest.lower() for p in participants)
+    if not known:
+        await db.livre_coop_sessions.update_one(
+            {"_id": sess["_id"]},
+            {"$push": {"participants": {
+                "name": guest, "is_owner": False, "joined_at": now, "last_seen": now,
+            }}},
+        )
+    else:
+        await db.livre_coop_sessions.update_one(
+            {"_id": sess["_id"], "participants.name": {"$regex": f"^{guest}$", "$options": "i"}},
+            {"$set": {"participants.$.last_seen": now}},
+        )
+    sess = await _find_session(body.code)
+    sess.pop("_id", None)
+    return {"ok": True, "session": sess}
+
+
+@router.get("/coop/{code}/state")
+async def coop_state(code: str) -> dict:
+    """État courant : chapitre, prompts, souvenirs et participants.
+
+    Endpoint public (pas d'auth) pour permettre au petit-enfant de suivre en
+    temps réel sans compte. Ne renvoie que les entrées du chapitre concerné.
+    """
+    sess = await _find_session(code)
+    if not sess:
+        raise HTTPException(status_code=404, detail="Session introuvable")
+    if sess.get("status") != "active":
+        raise HTTPException(status_code=410, detail="Session fermée")
+    ch = _chapter_by_id(sess["chapter_id"])
+    if not ch:
+        raise HTTPException(status_code=500, detail="Chapitre invalide")
+    entries = await db.livre_entries.find(
+        {"user_id": sess["owner_user_id"], "chapter_id": sess["chapter_id"]},
+        {"_id": 0, "audio_b64": 0},  # allège la payload : pas de blob audio en polling
+    ).sort("created_at", 1).to_list(500)
+    return {
+        "session_id": sess["id"],
+        "owner_name": sess["owner_name"],
+        "chapter": {
+            "id": sess["chapter_id"],
+            "label": ch["label"],
+            "emoji": ch["emoji"],
+            "description": ch["description"],
+            "prompts": [{"id": f"{sess['chapter_id']}_p{i+1}", "text": p} for i, p in enumerate(ch["prompts"])],
+        },
+        "entries": entries,
+        "participants": sess.get("participants", []),
+    }
+
+
+@router.post("/coop/{code}/heartbeat")
+async def coop_heartbeat(code: str, body: CoopHeartbeat) -> dict:
+    """Met à jour last_seen pour un participant (garde la présence à jour)."""
+    sess = await _find_session(code)
+    if not sess or sess.get("status") != "active":
+        raise HTTPException(status_code=404, detail="Session introuvable")
+    now = datetime.now(timezone.utc).isoformat()
+    await db.livre_coop_sessions.update_one(
+        {"_id": sess["_id"], "participants.name": {"$regex": f"^{body.guest_name.strip()}$", "$options": "i"}},
+        {"$set": {"participants.$.last_seen": now}},
+    )
+    return {"ok": True}
+
+
+@router.post("/coop/{code}/entry")
+async def coop_entry(code: str, body: CoopEntry) -> dict:
+    """L'invité (petit-enfant) écrit un souvenir. Crée une entrée `delegated`
+    dans le Livre du propriétaire, attribuée au prénom de l'invité.
+    """
+    sess = await _find_session(code)
+    if not sess or sess.get("status") != "active":
+        raise HTTPException(status_code=404, detail="Session introuvable ou fermée")
+    chapter_id = sess["chapter_id"]
+    ch = _chapter_by_id(chapter_id)
+    if not ch:
+        raise HTTPException(status_code=500, detail="Chapitre invalide")
+    prompt_text = _prompt_by_id(ch, chapter_id, body.prompt_id)
+    if not prompt_text:
+        raise HTTPException(status_code=400, detail="Prompt inconnu")
+    text = body.text.strip()
+    if not text:
+        raise HTTPException(status_code=400, detail="Texte vide")
+
+    now = datetime.now(timezone.utc).isoformat()
+    entry = {
+        "id": str(uuid.uuid4()),
+        "user_id": sess["owner_user_id"],           # rattaché au Livre du grand-parent
+        "chapter_id": chapter_id,
+        "prompt_id": body.prompt_id,
+        "prompt_text": prompt_text,
+        "mode": "delegated",
+        "text": text,
+        "audio_b64": None,
+        "photos": [],
+        "author_user_id": None,                     # pas de compte pour l'invité
+        "delegated_author_name": body.guest_name.strip(),
+        "visibility": "family",
+        "coop_session_code": sess["invite_code"],   # trace : d'où vient ce souvenir
+        "created_at": now,
+        "updated_at": now,
+    }
+    await db.livre_entries.insert_one(entry)
+    entry.pop("_id", None)
+    # Update last_seen de l'invité
+    await db.livre_coop_sessions.update_one(
+        {"_id": sess["_id"], "participants.name": {"$regex": f"^{body.guest_name.strip()}$", "$options": "i"}},
+        {"$set": {"participants.$.last_seen": now}},
+    )
+    return {"ok": True, "entry": entry}

@@ -1285,3 +1285,41 @@ Guard `_require_animator` renvoie 403 non-animateurs → le front redirige vers 
 - Coop Atelier / Livre de Vie temps partagé (grand-parent + petit-enfant sur même session).
 - EHPAD Superviseur (P2) — rôle admin établissement.
 - EHPAD CRM (P2) — brancher formulaire `/ehpad` sur Brevo ou collection Mongo leads.
+
+## 2026-02-17 — Coop Livre de Vie (P1) + Hook Deps Audit
+
+### Coop Atelier — sessions partagées ✅
+Un grand-parent peut ouvrir un chapitre en "mode coop" et inviter un petit-enfant / proche à écrire à ses côtés. Sync via polling léger 4 s, aucun compte requis pour l'invité, souvenirs attribués au prénom saisi.
+
+- **Backend** (`routers/livre.py`): 7 endpoints coop
+  - `POST /api/livre/coop/create` (auth) — crée session pour un chapitre, réutilise l'existante active (idempotent), code alphanumérique 6 caractères non ambigus
+  - `POST /api/livre/coop/join` (public) — l'invité entre son prénom + code
+  - `GET /api/livre/coop/{code}/state` (public) — chapitre, prompts, entrées, participants
+  - `POST /api/livre/coop/{code}/heartbeat` (public) — met à jour last_seen
+  - `POST /api/livre/coop/{code}/entry` (public) — l'invité ajoute un souvenir en mode `delegated`
+  - `GET /api/livre/coop/mine` (auth) — mes sessions actives
+  - `POST /api/livre/coop/{code}/close` (auth) — fermeture par le propriétaire
+- **Collection Mongo** : `livre_coop_sessions` `{id, owner_user_id, owner_name, chapter_id, invite_code, status, participants:[{name, is_owner, joined_at, last_seen}], created_at}`
+- **Frontend**
+  - `LivreCoop.jsx` — page publique `/livre/coop/:code` avec écran de bienvenue, avatars participants + indicateur en ligne, composer en pied de page, polling 4 s
+  - `MonLivre.jsx` — dans ChapterModal : bouton "Remplir ce chapitre à deux" + modal de partage (code + bouton copier lien + WhatsApp)
+- **Attribution** : les souvenirs de l'invité s'enregistrent en mode `delegated` avec `delegated_author_name = prénom` et `visibility = "family"` dans le Livre du propriétaire. `coop_session_code` conservé pour traçabilité.
+
+### Hook Deps Audit ✅
+Après investigation, le rapport de 64 warnings comportait principalement des faux positifs. Aucun eslint.config.js n'était présent dans le projet, donc la règle `react-hooks/exhaustive-deps` n'était pas active. Audit manuel des 3 hotspots critiques cités :
+
+- **QuizPlayer.jsx:41** — useEffect `[categoryId]` : correct (n'utilise que `categoryId` + `api` stable)
+- **MotsFleches.jsx:122** — useEffect `[letters, liveCheck, grid, gridId]` : correct (checkTimer via ref, setMistakes stable)
+- **MotsMeles.jsx:157** — useCallback `[start, busy, gridId]` : correct (setters stables, refs pas nécessaires)
+
+Ajouter aveuglément des deps aux setters (stables React) ou refs aurait cassé la logique de polling live de MotsFleches. Décision : ne pas toucher.
+
+### Fichiers touchés
+- **Modifiés** : `/app/backend/routers/livre.py` (+200 lignes coop), `/app/frontend/src/App.js` (route + import), `/app/frontend/src/pages/MonLivre.jsx` (ChapterModal + CoopShareModal)
+- **Créés** : `/app/frontend/src/pages/LivreCoop.jsx` (page invité publique)
+
+### Tests
+- Backend end-to-end via curl : create → join → state → entry → state (2 entries) ✅
+- Frontend E2E (screenshots) : join screen → main view → composer → send → entry appears ✅
+- Owner flow (screenshots) : ouvrir chapitre → bouton coop → modal partage avec code `4HTRJB` ✅
+
