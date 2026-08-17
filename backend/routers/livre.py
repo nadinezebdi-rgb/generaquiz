@@ -666,6 +666,7 @@ QUIZ_MEMORY_MAP: dict[str, dict] = {
     "cuisine":          {"chapter_id": "enfance",     "prompt_hint": "Une odeur ou un plat de votre enfance ?"},
     "sport":            {"chapter_id": "passions",    "prompt_hint": "Un moment de sport dont vous êtes fier(ère) ?"},
     "geographie":       {"chapter_id": "voyages",     "prompt_hint": "Une destination qui vous a émerveillé(e) ?"},
+    "voyages-france":   {"chapter_id": "voyages",     "prompt_hint": "Où passiez-vous vos vacances quand vous étiez jeune ?"},
     "histoire":         {"chapter_id": "epreuves",    "prompt_hint": "Un événement historique que vous avez vécu — racontez."},
     "litterature":      {"chapter_id": "passions",    "prompt_hint": "Un livre qui vous a marqué(e) ?"},
     "sciences":         {"chapter_id": "ecole",       "prompt_hint": "Une matière ou expérience qui vous a fasciné(e) à l'école ?"},

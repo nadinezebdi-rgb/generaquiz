@@ -182,6 +182,17 @@ async def startup():
     else:
         logger.info(f"{existing_q} questions déjà en DB — seed sauté (Mistral gère la régénération)")
 
+    # Force-seed pour les catégories récemment ajoutées (idempotent). Chaque
+    # nouvelle catégorie ajoutée à CATEGORIES qui n'a AUCUNE question en base
+    # reçoit ses questions seed pour ne pas attendre le prochain job Mistral.
+    for cat in CATEGORIES:
+        n = await db.questions.count_documents({"category_id": cat["id"]})
+        if n == 0:
+            cat_qs = [q for q in QUESTIONS if q["category_id"] == cat["id"]]
+            if cat_qs:
+                await db.questions.insert_many([{**q} for q in cat_qs])
+                logger.info(f"[seed] catégorie '{cat['id']}' vide → {len(cat_qs)} questions seed insérées")
+
     # Seed admin
     existing = await db.users.find_one({"email": ADMIN_EMAIL})
     if existing is None:

@@ -65,6 +65,13 @@ CATEGORIES = [
         "mascot_image": "/api/static/mascots/culture-70-ans.png",
         "mascot_name": "Pierre le Sage", "count": 100,
     },
+    {
+        "id": "voyages-france", "title": "Voyages & régions de France",
+        "description": "Régions, monuments, paysages, traditions et souvenirs de vacances.",
+        "color": "#0EA5E9", "icon": "map",
+        "mascot_image": "/api/static/mascots/voyages-france.png",
+        "mascot_name": "Jeanne la Voyageuse", "count": 100,
+    },
 ]
 
 
@@ -845,6 +852,73 @@ def _load_extra_questions():
             except (KeyError, ValueError, TypeError):
                 continue
     return extras
+
+
+# ============================ VOYAGES & RÉGIONS DE FRANCE (15) ============================
+# Certaines questions ont un `discussion_prompt` optionnel (relance conversation EHPAD).
+def QD(qid, cat, q, opts, correct, exp, discussion=None):
+    d = Q(qid, cat, q, opts, correct, exp)
+    if discussion:
+        d["discussion_prompt"] = discussion
+    return d
+
+
+VOYAGES_QUESTIONS = [
+    QD("v1", "voyages-france", "Dans quelle région se trouve le Mont-Saint-Michel ?",
+       ["Bretagne", "Normandie", "Pays de la Loire", "Picardie"], 1,
+       "Le Mont-Saint-Michel est situé en Normandie, à la frontière avec la Bretagne.",
+       "Et vous, avez-vous déjà eu la chance de visiter le Mont-Saint-Michel ?"),
+    QD("v2", "voyages-france", "Quelle ville française est surnommée la Ville Rose ?",
+       ["Marseille", "Toulouse", "Montpellier", "Bordeaux"], 1,
+       "Toulouse doit son surnom à ses briques roses caractéristiques.",
+       "Et vous, quelle ville de province vous a le plus marqué(e) ?"),
+    QD("v3", "voyages-france", "Quel fleuve traverse Paris ?",
+       ["La Seine", "La Loire", "Le Rhône", "La Garonne"], 0,
+       "La Seine traverse Paris sur 13 km, avec 37 ponts."),
+    QD("v4", "voyages-france", "Dans quelle région trouve-t-on les célèbres champs de lavande ?",
+       ["Alsace", "Provence", "Auvergne", "Aquitaine"], 1,
+       "La Provence, notamment le plateau de Valensole, offre ces paysages violets emblématiques.",
+       "Avez-vous des souvenirs d'un été en Provence ?"),
+    QD("v5", "voyages-france", "Quelle spécialité associez-vous à l'Alsace ?",
+       ["Cassoulet", "Choucroute", "Bouillabaisse", "Aligot"], 1,
+       "La choucroute garnie (chou fermenté + charcuterie) est le plat emblématique d'Alsace.",
+       "Y a-t-il un plat régional qui vous rappelle vos vacances d'enfance ?"),
+    QD("v6", "voyages-france", "Quelle destination était très prisée des vacances familiales dans les années 1960 ?",
+       ["Les stations de ski des Alpes", "La Côte d'Azur", "L'île de La Réunion", "La Corse"], 1,
+       "La Côte d'Azur (Nice, Cannes, Saint-Tropez) accueillait déjà des millions de vacanciers.",
+       "Où votre famille partait-elle en vacances lorsque vous étiez jeune ?"),
+    QD("v7", "voyages-france", "Dans quelle ville se trouve la basilique Notre-Dame-de-la-Garde, surnommée « la Bonne Mère » ?",
+       ["Lyon", "Marseille", "Nice", "Ajaccio"], 1,
+       "Notre-Dame-de-la-Garde domine Marseille depuis 1864."),
+    QD("v8", "voyages-france", "Quel massif abrite le Mont Blanc, plus haut sommet d'Europe occidentale ?",
+       ["Les Pyrénées", "Les Alpes", "Le Massif central", "Les Vosges"], 1,
+       "Le Mont Blanc culmine à 4 809 m dans les Alpes, entre France et Italie."),
+    QD("v9", "voyages-france", "Quelle région française est connue pour ses vins et son vignoble prestigieux autour de Beaune ?",
+       ["Champagne", "Bourgogne", "Bordelais", "Val de Loire"], 1,
+       "La Bourgogne : Côte de Beaune, Côte de Nuits — grands crus mondialement connus."),
+    QD("v10", "voyages-france", "Comment se nomme la longue plage bordant les Landes ?",
+       ["Côte de Nacre", "Côte d'Argent", "Côte Vermeille", "Côte d'Émeraude"], 1,
+       "La Côte d'Argent s'étend sur 230 km, de la pointe de Grave à l'embouchure de l'Adour.",
+       "Avez-vous déjà passé un été sur la côte atlantique ?"),
+    QD("v11", "voyages-france", "Quel monument gothique de Reims a servi au sacre des rois de France ?",
+       ["Notre-Dame de Paris", "La cathédrale de Reims", "L'abbaye du Mont-Saint-Michel", "La Sainte-Chapelle"], 1,
+       "33 rois de France y ont été sacrés, de Louis VIII à Charles X."),
+    QD("v12", "voyages-france", "Quelle île française de Méditerranée est surnommée « l'île de Beauté » ?",
+       ["La Sardaigne", "La Corse", "Les Baléares", "La Sicile"], 1,
+       "La Corse, département français depuis 1789, a vu naître Napoléon Bonaparte."),
+    QD("v13", "voyages-france", "Quel château de la Loire est célèbre pour son escalier à double révolution attribué à Léonard de Vinci ?",
+       ["Chenonceau", "Chambord", "Amboise", "Cheverny"], 1,
+       "Chambord, construit par François Ier — 440 pièces, 365 cheminées."),
+    QD("v14", "voyages-france", "Quelle spécialité sucrée est typique de la ville de Montélimar ?",
+       ["Les calissons", "Le nougat", "Les bêtises", "Les canelés"], 1,
+       "Le nougat de Montélimar (miel + amandes) est célèbre depuis le XVIIᵉ siècle."),
+    QD("v15", "voyages-france", "Dans quelle région trouve-t-on le célèbre village de Rocamadour, accroché à sa falaise ?",
+       ["Périgord", "Quercy (Occitanie)", "Auvergne", "Ardèche"], 1,
+       "Rocamadour, dans le Lot (Quercy), est un site de pèlerinage médiéval spectaculaire.",
+       "Avez-vous un souvenir de village perché ou de vacances dans le sud-ouest ?"),
+]
+
+QUESTIONS.extend(VOYAGES_QUESTIONS)
 
 
 QUESTIONS.extend(_load_extra_questions())

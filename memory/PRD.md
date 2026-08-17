@@ -1237,3 +1237,37 @@ Guard `_require_animator` renvoie 403 non-animateurs → le front redirige vers 
 - Export PDF des séances (compte-rendu imprimable pour les familles)
 - Photos de la séance (groupe, ambiance) dans le compte-rendu
 - Facturation à la séance ou forfait mensuel par résident
+
+
+---
+
+## Nouvelle catégorie : Voyages & régions de France (2026-02-10) ✅
+
+### Contenu
+- 🧳 **Voyages & régions de France** — 9ᵉ carte du dashboard
+- Sous-titre : *Régions, monuments, paysages, traditions et souvenirs de vacances.*
+- Mascotte : **👩‍🦳 Jeanne la Voyageuse** — générée via Nano Banana en background (722 KB, valise vintage + carte + chapeau à ruban tricolore).
+- 15 questions seed rédigées à la main (Mont-Saint-Michel, Ville Rose, champs de lavande, choucroute alsacienne, Bourgogne, Corse, Chambord, nougat de Montélimar, Rocamadour…).
+
+### Innovation EHPAD : Discussion prompt
+- Nouveau champ optionnel `discussion_prompt` sur une question.
+- 7 des 15 questions voyages en sont dotées : « Et vous, où partiez-vous en vacances lorsque vous étiez jeune ? », « Avez-vous des souvenirs d'un été en Provence ? », etc.
+- Helper Python `QD()` (Q + Discussion) dans `seed_data.py`.
+- Le front QuizPlayer affiche un bandeau visible « 🗣️ Question à raconter en groupe » avec l'accroche italique — idéal en séance EHPAD.
+
+### Force-seed nouvelle catégorie
+- `server.py` boucle sur `CATEGORIES` au démarrage : toute catégorie sans question en DB reçoit immédiatement ses seed_questions (idempotent, ne double pas les insertions).
+- La régénération Mistral nocturne (03:00 Paris) complétera la catégorie jusqu'à 100 questions.
+
+### Mapping mémoire
+- `QUIZ_MEMORY_MAP["voyages-france"] → chapter voyages` — après un quiz voyages, l'utilisateur voit un CTA « Où passiez-vous vos vacances quand vous étiez jeune ? » vers son Livre de Vie.
+
+### Vérifications
+- `GET /api/categories` → 9 catégories, voyages-france présente avec mascotte Jeanne la Voyageuse ✅
+- `GET /api/categories/voyages-france/questions` → 15 questions dont 7 avec discussion_prompt ✅
+- Screenshot dashboard : 9 tuiles catégories visibles ✅
+- Mascotte statique servie via `/api/static/mascots/voyages-france.png` (722 KB) ✅
+
+### Fichiers touchés
+- Modifié : `/app/backend/seed_data.py` (+ helper QD, +15 questions, +1 catégorie), `/app/backend/generate_mascots.py` (+prompt Jeanne), `/app/backend/server.py` (force-seed loop), `/app/backend/routers/livre.py` (memory-trigger map), `/app/frontend/src/pages/QuizPlayer.jsx` (rendu discussion_prompt).
+- Créé : `/app/backend/static/mascots/voyages-france.png` (722 KB via Nano Banana).

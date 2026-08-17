@@ -242,6 +242,12 @@ export default function QuizPlayer() {
                       {selected === shuffled.newCorrectIdx ? "✅ Bonne réponse !" : "❌ Presque !"}
                     </p>
                     <p className="text-navy/80 text-lg leading-relaxed">{q.explanation}</p>
+                    {q.discussion_prompt && (
+                      <div className="mt-4 bg-cream border-l-4 border-terracotta p-3 rounded-r-lg" data-testid="quiz-discussion-prompt">
+                        <p className="text-sm font-bold text-terracotta uppercase tracking-wider mb-1">🗣️ Question à raconter en groupe</p>
+                        <p className="text-navy italic">{q.discussion_prompt}</p>
+                      </div>
+                    )}
                   </motion.div>
                 )}
               </AnimatePresence>
