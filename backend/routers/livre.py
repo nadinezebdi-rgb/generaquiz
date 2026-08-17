@@ -583,9 +583,22 @@ async def export_pdf(user: dict = Depends(get_current_user)) -> StreamingRespons
         entries = grouped.get(cid, [])
         if not entries:
             continue
+
+        # Couverture de chapitre en pleine page (si générée)
+        cover_path = COVERS_DIR / f"{cid}.png"
+        if cover_path.exists() and cover_path.stat().st_size > 5000:
+            story.append(Spacer(1, 2 * cm))
+            try:
+                img = RLImage(str(cover_path), width=12 * cm, height=12 * cm, kind="proportional", hAlign="CENTER")
+                story.append(img)
+            except Exception:
+                pass
+            story.append(Spacer(1, 1 * cm))
+
         story.append(Paragraph(f"{c['emoji']} {c['label']}", styles["ChapterTitle"]))
         story.append(Paragraph(f"<i>{c['description']}</i>", styles["PromptQ"]))
-        story.append(Spacer(1, 0.4 * cm))
+        story.append(Spacer(1, 0.5 * cm))
+
         for e in entries:
             story.append(Paragraph(e.get("prompt_text", ""), styles["PromptQ"]))
             txt = (e.get("text") or "").replace("\n", "<br/>")
@@ -596,6 +609,36 @@ async def export_pdf(user: dict = Depends(get_current_user)) -> StreamingRespons
             if e.get("mode") == "delegated" and e.get("delegated_author_name"):
                 author = f' <font color="#722F37">— raconté par {e["delegated_author_name"]}</font>'
             story.append(Paragraph(f'{txt}<br/><font size="8" color="#888">{when}{author}</font>', styles["EntryTxt"]))
+
+            # Photos du souvenir (jusqu'à 3, ~6×6 cm chacune)
+            photos = e.get("photos") or []
+            if photos:
+                photo_flowables = []
+                for ph in photos[:3]:
+                    try:
+                        img_bytes = base64.b64decode(ph.get("b64", ""))
+                        img_io = io.BytesIO(img_bytes)
+                        rl_img = RLImage(img_io, width=5.5 * cm, height=5.5 * cm, kind="proportional")
+                        photo_flowables.append(rl_img)
+                    except Exception:
+                        continue
+                if photo_flowables:
+                    from reportlab.platypus import Table, TableStyle
+                    tbl = Table([photo_flowables], colWidths=[6 * cm] * len(photo_flowables))
+                    tbl.setStyle(TableStyle([
+                        ("VALIGN", (0, 0), (-1, -1), "TOP"),
+                        ("LEFTPADDING", (0, 0), (-1, -1), 4),
+                        ("RIGHTPADDING", (0, 0), (-1, -1), 4),
+                    ]))
+                    story.append(tbl)
+                    # Légendes des photos si présentes
+                    captions = [ph.get("caption", "") for ph in photos[:3]]
+                    if any(captions):
+                        cap_txt = " · ".join(c for c in captions if c) or ""
+                        if cap_txt:
+                            story.append(Paragraph(f'<font size="8" color="#666"><i>{cap_txt}</i></font>', styles["EntryTxt"]))
+                    story.append(Spacer(1, 0.4 * cm))
+
         story.append(PageBreak())
 
     doc.build(story)
@@ -664,5 +707,5 @@ async def list_covers() -> dict:
     for cid in CHAPTERS.keys():
         path = COVERS_DIR / f"{cid}.png"
         if path.exists() and path.stat().st_size > 5000:
-            out[cid] = f"/static/livre_covers/{cid}.png"
+            out[cid] = f"/api/static/livre_covers/{cid}.png"
     return out

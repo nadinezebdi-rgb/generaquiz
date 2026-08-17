@@ -24,6 +24,7 @@ import {
 export default function MonLivre() {
   const [tab, setTab] = useState("livre"); // "livre" | "famille"
   const [chapters, setChapters] = useState([]);
+  const [covers, setCovers] = useState({});     // {chapter_id: url}
   const [progress, setProgress] = useState({ total_entries: 0, total_prompts: 50, progress_pct: 0 });
   const [openChapter, setOpenChapter] = useState(null); // full chapter with prompts+entries
   const [openPrompt, setOpenPrompt] = useState(null);   // {chapter_id, prompt_id, prompt_text}
@@ -32,11 +33,13 @@ export default function MonLivre() {
 
   async function refresh() {
     try {
-      const [chRes, entriesRes] = await Promise.all([
+      const [chRes, entriesRes, coversRes] = await Promise.all([
         api.get("/livre/chapters"),
         api.get("/livre/entries"),
+        api.get("/livre/covers"),
       ]);
       setChapters(chRes.data);
+      setCovers(coversRes.data || {});
       setProgress({
         total_entries: entriesRes.data.total_entries,
         total_prompts: entriesRes.data.total_prompts,
@@ -117,7 +120,7 @@ export default function MonLivre() {
             <ProgressBar progress={progress} />
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mt-6">
               {chapters.map((c) => (
-                <ChapterTile key={c.id} chapter={c} onClick={() => openChapterFn(c.id)} />
+                <ChapterTile key={c.id} chapter={c} coverUrl={covers[c.id]} onClick={() => openChapterFn(c.id)} />
               ))}
             </div>
           </>
@@ -192,29 +195,42 @@ function ProgressBar({ progress }) {
   );
 }
 
-function ChapterTile({ chapter, onClick }) {
+function ChapterTile({ chapter, coverUrl, onClick }) {
   const pct = chapter.n_prompts > 0 ? Math.round((chapter.n_written / chapter.n_prompts) * 100) : 0;
+  const backend = process.env.REACT_APP_BACKEND_URL;
   return (
     <button
       type="button"
       onClick={onClick}
       data-testid={`livre-chapter-${chapter.id}`}
-      className="text-left bg-white rounded-2xl border-2 border-cream-dark hover:border-terracotta p-5 shadow-warm transition group"
+      className="text-left bg-white rounded-2xl border-2 border-cream-dark hover:border-terracotta shadow-warm transition group overflow-hidden"
     >
-      <div className="flex items-start justify-between mb-3">
-        <div>
-          <div className="text-3xl mb-1">{chapter.emoji}</div>
-          <div className="font-display text-xl font-bold text-navy group-hover:text-terracotta transition">
-            {chapter.label}
-          </div>
+      {coverUrl ? (
+        <div className="aspect-[4/2] bg-cream-dark overflow-hidden">
+          <img
+            src={`${backend}${coverUrl}`}
+            alt={`Couverture ${chapter.label}`}
+            className="w-full h-full object-cover group-hover:scale-105 transition duration-500"
+            loading="lazy"
+          />
         </div>
-        <span className="text-xs text-navy/50 font-mono">{chapter.order}/10</span>
-      </div>
-      <p className="text-sm text-navy/70 mb-4 min-h-[40px]">{chapter.description}</p>
-      <div className="flex items-center justify-between">
-        <span className="text-xs text-navy/60">{chapter.n_written}/{chapter.n_prompts} souvenirs</span>
-        <div className="w-24 h-2 bg-cream-dark rounded-full overflow-hidden">
-          <div className="h-full bg-terracotta" style={{ width: `${pct}%` }} />
+      ) : null}
+      <div className="p-5">
+        <div className="flex items-start justify-between mb-3">
+          <div>
+            <div className="text-3xl mb-1">{chapter.emoji}</div>
+            <div className="font-display text-xl font-bold text-navy group-hover:text-terracotta transition">
+              {chapter.label}
+            </div>
+          </div>
+          <span className="text-xs text-navy/50 font-mono">{chapter.order}/10</span>
+        </div>
+        <p className="text-sm text-navy/70 mb-4 min-h-[40px]">{chapter.description}</p>
+        <div className="flex items-center justify-between">
+          <span className="text-xs text-navy/60">{chapter.n_written}/{chapter.n_prompts} souvenirs</span>
+          <div className="w-24 h-2 bg-cream-dark rounded-full overflow-hidden">
+            <div className="h-full bg-terracotta" style={{ width: `${pct}%` }} />
+          </div>
         </div>
       </div>
     </button>

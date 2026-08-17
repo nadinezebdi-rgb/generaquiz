@@ -6,6 +6,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import StreakSaverModal from "@/components/StreakSaverModal";
+import OnboardingTour from "@/components/OnboardingTour";
 import { ArrowRight, Crown, Trophy, Target, Zap, Sparkles, Calendar, Flame, BookOpen } from "lucide-react";
 
 /**
@@ -66,6 +67,7 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen paper-bg">
+      <OnboardingTour />
       <Navbar variant="app" />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">

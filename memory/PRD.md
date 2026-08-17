@@ -1164,3 +1164,39 @@ Nouvelle carte "📖 Souvenir du jour · {chapitre}" avec le prompt du jour et C
 
 - Souvenirs déclenchés par les quiz (memory triggers)
 - Nano Banana couverture illustrée par chapitre
+
+
+---
+
+## Livre de Vie V3 — Couvertures + PDF illustré + Onboarding Tour (2026-02-10) ✅
+
+### 1. 10 couvertures Nano Banana générées
+- Script `generate_livre_covers.py` exécuté avec succès : **10 aquarelles** de 670 KB à 900 KB stockées dans `/app/backend/static/livre_covers/`.
+- Sujets : landau + ourson (enfance), cahier + encrier (école), transistor + cassette (adolescence), main tenant une lettre d'amour (rencontres), outils de métiers (métier), table dressée (famille), valise + carte (voyages), vinyle + peinture + échecs (passions), chêne dans la pierre (épreuves), recette manuscrite + enveloppe (transmission).
+- Palette maison respectée : terracotta / navy / mustard / cream / bordeaux.
+
+### 2. PDF illustré (`GET /livre/export/pdf`)
+- **Couverture de chapitre pleine page** avant chaque section (12×12 cm centrée) si l'illustration Nano Banana existe.
+- **Photos des souvenirs** intégrées : jusqu'à 3 par entrée, ReportLab Table 3 colonnes.
+- **Légendes** affichées si présentes.
+- Taille finale : ~1.1 MB pour un Livre avec photos (vs 3 KB en V2 texte-only).
+
+### 3. Onboarding Tour
+- Nouveau `<OnboardingTour />` dans `/app/frontend/src/components/OnboardingTour.jsx`.
+- 4 étapes : Bienvenue · Quiz du Jour · Mon Livre de Vie · Progression douce.
+- Framer Motion pour transitions, dots de navigation, "Passer la visite" + CTA principal.
+- Se déclenche à la première connexion (`localStorage.generaquiz_onboarding_v1`).
+- Rejouable via `?tour=1`.
+- Injecté en tête de `Dashboard.jsx`.
+
+### Fichiers touchés
+- Créé : `/app/frontend/src/components/OnboardingTour.jsx`
+- Modifié : `/app/backend/routers/livre.py` (PDF illustré + URL /api/static), `/app/frontend/src/pages/MonLivre.jsx` (fetch covers + ChapterTile avec image), `/app/frontend/src/pages/Dashboard.jsx` (injection OnboardingTour).
+- 10 fichiers créés dans `/app/backend/static/livre_covers/*.png` (~8 MB total).
+
+### Vérifications (screenshots admin@1440)
+- Onboarding tour étape 1 "Bienvenue dans GénéraQuiz 👋" à `?tour=1` ✅
+- Onboarding tour étape 4 "Votre progression 🌱" avec CTA "Explorer →" ✅
+- Grille des chapitres avec aquarelles Nano Banana (ourson+landau, cahier+encrier, transistor+cassette) ✅
+- Endpoint `/livre/covers` : 10 URLs `/api/static/livre_covers/*.png` ✅
+- Endpoint `/livre/export/pdf` : 1.1 MB PDF-1.4 avec covers + photos ✅
