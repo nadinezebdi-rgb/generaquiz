@@ -20,7 +20,8 @@ from core import (
     client, db, logger, hash_password, verify_password, get_admin_user,
 )
 from seed_data import CATEGORIES, QUESTIONS
-from daily_email import start_daily_scheduler, stop_daily_scheduler, send_morning_emails
+from daily_email import send_morning_emails
+from scheduler import start_scheduler, stop_scheduler
 from mistral_client import regenerate_all as mistral_regenerate_all
 
 from routers import auth as auth_router
@@ -37,6 +38,8 @@ from routers import referral as referral_router
 from routers import coop_challenges as coop_challenges_router
 from routers import progression as progression_router
 from routers import atelier as atelier_router
+from routers import livre as livre_router
+from routers import ehpad as ehpad_router
 from routers import admin_analytics as admin_analytics_router
 from routers import charades as charades_router
 from routers import mots_meles as mots_meles_router
@@ -118,6 +121,8 @@ api.include_router(referral_router.router)
 api.include_router(coop_challenges_router.router)
 api.include_router(progression_router.router)
 api.include_router(atelier_router.router)
+api.include_router(livre_router.router)
+api.include_router(ehpad_router.router)
 api.include_router(admin_analytics_router.router)
 api.include_router(charades_router.router)
 api.include_router(mots_meles_router.router)
@@ -281,11 +286,11 @@ async def startup():
     from wordsearch_mistral import seed_grids_if_empty
     await seed_grids_if_empty()
 
-    # Schedule morning Quiz du Jour reminder emails (09:00 Europe/Paris)
-    start_daily_scheduler()
+    # Schedule all cron jobs (voir scheduler.py pour la matrice complète)
+    start_scheduler()
 
 
 @app.on_event("shutdown")
 async def shutdown():
-    stop_daily_scheduler()
+    stop_scheduler()
     client.close()

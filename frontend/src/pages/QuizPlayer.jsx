@@ -97,7 +97,7 @@ export default function QuizPlayer() {
       u.rate = 0.92;
       window.speechSynthesis.cancel();
       window.speechSynthesis.speak(u);
-    } catch {}
+    } catch { /* speech synthesis indisponible */ }
   };
 
   // Ajoute un prénom au défi famille, avec une limite de 6 joueurs.
@@ -543,10 +543,45 @@ export default function QuizPlayer() {
                 shareText={`🎯 J'ai fait ${score}/${total} en ${category.title} sur GénéraQuiz ! Saurez-vous battre mon score ?`}
                 shareUrl={`${window.location.origin}/quiz-du-jour`}
               />
+
+              <MemoryTrigger categorySlug={categoryId} />
             </motion.div>
           )}
         </AnimatePresence>
       </main>
+    </div>
+  );
+}
+
+function MemoryTrigger({ categorySlug }) {
+  const [trigger, setTrigger] = useState(null);
+  useEffect(() => {
+    if (!categorySlug) return;
+    // Import dynamique de l'API axios déjà configuré
+    import("@/lib/api").then(({ api }) => {
+      api.get(`/livre/memory-trigger/${categorySlug}`)
+        .then((r) => { if (r.data.has_trigger) setTrigger(r.data); })
+        .catch(() => {});
+    });
+  }, [categorySlug]);
+  if (!trigger) return null;
+  return (
+    <div className="mt-6 bg-gradient-to-br from-terracotta/10 to-mustard/20 rounded-2xl border-2 border-terracotta/40 p-5" data-testid="quiz-memory-trigger">
+      <div className="flex items-start gap-4">
+        <div className="text-3xl shrink-0">{trigger.chapter_emoji}</div>
+        <div className="flex-1">
+          <p className="text-sm text-terracotta font-bold uppercase tracking-wider mb-1">Vous avez un souvenir à raconter ?</p>
+          <p className="font-display text-xl font-bold text-navy leading-snug mb-2">« {trigger.prompt_hint} »</p>
+          <p className="text-sm text-navy/70 mb-3">Ce quiz a peut-être fait remonter un souvenir — consignez-le dans votre Livre de Vie ({trigger.chapter_label}).</p>
+          <Link
+            to="/app/livre"
+            data-testid="quiz-memory-trigger-cta"
+            className="inline-flex items-center gap-2 bg-terracotta text-white font-bold px-5 py-2 rounded-full hover:bg-terracotta-dark transition shadow-warm text-sm"
+          >
+            Aller raconter →
+          </Link>
+        </div>
+      </div>
     </div>
   );
 }

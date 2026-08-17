@@ -6,8 +6,13 @@ Grille 4×4 : la première ligne et la première colonne sont des "blocks" avec
 définitions (▶ pour un mot horizontal, ▼ pour un mot vertical). La zone
 jouable est un carré 3×3 où chaque ligne ET chaque colonne forme un vrai mot
 français. Grâce à la symétrie (matrice symétrique), les indices "row" et
-"col" sont identiques 3 par 3 — chaque définition est donc reprise 2 fois
-(une fois horizontale, une fois verticale), ce qui est cohérent visuellement.
+"col" produisent les MÊMES 3 mots.
+
+Pour éviter la redondance visuelle (afficher deux fois exactement la même
+définition), chaque mot dispose de DEUX définitions différentes : une pour
+la direction horizontale (clue_h) et une pour la verticale (clue_v). Le mot
+à trouver reste identique mais la formulation change — c'est plus riche
+pédagogiquement.
 
 Cellules
 --------
@@ -27,34 +32,36 @@ from __future__ import annotations
 
 def _magic_grid(gid: str, theme: str, emoji: str, difficulty: str,
                 w1: str, w2: str, w3: str,
-                clue1: str, clue2: str, clue3: str,
+                clues_h: tuple[str, str, str],
+                clues_v: tuple[str, str, str],
                 notes: str | None = None) -> dict:
     """Construit une grille 4×4 à partir d'un carré magique 3×3 symétrique.
 
     Contrainte de validation (assert au load) : la matrice doit être symétrique,
-    donc w1[i] == wi[0], w1[j] == wj[0], w2[k] == w3[1] etc. Autrement dit, si
-    on écrit les 3 mots en lignes, les colonnes formeront les mêmes 3 mots.
+    donc si on écrit les 3 mots en lignes, les colonnes formeront les mêmes
+    mots. Les deux tuples de clues (horizontal + vertical) doivent avoir 3
+    éléments chacun.
     """
     assert len(w1) == len(w2) == len(w3) == 3, f"{gid}: mots doivent faire 3 lettres"
+    assert len(clues_h) == 3 and len(clues_v) == 3, f"{gid}: clues_h/clues_v doivent avoir 3 items"
     matrix = [list(w1), list(w2), list(w3)]
-    # Symétrie: matrix[i][j] == matrix[j][i]
     for i in range(3):
         for j in range(3):
             assert matrix[i][j] == matrix[j][i], f"{gid}: non symétrique en ({i},{j})"
     words = [w1, w2, w3]
-    clues = [clue1, clue2, clue3]
 
     cells = [
-        # row 0 — bandeau de définitions verticales (▼)
+        # row 0 — bandeau de définitions verticales (▼) — clues verticaux
         [
             {"type": "block"},
-            {"type": "block", "clue_v": clues[0]},
-            {"type": "block", "clue_v": clues[1]},
-            {"type": "block", "clue_v": clues[2]},
+            {"type": "block", "clue_v": clues_v[0]},
+            {"type": "block", "clue_v": clues_v[1]},
+            {"type": "block", "clue_v": clues_v[2]},
         ],
     ]
     for i in range(3):
-        row = [{"type": "block", "clue_h": clues[i]}]
+        # col 0 de chaque ligne — clue horizontal
+        row = [{"type": "block", "clue_h": clues_h[i]}]
         for j in range(3):
             row.append({"type": "letter", "answer": matrix[i][j]})
         cells.append(row)
@@ -87,10 +94,17 @@ GRIDS: list[dict] = [
         emoji="🥐",
         difficulty="facile",
         w1="BOL", w2="OSE", w3="LES",
-        clue1="Récipient à café au lait",
-        clue2="N'hésite pas (verbe, 3e p. sg.)",
-        clue3="Article défini pluriel",
-        notes="Carré magique : BOL/OSE/LES en lignes ET en colonnes.",
+        clues_h=(
+            "Récipient à café au lait",
+            "N'hésite pas (verbe, 3e p. sg.)",
+            "Article défini pluriel",
+        ),
+        clues_v=(
+            "Il contient chocolat chaud ou soupe",
+            "Prend un risque (verbe)",
+            "Précède un nom au pluriel",
+        ),
+        notes="Carré magique : BOL/OSE/LES en lignes ET en colonnes (2 définitions par mot).",
     ),
 
     # ============ mf02 — À la ferme ============
@@ -101,10 +115,17 @@ GRIDS: list[dict] = [
         emoji="🐓",
         difficulty="facile",
         w1="OIE", w2="IRA", w3="EAU",
-        clue1="Volaille grise à long cou",
-        clue2="Verbe aller au futur (3e p. sg.)",
-        clue3="Liquide vital (H₂O)",
-        notes="Carré magique : OIE/IRA/EAU en lignes ET en colonnes.",
+        clues_h=(
+            "Volaille grise à long cou",
+            "Verbe aller au futur (3e p. sg.)",
+            "Liquide vital (H₂O)",
+        ),
+        clues_v=(
+            "Elle fait \"couac\" en s'envolant",
+            "Il partira bientôt (verbe aller)",
+            "Sans elle, pas de vie",
+        ),
+        notes="Carré magique : OIE/IRA/EAU (2 définitions par mot).",
     ),
 
     # ============ mf03 — Nature & vigne ============
@@ -115,10 +136,17 @@ GRIDS: list[dict] = [
         emoji="🍇",
         difficulty="moyen",
         w1="ROC", w2="OSE", w3="CEP",
-        clue1="Grosse pierre solide",
-        clue2="Prend le risque (verbe, 3e p. sg.)",
-        clue3="Pied de vigne",
-        notes="Carré magique : ROC/OSE/CEP en lignes ET en colonnes.",
+        clues_h=(
+            "Grosse pierre solide",
+            "Prend le risque (verbe, 3e p. sg.)",
+            "Pied de vigne",
+        ),
+        clues_v=(
+            "Bloc de granit ou de calcaire",
+            "N'a pas froid aux yeux (verbe)",
+            "Souche qui donne le raisin",
+        ),
+        notes="Carré magique : ROC/OSE/CEP (2 définitions par mot).",
     ),
 
     # ============ mf04 — Petits mots courants ============
@@ -129,10 +157,17 @@ GRIDS: list[dict] = [
         emoji="📚",
         difficulty="moyen",
         w1="ILE", w2="LES", w3="EST",
-        clue1="Terre entourée d'eau",
-        clue2="Article défini pluriel",
-        clue3="Point cardinal du soleil levant",
-        notes="Carré magique : ILE/LES/EST en lignes ET en colonnes.",
+        clues_h=(
+            "Terre entourée d'eau",
+            "Article défini pluriel",
+            "Point cardinal du soleil levant",
+        ),
+        clues_v=(
+            "La Corse en est une",
+            "Précède un nom au pluriel",
+            "Verbe être (3e p. sg.)",
+        ),
+        notes="Carré magique : ILE/LES/EST (2 définitions par mot).",
     ),
 
     # ============ mf05 — Objets du quotidien ============
@@ -143,10 +178,17 @@ GRIDS: list[dict] = [
         emoji="🔑",
         difficulty="difficile",
         w1="SAC", w2="AIL", w3="CLE",
-        clue1="Contient les courses",
-        clue2="Bulbe qui parfume l'aïoli",
-        clue3="Ouvre la porte",
-        notes="Carré magique : SAC/AIL/CLE en lignes ET en colonnes.",
+        clues_h=(
+            "Contient les courses",
+            "Bulbe qui parfume l'aïoli",
+            "Ouvre la porte",
+        ),
+        clues_v=(
+            "On le porte à l'épaule",
+            "Ingrédient de l'aïoli et du pesto",
+            "Elle tourne dans la serrure",
+        ),
+        notes="Carré magique : SAC/AIL/CLE (2 définitions par mot).",
     ),
 
     # ============ mf06 — Ville & Nature (grille historique) ============
@@ -157,10 +199,17 @@ GRIDS: list[dict] = [
         emoji="🎯",
         difficulty="difficile",
         w1="MER", w2="EAU", w3="RUE",
-        clue1="Étendue salée",
-        clue2="Liquide vital",
-        clue3="Voie urbaine",
-        notes="Carré magique : MER/EAU/RUE en lignes ET en colonnes.",
+        clues_h=(
+            "Étendue salée",
+            "Liquide vital",
+            "Voie urbaine",
+        ),
+        clues_v=(
+            "Elle borde les plages",
+            "Elle coule du robinet",
+            "On la traverse en ville",
+        ),
+        notes="Carré magique : MER/EAU/RUE (2 définitions par mot).",
     ),
 ]
 

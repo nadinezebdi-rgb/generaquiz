@@ -28,7 +28,19 @@ android-sdk/
 credentials.json
 *.key
 .credentials
-# Divers
-.DS_Store
-*.log
-source_mistral_pricing.md
+frontend/node_modules/.cache/default-development/0.pack
+frontend/node_modules/.cache/default-development/14.pack
+frontend/node_modules/.cache/default-development/10.pack
+frontend/node_modules/.cache/default-development/17.pack_
+frontend/node_modules/.cache/default-development/18.pack
+frontend/node_modules/.cache/default-development/20.pack
+frontend/node_modules/.cache/default-development/5.pack
+frontend/node_modules/.cache/default-development/1.pack
+frontend/node_modules/.cache/default-development/2.pack
+frontend/node_modules/.cache/default-development/4.pack
+frontend/node_modules/.cache/default-development/6.pack
+frontend/node_modules/.cache/default-development/7.pack
+frontend/node_modules/.cache/default-development/3.pack
+frontend/node_modules/.cache/default-development/9.pack
+frontend/node_modules/.cache/default-development/8.pack
+frontend/node_modules/.cache/default-development/12.pack

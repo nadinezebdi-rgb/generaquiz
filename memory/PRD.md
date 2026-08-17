@@ -1082,3 +1082,158 @@ Les grilles mf01-mf05 étaient des "5×5" (en réalité 4×4 zone jouable) avec 
 ### Fichiers touchés
 - Modifié : `/app/backend/fleches_mistral.py` (MAGIC_BANK_4, `_pick_puzzle`, `_build_magic_grid` généralisé)
 - Modifié : `/app/frontend/src/pages/MotsFleches.jsx` (Web Audio ding, `completedWords`, toggle Son, copy)
+
+
+---
+
+## Mon Livre de Vie — MVP + V1 (2026-02-10) ✅
+
+### Refonte stratégique
+Positionnement app enrichi : **« Jouez. Souvenez-vous. Transmettez. »**. L'ancien "Atelier Mémoire" évolue en **"📖 Mon Livre de Vie"** — module central de mémoire intergénérationnelle privé par défaut.
+
+### Backend — `/app/backend/routers/livre.py` (nouveau, ~400 lignes)
+- **10 chapitres progressifs** hardcodés : Enfance 🍼 · École 🎒 · Adolescence 🎵 · Rencontres 💑 · Métier 👷 · Famille 👨‍👩‍👧‍👦 · Voyages ✈️ · Passions 🎨 · Épreuves 🌱 · Transmission 💌. 5 prompts par chapitre (50 au total).
+- Collection `livre_entries` : `{chapter_id, prompt_id, mode: text|audio|delegated, text, audio_b64, photos, delegated_author_name, visibility}`.
+- Endpoints principaux :
+  - `GET /livre/chapters` — 10 chapitres + compteur d'entrées
+  - `GET /livre/chapters/{id}` — prompts + entrées de ce chapitre
+  - `POST /livre/entries` — création d'un souvenir (+10 XP)
+  - `GET /livre/entries` — vue Livre regroupée par chapitre
+  - `GET /livre/souvenir-du-jour` — prompt aléatoire déterministe par user + date
+- Endpoints Famille (P1) : questions envoyées/reçues/répondues, invitations avec 4 permissions (view/comment/contribute/manage).
+
+### Frontend — `/app/frontend/src/pages/MonLivre.jsx` (nouveau, ~700 lignes)
+- Hero avec tagline et rappel privacy.
+- 2 onglets : "Mon livre" et "Ma famille".
+- Jauge de progression douce avec messages chaleureux évolutifs.
+- Grille 10 chapitres cliquables.
+- Modal chapitre : liste des 5 prompts + previews des entrées existantes (texte / audio player / photos).
+- Modal saisie avec 3 modes : ✍️ Texte, 🎙️ Audio (MediaRecorder Web API, 60 s max, base64), 👨‍👩‍👧 Délégué + photos (3 max, base64).
+- Onglet Famille : envoi de question, inbox/sent, invitations avec permissions.
+
+### Dashboard enrichi
+Nouvelle carte "📖 Souvenir du jour · {chapitre}" avec le prompt du jour et CTA "Raconter →" vers `/app/livre`.
+
+### Navigation
+- Menu Jeux : "Atelier Mémoire" → **"Mon Livre de Vie"** pointant vers `/app/livre`.
+- Ancien `/app/atelier` conservé pour rétrocompat (entrées existantes visibles).
+
+### Vérifications (screenshot admin@1440)
+- Dashboard : carte Souvenir du jour + CTA ✅
+- /app/livre : hero + jauge + 10 chapitres ✅
+- Modal chapitre : 5 prompts visibles ✅
+- Modal saisie Texte : sauvegarde OK, toast "🌱", entry preview ✅
+- Onglet Ma famille : formulaire question + invite + listings ✅
+
+### V2 restants (backlog)
+- Whisper transcription audio auto
+- Génération PDF téléchargeable
+- Impression print-on-demand
+- Version EHPAD complète
+
+---
+
+## Mon Livre de Vie V2 — 4 fonctionnalités (2026-02-10) ✅
+
+### 1. Whisper transcription automatique
+- Nouvel endpoint `POST /livre/transcribe` — utilise `emergentintegrations.llm.openai.OpenAISpeechToText` avec `whisper-1` + `EMERGENT_LLM_KEY`.
+- Bouton "✨ Transcrire en texte" dans le mode audio du modal souvenir — remplit automatiquement la légende avec la transcription française.
+- Testé end-to-end via curl (silence WAV → transcription renvoyée) ✅.
+
+### 2. PDF téléchargeable
+- Nouvel endpoint `GET /livre/export/pdf` — construit un PDF ReportLab avec couverture (titre / nom / date en gros), sommaire chapitres, et pour chaque chapitre les prompts + entrées (texte ou "audio non transcrit") + auteur délégué.
+- Bouton "📕 Télécharger mon Livre en PDF" dans le hero de `MonLivre.jsx` — fetch axios en `responseType: blob` puis download programmatique.
+- Testé : HTTP 200, 2.9 KB, magic bytes `%PDF-1.4` ✅.
+
+### 3. Quiz Memory Triggers
+- Nouvel endpoint `GET /livre/memory-trigger/{category_slug}` — mapping manuel 12 catégories quiz → chapitre du Livre + prompt-hint.
+- Composant `<MemoryTrigger>` dans `QuizPlayer.jsx` : après le score final, affiche une carte chaleureuse « Vous avez un souvenir à raconter ? » + prompt-hint + CTA "Aller raconter →" vers `/app/livre`.
+- Testé : GET cuisine → `{chapter_id: enfance, prompt_hint: "Une odeur ou un plat…"}` ✅.
+
+### 4. Couvertures illustrées Nano Banana
+- Script `generate_livre_covers.py` — 10 aquarelles douces (palette maison : terracotta / navy / mustard / cream / bordeaux) via Gemini 3.1 Flash Image Preview + `EMERGENT_LLM_KEY`.
+- Endpoint `GET /livre/covers` — retourne pour chaque chapitre l'URL statique de sa couverture (vide tant que le script n'a pas été exécuté).
+- ⚠️ **À exécuter une fois manuellement** : `cd /app/backend && python generate_livre_covers.py` — coûte ~10 requêtes Nano Banana. Non lancé automatiquement pour maîtriser les coûts.
+
+### Fichiers touchés
+- Modifié : `/app/backend/routers/livre.py` (transcribe + export/pdf + memory-trigger + covers endpoints)
+- Créé : `/app/backend/generate_livre_covers.py`
+- Modifié : `/app/frontend/src/pages/MonLivre.jsx` (bouton PDF + bouton Transcrire + textarea transcript)
+- Modifié : `/app/frontend/src/pages/QuizPlayer.jsx` (composant MemoryTrigger)
+- Dépendance ajoutée : `reportlab==5.0.0`
+
+- Souvenirs déclenchés par les quiz (memory triggers)
+- Nano Banana couverture illustrée par chapitre
+
+
+---
+
+## Livre de Vie V3 — Couvertures + PDF illustré + Onboarding Tour (2026-02-10) ✅
+
+### 1. 10 couvertures Nano Banana générées
+- Script `generate_livre_covers.py` exécuté avec succès : **10 aquarelles** de 670 KB à 900 KB stockées dans `/app/backend/static/livre_covers/`.
+- Sujets : landau + ourson (enfance), cahier + encrier (école), transistor + cassette (adolescence), main tenant une lettre d'amour (rencontres), outils de métiers (métier), table dressée (famille), valise + carte (voyages), vinyle + peinture + échecs (passions), chêne dans la pierre (épreuves), recette manuscrite + enveloppe (transmission).
+- Palette maison respectée : terracotta / navy / mustard / cream / bordeaux.
+
+### 2. PDF illustré (`GET /livre/export/pdf`)
+- **Couverture de chapitre pleine page** avant chaque section (12×12 cm centrée) si l'illustration Nano Banana existe.
+- **Photos des souvenirs** intégrées : jusqu'à 3 par entrée, ReportLab Table 3 colonnes.
+- **Légendes** affichées si présentes.
+- Taille finale : ~1.1 MB pour un Livre avec photos (vs 3 KB en V2 texte-only).
+
+### 3. Onboarding Tour
+- Nouveau `<OnboardingTour />` dans `/app/frontend/src/components/OnboardingTour.jsx`.
+- 4 étapes : Bienvenue · Quiz du Jour · Mon Livre de Vie · Progression douce.
+- Framer Motion pour transitions, dots de navigation, "Passer la visite" + CTA principal.
+- Se déclenche à la première connexion (`localStorage.generaquiz_onboarding_v1`).
+- Rejouable via `?tour=1`.
+- Injecté en tête de `Dashboard.jsx`.
+
+### Fichiers touchés
+- Créé : `/app/frontend/src/components/OnboardingTour.jsx`
+- Modifié : `/app/backend/routers/livre.py` (PDF illustré + URL /api/static), `/app/frontend/src/pages/MonLivre.jsx` (fetch covers + ChapterTile avec image), `/app/frontend/src/pages/Dashboard.jsx` (injection OnboardingTour).
+- 10 fichiers créés dans `/app/backend/static/livre_covers/*.png` (~8 MB total).
+
+### Vérifications (screenshots admin@1440)
+- Onboarding tour étape 1 "Bienvenue dans GénéraQuiz 👋" à `?tour=1` ✅
+- Onboarding tour étape 4 "Votre progression 🌱" avec CTA "Explorer →" ✅
+- Grille des chapitres avec aquarelles Nano Banana (ourson+landau, cahier+encrier, transistor+cassette) ✅
+- Endpoint `/livre/covers` : 10 URLs `/api/static/livre_covers/*.png` ✅
+- Endpoint `/livre/export/pdf` : 1.1 MB PDF-1.4 avec covers + photos ✅
+
+
+---
+
+## Version EHPAD — Espace animateur B2B (2026-02-10) ✅
+
+### Backend — `/app/backend/routers/ehpad.py` (nouveau, ~230 lignes)
+Nouveau rôle `role: "ehpad_animator"` (les admins passent aussi les checks).
+
+Collections :
+- `ehpad_residents` : fiches sans e-mail pour respecter la vie privée.
+- `ehpad_sessions` : séance collective (kind quiz OU prompt).
+- `ehpad_session_responses` : 1 réponse par résident par séance (upsert).
+
+Endpoints principaux : CRUD résidents, sessions, réponses, dashboard stats, `POST /admin/promote` pour passer un compte en animateur.
+
+### Frontend — 3 pages sous `/app/ehpad`
+- `EhpadDashboard.jsx` — hero + 3 stats (résidents / séances / souvenirs) + 3 tabs.
+- `EhpadNewSession.jsx` — assistant 3 étapes (support quiz|prompt / résidents / notes).
+- `EhpadSessionView.jsx` — saisie par résident : score 0-5 pour quiz, textarea auto-save pour souvenir.
+
+Guard `_require_animator` renvoie 403 non-animateurs → le front redirige vers `/app/dashboard`.
+
+### Vérifications
+- Backend curl : `POST /ehpad/residents` ✅, `GET /ehpad/dashboard` ✅.
+- Frontend screenshots @1440 : dashboard EHPAD propre ✅, Nouvelle séance avec 8 catégories + chip résident ✅.
+
+### Fichiers créés / touchés
+- Créé : `/app/backend/routers/ehpad.py`, `/app/frontend/src/pages/EhpadDashboard.jsx`, `/app/frontend/src/pages/EhpadSession.jsx`
+- Modifié : `/app/backend/server.py`, `/app/frontend/src/App.js`.
+
+### Backlog EHPAD V2
+- Stripe B2B checkout dédié pour créer directement les comptes animateurs
+- Multi-animateurs par établissement + rôle directeur avec vue agrégée
+- Export PDF des séances (compte-rendu imprimable pour les familles)
+- Photos de la séance (groupe, ambiance) dans le compte-rendu
+- Facturation à la séance ou forfait mensuel par résident

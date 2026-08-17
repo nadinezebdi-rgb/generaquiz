@@ -9,7 +9,7 @@ import { ChevronDown, Gamepad2, Feather, MessageCircle, Search, PenLine } from "
  */
 
 const GAMES = [
-  { to: "/app/atelier",      icon: Feather,         label: "Atelier Mémoire", desc: "5 questions ouvertes, votre carnet", testid: "nav-game-atelier" },
+  { to: "/app/livre",      icon: Feather,         label: "Mon Livre de Vie", desc: "Vos souvenirs, guidés en 10 chapitres", testid: "nav-game-livre" },
   { to: "/app/charades",     icon: MessageCircle,   label: "Charades",         desc: "Mon premier, mon deuxième…",         testid: "nav-game-charades" },
   { to: "/app/mots-meles",   icon: Search,          label: "Mots Mêlés",       desc: "Grilles thématiques IA",             testid: "nav-game-mots-meles" },
   { to: "/app/mots-fleches", icon: PenLine,         label: "Mots Fléchés",     desc: "5×5 MVP interactif",                 testid: "nav-game-mots-fleches" },

@@ -15,8 +15,6 @@ from typing import Iterable
 from zoneinfo import ZoneInfo
 
 import resend
-from apscheduler.schedulers.asyncio import AsyncIOScheduler
-from apscheduler.triggers.cron import CronTrigger
 
 from core import db, logger, FRONTEND_URL, RESEND_API_KEY, SENDER_EMAIL
 
@@ -137,9 +135,6 @@ async def send_morning_emails() -> dict:
 
     logger.info(f"[daily-email] sent={sent} skipped={skipped} failed={failed}")
     return {"sent": sent, "skipped": skipped, "failed": failed, "date": today}
-
-
-_scheduler: AsyncIOScheduler | None = None
 
 
 def _build_expiration_email_html(name: str, expires_label: str, pricing_url: str) -> str:
@@ -389,89 +384,3 @@ async def send_league_reminders() -> dict:
 
     logger.info(f"[league-reminder] sent={sent} skipped={skipped} failed={failed} cohorts={len(cohorts)}")
     return {"sent": sent, "skipped": skipped, "failed": failed, "cohorts": len(cohorts)}
-
-
-
-def start_daily_scheduler() -> None:
-    """Start the APScheduler jobs:
-    - Daily morning emails at 09:00 Europe/Paris
-    - Weekly league settlement at Monday 00:05 Europe/Paris
-    """
-    global _scheduler
-    if _scheduler is not None:
-        return
-    _scheduler = AsyncIOScheduler(timezone="Europe/Paris")
-    _scheduler.add_job(
-        send_morning_emails,
-        CronTrigger(hour=9, minute=0, timezone="Europe/Paris"),
-        id="daily_quiz_email",
-        replace_existing=True,
-        misfire_grace_time=3600,
-    )
-    # Lazy import to avoid circular imports at module load
-    from routers.gamification import settle_finished_week  # noqa: WPS433
-    from mistral_client import regenerate_all as _mistral_regen  # noqa: WPS433
-    _scheduler.add_job(
-        settle_finished_week,
-        CronTrigger(day_of_week="mon", hour=0, minute=5, timezone="Europe/Paris"),
-        id="leagues_weekly_settle",
-        replace_existing=True,
-        misfire_grace_time=3600,
-    )
-    _scheduler.add_job(
-        _mistral_regen,
-        CronTrigger(hour=3, minute=0, timezone="Europe/Paris"),
-        id="mistral_regenerate_all",
-        replace_existing=True,
-        misfire_grace_time=3600,
-    )
-    # Mots Mêlés — one fresh grid nightly at 03:30 Paris (after quiz regen)
-    from wordsearch_mistral import generate_one_grid_from_mistral  # noqa: WPS433
-    _scheduler.add_job(
-        generate_one_grid_from_mistral,
-        CronTrigger(hour=3, minute=30, timezone="Europe/Paris"),
-        id="wordsearch_generate_nightly",
-        replace_existing=True,
-        misfire_grace_time=3600,
-    )
-    from charades_mistral import generate_nightly_charades  # noqa: WPS433
-    _scheduler.add_job(
-        generate_nightly_charades,
-        CronTrigger(hour=4, minute=0, timezone="Europe/Paris"),
-        id="charades_generate_nightly",
-        replace_existing=True,
-        misfire_grace_time=3600,
-    )
-    from fleches_mistral import generate_nightly_fleches  # noqa: WPS433
-    _scheduler.add_job(
-        generate_nightly_fleches,
-        CronTrigger(hour=4, minute=30, timezone="Europe/Paris"),
-        id="fleches_generate_nightly",
-        replace_existing=True,
-        misfire_grace_time=3600,
-    )
-    _scheduler.add_job(
-        send_expiration_emails,
-        CronTrigger(hour=10, minute=0, timezone="Europe/Paris"),
-        id="premium_expiration_email_j7",
-        replace_existing=True,
-        misfire_grace_time=3600,
-    )
-    _scheduler.add_job(
-        send_league_reminders,
-        CronTrigger(day_of_week="sun", hour=20, minute=0, timezone="Europe/Paris"),
-        id="league_reminder_sunday_20h",
-        replace_existing=True,
-        misfire_grace_time=3600,
-    )
-    _scheduler.start()
-    logger.info(
-        "[scheduler] démarré — email quotidien 09:00 Paris + régénération Mistral 03:00 Paris + clôture ligues lundi 00:05 Paris + relance expiration J-7 10:00 Paris + rappel ligues dimanche 20:00 Paris"
-    )
-
-
-def stop_daily_scheduler() -> None:
-    global _scheduler
-    if _scheduler is not None:
-        _scheduler.shutdown(wait=False)
-        _scheduler = None
