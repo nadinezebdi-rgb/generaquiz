@@ -35,6 +35,7 @@ import Ehpad from "@/pages/Ehpad";
 import Atelier from "@/pages/Atelier";
 import AtelierEntries from "@/pages/AtelierEntries";
 import MonLivre from "@/pages/MonLivre";
+import VoyagesShowcase from "@/pages/VoyagesShowcase";
 import EhpadDashboard from "@/pages/EhpadDashboard";
 import { EhpadNewSession, EhpadSessionView } from "@/pages/EhpadSession";
 import Charades from "@/pages/Charades";
@@ -74,6 +75,7 @@ export default function App() {
           <Route path="/cgv" element={<CGV />} />
           <Route path="/confidentialite" element={<Confidentialite />} />
           <Route path="/ehpad" element={<Ehpad />} />
+          <Route path="/voyages-france" element={<VoyagesShowcase />} />
           <Route
             path="/app/atelier"
             element={

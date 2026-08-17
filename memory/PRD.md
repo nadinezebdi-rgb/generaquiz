@@ -1271,3 +1271,17 @@ Guard `_require_animator` renvoie 403 non-animateurs → le front redirige vers 
 ### Fichiers touchés
 - Modifié : `/app/backend/seed_data.py` (+ helper QD, +15 questions, +1 catégorie), `/app/backend/generate_mascots.py` (+prompt Jeanne), `/app/backend/server.py` (force-seed loop), `/app/backend/routers/livre.py` (memory-trigger map), `/app/frontend/src/pages/QuizPlayer.jsx` (rendu discussion_prompt).
 - Créé : `/app/backend/static/mascots/voyages-france.png` (722 KB via Nano Banana).
+
+
+## 2026-02-17 — Validation vitrine Voyages & discussion_prompts EHPAD
+
+### Statut : ✅ VALIDÉ PAR L'UTILISATEUR
+- Page vitrine `/voyages-france` (`VoyagesShowcase.jsx`) — hero Jeanne, exemples de questions, section "déclencheur de conversation" avec témoignage EHPAD, CTA final — vérifiée visuellement (3 screenshots).
+- 130 questions enrichies avec `discussion_prompt` en base :
+  - annees-50-60 : 25, chansons : 25, cinema : 25, cuisine-terroir : 15, culture-70-ans : 15, voyages-france : 7, culture-40-ans : 6, histoire-france : 6, objets-antan : 6.
+- Route `/voyages-france` correctement branchée dans `App.js`.
+
+### Prochaines priorités (P1)
+- Coop Atelier / Livre de Vie temps partagé (grand-parent + petit-enfant sur même session).
+- EHPAD Superviseur (P2) — rôle admin établissement.
+- EHPAD CRM (P2) — brancher formulaire `/ehpad` sur Brevo ou collection Mongo leads.

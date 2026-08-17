@@ -193,6 +193,10 @@ async def startup():
                 await db.questions.insert_many([{**q} for q in cat_qs])
                 logger.info(f"[seed] catégorie '{cat['id']}' vide → {len(cat_qs)} questions seed insérées")
 
+    # Enrichit les questions existantes avec des relances de conversation EHPAD
+    from discussion_prompts import enrich_existing_questions
+    await enrich_existing_questions()
+
     # Seed admin
     existing = await db.users.find_one({"email": ADMIN_EMAIL})
     if existing is None:
