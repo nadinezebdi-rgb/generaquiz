@@ -5,6 +5,7 @@ import { api, formatError } from "@/lib/api";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import RewriteAssistantModal from "@/components/RewriteAssistantModal";
+import FeuilleterModal from "@/components/FeuilleterModal";
 import {
   BookOpen, ArrowLeft, Mic, MicOff, Pen, Users, Camera,
   Send, Loader2, Sparkles, Inbox, Heart, X, ChevronRight,
@@ -30,6 +31,7 @@ export default function MonLivre() {
   const [openChapter, setOpenChapter] = useState(null); // full chapter with prompts+entries
   const [openPrompt, setOpenPrompt] = useState(null);   // {chapter_id, prompt_id, prompt_text}
   const [rewriteEntry, setRewriteEntry] = useState(null); // entry being rewritten by AI
+  const [feuilleterOpen, setFeuilleterOpen] = useState(false);
 
   useEffect(() => { refresh(); }, []);
 
@@ -91,6 +93,16 @@ export default function MonLivre() {
             <p className="text-navy/70 max-w-2xl flex-1">
               Mes souvenirs. Mon histoire. Pour ceux que j&apos;aime. Répondez à une question, un souvenir à la fois — tout reste <b>privé par défaut</b>.
             </p>
+            <button
+              type="button"
+              onClick={() => setFeuilleterOpen(true)}
+              data-testid="livre-feuilleter-open"
+              disabled={progress.total_entries === 0}
+              className="hidden md:inline-flex items-center gap-2 bg-terracotta text-white text-sm font-bold px-4 py-2 rounded-full hover:bg-terracotta-dark transition shrink-0 shadow-warm disabled:opacity-50 disabled:cursor-not-allowed"
+              title={progress.total_entries === 0 ? "Ajoutez un premier souvenir pour feuilleter votre livre" : "Feuilleter mon livre en plein écran"}
+            >
+              <BookOpen className="w-4 h-4" /> Feuilleter mon livre
+            </button>
             <a
               href={`${process.env.REACT_APP_BACKEND_URL}/api/livre/export/pdf`}
               target="_blank"
@@ -105,6 +117,25 @@ export default function MonLivre() {
             >
               📕 Télécharger mon Livre en PDF
             </a>
+          </div>
+          {/* Mobile : boutons empilés */}
+          <div className="flex md:hidden gap-2 mt-3">
+            <button
+              type="button"
+              onClick={() => setFeuilleterOpen(true)}
+              data-testid="livre-feuilleter-open-mobile"
+              disabled={progress.total_entries === 0}
+              className="flex-1 inline-flex items-center justify-center gap-2 bg-terracotta text-white text-sm font-bold px-3 py-2 rounded-full hover:bg-terracotta-dark transition disabled:opacity-50"
+            >
+              <BookOpen className="w-4 h-4" /> Feuilleter
+            </button>
+            <button
+              type="button"
+              onClick={downloadPdf}
+              className="flex-1 inline-flex items-center justify-center gap-2 bg-navy text-cream text-sm font-bold px-3 py-2 rounded-full hover:bg-navy-dark transition"
+            >
+              📕 PDF
+            </button>
           </div>
         </header>
 
@@ -154,6 +185,12 @@ export default function MonLivre() {
           promptText={openPrompt.prompt_text}
           onClose={() => setOpenPrompt(null)}
           onSaved={() => { setOpenPrompt(null); if (openChapter) openChapterFn(openChapter.id); refresh(); }}
+        />
+      )}
+      {feuilleterOpen && (
+        <FeuilleterModal
+          onClose={() => setFeuilleterOpen(false)}
+          onDownloadPdf={downloadPdf}
         />
       )}
     </div>

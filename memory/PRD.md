@@ -1,5 +1,15 @@
 # Quiz d'Antan — SaaS pour seniors français
 
+## 2026-02-19 (soir) — Feuilleter Le Livre (mode plein écran)
+- **Nouveau composant** `frontend/src/components/FeuilleterModal.jsx` : mode plein écran type « vrai livre ». Structure :
+  - Page 0 : couverture (nom auteur + année + titre « Mes souvenirs. Mon histoire. »)
+  - Pour chaque chapitre avec entrées : page-titre (emoji + Chapitre N + label + nb souvenirs) puis 1 page par souvenir (question en italique, texte avec lettrine terracotta, photos en grille, date en pied)
+  - Page finale : « À suivre… »
+- Alimenté par `/api/livre/entries` (déjà existant, tri chrono par chapitre). Empty state si `total_entries === 0`.
+- **Navigation** : boutons latéraux + clavier `←/→/Home/End/Échap` + swipe tactile (framer-motion drag) + table des matières horizontale cliquable en bas.
+- **Wired dans** `pages/MonLivre.jsx` : bouton « Feuilleter mon livre » (desktop + variante mobile), désactivé si aucun souvenir. Bouton PDF conservé pour téléchargement/impression.
+
+
 ## 2026-02-19 — Stripe frontend wiring + EHPAD alignée sur Wivy
 - **Câblage Stripe B2C + Cadeaux (P0 DONE)**
   - `frontend/src/lib/checkout.js` (nouveau) : helper `startCheckout(packageId)` → POST `/api/checkout/session` puis redirect Stripe. 401 → redirect `/register?next=/app/pricing&pkg=<id>` + sessionStorage `pending_checkout_package`.
