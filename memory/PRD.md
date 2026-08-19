@@ -1466,3 +1466,45 @@ Nouveau composant `PrintedBookPricing.jsx` injecté sous la reassurance-strip :
 - Coût estimé : ~2-3€ Emergent LLM Key pour 800 questions (8 catégories × 100).
 - Durée : ~10 min par catégorie via LLM externe.
 
+
+## 2026-08-19 (suite 2) — Admin QA Dashboard + audit des 7 autres catégories
+
+### 🎯 Admin QA Dashboard `/app/admin/qa`
+Nouveau backend `routers/admin_qa.py` + nouvelle page `AdminQA.jsx`.
+
+**Endpoints (rôle admin)** :
+- `GET /admin/qa/summary` — répartition par catégorie (verified/flagged/unchecked/% jouable)
+- `GET /admin/qa/questions?category_id&quality&limit&offset` — liste paginée triée par confidence croissante
+- `POST /admin/qa/{id}/approve` — force verified (retour au tirage)
+- `POST /admin/qa/{id}/flag` — force flagged (retire du tirage)
+- `POST /admin/qa/{id}/apply-correction` — applique la correction textuelle proposée par le fact-check (sauvegarde original dans `original_snapshot`)
+- `DELETE /admin/qa/{id}` — suppression définitive
+
+**Frontend** :
+- Résumé visuel : 9 cartes catégorie avec barre 3 couleurs (vert verified / crème unchecked / orange flagged) + % jouable
+- Filtres : catégorie sélectionnée + quality (flagged/verified/unchecked/all)
+- Liste : question + 4 options (bonne en vert), verdict + confidence, commentaire fact-check, correction proposée si dispo
+- Actions : Approuver / Appliquer la correction / Flagger / Supprimer
+- Toutes les actions retirent l'item de la liste localement + rafraîchissent le résumé
+
+### 🎯 Audit lancé sur les 7 catégories restantes (en background)
+Script `run_all_audits.sh` séquentiel dans `/tmp/audit_all.log` : cinema → cuisine-terroir → culture-40-ans → culture-70-ans → annees-50-60 → objets-antan → voyages-france → histoire-france. ~10 min/catégorie.
+
+Résultats partiels au moment du finish :
+- Chansons : 53 verified / 54 flagged / 7 régen OK (100 %)
+- Cinema : ~45/100 en cours (39 verified déjà, 24 flagged)
+
+### Ajouts UI navigation
+- AdminHome : passage à 4 tuiles (ajout "Qualité IA") avec grid `lg:grid-cols-4`
+- AdminDropdown Navbar : 5 entrées (Admin / Analytics / Promos / Signalements / Qualité IA)
+- MobileMenu : entrée "Qualité IA" ajoutée dans la section Admin
+
+### Fichiers touchés
+- **Créés** : `backend/routers/admin_qa.py`, `frontend/src/pages/AdminQA.jsx`, `/tmp/run_all_audits.sh`
+- **Modifiés** : `backend/server.py` (registre routeur admin_qa), `frontend/src/App.js` (route /app/admin/qa + import), `AdminHome.jsx` (4ᵉ tuile + grid 4 cols), `AdminDropdown.jsx` (5ᵉ entrée), `MobileMenu.jsx` (idem)
+
+### Tests
+- Backend endpoints admin QA : summary + questions filtrées OK, actions approve/flag/apply-correction/delete OK
+- Frontend : dashboard rendu, 78 questions flagged listées avec fact-check commentaires, boutons d'action fonctionnels
+- Sécurité : tous les endpoints admin_qa passent par `get_admin_user` → HTTP 403 pour un non-admin
+

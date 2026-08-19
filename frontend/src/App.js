@@ -26,6 +26,7 @@ import Confidentialite from "@/pages/legal/Confidentialite";
 import AdminReports from "@/pages/AdminReports";
 import AdminAnalytics from "@/pages/AdminAnalytics";
 import AdminHome from "@/pages/AdminHome";
+import AdminQA from "@/pages/AdminQA";
 import Pourquoi from "@/pages/Pourquoi";
 import EarnCredits from "@/pages/EarnCredits";
 import CoopChallengeCreate from "@/pages/CoopChallengeCreate";
@@ -260,6 +261,14 @@ export default function App() {
             element={
               <AdminRoute>
                 <AdminAnalytics />
+              </AdminRoute>
+            }
+          />
+          <Route
+            path="/app/admin/qa"
+            element={
+              <AdminRoute>
+                <AdminQA />
               </AdminRoute>
             }
           />

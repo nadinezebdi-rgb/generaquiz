@@ -40,6 +40,7 @@ from routers import progression as progression_router
 from routers import atelier as atelier_router
 from routers import livre as livre_router
 from routers import livre_ai as livre_ai_router
+from routers import admin_qa as admin_qa_router
 from routers import ehpad as ehpad_router
 from routers import admin_analytics as admin_analytics_router
 from routers import charades as charades_router
@@ -106,6 +107,7 @@ api.include_router(progression_router.router)
 api.include_router(atelier_router.router)
 api.include_router(livre_router.router)
 api.include_router(livre_ai_router.router)
+api.include_router(admin_qa_router.router)
 api.include_router(ehpad_router.router)
 api.include_router(admin_analytics_router.router)
 api.include_router(charades_router.router)

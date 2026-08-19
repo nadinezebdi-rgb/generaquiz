@@ -104,6 +104,7 @@ export default function MobileMenu({ variant = "landing" }) {
                       <MobileLink to="/app/admin/analytics" onClick={close} testid="mobile-nav-admin-analytics" accent>Analytics</MobileLink>
                       <MobileLink to="/app/admin/promo" onClick={close} accent>Promos</MobileLink>
                       <MobileLink to="/app/admin/reports" onClick={close} accent>Signalements</MobileLink>
+                      <MobileLink to="/app/admin/qa" onClick={close} accent>Qualité IA</MobileLink>
                     </>
                   )}
                 </>

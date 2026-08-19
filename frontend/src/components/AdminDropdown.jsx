@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { ChevronDown, Shield, BarChart3, Tag, Flag, LayoutDashboard } from "lucide-react";
+import { ChevronDown, Shield, BarChart3, Tag, Flag, LayoutDashboard, ClipboardCheck } from "lucide-react";
 
 /**
  * AdminDropdown — collapsible "Admin" trigger visible only to role=admin users.
- * Bundles Home / Analytics / Promos / Signalements so the desktop nav stays clean.
+ * Bundles Home / Analytics / Promos / Signalements / Qualité IA so the desktop nav stays clean.
  */
 
 const ADMIN_LINKS = [
@@ -12,6 +12,7 @@ const ADMIN_LINKS = [
   { to: "/app/admin/analytics", icon: BarChart3,       label: "Analytics",      desc: "MAU, MRR, top catégories",      testid: "nav-admin-analytics" },
   { to: "/app/admin/promo",     icon: Tag,             label: "Promos",         desc: "Codes promo Stripe",            testid: "nav-admin-promo" },
   { to: "/app/admin/reports",   icon: Flag,            label: "Signalements",   desc: "Questions signalées à modérer", testid: "nav-admin-reports" },
+  { to: "/app/admin/qa",        icon: ClipboardCheck,  label: "Qualité IA",     desc: "Questions vérifiées par Opus",  testid: "nav-admin-qa" },
 ];
 
 export default function AdminDropdown() {
