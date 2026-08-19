@@ -26,6 +26,7 @@ import CGV from "@/pages/legal/CGV";
 import Confidentialite from "@/pages/legal/Confidentialite";
 import AdminReports from "@/pages/AdminReports";
 import AdminAnalytics from "@/pages/AdminAnalytics";
+import AdminHome from "@/pages/AdminHome";
 import Pourquoi from "@/pages/Pourquoi";
 import EarnCredits from "@/pages/EarnCredits";
 import CoopChallengeCreate from "@/pages/CoopChallengeCreate";
@@ -36,6 +37,8 @@ import Ehpad from "@/pages/Ehpad";
 import Atelier from "@/pages/Atelier";
 import AtelierEntries from "@/pages/AtelierEntries";
 import MonLivre from "@/pages/MonLivre";
+import LivreCoop from "@/pages/LivreCoop";
+import VoyagesShowcase from "@/pages/VoyagesShowcase";
 import EhpadDashboard from "@/pages/EhpadDashboard";
 import { EhpadNewSession, EhpadSessionView } from "@/pages/EhpadSession";
 import Charades from "@/pages/Charades";
@@ -58,6 +61,28 @@ function ProtectedRoute({ children }) {
   return children;
 }
 
+/** AdminRoute — guard rôle "admin". Un utilisateur connecté mais non-admin
+ *  est redirigé vers son tableau de bord. Ne remplace PAS la protection
+ *  serveur : tous les endpoints /api/admin/* exigent aussi role=admin. */
+function AdminRoute({ children }) {
+  const { user, loading } = useAuth();
+  const location = useLocation();
+  if (loading || user === null) {
+    return (
+      <div className="min-h-screen flex items-center justify-center paper-bg">
+        <div className="text-navy text-xl font-medium">Chargement...</div>
+      </div>
+    );
+  }
+  if (!user) {
+    return <Navigate to="/login" state={{ from: location.pathname }} replace />;
+  }
+  if (user.role !== "admin") {
+    return <Navigate to="/app/dashboard" replace />;
+  }
+  return children;
+}
+
 export default function App() {
   return (
     <AuthProvider>
@@ -75,6 +100,8 @@ export default function App() {
           <Route path="/cgv" element={<CGV />} />
           <Route path="/confidentialite" element={<Confidentialite />} />
           <Route path="/ehpad" element={<Ehpad />} />
+          <Route path="/voyages-france" element={<VoyagesShowcase />} />
+          <Route path="/livre/coop/:code" element={<LivreCoop />} />
           <Route
             path="/app/atelier"
             element={
@@ -206,27 +233,35 @@ export default function App() {
           />
           <Route path="/defi/:token" element={<ChallengePlay />} />
           <Route
+            path="/app/admin"
+            element={
+              <AdminRoute>
+                <AdminHome />
+              </AdminRoute>
+            }
+          />
+          <Route
             path="/app/admin/promo"
             element={
-              <ProtectedRoute>
+              <AdminRoute>
                 <AdminPromo />
-              </ProtectedRoute>
+              </AdminRoute>
             }
           />
           <Route
             path="/app/admin/reports"
             element={
-              <ProtectedRoute>
+              <AdminRoute>
                 <AdminReports />
-              </ProtectedRoute>
+              </AdminRoute>
             }
           />
           <Route
             path="/app/admin/analytics"
             element={
-              <ProtectedRoute>
+              <AdminRoute>
                 <AdminAnalytics />
-              </ProtectedRoute>
+              </AdminRoute>
             }
           />
           <Route path="/pourquoi" element={<Pourquoi />} />

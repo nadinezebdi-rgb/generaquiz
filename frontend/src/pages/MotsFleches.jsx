@@ -138,7 +138,7 @@ function GridPlay({ gridId, onExit }) {
           }
         }
         setMistakes(m);
-      } catch (_) { /* silencieux */ }
+      } catch (err) { console.debug("Live check skipped:", err); }
     }, 400);
     return () => { if (checkTimer.current) clearTimeout(checkTimer.current); };
   }, [letters, liveCheck, grid, gridId]);
@@ -302,7 +302,7 @@ function GridPlay({ gridId, onExit }) {
         osc.start(now);
         osc.stop(now + 0.5);
       }
-    } catch (_) { /* audio bloqué (permission) → silencieux */ }
+    } catch (err) { console.debug("Audio playback blocked:", err); }
   }, [completedWords, soundOn]);
 
   if (!grid) {

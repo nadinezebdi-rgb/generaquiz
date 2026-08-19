@@ -7,6 +7,7 @@ import Navbar from "@/components/Navbar";
 import { ArrowLeft, ChevronRight, RotateCcw, Volume2, Crown, Check, X } from "lucide-react";
 import ScoreCard from "@/components/ScoreCard";
 import ReportButton from "@/components/ReportButton";
+import QuizMemoryBridge from "@/components/QuizMemoryBridge";
 
 // Fisher-Yates shuffle helper that returns the new options + the new correct index.
 function shuffleOptions(options, correctIndex) {
@@ -97,7 +98,7 @@ export default function QuizPlayer() {
       u.rate = 0.92;
       window.speechSynthesis.cancel();
       window.speechSynthesis.speak(u);
-    } catch { /* speech synthesis indisponible */ }
+    } catch (err) { console.warn("Speech synthesis unavailable:", err); }
   };
 
   // Ajoute un prénom au défi famille, avec une limite de 6 joueurs.
@@ -444,6 +445,14 @@ export default function QuizPlayer() {
                       {selected === shuffled.newCorrectIdx ? "✅ Bonne réponse !" : "❌ Presque !"}
                     </p>
                     <p className="text-navy/80 text-lg leading-relaxed">{q.explanation}</p>
+                    {q.discussion_prompt && (
+                      <div className="mt-4 bg-cream border-l-4 border-terracotta p-3 rounded-r-lg" data-testid="quiz-discussion-prompt">
+                        <p className="text-sm font-bold text-terracotta uppercase tracking-wider mb-1">🗣️ Question à raconter en groupe</p>
+                        <p className="text-navy italic">{q.discussion_prompt}</p>
+                      </div>
+                    )}
+                    {/* Boucle Quiz → Livre : proposer d'ajouter un souvenir personnel */}
+                    <QuizMemoryBridge question={q} categorySlug={categoryId} />
                   </motion.div>
                 )}
               </AnimatePresence>

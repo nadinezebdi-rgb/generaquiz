@@ -9,6 +9,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import StatsSection from "@/components/StatsSection";
 import PlatformSection from "@/components/PlatformSection";
+import HowItWorksSection from "@/components/HowItWorksSection";
 import HeroPhoneDemo from "@/components/HeroPhoneDemo";
 import TestimonialsSection from "@/components/TestimonialsSection";
 import { api, BACKEND_URL } from "@/lib/api";
@@ -41,16 +42,16 @@ export default function Landing() {
             className="lg:col-span-7"
           >
             <div className="inline-flex items-center gap-2 bg-cream border-2 border-mustard-dark text-navy font-bold px-4 py-2 rounded-full text-sm mb-6" data-testid="hero-pill">
-              <Star className="w-4 h-4 text-terracotta fill-terracotta" /> Le premier club mémoire intergénérationnel
+              <Star className="w-4 h-4 text-terracotta fill-terracotta" /> Jouer. Se souvenir. Transmettre.
             </div>
             <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl font-extrabold text-navy leading-[1.1] mb-6" data-testid="hero-title">
-              5 minutes par jour<br />
-              pour <span className="text-terracotta italic">stimuler votre mémoire</span><br />
-              et partager un moment en famille.
+              5 minutes pour jouer.<br />
+              <span className="text-terracotta italic">Toute une vie</span><br />
+              à raconter.
             </h1>
             <p className="text-lg sm:text-xl text-navy/80 leading-relaxed max-w-2xl mb-6" data-testid="hero-subtitle">
-              GénéraQuiz réunit seniors, enfants et petits-enfants autour de quiz culturels
-              inspirés des connaissances scientifiques sur la <strong>stimulation cognitive</strong> et le <strong>lien social</strong>.
+              GénéraQuiz fait revivre les souvenirs grâce au jeu
+              et rapproche les générations pour mieux <strong>transmettre les histoires familiales</strong>.
             </p>
 
             {/* Rating + social proof line */}
@@ -74,6 +75,13 @@ export default function Landing() {
                 <Play className="w-6 h-6" fill="currentColor" />
                 Commencer gratuitement
               </Link>
+              <a
+                href="#how-it-works"
+                data-testid="hero-cta-discover"
+                className="inline-flex items-center justify-center gap-2 bg-white border-2 border-navy text-navy hover:bg-navy hover:text-cream font-bold text-lg px-6 py-5 rounded-full transition min-h-[64px]"
+              >
+                Découvrir GénéraQuiz
+              </a>
             </div>
 
             <p className="text-sm text-navy/60 mt-4" data-testid="hero-reassurance">
@@ -176,11 +184,11 @@ export default function Landing() {
           <div className="text-center max-w-3xl mx-auto mb-14">
             <span className="inline-block bg-mustard text-navy font-bold px-4 py-1 rounded-full text-sm mb-4">Choisissez votre thème</span>
             <h2 className="font-display text-4xl sm:text-5xl font-extrabold text-navy mb-4">
-              Huit univers, huit personnages
+              Neuf univers, neuf personnages
             </h2>
             <p className="text-xl text-navy/70 leading-relaxed">
               Chaque catégorie a son ambassadeur caricaturé pour vous accompagner dans la découverte —
-              avec deux nouvelles thématiques de culture générale pour les <strong>quadras</strong> et les <strong>septuagénaires</strong>.
+              avec notre toute dernière <strong>Voyages &amp; régions de France</strong> guidée par Jeanne la Voyageuse.
             </p>
           </div>
 
@@ -201,6 +209,14 @@ export default function Landing() {
                     className="absolute -top-12 -right-12 w-48 h-48 rounded-full opacity-15 group-hover:opacity-25 transition"
                     style={{ backgroundColor: cat.color }}
                   />
+                  {cat.id === "voyages-france" && (
+                    <span
+                      data-testid={`category-badge-nouveau-${cat.id}`}
+                      className="absolute top-3 right-3 z-10 inline-flex items-center gap-1 bg-terracotta text-white text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full shadow-warm"
+                    >
+                      ✨ Nouveau
+                    </span>
+                  )}
                   <div className="relative">
                     <div className="aspect-square w-32 mx-auto rounded-3xl overflow-hidden bg-cream border-2 border-cream-dark mb-5">
                       <img
@@ -236,6 +252,9 @@ export default function Landing() {
 
       {/* ============ DEMO QUIZ ============ */}
       <DemoQuiz />
+
+      {/* ============ COMMENT ÇA MARCHE (Jouer → Se souvenir → Raconter → Transmettre) ============ */}
+      <HowItWorksSection />
 
       {/* ============ PLATFORM (activities + word games) ============ */}
       <PlatformSection />

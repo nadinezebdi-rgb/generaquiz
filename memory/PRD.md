@@ -1237,3 +1237,193 @@ Guard `_require_animator` renvoie 403 non-animateurs → le front redirige vers 
 - Export PDF des séances (compte-rendu imprimable pour les familles)
 - Photos de la séance (groupe, ambiance) dans le compte-rendu
 - Facturation à la séance ou forfait mensuel par résident
+
+
+---
+
+## Nouvelle catégorie : Voyages & régions de France (2026-02-10) ✅
+
+### Contenu
+- 🧳 **Voyages & régions de France** — 9ᵉ carte du dashboard
+- Sous-titre : *Régions, monuments, paysages, traditions et souvenirs de vacances.*
+- Mascotte : **👩‍🦳 Jeanne la Voyageuse** — générée via Nano Banana en background (722 KB, valise vintage + carte + chapeau à ruban tricolore).
+- 15 questions seed rédigées à la main (Mont-Saint-Michel, Ville Rose, champs de lavande, choucroute alsacienne, Bourgogne, Corse, Chambord, nougat de Montélimar, Rocamadour…).
+
+### Innovation EHPAD : Discussion prompt
+- Nouveau champ optionnel `discussion_prompt` sur une question.
+- 7 des 15 questions voyages en sont dotées : « Et vous, où partiez-vous en vacances lorsque vous étiez jeune ? », « Avez-vous des souvenirs d'un été en Provence ? », etc.
+- Helper Python `QD()` (Q + Discussion) dans `seed_data.py`.
+- Le front QuizPlayer affiche un bandeau visible « 🗣️ Question à raconter en groupe » avec l'accroche italique — idéal en séance EHPAD.
+
+### Force-seed nouvelle catégorie
+- `server.py` boucle sur `CATEGORIES` au démarrage : toute catégorie sans question en DB reçoit immédiatement ses seed_questions (idempotent, ne double pas les insertions).
+- La régénération Mistral nocturne (03:00 Paris) complétera la catégorie jusqu'à 100 questions.
+
+### Mapping mémoire
+- `QUIZ_MEMORY_MAP["voyages-france"] → chapter voyages` — après un quiz voyages, l'utilisateur voit un CTA « Où passiez-vous vos vacances quand vous étiez jeune ? » vers son Livre de Vie.
+
+### Vérifications
+- `GET /api/categories` → 9 catégories, voyages-france présente avec mascotte Jeanne la Voyageuse ✅
+- `GET /api/categories/voyages-france/questions` → 15 questions dont 7 avec discussion_prompt ✅
+- Screenshot dashboard : 9 tuiles catégories visibles ✅
+- Mascotte statique servie via `/api/static/mascots/voyages-france.png` (722 KB) ✅
+
+### Fichiers touchés
+- Modifié : `/app/backend/seed_data.py` (+ helper QD, +15 questions, +1 catégorie), `/app/backend/generate_mascots.py` (+prompt Jeanne), `/app/backend/server.py` (force-seed loop), `/app/backend/routers/livre.py` (memory-trigger map), `/app/frontend/src/pages/QuizPlayer.jsx` (rendu discussion_prompt).
+- Créé : `/app/backend/static/mascots/voyages-france.png` (722 KB via Nano Banana).
+
+
+## 2026-02-17 — Validation vitrine Voyages & discussion_prompts EHPAD
+
+### Statut : ✅ VALIDÉ PAR L'UTILISATEUR
+- Page vitrine `/voyages-france` (`VoyagesShowcase.jsx`) — hero Jeanne, exemples de questions, section "déclencheur de conversation" avec témoignage EHPAD, CTA final — vérifiée visuellement (3 screenshots).
+- 130 questions enrichies avec `discussion_prompt` en base :
+  - annees-50-60 : 25, chansons : 25, cinema : 25, cuisine-terroir : 15, culture-70-ans : 15, voyages-france : 7, culture-40-ans : 6, histoire-france : 6, objets-antan : 6.
+- Route `/voyages-france` correctement branchée dans `App.js`.
+
+### Prochaines priorités (P1)
+- Coop Atelier / Livre de Vie temps partagé (grand-parent + petit-enfant sur même session).
+- EHPAD Superviseur (P2) — rôle admin établissement.
+- EHPAD CRM (P2) — brancher formulaire `/ehpad` sur Brevo ou collection Mongo leads.
+
+## 2026-02-17 — Coop Livre de Vie (P1) + Hook Deps Audit
+
+### Coop Atelier — sessions partagées ✅
+Un grand-parent peut ouvrir un chapitre en "mode coop" et inviter un petit-enfant / proche à écrire à ses côtés. Sync via polling léger 4 s, aucun compte requis pour l'invité, souvenirs attribués au prénom saisi.
+
+- **Backend** (`routers/livre.py`): 7 endpoints coop
+  - `POST /api/livre/coop/create` (auth) — crée session pour un chapitre, réutilise l'existante active (idempotent), code alphanumérique 6 caractères non ambigus
+  - `POST /api/livre/coop/join` (public) — l'invité entre son prénom + code
+  - `GET /api/livre/coop/{code}/state` (public) — chapitre, prompts, entrées, participants
+  - `POST /api/livre/coop/{code}/heartbeat` (public) — met à jour last_seen
+  - `POST /api/livre/coop/{code}/entry` (public) — l'invité ajoute un souvenir en mode `delegated`
+  - `GET /api/livre/coop/mine` (auth) — mes sessions actives
+  - `POST /api/livre/coop/{code}/close` (auth) — fermeture par le propriétaire
+- **Collection Mongo** : `livre_coop_sessions` `{id, owner_user_id, owner_name, chapter_id, invite_code, status, participants:[{name, is_owner, joined_at, last_seen}], created_at}`
+- **Frontend**
+  - `LivreCoop.jsx` — page publique `/livre/coop/:code` avec écran de bienvenue, avatars participants + indicateur en ligne, composer en pied de page, polling 4 s
+  - `MonLivre.jsx` — dans ChapterModal : bouton "Remplir ce chapitre à deux" + modal de partage (code + bouton copier lien + WhatsApp)
+- **Attribution** : les souvenirs de l'invité s'enregistrent en mode `delegated` avec `delegated_author_name = prénom` et `visibility = "family"` dans le Livre du propriétaire. `coop_session_code` conservé pour traçabilité.
+
+### Hook Deps Audit ✅
+Après investigation, le rapport de 64 warnings comportait principalement des faux positifs. Aucun eslint.config.js n'était présent dans le projet, donc la règle `react-hooks/exhaustive-deps` n'était pas active. Audit manuel des 3 hotspots critiques cités :
+
+- **QuizPlayer.jsx:41** — useEffect `[categoryId]` : correct (n'utilise que `categoryId` + `api` stable)
+- **MotsFleches.jsx:122** — useEffect `[letters, liveCheck, grid, gridId]` : correct (checkTimer via ref, setMistakes stable)
+- **MotsMeles.jsx:157** — useCallback `[start, busy, gridId]` : correct (setters stables, refs pas nécessaires)
+
+Ajouter aveuglément des deps aux setters (stables React) ou refs aurait cassé la logique de polling live de MotsFleches. Décision : ne pas toucher.
+
+### Fichiers touchés
+- **Modifiés** : `/app/backend/routers/livre.py` (+200 lignes coop), `/app/frontend/src/App.js` (route + import), `/app/frontend/src/pages/MonLivre.jsx` (ChapterModal + CoopShareModal)
+- **Créés** : `/app/frontend/src/pages/LivreCoop.jsx` (page invité publique)
+
+### Tests
+- Backend end-to-end via curl : create → join → state → entry → state (2 entries) ✅
+- Frontend E2E (screenshots) : join screen → main view → composer → send → entry appears ✅
+- Owner flow (screenshots) : ouvrir chapitre → bouton coop → modal partage avec code `4HTRJB` ✅
+
+
+## 2026-02-17 — Repositionnement "Jouer. Se souvenir. Transmettre." (Phases 1→4)
+
+### Nouvelle promesse produit ✅
+GénéraQuiz devient une plateforme intergénérationnelle : JOUER → SE SOUVENIR → RACONTER → TRANSMETTRE.
+
+### Phase 1 — Landing repositionnée
+- Hero H1 : "5 minutes pour jouer. Toute une vie à raconter."
+- Sous-titre : "GénéraQuiz fait revivre les souvenirs grâce au jeu et rapproche les générations pour mieux transmettre les histoires familiales."
+- Pill : "Jouer. Se souvenir. Transmettre." (remplace "Le premier club mémoire intergénérationnel")
+- 2 CTAs : "Commencer gratuitement" + "Découvrir GénéraQuiz" (scroll vers #how-it-works)
+- Nouvelle section `HowItWorksSection.jsx` (4 étapes visuelles Je joue / Je me souviens / Je raconte / Je transmets)
+
+### Phase 2 — Livre de Vie à 12 chapitres
+- Ajout de 4 nouveaux chapitres : `origines` (1), `couple` (6), `enfants` (7), `evenements` (11)
+- Migration douce idempotente : `famille` → `enfants`, `epreuves` → `transmission` (via `_migrate_legacy_chapters` au startup)
+- Nouveau widget Dashboard `LivreProgressCard.jsx` : "Votre Livre de Vie prend forme" + barre de progression + 4 stats + CTA "Feuilleter"
+- Nouvel endpoint `GET /api/livre/progression` (agrégats souvenirs / photos / chapitres complétés / pages estimées)
+
+### Phase 3 — Assistance rédactionnelle IA
+- Nouveau routeur `routers/livre_ai.py` avec 2 endpoints :
+  - `POST /api/livre/entries/{id}/rewrite` : propose une reformulation sans écraser le texte source
+  - `POST /api/livre/entries/{id}/accept-rewrite` : archive l'original dans `original_text`, applique la version acceptée
+- **Guardrails stricts** dans le prompt système : interdiction absolue d'inventer personne, date, lieu, événement, émotion (6 règles inviolables)
+- Modèle : **gpt-5.5** via Emergent LLM key (gpt-5.6 pas encore listé dans emergentintegrations)
+- Composant `RewriteAssistantModal.jsx` : 3 boutons "❤️ Ça me ressemble", "✏️ Modifier", "🔄 Reformuler autrement" + 3 tons (natural / warmer / concise)
+- Bouton "✨ Reformuler" ajouté à `EntryPreview` (visible uniquement si mode=text et text >= 20 caractères)
+
+### Phase 4 — Boucle Quiz → Livre (feature signature)
+- Nouveau endpoint `POST /api/livre/from-quiz` avec mapping automatique catégorie → chapitre :
+  - chansons/cinema/culture-70/culture-40/cuisine-terroir → passions
+  - voyages-france → voyages
+  - histoire-france → evenements
+  - annees-50-60 → adolescence
+  - objets-antan → enfance
+- Nouveau composant `QuizMemoryBridge.jsx` injecté dans `QuizPlayer.jsx` sous le feedback : "💭 Ce moment vous rappelle un souvenir ?" avec zone de saisie et confirmation "Souvenir ajouté à votre Livre de Vie · [chapitre]"
+- Champs `source="quiz"` + `quiz_question_id` + `quiz_category_slug` tracés sur l'entrée
+- Fix bonus : `QUIZ_MEMORY_MAP["histoire"]` corrigé (`epreuves` → `evenements`)
+
+### Fichiers touchés
+- **Modifiés** : `Landing.jsx`, `Dashboard.jsx`, `MonLivre.jsx`, `QuizPlayer.jsx`, `livre.py` (12 chapitres + progression + from-quiz + QUIZ_MEMORY_MAP), `server.py` (registre routeur + migration startup)
+- **Créés** : `HowItWorksSection.jsx`, `LivreProgressCard.jsx`, `RewriteAssistantModal.jsx`, `QuizMemoryBridge.jsx`, `livre_ai.py`, `tests/test_iteration40_livre_ai_boucle.py`
+
+### Tests
+- Testing agent iteration 40 : **100% backend + 100% frontend** ✅
+- 12 chapitres visibles dans le bon ordre, migration OK (0 orpheline)
+- Rewrite AI testé avec input "Marie" → aucun autre prénom inventé, guardrails respectés
+- from-quiz testé pour 6 mappings catégorie → chapitre : tous corrects
+- Aucun casse-flow : login, dashboard, coop, quiz classique fonctionnent
+
+### Notes de production
+- Modèle IA actuel : gpt-5.5 (mettre à jour vers gpt-5.6 dès qu'il est ajouté au catalogue emergentintegrations)
+- Refactor recommandé (non urgent) : `livre.py` fait 1113 lignes, à découper en submodules (chapters/entries/family/coop/pdf/ai) — reporté en backlog technique
+
+
+## 2026-08-19 — Sécurité admin + copy + nouveaux tarifs (Livre imprimé, Offre Pro)
+
+### 🚨 P0 — Rotation du mot de passe admin
+- L'ancien mot de passe `Admin2026!` était visible dans l'historique du chat Emergent (signalé par l'utilisateur).
+- Nouveau mot de passe généré via `secrets.choice(alphanum+special)` sur 20 caractères, stocké **uniquement** dans `/app/backend/.env` et `/app/memory/test_credentials.md` (fichier non servi publiquement).
+- Ancien mot de passe : HTTP 401 ✅ · Nouveau : HTTP 200 ✅
+
+### 🔐 Restauration de l'espace admin
+- **Nouvelle page `AdminHome.jsx`** (route `/app/admin`) : tableau de bord central avec 3 tuiles (Analytics / Codes promo / Signalements).
+- **Nouveau composant `<AdminRoute>`** dans `App.js` : vérifie `user.role === "admin"` côté client (les endpoints `/api/admin/*` étaient déjà protégés par `get_admin_user` côté serveur — testé HTTP 403 pour un compte non-admin).
+- `AdminDropdown` (menu Navbar avatar) enrichi : entrée "Administration → Tableau de bord admin" ajoutée en 1ère position.
+- `MobileMenu` : entrée "Tableau de bord" ajoutée dans la section Admin.
+
+### ✏️ Copy changes
+- Landing : "Huit univers, huit personnages" → **"Neuf univers, neuf personnages"** avec accroche Jeanne la Voyageuse.
+- Carte catégorie "Voyages & régions de France" : badge **"✨ NOUVEAU"** ajouté (Landing + Dashboard).
+- MonLivre chapter modal : bandeau **"✨ Racontez simplement votre souvenir, GénéraQuiz le transforme en un joli récit pour votre livre de vie."** ajouté ; bouton coop renommé "Remplir à deux avec un proche".
+- EarnCredits.jsx : "accès aux 8 catégories" → "accès aux 9 univers".
+
+### 💰 Nouveaux tarifs (page Pricing)
+Nouveau composant `PrintedBookPricing.jsx` injecté sous la reassurance-strip :
+
+**📖 Livre imprimé** (3 offres) :
+| Offre | Prix | Prix/livre | Économie |
+|---|---|---|---|
+| 📕 1 livre | 79,90 € | 79,90 € | — |
+| 📚 2 livres ⭐ (Le plus choisi) | 129,90 € | 64,95 € | 29,90 € |
+| 🎁 3 livres | 179,90 € | 59,97 € | 59,80 € |
++ mention **"PDF gratuit inclus"** pour tous les abonnés · format A5 · impression à la demande. Les CTAs pointent vers `mailto:contact@generaquiz.fr` en attendant le vrai checkout Stripe.
+
+**🏥 Offre Pro** (à partir de 59 €/mois, devis 48h) — 8 catégories affichées : EHPAD, Associations, Clubs du 3ᵉ âge, CCAS, Collectivités territoriales, Structures médicalisées, Médiathèques, Bibliothèques. CTA `mailto:` "Demander un devis".
+
+### Fichiers touchés
+- **Modifiés** : `Landing.jsx`, `Dashboard.jsx`, `MonLivre.jsx`, `EarnCredits.jsx`, `Pricing.jsx`, `App.js` (AdminRoute + route /app/admin), `AdminDropdown.jsx`, `MobileMenu.jsx`, `.env` (nouveau ADMIN_PASSWORD).
+- **Créés** : `AdminHome.jsx`, `PrintedBookPricing.jsx`.
+
+### Tests
+- Login admin avec nouveau mot de passe : HTTP 200 ✅
+- Ancien mot de passe rejeté : HTTP 401 ✅
+- Non-admin sur `/api/admin/analytics/overview` : HTTP 403 ✅
+- Non-admin sur `/api/admin/promo` : HTTP 403 ✅
+- Badge "Nouveau" sur voyages-france : visible Landing + Dashboard ✅
+- Section Livre imprimé + Offre Pro : rendues correctement sur `/app/pricing` ✅
+- Bandeau pitch dans le Livre : visible et bien formaté ✅
+
+### Notes production
+- Aucun endpoint Stripe créé pour les livres imprimés (CTA mailto uniquement) → à câbler en itération suivante avec des PACKAGES dédiés (`livre_1`, `livre_2`, `livre_3`, `pro_lite`, `pro_ehpad`).
+- Le contrôle de rôle côté frontend NE remplace PAS la vérification serveur — les deux sont en place.
+

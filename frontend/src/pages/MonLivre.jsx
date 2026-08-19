@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { api, formatError } from "@/lib/api";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import RewriteAssistantModal from "@/components/RewriteAssistantModal";
 import {
   BookOpen, ArrowLeft, Mic, MicOff, Pen, Users, Camera,
   Send, Loader2, Sparkles, Inbox, Heart, X, ChevronRight,
@@ -28,6 +29,7 @@ export default function MonLivre() {
   const [progress, setProgress] = useState({ total_entries: 0, total_prompts: 50, progress_pct: 0 });
   const [openChapter, setOpenChapter] = useState(null); // full chapter with prompts+entries
   const [openPrompt, setOpenPrompt] = useState(null);   // {chapter_id, prompt_id, prompt_text}
+  const [rewriteEntry, setRewriteEntry] = useState(null); // entry being rewritten by AI
 
   useEffect(() => { refresh(); }, []);
 
@@ -135,6 +137,14 @@ export default function MonLivre() {
           chapter={openChapter}
           onClose={() => { setOpenChapter(null); refresh(); }}
           onPromptClick={(p) => setOpenPrompt({ chapter_id: openChapter.id, prompt_id: p.id, prompt_text: p.text })}
+          onRewriteClick={setRewriteEntry}
+        />
+      )}
+      {rewriteEntry && (
+        <RewriteAssistantModal
+          entry={rewriteEntry}
+          onClose={() => setRewriteEntry(null)}
+          onAccepted={() => { setRewriteEntry(null); if (openChapter) openChapterFn(openChapter.id); refresh(); }}
         />
       )}
       {openPrompt && (
@@ -237,7 +247,8 @@ function ChapterTile({ chapter, coverUrl, onClick }) {
   );
 }
 
-function ChapterModal({ chapter, onClose, onPromptClick }) {
+function ChapterModal({ chapter, onClose, onPromptClick, onRewriteClick }) {
+  const [coopSession, setCoopSession] = useState(null);
   const entriesByPrompt = useMemo(() => {
     const map = {};
     for (const e of chapter.entries || []) {
@@ -245,6 +256,15 @@ function ChapterModal({ chapter, onClose, onPromptClick }) {
     }
     return map;
   }, [chapter]);
+
+  async function openCoop() {
+    try {
+      const { data } = await api.post("/livre/coop/create", { chapter_id: chapter.id });
+      setCoopSession(data.session);
+    } catch (e) {
+      toast.error(formatError(e.response?.data?.detail) || "Impossible de créer la session coop");
+    }
+  }
 
   return (
     <div className="fixed inset-0 z-50 bg-navy/50 backdrop-blur-sm flex items-center justify-center p-4" onClick={onClose}>
@@ -260,6 +280,20 @@ function ChapterModal({ chapter, onClose, onPromptClick }) {
           </button>
         </div>
         <div className="p-5 space-y-3">
+          <div className="bg-terracotta/10 border-2 border-terracotta/30 rounded-2xl p-4 text-center" data-testid="livre-pitch-banner">
+            <p className="text-navy leading-relaxed">
+              <span className="text-terracotta text-lg">✨</span>{" "}
+              <span className="font-bold">Racontez simplement votre souvenir</span>, GénéraQuiz le transforme en un joli récit pour votre livre de vie.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={openCoop}
+            data-testid="livre-coop-open"
+            className="w-full inline-flex items-center justify-center gap-2 bg-navy text-cream font-bold px-4 py-3 rounded-2xl hover:bg-navy-dark transition"
+          >
+            <Users className="w-4 h-4" /> Remplir à deux avec un proche
+          </button>
           {chapter.prompts.map((p) => {
             const written = entriesByPrompt[p.id] || [];
             return (
@@ -269,7 +303,7 @@ function ChapterModal({ chapter, onClose, onPromptClick }) {
                     <p className="font-semibold text-navy">{p.text}</p>
                     {written.length > 0 && (
                       <div className="mt-2 space-y-2">
-                        {written.map((e, i) => <EntryPreview key={i} entry={e} />)}
+                        {written.map((e) => <EntryPreview key={e.id} entry={e} onRewriteClick={onRewriteClick} />)}
                       </div>
                     )}
                   </div>
@@ -286,17 +320,87 @@ function ChapterModal({ chapter, onClose, onPromptClick }) {
           })}
         </div>
       </div>
+      {coopSession && <CoopShareModal session={coopSession} onClose={() => setCoopSession(null)} />}
     </div>
   );
 }
 
-function EntryPreview({ entry }) {
+function CoopShareModal({ session, onClose }) {
+  const shareUrl = `${window.location.origin}/livre/coop/${session.invite_code}`;
+  const message = `Coucou ! Je remplis mon Livre de Vie et j'aimerais que tu m'aides pour le chapitre "${session.chapter_label}". Rejoins-moi ici : ${shareUrl} (code : ${session.invite_code})`;
+  const waUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
+  function copyLink() {
+    navigator.clipboard.writeText(shareUrl).then(
+      () => toast.success("Lien copié 📋"),
+      () => toast.error("Copie impossible")
+    );
+  }
+  return (
+    <div className="fixed inset-0 z-[60] bg-navy/70 backdrop-blur-sm flex items-center justify-center p-4" onClick={onClose}>
+      <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl" onClick={(e) => e.stopPropagation()} data-testid="livre-coop-share">
+        <div className="flex items-start justify-between mb-4">
+          <div>
+            <div className="text-xs text-terracotta font-bold uppercase tracking-wider mb-1">Session partagée créée ✨</div>
+            <h3 className="font-display text-2xl font-extrabold text-navy">{session.chapter_emoji} {session.chapter_label}</h3>
+          </div>
+          <button onClick={onClose} className="p-2 hover:bg-cream-dark rounded-full"><X className="w-5 h-5" /></button>
+        </div>
+        <p className="text-sm text-navy/70 mb-4">
+          Partagez ce code ou ce lien à un proche. Il pourra écrire des souvenirs qui apparaîtront dans <b>votre</b> Livre.
+        </p>
+        <div className="bg-cream rounded-2xl border-2 border-cream-dark p-4 text-center mb-4">
+          <div className="text-xs text-navy/50 mb-1">Code de session</div>
+          <div className="font-mono text-4xl font-extrabold text-terracotta tracking-widest" data-testid="livre-coop-code">
+            {session.invite_code}
+          </div>
+        </div>
+        <div className="space-y-2">
+          <button
+            type="button"
+            onClick={copyLink}
+            data-testid="livre-coop-copy"
+            className="w-full inline-flex items-center justify-center gap-2 bg-navy text-cream font-bold px-4 py-3 rounded-full hover:bg-navy-dark transition"
+          >
+            📋 Copier le lien
+          </button>
+          <a
+            href={waUrl}
+            target="_blank"
+            rel="noreferrer"
+            data-testid="livre-coop-whatsapp"
+            className="w-full inline-flex items-center justify-center gap-2 bg-[#25D366] text-white font-bold px-4 py-3 rounded-full hover:opacity-90 transition"
+          >
+            📱 Partager par WhatsApp
+          </a>
+        </div>
+        <p className="text-xs text-navy/50 mt-4 text-center break-all">{shareUrl}</p>
+      </div>
+    </div>
+  );
+}
+
+
+function EntryPreview({ entry, onRewriteClick }) {
   const badge = { text: "✍️ écrit", audio: "🎙️ audio", delegated: `👨‍👩‍👧 raconté` }[entry.mode] || "";
   const author = entry.mode === "delegated" && entry.delegated_author_name
     ? ` par ${entry.delegated_author_name}` : "";
+  const canRewrite = onRewriteClick && entry.text && entry.text.length >= 20 && entry.mode !== "delegated";
   return (
     <div className="bg-cream rounded-lg p-3 border border-cream-dark">
-      <div className="text-xs text-navy/50 mb-1">{badge}{author} · {new Date(entry.created_at).toLocaleDateString("fr-FR")}</div>
+      <div className="text-xs text-navy/50 mb-1 flex items-center justify-between gap-2">
+        <span>{badge}{author} · {new Date(entry.created_at).toLocaleDateString("fr-FR")}</span>
+        {canRewrite && (
+          <button
+            type="button"
+            onClick={() => onRewriteClick(entry)}
+            data-testid={`entry-rewrite-${entry.id}`}
+            className="inline-flex items-center gap-1 text-terracotta hover:text-terracotta-dark font-bold text-xs uppercase tracking-wider"
+            title="Reformuler joliment avec l'assistance IA"
+          >
+            ✨ Reformuler
+          </button>
+        )}
+      </div>
       {entry.text && <p className="text-sm text-navy whitespace-pre-wrap">{entry.text.slice(0, 220)}{entry.text.length > 220 ? "…" : ""}</p>}
       {entry.audio_b64 && <audio controls src={`data:audio/webm;base64,${entry.audio_b64}`} className="w-full mt-2" />}
       {entry.photos?.length > 0 && (
@@ -608,7 +712,7 @@ function FamilyTab() {
         api.get("/livre/family/members"),
       ]);
       setInbox(i.data); setSent(s.data); setMembers(m.data);
-    } catch (e) { /* silencieux */ }
+    } catch (err) { console.debug("Non-blocking livre op failed:", err); }
   }
 
   async function sendQuestion() {

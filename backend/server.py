@@ -39,6 +39,7 @@ from routers import coop_challenges as coop_challenges_router
 from routers import progression as progression_router
 from routers import atelier as atelier_router
 from routers import livre as livre_router
+from routers import livre_ai as livre_ai_router
 from routers import ehpad as ehpad_router
 from routers import admin_analytics as admin_analytics_router
 from routers import charades as charades_router
@@ -122,6 +123,7 @@ api.include_router(coop_challenges_router.router)
 api.include_router(progression_router.router)
 api.include_router(atelier_router.router)
 api.include_router(livre_router.router)
+api.include_router(livre_ai_router.router)
 api.include_router(ehpad_router.router)
 api.include_router(admin_analytics_router.router)
 api.include_router(charades_router.router)
@@ -199,6 +201,25 @@ async def startup():
             logger.info(f"Pool de questions vide : {len(QUESTIONS)} questions seed insérées")
     else:
         logger.info(f"{existing_q} questions déjà en DB — seed sauté (Mistral gère la régénération)")
+
+    # Force-seed pour les catégories récemment ajoutées (idempotent). Chaque
+    # nouvelle catégorie ajoutée à CATEGORIES qui n'a AUCUNE question en base
+    # reçoit ses questions seed pour ne pas attendre le prochain job Mistral.
+    for cat in CATEGORIES:
+        n = await db.questions.count_documents({"category_id": cat["id"]})
+        if n == 0:
+            cat_qs = [q for q in QUESTIONS if q["category_id"] == cat["id"]]
+            if cat_qs:
+                await db.questions.insert_many([{**q} for q in cat_qs])
+                logger.info(f"[seed] catégorie '{cat['id']}' vide → {len(cat_qs)} questions seed insérées")
+
+    # Enrichit les questions existantes avec des relances de conversation EHPAD
+    from discussion_prompts import enrich_existing_questions
+    await enrich_existing_questions()
+
+    # Migration douce des anciens chapitres Livre → nouveaux (10 → 12 chapitres)
+    from routers.livre import _migrate_legacy_chapters
+    await _migrate_legacy_chapters()
 
     # Seed admin
     # Guard: never auto-seed or reset the admin account when ADMIN_PASSWORD is

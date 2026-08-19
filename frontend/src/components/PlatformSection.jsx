@@ -20,11 +20,12 @@ const QUIZ_ACTIVITIES = [
     tag: { label: "En ligne", cls: "bg-[#3D9970]/20 text-[#2A7350]" },
   },
   {
-    key: "journal-vie",
-    title: "Mon Journal de Vie",
-    desc: "Racontez votre histoire, chapitre après chapitre.",
+    key: "livre-vie",
+    title: "Mon Livre de Vie",
+    desc: "10 chapitres, texte + audio + coop famille — votre histoire, à votre rythme.",
     icon: BookOpen,
-    tag: { label: "Populaire", cls: "bg-terracotta/25 text-terracotta-dark" },
+    href: "/app/livre",
+    tag: { label: "En ligne", cls: "bg-[#3D9970]/20 text-[#2A7350]" },
   },
   {
     key: "recettes-antan",
@@ -85,8 +86,8 @@ export default function PlatformSection() {
               <span className="text-terracotta italic">complète</span>
             </h2>
             <p className="text-navy/70 text-base leading-relaxed mb-6">
-              Des activités conçues pour les seniors : mémoire, journal, recettes, photothèque — et des jeux de mots pour garder l&apos;esprit vif.
-              <strong className="text-navy"> Deux sont déjà en ligne.</strong>
+              Des activités conçues pour les seniors : mémoire, livre de vie, recettes, photothèque — et des jeux de mots pour garder l&apos;esprit vif.
+              <strong className="text-navy"> Trois sont déjà en ligne.</strong>
             </p>
             <button
               type="button"
@@ -149,7 +150,7 @@ export default function PlatformSection() {
             </div>
 
             <p className="text-xs text-navy/50 text-center pt-2" data-testid="platform-availability-note">
-              🚀 <strong>Atelier Mémoire</strong> et <strong>Charades</strong> sont déjà accessibles. Les autres arrivent bientôt.
+              🚀 <strong>Atelier Mémoire</strong>, <strong>Mon Livre de Vie</strong> et <strong>Charades / Mots Mêlés / Mots Fléchés</strong> sont déjà accessibles. Les autres arrivent bientôt.
             </p>
           </div>
         </div>

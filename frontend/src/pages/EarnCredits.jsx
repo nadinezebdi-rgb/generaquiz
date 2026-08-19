@@ -216,7 +216,7 @@ function HouseAd() {
         Tirez le meilleur de <span className="text-terracotta">GénéraQuiz</span>
       </h3>
       <p className="text-navy/70 mb-4 max-w-md mx-auto">
-        Passez Premium pour des quiz illimités, accès aux 8 catégories et défis famille sans pub.
+        Passez Premium pour des quiz illimités, accès aux 9 univers et défis famille sans pub.
       </p>
       <Link
         to="/app/pricing"

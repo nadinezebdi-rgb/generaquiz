@@ -7,6 +7,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import StreakSaverModal from "@/components/StreakSaverModal";
 import OnboardingTour from "@/components/OnboardingTour";
+import LivreProgressCard from "@/components/LivreProgressCard";
 import { ArrowRight, Crown, Trophy, Target, Zap, Sparkles, Calendar, Flame, BookOpen } from "lucide-react";
 
 /**
@@ -188,6 +189,9 @@ export default function Dashboard() {
           </div>
         )}
 
+        {/* Livre de Vie — progression (visible dès la 1ère entrée) */}
+        <LivreProgressCard />
+
         {/* Categories grid */}
         <div className="mb-12">
           <div className="flex items-end justify-between mb-6">
@@ -208,6 +212,14 @@ export default function Dashboard() {
                   className="absolute -top-12 -right-12 w-48 h-48 rounded-full opacity-15 group-hover:opacity-30 transition"
                   style={{ backgroundColor: cat.color }}
                 />
+                {cat.id === "voyages-france" && (
+                  <span
+                    data-testid={`dashboard-badge-nouveau-${cat.id}`}
+                    className="absolute top-3 right-3 z-10 inline-flex items-center gap-1 bg-terracotta text-white text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full shadow-warm"
+                  >
+                    ✨ Nouveau
+                  </span>
+                )}
                 <div className="relative flex items-start gap-4">
                   <div className="w-24 h-24 shrink-0 rounded-2xl overflow-hidden bg-cream border-2 border-cream-dark">
                     <img src={`${BACKEND_URL}${cat.mascot_image}`} alt={cat.mascot_name} className="w-full h-full object-cover" />
