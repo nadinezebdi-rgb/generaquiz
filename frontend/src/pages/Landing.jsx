@@ -11,9 +11,11 @@ import StatsSection from "@/components/StatsSection";
 import PlatformSection from "@/components/PlatformSection";
 import HowItWorksSection from "@/components/HowItWorksSection";
 import PrintedBookPricing from "@/components/PrintedBookPricing";
+import ProPricing from "@/components/ProPricing";
 import HeroPhoneDemo from "@/components/HeroPhoneDemo";
 import TestimonialsSection from "@/components/TestimonialsSection";
 import { api, BACKEND_URL } from "@/lib/api";
+import { PLANS, pricePresentation, annualDiscountBadge, fmt } from "@/config/pricing";
 
 const ICON_MAP = { tv: Film, music: Music, film: Film, phone: Phone, landmark: Landmark, utensils: Utensils, sparkles: Sparkles, book: Book };
 
@@ -260,53 +262,40 @@ export default function Landing() {
       {/* ============ PLATFORM (activities + word games) ============ */}
       <PlatformSection />
 
-      {/* ============ PRICING ============ */}
+      {/* ============ PRICING (aperçu Découverte / Solo / Famille / Héritage) ============ */}
       <section id="tarifs" className="py-20 lg:py-28">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center max-w-2xl mx-auto mb-14">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center max-w-2xl mx-auto mb-10">
             <span className="inline-block bg-cream border-2 border-mustard-dark text-navy font-bold px-4 py-1 rounded-full text-sm mb-4">Tarifs simples</span>
-            <h2 className="font-display text-4xl sm:text-5xl font-extrabold text-navy mb-4">
-              Commencez gratuitement
+            <h2 className="font-display text-4xl sm:text-5xl font-extrabold text-navy mb-3">
+              Choisissez ce qui <span className="text-terracotta italic">vous ressemble</span>
             </h2>
-            <p className="text-xl text-navy/70">Sans engagement. Annulez à tout moment.</p>
+            <p className="text-lg text-navy/70">
+              Sans engagement · Résiliable à tout moment · Support en français
+            </p>
+            <p className="mt-3 text-sm text-terracotta font-bold">
+              <Sparkles className="w-3.5 h-3.5 inline mr-1" />
+              {annualDiscountBadge()} en formule annuelle
+            </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-6">
-            <PricingCard
-              title="Découverte"
-              price="0€"
-              period="à vie"
-              features={["5 questions par quiz", "Accès à 6 catégories", "Statistiques basiques"]}
-              cta="S'inscrire"
-              ctaTo="/register"
-              variant="ghost"
-              testid="pricing-free"
-            />
-            <PricingCard
-              title="Premium Mensuel"
-              price="9,99€"
-              period="par mois"
-              features={["Questions illimitées", "Toutes les activités", "Défis famille", "Lecture vocale", "Statistiques détaillées"]}
-              cta="Choisir Premium"
-              ctaTo="/app/pricing"
-              variant="primary"
-              highlight
-              testid="pricing-monthly"
-            />
-            <PricingCard
-              title="Premium Annuel"
-              price="89,99€"
-              period="par an"
-              features={["Tout Premium Mensuel", "12 mois pour le prix de 10", "Économisez 2 mois", "Support prioritaire"]}
-              cta="Économiser"
-              ctaTo="/app/pricing"
-              variant="ghost"
-              testid="pricing-yearly"
-            />
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
+            {PLANS.map((p) => <LandingPlanCard key={p.id} plan={p} />)}
           </div>
 
-          {/* Livre imprimé + Offre Pro — visibles directement depuis la landing */}
+          <div className="text-center mb-14">
+            <Link
+              to="/app/pricing"
+              data-testid="landing-see-all-pricing"
+              className="inline-flex items-center gap-2 bg-navy text-cream font-bold px-6 py-3 rounded-full hover:bg-navy-dark transition"
+            >
+              Voir tous les tarifs, cadeaux & livre imprimé <ArrowRight className="w-4 h-4" />
+            </Link>
+          </div>
+
+          {/* Livre imprimé + Offre Pro (EHPAD Wivy-style) — visibles directement depuis la landing */}
           <PrintedBookPricing />
+          <ProPricing />
         </div>
       </section>
 
@@ -315,43 +304,70 @@ export default function Landing() {
   );
 }
 
-function PricingCard({ title, price, period, features, cta, ctaTo, variant, highlight, testid }) {
+function LandingPlanCard({ plan }) {
+  // Aperçu depuis la Landing : vue annuelle (mise en avant de l'économie), CTA vers /app/pricing.
+  const pres = pricePresentation(plan, "yearly");
+  const isFree = plan.mensuel === 0 && plan.annuel === 0;
+  const ctaTo = plan.ctaTo || "/app/pricing";
   return (
     <div
-      data-testid={testid}
-      className={`relative rounded-3xl p-8 ${
-        highlight
-          ? "bg-navy text-white border-4 border-mustard shadow-warm scale-[1.02]"
-          : "bg-white border-2 border-cream-dark"
+      data-testid={`landing-plan-${plan.id}`}
+      className={`relative bg-white rounded-3xl p-6 border-2 flex flex-col ${
+        plan.populaire
+          ? "border-terracotta shadow-warm ring-4 ring-terracotta/15 scale-[1.02]"
+          : "border-cream-dark"
       }`}
     >
-      {highlight && (
-        <span className="absolute -top-4 left-1/2 -translate-x-1/2 bg-mustard text-navy font-bold text-sm px-4 py-1.5 rounded-full">
-          ★ Le plus populaire
+      {plan.populaire && (
+        <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-terracotta text-white text-[11px] font-extrabold uppercase tracking-widest px-3 py-1 rounded-full inline-flex items-center gap-1 shadow-warm">
+          <Star className="w-3 h-3 fill-current" /> Le plus populaire
         </span>
       )}
-      <h3 className={`font-display text-2xl font-bold mb-2 ${highlight ? "text-mustard" : "text-navy"}`}>{title}</h3>
-      <div className="mb-1">
-        <span className={`font-display text-5xl font-extrabold ${highlight ? "text-white" : "text-bordeaux"}`}>{price}</span>
-        <span className={`ml-2 ${highlight ? "text-cream/70" : "text-navy/60"}`}>{period}</span>
+      <h3 className="font-display text-2xl font-extrabold text-navy mb-1">{plan.nom}</h3>
+      <p className="text-sm text-navy/60 mb-4 min-h-[36px]">{plan.tagline}</p>
+
+      <div className="mb-4">
+        {pres.reference != null && pres.reference !== plan.annuel && (
+          <div className="text-sm text-navy/40 line-through">{fmt(pres.reference)}</div>
+        )}
+        <div className="flex items-baseline gap-1">
+          <span className="font-display text-4xl font-extrabold text-bordeaux">{pres.main}</span>
+          {pres.suffix && <span className="text-sm text-navy/60">{pres.suffix}</span>}
+        </div>
+        {pres.monthlyEquivalent != null && (
+          <p className="text-xs text-navy/50 mt-1">soit {fmt(pres.monthlyEquivalent)}/mois</p>
+        )}
+        {pres.economie != null && pres.economie > 0 && (
+          <span className="inline-flex items-center gap-1 bg-[#3D9970]/15 text-[#2A7350] font-bold px-2 py-0.5 rounded-full text-xs mt-2">
+            <Sparkles className="w-3 h-3" /> Économisez {fmt(pres.economie)} (−{pres.pourcentage} %)
+          </span>
+        )}
+        {isFree && <p className="text-xs text-navy/50 mt-1">Sans carte bancaire · à vie</p>}
       </div>
-      <ul className={`my-6 space-y-3 ${highlight ? "text-cream" : "text-navy/80"}`}>
-        {features.map((f) => (
-          <li key={f} className="flex items-start gap-2">
-            <Check className={`w-5 h-5 mt-1 shrink-0 ${highlight ? "text-mustard" : "text-terracotta"}`} strokeWidth={3} />
-            <span className="font-medium">{f}</span>
+
+      <p className="text-xs text-navy/50 mb-3 uppercase tracking-wider font-bold">
+        {plan.comptes} compte{plan.comptes > 1 ? "s" : ""}
+      </p>
+
+      <ul className="space-y-2 mb-5 flex-1">
+        {plan.features.slice(0, 5).map((f) => (
+          <li key={f} className="flex items-start gap-2 text-sm text-navy/80">
+            <Check className="w-4 h-4 mt-0.5 shrink-0 text-terracotta" strokeWidth={3} />
+            <span>{f}</span>
           </li>
         ))}
       </ul>
+
       <Link
         to={ctaTo}
-        className={`mt-4 inline-flex w-full items-center justify-center gap-2 px-6 py-4 rounded-full font-bold text-lg transition ${
-          variant === "primary"
-            ? "bg-terracotta hover:bg-terracotta-dark text-white"
-            : "bg-cream hover:bg-mustard text-navy border-2 border-navy"
+        data-testid={`landing-plan-cta-${plan.id}`}
+        className={`w-full inline-flex items-center justify-center gap-2 font-bold px-5 py-3 rounded-full transition min-h-[52px] ${
+          plan.populaire
+            ? "bg-terracotta text-white hover:bg-terracotta-dark shadow-warm"
+            : "bg-navy text-cream hover:bg-navy-dark"
         }`}
       >
-        {cta} <ArrowRight className="w-5 h-5" />
+        {plan.cta} <ArrowRight className="w-4 h-4" />
       </Link>
     </div>
   );
