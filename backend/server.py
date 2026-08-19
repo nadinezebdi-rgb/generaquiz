@@ -203,35 +203,46 @@ async def startup():
     from routers.livre import _migrate_legacy_chapters
     await _migrate_legacy_chapters()
 
-    # Seed admin
-    existing = await db.users.find_one({"email": ADMIN_EMAIL})
-    if existing is None:
-        await db.users.insert_one({
-            "email": ADMIN_EMAIL,
-            "password_hash": hash_password(ADMIN_PASSWORD),
-            "name": "Administrateur",
-            "role": "admin",
-            "plan": "premium",
-            "plan_tier": "premium",
-            "plan_period": "yearly",
-            "plan_expires_at": (datetime.now(timezone.utc) + timedelta(days=3650)).isoformat(),
-            "created_at": datetime.now(timezone.utc).isoformat(),
-        })
-        logger.info(f"Admin créé : {ADMIN_EMAIL}")
+    # Seed admin — skip complet si ADMIN_EMAIL ou ADMIN_PASSWORD ne sont pas définis
+    if not ADMIN_EMAIL or not ADMIN_PASSWORD:
+        logger.warning("ADMIN_EMAIL / ADMIN_PASSWORD non définis → seed admin ignoré")
     else:
-        if not verify_password(ADMIN_PASSWORD, existing["password_hash"]):
-            await db.users.update_one(
-                {"email": ADMIN_EMAIL},
-                {"$set": {"password_hash": hash_password(ADMIN_PASSWORD)}},
-            )
-            logger.info("Admin password mis à jour")
-        # Idempotent backfill of Sprint B tier fields for admin seeded before 3-tier model
-        if not existing.get("plan_tier"):
-            await db.users.update_one(
-                {"email": ADMIN_EMAIL},
-                {"$set": {"plan_tier": "premium", "plan_period": "yearly"}},
-            )
-            logger.info("Admin plan_tier/plan_period backfilled (Sprint B)")
+        existing = await db.users.find_one({"email": ADMIN_EMAIL})
+        if existing is None:
+            await db.users.insert_one({
+                "email": ADMIN_EMAIL,
+                "password_hash": hash_password(ADMIN_PASSWORD),
+                "name": "Administrateur",
+                "role": "admin",
+                "plan": "premium",
+                "plan_tier": "premium",
+                "plan_period": "yearly",
+                "plan_expires_at": (datetime.now(timezone.utc) + timedelta(days=3650)).isoformat(),
+                "created_at": datetime.now(timezone.utc).isoformat(),
+            })
+            logger.info(f"Admin créé : {ADMIN_EMAIL}")
+        else:
+            # Backfill idempotent : le rôle admin DOIT être présent, même sur un compte
+            # créé par inscription normale. Sinon un utilisateur inscrit avec ADMIN_EMAIL
+            # avant le seed reste bloqué en user standard pour toujours.
+            backfill_updates: dict = {}
+            if existing.get("role") != "admin":
+                backfill_updates["role"] = "admin"
+            if not existing.get("plan_tier"):
+                backfill_updates["plan_tier"] = "premium"
+                backfill_updates["plan_period"] = "yearly"
+            if existing.get("plan") != "premium":
+                backfill_updates["plan"] = "premium"
+            if backfill_updates:
+                await db.users.update_one({"email": ADMIN_EMAIL}, {"$set": backfill_updates})
+                logger.info(f"Admin backfill : {list(backfill_updates.keys())}")
+
+            if not verify_password(ADMIN_PASSWORD, existing["password_hash"]):
+                await db.users.update_one(
+                    {"email": ADMIN_EMAIL},
+                    {"$set": {"password_hash": hash_password(ADMIN_PASSWORD)}},
+                )
+                logger.info("Admin password mis à jour")
 
     # Backfill credits for users registered before the credits system.
     # Idempotent: only acts on users missing the `credits` field.

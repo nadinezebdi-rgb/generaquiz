@@ -1427,3 +1427,42 @@ Nouveau composant `PrintedBookPricing.jsx` injecté sous la reassurance-strip :
 - Aucun endpoint Stripe créé pour les livres imprimés (CTA mailto uniquement) → à câbler en itération suivante avec des PACKAGES dédiés (`livre_1`, `livre_2`, `livre_3`, `pro_lite`, `pro_ehpad`).
 - Le contrôle de rôle côté frontend NE remplace PAS la vérification serveur — les deux sont en place.
 
+
+## 2026-08-19 (suite) — Anti-répétition + Fact-check IA + fix seed admin
+
+### 🎯 Correctif A — Anti-répétition
+- Nouvelle collection `user_seen_questions {user_id, category_id, question_id, seen_at, seen_count}` upsert à chaque tirage.
+- `GET /categories/{id}/questions` : exclut les questions vues dans les 30 derniers jours, avec fallback repêche si <5 restantes.
+- Réponse enrichie de `pool: {total, seen_recently, remaining_fresh, reported_excluded}`.
+- Widget frontend "📚 X/N nouvelles questions à découvrir" affiché en tête de quiz.
+
+### 🎯 Correctif C — Exclusion signalements
+- Le tirage exclut désormais les questions ayant ≥2 signalements avec statut ≠ "dismissed".
+- Backend automatique, aucun bouton à activer côté admin.
+
+### 🎯 Correctif B3 + D — Fact-check IA permanent (pipeline)
+- Nouveau script `audit_and_regen_questions.py` :
+  - Fact-check via **Claude Opus 4.8** (JSON strict, seuil confidence ≥ 85, verdicts correct/doubtful/wrong)
+  - Régénération via **Claude Sonnet 4.6** avec prompt strict anti-hallucination
+  - Chaque question générée est re-vérifiée avant insertion (double-passe)
+- Champs ajoutés : `questions.quality: "verified"|"flagged"` + `questions.fact_check: {verdict, confidence, comment, correction, checked_at, checker_model}`
+- Les questions `quality: "flagged"` sont automatiquement exclues du tirage côté `quiz.py`.
+- Rapport JSON généré dans `/tmp/qa_report_{category}.json`.
+
+**Résultat audit Chansons (100 questions)** : 46 verified · 54 flagged · 7 régen OK · 47 régen refusées → pool jouable = **53 questions** au lieu de 100. Exemples d'erreurs détectées : "Mon Légionnaire" datée 1945 (vraie date 1936), "Amsterdam hymne à la liberté" (interprétation subjective), etc.
+
+### 🚨 Fix seed admin (bugs signalés par l'utilisateur)
+- Retrait des valeurs par défaut hardcodées : `ADMIN_EMAIL` et `ADMIN_PASSWORD` n'ont **plus de fallback** dans `core.py`. Si absents, le seed est **skip complet** avec un warning log.
+- Backfill idempotent du rôle admin : à chaque startup, si un compte existe avec `ADMIN_EMAIL` mais `role != "admin"`, le rôle est **forcé à "admin"** (idem plan_tier + plan). Résout le cas où un utilisateur s'était inscrit avec l'email admin avant le seed.
+- Vérifié : `admin@generaquiz.fr` login HTTP 200, role=admin dans `/auth/me`.
+- Note historique : l'ancienne valeur par défaut `Admin2026!` a été présente dans le code source jusqu'à ce commit. Si le repo est publié, elle reste dans l'historique Git.
+
+### Fichiers touchés
+- **Modifiés** : `core.py` (retrait défauts admin), `server.py` (seed skip + backfill rôle), `routers/quiz.py` (anti-répétition + exclusion flagged/signalés + pool), `frontend/src/pages/QuizPlayer.jsx` (affichage pool).
+- **Créés** : `audit_and_regen_questions.py` (pipeline QA), `/tmp/qa_report_chansons.json` (rapport).
+
+### Prochaines étapes
+- Lancer l'audit sur les autres catégories : `ONLY_CATEGORY=cinema python audit_and_regen_questions.py`, etc.
+- Coût estimé : ~2-3€ Emergent LLM Key pour 800 questions (8 catégories × 100).
+- Durée : ~10 min par catégorie via LLM externe.
+
