@@ -10,6 +10,7 @@ import Footer from "@/components/Footer";
 import StatsSection from "@/components/StatsSection";
 import PlatformSection from "@/components/PlatformSection";
 import HowItWorksSection from "@/components/HowItWorksSection";
+import PrintedBookPricing from "@/components/PrintedBookPricing";
 import HeroPhoneDemo from "@/components/HeroPhoneDemo";
 import TestimonialsSection from "@/components/TestimonialsSection";
 import { api, BACKEND_URL } from "@/lib/api";
@@ -303,6 +304,9 @@ export default function Landing() {
               testid="pricing-yearly"
             />
           </div>
+
+          {/* Livre imprimé + Offre Pro — visibles directement depuis la landing */}
+          <PrintedBookPricing />
         </div>
       </section>
 
