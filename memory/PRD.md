@@ -1,5 +1,24 @@
 # Quiz d'Antan — SaaS pour seniors français
 
+## 2026-02-19 — Stripe frontend wiring + EHPAD alignée sur Wivy
+- **Câblage Stripe B2C + Cadeaux (P0 DONE)**
+  - `frontend/src/lib/checkout.js` (nouveau) : helper `startCheckout(packageId)` → POST `/api/checkout/session` puis redirect Stripe. 401 → redirect `/register?next=/app/pricing&pkg=<id>` + sessionStorage `pending_checkout_package`.
+  - `frontend/src/config/pricing.js` : Famille rebranchée sur `famille_v2_monthly` / `famille_v2_yearly` (les anciens `famille_*` sont legacy grandfathering). `GIFTS[]` reçoit un champ `stripeId` (`gift_famille` / `gift_heritage` / `gift_livre`).
+  - `frontend/src/pages/Pricing.jsx` : `PlanCard` et `GiftCard` CTA → `startCheckout()` avec loader + toast. Reprise auto d'un `pkg` en attente au retour sur `/app/pricing`.
+  - `frontend/src/pages/Register.jsx` : respecte `?next=` + `?pkg=` après inscription.
+  - **Vérifié via curl** (admin token) : les 8 packages (`solo_monthly`, `solo_yearly`, `famille_v2_monthly`, `famille_v2_yearly`, `heritage_yearly`, `gift_famille`, `gift_heritage`, `gift_livre`) créent chacun une session Stripe valide.
+
+- **Offre EHPAD alignée sur Wivy (nouveau)**
+  - `pricing.js` : suppression de `PRO_PLANS` / `PRO_SETUP_FEE` (multi-paliers mensuels). Remplacés par :
+    - `PRO_RESIDENCE` : 990 € HT/an (1 188 € TTC), utilisateurs illimités, 12 mois, sans reconduction tacite.
+    - `PRO_RESEAU` : sur devis pour multi-sites.
+    - `PRO_STEPS` : 4 étapes (devis → signature → facture → activation).
+    - `PRO_TYPES` élargi (EHPAD, résidences services, résidences autonomie, accueil de jour, foyers logements, USLD, associations, CCAS).
+  - `components/ProPricing.jsx` refonte complète : héro + 2 cartes (Résidence highlight / Réseau devis) + 3 pastilles de réassurance (sans tacite / essai gratuit / illimité) + process 4 étapes façon Wivy. CTA principaux : *Demander un devis* + *Essai gratuit*.
+
+- **Backlog inchangé** : Coop Notifications (P1), Feuilleter Le Livre (P1), EHPAD Superviseur (P2), EHPAD CRM Brevo (P2), Stripe B2B checkout (P2).
+
+
 ## Problem Statement (verbatim)
 "fais moi un saas avec les données ci jointes, avec des personnages caricaturé"
 Source data: French senior quiz platform (6 categories, 8 activities, sample questions).

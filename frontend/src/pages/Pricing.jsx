@@ -1,12 +1,15 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, useSearchParams } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Check, Star, Sparkles, Gift, ChevronRight, Phone, Mail } from "lucide-react";
+import { Check, Star, Sparkles, Gift, ChevronRight, Phone, Mail, Loader2 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { PLANS, GIFTS, pricePresentation, annualDiscountBadge, fmt } from "@/config/pricing";
 import ProPricing from "@/components/ProPricing";
 import PrintedBookPricing from "@/components/PrintedBookPricing";
+import { startCheckout } from "@/lib/checkout";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
 
 /**
  * Pricing — Nouvelle grille tarifaire GénéraQuiz.
@@ -19,8 +22,34 @@ import PrintedBookPricing from "@/components/PrintedBookPricing";
 export default function Pricing() {
   const [period, setPeriod] = useState("yearly"); // 'monthly' | 'yearly'
   const annualBadge = annualDiscountBadge();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const { user, loading } = useAuth();
 
   function switchToYearly() { setPeriod("yearly"); }
+
+  // Reprise du checkout après connexion / inscription : si un pkg est en attente
+  // (URL ?pkg=... ou sessionStorage), on relance dès que l'utilisateur est
+  // authentifié.
+  useEffect(() => {
+    if (loading) return;
+    const urlPkg = searchParams.get("pkg");
+    let pending = urlPkg;
+    if (!pending) {
+      try { pending = sessionStorage.getItem("pending_checkout_package"); } catch { /* storage bloqué */ }
+    }
+    if (!pending) return;
+    if (!user) return; // pas connecté → on garde le pkg et on attend
+    // On nettoie AVANT la redirection Stripe pour éviter les boucles
+    try { sessionStorage.removeItem("pending_checkout_package"); } catch { /* storage bloqué */ }
+    if (urlPkg) {
+      const next = new URLSearchParams(searchParams);
+      next.delete("pkg");
+      setSearchParams(next, { replace: true });
+    }
+    startCheckout(pending, {
+      onError: (msg) => toast.error(msg || "Impossible d'ouvrir le paiement."),
+    });
+  }, [user, loading, searchParams, setSearchParams]);
 
   return (
     <div className="min-h-screen bg-cream text-navy">
@@ -114,6 +143,21 @@ export default function Pricing() {
 function PlanCard({ plan, period, switchToYearly }) {
   const pres = pricePresentation(plan, period);
   const isFree = plan.mensuel === 0 && plan.annuel === 0;
+  const [loading, setLoading] = useState(false);
+
+  const packageId = plan.stripeIds?.[period] ?? null;
+
+  async function handleCheckout() {
+    if (loading) return;
+    setLoading(true);
+    await startCheckout(packageId, {
+      onError: (msg) => {
+        toast.error(msg || "Impossible d'ouvrir le paiement.");
+        setLoading(false);
+      },
+    });
+    // En cas de succès on est redirigé, sinon on remet loading à false via onError.
+  }
 
   return (
     <motion.div
@@ -193,15 +237,25 @@ function PlanCard({ plan, period, switchToYearly }) {
             {plan.cta} <ChevronRight className="w-4 h-4" />
           </Link>
         ) : (
-          <Link
-            to={`/app/checkout?plan=${plan.id}&period=${period}`}
+          <button
+            type="button"
+            onClick={handleCheckout}
+            disabled={loading || !packageId}
             data-testid={`plan-cta-${plan.id}`}
-            className={`w-full inline-flex items-center justify-center gap-2 font-bold px-5 py-3 rounded-full transition min-h-[52px] ${
+            className={`w-full inline-flex items-center justify-center gap-2 font-bold px-5 py-3 rounded-full transition min-h-[52px] disabled:opacity-70 disabled:cursor-not-allowed ${
               plan.populaire ? "bg-terracotta text-white hover:bg-terracotta-dark shadow-warm" : "bg-navy text-cream hover:bg-navy-dark"
             }`}
           >
-            {plan.cta} <ChevronRight className="w-4 h-4" />
-          </Link>
+            {loading ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" /> Redirection…
+              </>
+            ) : (
+              <>
+                {plan.cta} <ChevronRight className="w-4 h-4" />
+              </>
+            )}
+          </button>
         )
       ) : (
         <button
@@ -218,7 +272,19 @@ function PlanCard({ plan, period, switchToYearly }) {
 }
 
 function GiftCard({ gift }) {
-  const mailtoSubject = encodeURIComponent(`Offrir : ${gift.nom}`);
+  const [loading, setLoading] = useState(false);
+
+  async function handleCheckout() {
+    if (loading) return;
+    setLoading(true);
+    await startCheckout(gift.stripeId, {
+      onError: (msg) => {
+        toast.error(msg || "Impossible d'ouvrir le paiement.");
+        setLoading(false);
+      },
+    });
+  }
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
@@ -236,15 +302,25 @@ function GiftCard({ gift }) {
       <h3 className="font-display text-xl font-extrabold text-navy mb-1">{gift.nom}</h3>
       <div className="font-display text-3xl font-extrabold text-bordeaux mb-2">{fmt(gift.prix)}</div>
       <p className="text-sm text-navy/70 mb-4 flex-1">{gift.description}</p>
-      <a
-        href={`mailto:contact@generaquiz.fr?subject=${mailtoSubject}`}
+      <button
+        type="button"
+        onClick={handleCheckout}
+        disabled={loading || !gift.stripeId}
         data-testid={`gift-cta-${gift.id}`}
-        className={`w-full inline-flex items-center justify-center gap-2 font-bold px-5 py-3 rounded-full transition min-h-[52px] ${
+        className={`w-full inline-flex items-center justify-center gap-2 font-bold px-5 py-3 rounded-full transition min-h-[52px] disabled:opacity-70 disabled:cursor-not-allowed ${
           gift.highlight ? "bg-terracotta text-white hover:bg-terracotta-dark" : "bg-navy text-cream hover:bg-navy-dark"
         }`}
       >
-        <Gift className="w-4 h-4" /> Offrir maintenant
-      </a>
+        {loading ? (
+          <>
+            <Loader2 className="w-4 h-4 animate-spin" /> Redirection…
+          </>
+        ) : (
+          <>
+            <Gift className="w-4 h-4" /> Offrir maintenant
+          </>
+        )}
+      </button>
     </motion.div>
   );
 }

@@ -40,8 +40,7 @@ export const PLANS = [
     comptes: 1,
     populaire: false,
     annuelUniquement: false,
-    stripeIds: { monthly: "solo_monthly", yearly: "solo_yearly" },
-    features: [
+    stripeIds: { monthly: "solo_monthly", yearly: "solo_yearly" },    features: [
       "Quiz illimités toutes catégories",
       "Progression et badges",
       "Historique complet",
@@ -60,7 +59,7 @@ export const PLANS = [
     comptes: 6,
     populaire: true,
     annuelUniquement: false,
-    stripeIds: { monthly: "famille_monthly", yearly: "famille_yearly" },
+    stripeIds: { monthly: "famille_v2_monthly", yearly: "famille_v2_yearly" },
     features: [
       "Tout Solo, pour 6 personnes",
       "Classement familial privé",
@@ -105,6 +104,7 @@ export const GIFTS = [
     prix: 99,
     description: "1 an Famille, code envoyé par e-mail ou à imprimer.",
     badge: null,
+    stripeId: "gift_famille",
   },
   {
     id: "coffret_heritage",
@@ -113,6 +113,7 @@ export const GIFTS = [
     description: "1 an d'abonnement + le Livre de Vie imprimé.",
     badge: "Notre coffret cadeau",
     highlight: true,
+    stripeId: "gift_heritage",
   },
   {
     id: "livre_seul",
@@ -120,6 +121,7 @@ export const GIFTS = [
     prix: 79.9,
     description: "Un Livre de Vie imprimé, sans abonnement.",
     badge: null,
+    stripeId: "gift_livre",
   },
 ];
 
@@ -141,61 +143,55 @@ export const BOOK_DISCOUNT_BY_TIER = {
 };
 
 // -----------------------------------------------------------------------------
-// PRO (B2B)
+// PRO (B2B) — Modèle "Résidence" aligné sur Wivy : 1 abonnement annuel flat,
+// utilisateurs illimités, engagement 12 mois SANS reconduction tacite, essai
+// gratuit, process devis → signature → facture → activation.
 // -----------------------------------------------------------------------------
-export const PRO_PLANS = [
-  {
-    id: "pro_essentiel",
-    nom: "Essentiel",
-    mensuel: 99,
-    annuel: 990,
-    features: [
-      "Jusqu'à 40 résidents",
-      "1 espace animateur",
-      "Séances collectives",
-      "Formation en ligne",
-    ],
-    highlight: false,
-  },
-  {
-    id: "pro_etablissement",
-    nom: "Établissement",
-    mensuel: 179,
-    annuel: 1790,
-    features: [
-      "Résidents et animateurs illimités",
-      "1 site",
-      "Formation sur site incluse",
-      "Tableau de bord établissement",
-    ],
-    highlight: true,
-    badge: "Le plus choisi",
-  },
-  {
-    id: "pro_reseau",
-    nom: "Réseau",
-    mensuel: null,
-    annuel: null,
-    onDemand: true,
-    features: [
-      "Multi-sites",
-      "Tableau de bord consolidé groupe",
-      "Compte gestionnaire",
-      "Facturation groupée",
-    ],
-  },
+export const PRO_RESIDENCE = {
+  id: "pro_residence",
+  nom: "Formule Résidence",
+  tagline: "1 an d'abonnement, tous vos résidents inclus",
+  prixHT: 990,
+  prixTTC: 1188,
+  duree: "12 mois",
+  features: [
+    "Utilisateurs illimités dans la résidence",
+    "Quiz, Livre de Vie, séances collectives, activités clés en main",
+    "Espace animateur dédié + tableau de bord établissement",
+    "Formation en ligne + support en français",
+    "Sans reconduction tacite (on vous recontacte avant expiration)",
+  ],
+};
+
+export const PRO_RESEAU = {
+  id: "pro_reseau",
+  nom: "Formule Réseau",
+  tagline: "Pour les groupes multi-établissements",
+  onDemand: true,
+  features: [
+    "Multi-sites (2 résidences ou plus)",
+    "Tableau de bord consolidé groupe",
+    "Compte gestionnaire + facturation groupée",
+    "Formation sur site incluse",
+  ],
+};
+
+export const PRO_STEPS = [
+  { n: 1, title: "Demandez un devis", desc: "En 30 secondes via le formulaire ou par e-mail." },
+  { n: 2, title: "Renvoyez le devis signé", desc: "Aucun engagement tacite, tout est transparent." },
+  { n: 3, title: "Vous recevez votre facture", desc: "Paiement par virement ou mandat administratif." },
+  { n: 4, title: "Votre compte est activé", desc: "Accès instantané pour toute la résidence." },
 ];
 
-export const PRO_SETUP_FEE = 390;
 export const PRO_TYPES = [
   "EHPAD",
-  "Associations",
-  "Clubs du 3ᵉ âge",
-  "CCAS",
-  "Collectivités territoriales",
-  "Structures médicalisées",
-  "Médiathèques",
-  "Bibliothèques",
+  "Résidences services seniors",
+  "Résidences autonomie",
+  "Accueil de jour",
+  "Foyers logements",
+  "USLD",
+  "Associations & clubs du 3ᵉ âge",
+  "CCAS & collectivités",
 ];
 
 // -----------------------------------------------------------------------------

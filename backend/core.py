@@ -68,27 +68,55 @@ LEAGUE_PROMOTE = 5  # top 5 promote each Sunday
 LEAGUE_RELEGATE = 3  # bottom 3 relegate
 
 PACKAGES = {
-    # -- Club Mémoire : entrée de gamme (1 compte) --
+    # ============ NOUVELLE GRILLE (2026) ============
+    # -- Solo : 1 compte, replace Club Mémoire --
+    "solo_monthly":    {"amount": 6.99,  "currency": "eur", "label": "Solo — Mensuel",
+                        "tier": "solo",    "period": "monthly",
+                        "description": "Quiz illimités, Livre de Vie PDF, −20 % sur le livre imprimé"},
+    "solo_yearly":     {"amount": 69.00, "currency": "eur", "label": "Solo — Annuel",
+                        "tier": "solo",    "period": "yearly",
+                        "description": "12 mois — économisez 14,88 €"},
+    # -- Famille : 6 comptes + classement familial --
+    "famille_v2_monthly": {"amount": 9.99, "currency": "eur", "label": "Famille — Mensuel",
+                        "tier": "famille_v2", "period": "monthly",
+                        "description": "6 comptes, défis coopératifs, Score Mémoire 5 axes"},
+    "famille_v2_yearly":  {"amount": 99.00,"currency": "eur", "label": "Famille — Annuel",
+                        "tier": "famille_v2", "period": "yearly",
+                        "description": "12 mois — économisez 20,88 €"},
+    # -- Héritage : abonnement annuel + 1 livre imprimé/an --
+    "heritage_yearly": {"amount": 159.00,"currency": "eur", "label": "Héritage — Annuel",
+                        "tier": "heritage", "period": "yearly",
+                        "description": "Tout Famille + 1 Livre de Vie imprimé offert chaque année + support prioritaire"},
+    # -- Cadeaux (paiements uniques) --
+    "gift_famille":    {"amount": 99.00, "currency": "eur", "label": "Carte cadeau Famille",
+                        "tier": "gift", "period": "one_time",
+                        "description": "1 an Famille — code envoyé par e-mail"},
+    "gift_heritage":   {"amount": 159.00,"currency": "eur", "label": "Coffret Héritage",
+                        "tier": "gift", "period": "one_time",
+                        "description": "1 an Famille + le Livre de Vie imprimé"},
+    "gift_livre":      {"amount": 79.90, "currency": "eur", "label": "Livre de Vie imprimé",
+                        "tier": "gift", "period": "one_time",
+                        "description": "1 Livre imprimé A5 — sans abonnement"},
+    # ============ ANCIENS PLANS (grandfathering — conservés) ============
+    # Les abonnés existants gardent l'accès à ces packages, non affichés en front
     "club_monthly":    {"amount": 4.99,  "currency": "eur", "label": "Club Mémoire — Mensuel",
-                        "tier": "club",    "period": "monthly",
-                        "description": "Quiz illimités, progression, badges, historique"},
+                        "tier": "club",    "period": "monthly", "legacy": True,
+                        "description": "Ancienne formule (grandfathering)"},
     "club_yearly":     {"amount": 49.99, "currency": "eur", "label": "Club Mémoire — Annuel",
-                        "tier": "club",    "period": "yearly",
-                        "description": "12 mois — économisez 10 €"},
-    # -- Famille : 5 comptes + classement familial --
-    "famille_monthly": {"amount": 7.99,  "currency": "eur", "label": "Famille — Mensuel",
-                        "tier": "famille", "period": "monthly",
-                        "description": "5 comptes, classement familial, défis, quiz privés"},
-    "famille_yearly":  {"amount": 79.99, "currency": "eur", "label": "Famille — Annuel",
-                        "tier": "famille", "period": "yearly",
-                        "description": "12 mois — économisez 16 €"},
-    # -- Premium : tout + exclusifs --
+                        "tier": "club",    "period": "yearly", "legacy": True,
+                        "description": "Ancienne formule (grandfathering)"},
+    "famille_monthly": {"amount": 7.99,  "currency": "eur", "label": "Famille — Mensuel (ancienne)",
+                        "tier": "famille", "period": "monthly", "legacy": True,
+                        "description": "Ancienne formule (grandfathering)"},
+    "famille_yearly":  {"amount": 79.99, "currency": "eur", "label": "Famille — Annuel (ancienne)",
+                        "tier": "famille", "period": "yearly", "legacy": True,
+                        "description": "Ancienne formule (grandfathering)"},
     "premium_monthly": {"amount": 12.99, "currency": "eur", "label": "Premium — Mensuel",
-                        "tier": "premium", "period": "monthly",
-                        "description": "Tout Famille + quiz exclusifs, stats avancées, nouveautés en priorité"},
+                        "tier": "premium", "period": "monthly", "legacy": True,
+                        "description": "Ancienne formule (grandfathering)"},
     "premium_yearly":  {"amount": 129.99,"currency": "eur", "label": "Premium — Annuel",
-                        "tier": "premium", "period": "yearly",
-                        "description": "12 mois — économisez 26 €"},
+                        "tier": "premium", "period": "yearly", "legacy": True,
+                        "description": "Ancienne formule (grandfathering)"},
 }
 
 client = AsyncIOMotorClient(MONGO_URL)

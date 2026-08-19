@@ -205,6 +205,23 @@ async def startup():
     from routers.livre import _migrate_legacy_chapters
     await _migrate_legacy_chapters()
 
+    # ============ Grandfathering : mapping des anciens plan_tier → nouveaux ============
+    # Les abonnés existants voient leur plan_tier réétiqueté :
+    #   club     → solo         (garde leur ancien prix Stripe)
+    #   famille  → famille_v2   (garde leur ancien prix Stripe)
+    #   premium  → heritage     (garde leur ancien prix Stripe)
+    # L'abonnement Stripe reste sur l'ancien package (`club_monthly` etc.), donc
+    # personne ne subit une hausse à la reconduction. Le nouveau `plan_tier`
+    # permet uniquement d'unifier l'affichage/permissions côté app.
+    from motor.motor_asyncio import AsyncIOMotorClient  # noqa: F401
+    for old, new in [("club", "solo"), ("famille", "famille_v2"), ("premium", "heritage")]:
+        r = await db.users.update_many(
+            {"plan_tier": old, "grandfathered": {"$ne": True}},
+            {"$set": {"plan_tier": new, "grandfathered": True, "grandfathered_from": old}},
+        )
+        if r.modified_count:
+            logger.info(f"[grandfathering] {old}→{new}: {r.modified_count} utilisateurs")
+
     # Seed admin — skip complet si ADMIN_EMAIL ou ADMIN_PASSWORD ne sont pas définis
     if not ADMIN_EMAIL or not ADMIN_PASSWORD:
         logger.warning("ADMIN_EMAIL / ADMIN_PASSWORD non définis → seed admin ignoré")

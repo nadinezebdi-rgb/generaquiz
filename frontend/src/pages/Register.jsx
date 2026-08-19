@@ -46,7 +46,15 @@ export default function Register() {
       const finalCode = codeStatus && codeStatus.valid ? referralCode.trim().toUpperCase() : null;
       const by = birthYear ? parseInt(birthYear, 10) : null;
       await register(name, email, password, finalCode, by);
-      navigate("/app/dashboard");
+      // Reprise checkout / redirection ciblée si ?next=... a été fourni
+      const next = searchParams.get("next");
+      const pkg = searchParams.get("pkg");
+      if (next) {
+        const target = pkg ? `${next}${next.includes("?") ? "&" : "?"}pkg=${encodeURIComponent(pkg)}` : next;
+        navigate(target);
+      } else {
+        navigate("/app/dashboard");
+      }
     } catch (e2) {
       setErr(formatError(e2.response?.data?.detail) || e2.message);
     } finally {
