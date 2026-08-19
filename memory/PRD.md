@@ -1536,3 +1536,34 @@ Nouveaux endpoints (rôle admin) :
 - 5/9 catégories déjà auditées (chansons, cinema, cuisine-terroir, culture-40/70-ans)
 - 4/9 restantes : annees-50-60 (partiel 5/100), objets-antan, histoire-france, voyages-france → à relancer depuis le dashboard
 
+
+## 2026-08-19 (suite 4) — QA Bulk Actions
+
+### 🎯 Actions groupées sur le dashboard `/app/admin/qa`
+Nouveaux endpoints admin (rôle admin) :
+- `POST /api/admin/qa/bulk/approve` `{ids:[]}` → `quality: verified` sur toutes
+- `POST /api/admin/qa/bulk/flag` `{ids:[]}` → `quality: flagged` sur toutes
+- `POST /api/admin/qa/bulk/delete` `{ids:[]}` → suppression définitive
+
+Validation Pydantic : `ids` obligatoire, 1 à 500 éléments (HTTP 422 sinon).
+
+### 🐛 Fix route-order critique
+Les routes `/bulk/*` étaient interceptées par `/{qid}/approve|flag|apply-correction` (FastAPI matche par ordre de déclaration → `qid = "bulk"`). Correction : les routes bulk sont maintenant déclarées **avant** les routes paramétrées.
+
+### Frontend
+- Checkbox sur chaque `QuestionCard` (data-testid `admin-qa-select-{id}`) → surlignage ring terracotta quand sélectionnée
+- Bouton "Tout sélectionner (N) / Tout désélectionner" en tête de liste
+- Barre sticky en bas de page (data-testid `admin-qa-bulk-bar`) qui apparaît dès qu'au moins 1 item est sélectionné : compteur + 3 boutons (Approuver / Flagger / Supprimer) + ×
+- Suppression demande `window.confirm()` avec message "Aucun retour arrière possible"
+- Sélection reset automatique quand catégorie / quality / recherche changent
+
+### Fichiers touchés
+- Backend : `routers/admin_qa.py` (nouveaux endpoints bulk + réordonnancement)
+- Frontend : `pages/AdminQA.jsx` (state selected + handlers + UI checkboxes + sticky bar)
+
+### Tests
+- Testing agent iteration 43 : **8/9 backend (1 skip destructif volontaire) + 100% frontend**, 0 régression
+- Fix route-order vérifié : `POST /bulk/approve` retourne `{ok:true, matched:N, modified:N}` (200) au lieu du 404 du handler single-question
+- Validation Pydantic : HTTP 422 sur ids vides ou > 500
+- Sécurité : HTTP 403 pour non-admin sur tous les endpoints bulk
+

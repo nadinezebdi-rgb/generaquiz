@@ -1,0 +1,24 @@
+{
+  "summary": "Iteration 43 — Tested Admin QA Bulk Actions (approve/flag/delete). Backend: 8/9 pytest passed, 1 skipped (destructive bulk-delete on live DB skipped intentionally; routing verified via 200/deleted=0 on nonexistent IDs, confirming /bulk/delete is NOT captured by DELETE /{qid}). CRITICAL route-order fix verified: POST /admin/qa/bulk/approve returns {ok:true, requested:2, matched:2, modified:2} and NOT the single-question 404 handler. Validation: empty ids → 422, >500 ids → 422. Auth: no-cookie requests to bulk endpoints → 401. Frontend: All bulk UI verified — checkbox toggle, sticky bar appears/disappears correctly, count updates, select-all/deselect-all, X-clear button, selection resets on filter change, bulk-approve POST fires with correct payload {ids:[...]}, items removed from list, total counter decremented (41→39), toast success '2 question(s) traitée(s)' shown. Test data restored via /bulk/flag (chansons back to 41 flagged).",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {"ui_bugs": [], "integration_issues": [], "design_issues": []},
+  "test_report_links": [
+    "/app/backend/tests/test_admin_qa_bulk.py",
+    "/app/test_reports/pytest/pytest_iter43.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "admin_qa.py: /bulk/delete has no soft-delete/audit trail. A missing 'requested_by' log means bulk deletions are not traceable per-admin beyond nothing being stored — consider inserting an audit row in a separate collection for deletions since the question itself is gone.",
+    "Frontend AdminQA.jsx bulkAction: uses `selected` (Set) inside setItems callback without capturing to local const before setState — works today because setItems runs synchronously, but if React batches or delays, `selected` could reference stale state. Consider const idsSet = new Set(ids) then filter with idsSet.",
+    "Frontend bulk bar: 'Flagger' button is hidden when quality==='flagged' (correct), but 'Approuver' is always shown even when items are already verified (quality=verified filter). Minor UX inconsistency — approving already-verified items is a no-op but users may be confused.",
+    "Backend bulk endpoints: no per-request rate limit. An admin (or compromised admin token) could bulk-delete up to 500 items per call unlimited times. Consider a soft daily limit or requiring a 'confirmation' token for delete > N items."
+  ],
+  "updated_files": ["/app/backend/tests/test_admin_qa_bulk.py"],
+  "success_rate": {"backend": "89% (8/9, 1 intentional skip on destructive delete)", "frontend": "100%"},
+  "test_credentials": "admin@generaquiz.fr / pF44gVBfLdushm3NZ6dN (from /app/memory/test_credentials.md)",
+  "seed_data_creation": "None — all bulk-approved test data restored to 'flagged' state via /bulk/flag after each destructive test (chansons category verified back to 41 flagged).",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Bulk actions on Admin QA are fully working. Route order fix (bulk/* before {qid}/*) confirmed. If retesting: run `pytest /app/backend/tests/test_admin_qa_bulk.py` with REACT_APP_BACKEND_URL exported. Note the destructive bulk-delete test is intentionally skipped — reachability of /bulk/delete is proven by returning 200 + {deleted:0} on nonexistent IDs (not 404 from /{qid} DELETE handler).",
+  "rca of the issue": "Previous bug (route collision) was that FastAPI matches routes in declaration order — /bulk/approve was hitting /{qid}/approve with qid='bulk'. Fix confirmed: /bulk/{approve,delete,flag} are declared BEFORE parametric /{qid}/* routes in /app/backend/routers/admin_qa.py (lines 107-145 vs 148+). Verified via live 200 response with expected {ok, requested, matched, modified} schema, not the {ok:true} single-question schema nor 404."
+}

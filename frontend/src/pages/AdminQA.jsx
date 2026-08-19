@@ -5,7 +5,7 @@ import { api, formatError } from "@/lib/api";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import {
-  ShieldCheck, Filter, Check, X, Wand2, Trash2, RefreshCcw, AlertTriangle, Loader2, ChevronLeft, Search, PlayCircle,
+  ShieldCheck, Filter, Check, X, Wand2, Trash2, RefreshCcw, AlertTriangle, Loader2, ChevronLeft, Search, PlayCircle, CheckSquare, Square,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 
@@ -32,6 +32,8 @@ export default function AdminQA() {
   const [actionOn, setActionOn] = useState(null); // question id being acted on
   const [jobs, setJobs] = useState([]);
   const [rerunning, setRerunning] = useState(null); // category_id being rerun
+  const [selected, setSelected] = useState(() => new Set()); // ids selectionnés pour bulk
+  const [bulkBusy, setBulkBusy] = useState(false);
 
   const loadSummary = useCallback(async () => {
     try {
@@ -80,6 +82,8 @@ export default function AdminQA() {
 
   useEffect(() => { loadSummary(); loadJobs(); }, [loadSummary, loadJobs]);
   useEffect(() => { loadItems(); }, [loadItems]);
+  // Reset selection quand les items visibles changent (filtre/search/catégorie)
+  useEffect(() => { setSelected(new Set()); }, [selectedCat, quality, debouncedQ]);
 
   // Auto-refresh jobs + summary while a job is running
   useEffect(() => {
@@ -138,6 +142,44 @@ export default function AdminQA() {
       else toast.error(formatError(msg) || "Impossible de lancer le job");
     } finally {
       setRerunning(null);
+    }
+  }
+
+  // ---- Sélection multi + actions bulk ----
+  function toggleSelect(id) {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  }
+  function selectAllVisible() {
+    setSelected(new Set(items.map((q) => q.id)));
+  }
+  function clearSelection() {
+    setSelected(new Set());
+  }
+
+  async function bulkAction(endpoint, verbLabel) {
+    const ids = Array.from(selected);
+    if (ids.length === 0) return;
+    const confirmMsg = endpoint === "delete"
+      ? `Supprimer définitivement ${ids.length} question(s) ? Aucun retour arrière possible.`
+      : `${verbLabel} ${ids.length} question(s) ?`;
+    if (!window.confirm(confirmMsg)) return;
+    setBulkBusy(true);
+    try {
+      const { data } = await api.post(`/admin/qa/bulk/${endpoint}`, { ids });
+      const count = data.modified ?? data.deleted ?? 0;
+      toast.success(`${count} question(s) traitée(s)`);
+      setItems((prev) => prev.filter((q) => !selected.has(q.id)));
+      setTotal((n) => n - count);
+      clearSelection();
+      loadSummary();
+    } catch (e) {
+      toast.error(formatError(e.response?.data?.detail) || "Action groupée impossible");
+    } finally {
+      setBulkBusy(false);
     }
   }
 
@@ -305,11 +347,91 @@ export default function AdminQA() {
               Aucune question à ce filtre.
             </div>
           ) : (
-            <div className="space-y-3" data-testid="admin-qa-list">
-              {items.map((q) => (
-                <QuestionCard key={q.id} q={q} actionOn={actionOn} onAction={doAction} onDelete={doDelete} />
-              ))}
-            </div>
+            <>
+              {/* Select all + bulk actions bar */}
+              <div className="flex items-center gap-2 mb-3 px-2">
+                <button
+                  type="button"
+                  onClick={selected.size === items.length ? clearSelection : selectAllVisible}
+                  data-testid="admin-qa-select-all"
+                  className="inline-flex items-center gap-1.5 text-sm text-navy/70 hover:text-terracotta font-semibold"
+                >
+                  {selected.size === items.length && items.length > 0
+                    ? <CheckSquare className="w-4 h-4 text-terracotta" />
+                    : <Square className="w-4 h-4" />}
+                  {selected.size === items.length && items.length > 0
+                    ? "Tout désélectionner"
+                    : `Tout sélectionner (${items.length})`}
+                </button>
+              </div>
+
+              <div className="space-y-3" data-testid="admin-qa-list">
+                {items.map((q) => (
+                  <QuestionCard
+                    key={q.id}
+                    q={q}
+                    actionOn={actionOn}
+                    onAction={doAction}
+                    onDelete={doDelete}
+                    isSelected={selected.has(q.id)}
+                    onToggleSelect={toggleSelect}
+                  />
+                ))}
+              </div>
+            </>
+          )}
+
+          {/* Sticky bulk action bar */}
+          {selected.size > 0 && (
+            <motion.div
+              initial={{ y: 100, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              className="fixed bottom-4 left-1/2 -translate-x-1/2 bg-navy text-cream rounded-full shadow-2xl px-5 py-3 flex items-center gap-3 z-40 border-2 border-terracotta"
+              data-testid="admin-qa-bulk-bar"
+            >
+              <span className="font-bold" data-testid="admin-qa-bulk-count">
+                {selected.size} sélectionnée{selected.size > 1 ? "s" : ""}
+              </span>
+              <div className="h-6 w-px bg-cream/30" />
+              <button
+                type="button"
+                onClick={() => bulkAction("approve", "Approuver")}
+                disabled={bulkBusy}
+                data-testid="admin-qa-bulk-approve"
+                className="inline-flex items-center gap-1.5 bg-[#3D9970] hover:bg-[#2A7350] font-bold px-3 py-1.5 rounded-full transition disabled:opacity-50 text-sm"
+              >
+                {bulkBusy ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />}
+                Approuver
+              </button>
+              {quality !== "flagged" && (
+                <button
+                  type="button"
+                  onClick={() => bulkAction("flag", "Flagger")}
+                  disabled={bulkBusy}
+                  data-testid="admin-qa-bulk-flag"
+                  className="inline-flex items-center gap-1.5 bg-mustard-dark hover:opacity-90 font-bold px-3 py-1.5 rounded-full transition disabled:opacity-50 text-sm"
+                >
+                  <X className="w-3.5 h-3.5" /> Flagger
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={() => bulkAction("delete", "Supprimer")}
+                disabled={bulkBusy}
+                data-testid="admin-qa-bulk-delete"
+                className="inline-flex items-center gap-1.5 bg-terracotta hover:bg-terracotta-dark font-bold px-3 py-1.5 rounded-full transition disabled:opacity-50 text-sm"
+              >
+                <Trash2 className="w-3.5 h-3.5" /> Supprimer
+              </button>
+              <button
+                type="button"
+                onClick={clearSelection}
+                data-testid="admin-qa-bulk-clear"
+                className="text-cream/70 hover:text-cream text-sm ml-1"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </motion.div>
           )}
         </section>
       </main>
@@ -318,7 +440,7 @@ export default function AdminQA() {
   );
 }
 
-function QuestionCard({ q, actionOn, onAction, onDelete }) {
+function QuestionCard({ q, actionOn, onAction, onDelete, isSelected, onToggleSelect }) {
   const fc = q.fact_check || {};
   const verdict = fc.verdict || "?";
   const conf = fc.confidence ?? "?";
@@ -333,10 +455,23 @@ function QuestionCard({ q, actionOn, onAction, onDelete }) {
 
   return (
     <div
-      className="bg-white rounded-2xl border-2 border-cream-dark p-4"
+      className={`bg-white rounded-2xl border-2 p-4 transition ${
+        isSelected ? "border-terracotta ring-2 ring-terracotta/20 shadow-warm" : "border-cream-dark"
+      }`}
       data-testid={`admin-qa-item-${q.id}`}
     >
-      <div className="flex items-start justify-between gap-3 mb-2">
+      <div className="flex items-start gap-3 mb-2">
+        <button
+          type="button"
+          onClick={() => onToggleSelect?.(q.id)}
+          data-testid={`admin-qa-select-${q.id}`}
+          className="mt-0.5 p-1 hover:bg-cream rounded transition"
+          aria-label={isSelected ? "Désélectionner" : "Sélectionner"}
+        >
+          {isSelected
+            ? <CheckSquare className="w-5 h-5 text-terracotta" />
+            : <Square className="w-5 h-5 text-navy/40" />}
+        </button>
         <p className="font-semibold text-navy flex-1">{q.question}</p>
         <div className="flex items-center gap-2 shrink-0">
           <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold uppercase ${verdictColor}`}>

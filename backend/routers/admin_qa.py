@@ -98,6 +98,53 @@ class ApproveBody(BaseModel):
     reason: str = Field("", max_length=300)
 
 
+class BulkBody(BaseModel):
+    ids: list[str] = Field(..., min_length=1, max_length=500, description="Liste d'IDs de questions à traiter")
+
+
+# ⚠️ Les routes /bulk/* DOIVENT être déclarées avant /{qid}/* — sinon FastAPI
+# route /bulk/approve vers /{qid}/approve avec qid="bulk".
+@router.post("/bulk/approve")
+async def qa_bulk_approve(body: BulkBody, admin: dict = Depends(get_admin_user)) -> dict:
+    """Approuve en masse : marque toutes les questions listées en `verified`."""
+    r = await db.questions.update_many(
+        {"id": {"$in": body.ids}},
+        {"$set": {
+            "quality": "verified",
+            "fact_check.admin_override": {
+                "action": "bulk_approved",
+                "by": admin.get("email"),
+                "count": len(body.ids),
+            },
+        }},
+    )
+    return {"ok": True, "requested": len(body.ids), "matched": r.matched_count, "modified": r.modified_count}
+
+
+@router.post("/bulk/delete")
+async def qa_bulk_delete(body: BulkBody, _: dict = Depends(get_admin_user)) -> dict:
+    """Supprime en masse. Aucun undo — l'UI doit demander confirmation."""
+    r = await db.questions.delete_many({"id": {"$in": body.ids}})
+    return {"ok": True, "requested": len(body.ids), "deleted": r.deleted_count}
+
+
+@router.post("/bulk/flag")
+async def qa_bulk_flag(body: BulkBody, admin: dict = Depends(get_admin_user)) -> dict:
+    """Flag en masse : retire les questions listées du tirage."""
+    r = await db.questions.update_many(
+        {"id": {"$in": body.ids}},
+        {"$set": {
+            "quality": "flagged",
+            "fact_check.admin_override": {
+                "action": "bulk_flagged",
+                "by": admin.get("email"),
+                "count": len(body.ids),
+            },
+        }},
+    )
+    return {"ok": True, "requested": len(body.ids), "matched": r.matched_count, "modified": r.modified_count}
+
+
 @router.post("/{qid}/approve")
 async def qa_approve(qid: str, body: ApproveBody, admin: dict = Depends(get_admin_user)) -> dict:
     """Force une question `flagged` → `verified` (le tirage la reprendra)."""
@@ -209,6 +256,13 @@ async def qa_delete(qid: str, _: dict = Depends(get_admin_user)) -> dict:
     if r.deleted_count == 0:
         raise HTTPException(status_code=404, detail="Question introuvable")
     return {"ok": True}
+
+# =============================================================================
+# Bulk actions — approbation ou suppression massive
+# =============================================================================
+
+
+
 
 
 # =============================================================================
