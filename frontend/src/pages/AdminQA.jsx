@@ -5,7 +5,7 @@ import { api, formatError } from "@/lib/api";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import {
-  ShieldCheck, Filter, Check, X, Wand2, Trash2, RefreshCcw, AlertTriangle, Loader2, ChevronLeft,
+  ShieldCheck, Filter, Check, X, Wand2, Trash2, RefreshCcw, AlertTriangle, Loader2, ChevronLeft, Search, PlayCircle,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 
@@ -24,10 +24,14 @@ export default function AdminQA() {
   const [summary, setSummary] = useState(null);
   const [selectedCat, setSelectedCat] = useState("");
   const [quality, setQuality] = useState("flagged");
+  const [searchQ, setSearchQ] = useState("");
+  const [debouncedQ, setDebouncedQ] = useState("");
   const [items, setItems] = useState([]);
   const [total, setTotal] = useState(0);
   const [busy, setBusy] = useState(false);
   const [actionOn, setActionOn] = useState(null); // question id being acted on
+  const [jobs, setJobs] = useState([]);
+  const [rerunning, setRerunning] = useState(null); // category_id being rerun
 
   const loadSummary = useCallback(async () => {
     try {
@@ -38,11 +42,26 @@ export default function AdminQA() {
     }
   }, []);
 
+  const loadJobs = useCallback(async () => {
+    try {
+      const { data } = await api.get("/admin/qa/jobs", { params: { limit: 10 } });
+      setJobs(data);
+    } catch (err) {
+      console.debug("Load jobs failed:", err);
+    }
+  }, []);
+
   const loadItems = useCallback(async () => {
     setBusy(true);
     try {
       const { data } = await api.get("/admin/qa/questions", {
-        params: { category_id: selectedCat || undefined, quality, limit: 50, offset: 0 },
+        params: {
+          category_id: selectedCat || undefined,
+          quality,
+          q: debouncedQ || undefined,
+          limit: 50,
+          offset: 0,
+        },
       });
       setItems(data.questions);
       setTotal(data.total);
@@ -51,17 +70,30 @@ export default function AdminQA() {
     } finally {
       setBusy(false);
     }
-  }, [selectedCat, quality]);
+  }, [selectedCat, quality, debouncedQ]);
 
-  useEffect(() => { loadSummary(); }, [loadSummary]);
+  // Debounce the search input (400ms) to avoid spamming the API
+  useEffect(() => {
+    const t = setTimeout(() => setDebouncedQ(searchQ.trim()), 400);
+    return () => clearTimeout(t);
+  }, [searchQ]);
+
+  useEffect(() => { loadSummary(); loadJobs(); }, [loadSummary, loadJobs]);
   useEffect(() => { loadItems(); }, [loadItems]);
+
+  // Auto-refresh jobs + summary while a job is running
+  useEffect(() => {
+    const anyRunning = jobs.some((j) => j.status === "running");
+    if (!anyRunning) return undefined;
+    const iv = setInterval(() => { loadJobs(); loadSummary(); }, 8000);
+    return () => clearInterval(iv);
+  }, [jobs, loadJobs, loadSummary]);
 
   async function doAction(q, endpoint, extraBody = {}) {
     setActionOn(q.id);
     try {
       await api.post(`/admin/qa/${q.id}/${endpoint}`, { reason: "", ...extraBody });
       toast.success("OK ✓");
-      // Retire l'item localement + refresh du résumé
       setItems((prev) => prev.filter((x) => x.id !== q.id));
       setTotal((n) => n - 1);
       loadSummary();
@@ -88,6 +120,27 @@ export default function AdminQA() {
     }
   }
 
+  async function rerunCategory(categoryId, categoryTitle) {
+    if (!window.confirm(
+      `Relancer le fact-check pour "${categoryTitle}" ?\n\n` +
+      `Ceci va appeler Claude Opus 4.8 sur chaque question de la catégorie ` +
+      `(~10 min, ~0,30€ de crédits Emergent LLM Key).`
+    )) return;
+    setRerunning(categoryId);
+    try {
+      const { data } = await api.post(`/admin/qa/rerun/${categoryId}`);
+      toast.success(`Job démarré : ${data.job.id.slice(0, 8)}`);
+      loadJobs();
+    } catch (e) {
+      const status = e.response?.status;
+      const msg = e.response?.data?.detail;
+      if (status === 409) toast.warning(msg || "Job déjà en cours");
+      else toast.error(formatError(msg) || "Impossible de lancer le job");
+    } finally {
+      setRerunning(null);
+    }
+  }
+
   return (
     <div className="min-h-screen bg-cream text-navy">
       <Navbar />
@@ -109,40 +162,74 @@ export default function AdminQA() {
 
         {/* ==================== SUMMARY ==================== */}
         <section className="mb-10" data-testid="admin-qa-summary">
-          <h2 className="text-sm font-bold uppercase tracking-wider text-navy/60 mb-3">Résumé par catégorie</h2>
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-sm font-bold uppercase tracking-wider text-navy/60">Résumé par catégorie</h2>
+            {jobs.some((j) => j.status === "running") && (
+              <span className="inline-flex items-center gap-1 bg-terracotta/15 text-terracotta text-xs font-bold px-2.5 py-1 rounded-full" data-testid="admin-qa-jobs-running">
+                <Loader2 className="w-3 h-3 animate-spin" /> {jobs.filter((j) => j.status === "running").length} audit(s) en cours
+              </span>
+            )}
+          </div>
           {!summary ? (
             <div className="text-navy/50">Chargement…</div>
           ) : (
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
-              {summary.map((s) => (
-                <motion.button
-                  key={s.category_id}
-                  onClick={() => setSelectedCat(s.category_id === selectedCat ? "" : s.category_id)}
-                  data-testid={`admin-qa-cat-${s.category_id}`}
-                  initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
-                  className={`text-left bg-white rounded-2xl border-2 p-4 transition ${
-                    selectedCat === s.category_id
-                      ? "border-terracotta shadow-warm"
-                      : "border-cream-dark hover:border-navy/40"
-                  }`}
-                >
-                  <div className="flex items-center justify-between mb-2">
-                    <h3 className="font-display text-lg font-extrabold">{s.category_title}</h3>
-                    <span className="font-mono text-sm text-navy/60">{s.total} q.</span>
-                  </div>
-                  <div className="w-full h-2 rounded-full bg-cream-dark overflow-hidden flex mb-2">
-                    <div className="h-full bg-[#3D9970]" style={{ width: `${(s.verified / s.total) * 100 || 0}%` }} />
-                    <div className="h-full bg-cream" style={{ width: `${(s.unchecked / s.total) * 100 || 0}%` }} />
-                    <div className="h-full bg-terracotta" style={{ width: `${(s.flagged / s.total) * 100 || 0}%` }} />
-                  </div>
-                  <div className="flex items-center gap-3 text-xs">
-                    <span className="text-[#2A7350] font-bold">✓ {s.verified}</span>
-                    <span className="text-navy/50">? {s.unchecked}</span>
-                    <span className="text-terracotta font-bold">⚠ {s.flagged}</span>
-                    <span className="ml-auto text-navy/60">{s.playable_pct}% jouable</span>
-                  </div>
-                </motion.button>
-              ))}
+              {summary.map((s) => {
+                const runningJob = jobs.find((j) => j.category_id === s.category_id && j.status === "running");
+                const isRunning = !!runningJob || rerunning === s.category_id;
+                return (
+                  <motion.div
+                    key={s.category_id}
+                    initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
+                    className={`bg-white rounded-2xl border-2 p-4 transition ${
+                      selectedCat === s.category_id
+                        ? "border-terracotta shadow-warm"
+                        : "border-cream-dark hover:border-navy/40"
+                    }`}
+                    data-testid={`admin-qa-cat-${s.category_id}`}
+                  >
+                    <button
+                      type="button"
+                      onClick={() => setSelectedCat(s.category_id === selectedCat ? "" : s.category_id)}
+                      className="text-left w-full mb-2"
+                    >
+                      <div className="flex items-center justify-between mb-2">
+                        <h3 className="font-display text-lg font-extrabold">{s.category_title}</h3>
+                        <span className="font-mono text-sm text-navy/60">{s.total} q.</span>
+                      </div>
+                      <div className="w-full h-2 rounded-full bg-cream-dark overflow-hidden flex mb-2">
+                        <div className="h-full bg-[#3D9970]" style={{ width: `${(s.verified / s.total) * 100 || 0}%` }} />
+                        <div className="h-full bg-cream" style={{ width: `${(s.unchecked / s.total) * 100 || 0}%` }} />
+                        <div className="h-full bg-terracotta" style={{ width: `${(s.flagged / s.total) * 100 || 0}%` }} />
+                      </div>
+                      <div className="flex items-center gap-3 text-xs">
+                        <span className="text-[#2A7350] font-bold">✓ {s.verified}</span>
+                        <span className="text-navy/50">? {s.unchecked}</span>
+                        <span className="text-terracotta font-bold">⚠ {s.flagged}</span>
+                        <span className="ml-auto text-navy/60">{s.playable_pct}% jouable</span>
+                      </div>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={(e) => { e.stopPropagation(); rerunCategory(s.category_id, s.category_title); }}
+                      disabled={isRunning}
+                      data-testid={`admin-qa-rerun-${s.category_id}`}
+                      className="w-full inline-flex items-center justify-center gap-1.5 bg-navy text-cream text-xs font-bold uppercase tracking-wider px-3 py-1.5 rounded-full hover:bg-navy-dark transition disabled:opacity-60"
+                    >
+                      {isRunning ? (
+                        <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Audit en cours…</>
+                      ) : (
+                        <><PlayCircle className="w-3.5 h-3.5" /> Régénérer la catégorie</>
+                      )}
+                    </button>
+                    {runningJob?.log_tail && (
+                      <pre className="mt-2 bg-cream text-[10px] font-mono text-navy/70 rounded-md p-2 max-h-20 overflow-y-auto whitespace-pre-wrap">
+                        {runningJob.log_tail}
+                      </pre>
+                    )}
+                  </motion.div>
+                );
+              })}
             </div>
           )}
         </section>
@@ -164,6 +251,28 @@ export default function AdminQA() {
               <option value="unchecked">Non vérifiées</option>
               <option value="all">Toutes</option>
             </select>
+            <div className="relative flex-1 min-w-[220px]">
+              <Search className="w-4 h-4 text-navy/40 absolute left-3 top-1/2 -translate-y-1/2" />
+              <input
+                type="text"
+                value={searchQ}
+                onChange={(e) => setSearchQ(e.target.value)}
+                placeholder="Chercher un mot-clé (question, option, commentaire)…"
+                data-testid="admin-qa-search"
+                className="w-full pl-9 pr-9 py-1.5 rounded-full border-2 border-cream-dark focus:border-terracotta focus:outline-none text-sm bg-white"
+              />
+              {searchQ && (
+                <button
+                  type="button"
+                  onClick={() => setSearchQ("")}
+                  data-testid="admin-qa-search-clear"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-navy/40 hover:text-navy p-1"
+                  aria-label="Effacer la recherche"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              )}
+            </div>
             {selectedCat && (
               <button
                 type="button"
@@ -175,8 +284,8 @@ export default function AdminQA() {
             )}
             <button
               type="button"
-              onClick={() => { loadSummary(); loadItems(); }}
-              className="ml-auto inline-flex items-center gap-1 text-sm text-navy hover:text-terracotta font-semibold"
+              onClick={() => { loadSummary(); loadItems(); loadJobs(); }}
+              className="inline-flex items-center gap-1 text-sm text-navy hover:text-terracotta font-semibold"
               data-testid="admin-qa-refresh"
             >
               <RefreshCcw className="w-4 h-4" /> Rafraîchir

@@ -1,15 +1,23 @@
 """Admin QA — pilotage du fact-check et modération des questions IA.
 
 Endpoints (rôle admin requis) :
-    GET  /admin/qa/summary              : résumé par catégorie (verified/flagged/unchecked)
-    GET  /admin/qa/questions            : liste paginée des questions avec filtres
-    POST /admin/qa/{id}/approve         : force une question flagged → verified
-    POST /admin/qa/{id}/flag            : force une question → flagged (retire du tirage)
-    POST /admin/qa/{id}/apply-correction: applique la correction proposée par le fact-check
-    DELETE /admin/qa/{id}               : supprime la question de la DB
+    GET  /admin/qa/summary              : résumé par catégorie
+    GET  /admin/qa/questions            : liste paginée + recherche par mot-clé
+    POST /admin/qa/{id}/approve         : force flagged → verified
+    POST /admin/qa/{id}/flag            : force → flagged
+    POST /admin/qa/{id}/apply-correction: applique la correction fact-check
+    DELETE /admin/qa/{id}               : supprime la question
+    POST /admin/qa/rerun/{category_id}  : relance le pipeline fact-check pour 1 catégorie
+    GET  /admin/qa/jobs                 : liste des runs récents avec statut
 """
 from __future__ import annotations
 
+import asyncio
+import os
+import subprocess
+import sys
+from datetime import datetime, timezone
+from pathlib import Path
 from typing import Literal
 
 from fastapi import APIRouter, Depends, HTTPException, Query
@@ -48,26 +56,41 @@ async def qa_questions(
     _: dict = Depends(get_admin_user),
     category_id: str | None = None,
     quality: Literal["verified", "flagged", "unchecked", "all"] = "flagged",
+    q: str | None = Query(None, max_length=120, description="Recherche mot-clé (question / options / commentaire fact-check)"),
     limit: int = Query(50, ge=1, le=200),
     offset: int = Query(0, ge=0),
 ) -> dict:
-    """Liste paginée des questions avec leur statut fact-check.
+    """Liste paginée des questions avec statut fact-check + recherche par mot-clé.
 
-    Utile pour la revue admin : par défaut on liste les `flagged` (à modérer).
+    Le paramètre `q` cherche insensible à la casse dans :
+      - le texte de la question
+      - les 4 options
+      - le commentaire du fact-check (fact_check.comment)
     """
-    q: dict = {}
+    query: dict = {}
     if category_id:
-        q["category_id"] = category_id
+        query["category_id"] = category_id
     if quality == "verified":
-        q["quality"] = "verified"
+        query["quality"] = "verified"
     elif quality == "flagged":
-        q["quality"] = "flagged"
+        query["quality"] = "flagged"
     elif quality == "unchecked":
-        q["quality"] = {"$exists": False}
+        query["quality"] = {"$exists": False}
     # "all" → pas de filtre quality
 
-    total = await db.questions.count_documents(q)
-    docs = await db.questions.find(q, {"_id": 0}).sort([("fact_check.confidence", 1), ("id", 1)]).skip(offset).limit(limit).to_list(limit)
+    if q:
+        # Escape des méta-caractères regex pour éviter injections
+        import re as _re
+        needle = _re.escape(q.strip())
+        query["$or"] = [
+            {"question": {"$regex": needle, "$options": "i"}},
+            {"options": {"$regex": needle, "$options": "i"}},
+            {"fact_check.comment": {"$regex": needle, "$options": "i"}},
+            {"fact_check.correction": {"$regex": needle, "$options": "i"}},
+        ]
+
+    total = await db.questions.count_documents(query)
+    docs = await db.questions.find(query, {"_id": 0}).sort([("fact_check.confidence", 1), ("id", 1)]).skip(offset).limit(limit).to_list(limit)
     return {"total": total, "limit": limit, "offset": offset, "questions": docs}
 
 
@@ -186,3 +209,98 @@ async def qa_delete(qid: str, _: dict = Depends(get_admin_user)) -> dict:
     if r.deleted_count == 0:
         raise HTTPException(status_code=404, detail="Question introuvable")
     return {"ok": True}
+
+
+# =============================================================================
+# Regen batch — relance du pipeline fact-check pour une catégorie
+# =============================================================================
+
+# Un seul job à la fois par catégorie pour éviter la double-consommation LLM.
+# Les jobs sont stockés dans MongoDB `qa_jobs` pour survivre à un restart.
+_BACKEND_DIR = Path(__file__).parent.parent
+_AUDIT_SCRIPT = _BACKEND_DIR / "audit_and_regen_questions.py"
+
+
+async def _run_audit_subprocess(job_id: str, category_id: str) -> None:
+    """Lance le script d'audit en subprocess Python détaché. Met à jour le
+    statut du job en DB (running → done / failed) à la fin.
+    """
+    log_path = f"/tmp/qa_job_{job_id}.log"
+    env = os.environ.copy()
+    env["ONLY_CATEGORY"] = category_id
+
+    try:
+        with open(log_path, "w") as logf:
+            proc = await asyncio.create_subprocess_exec(
+                sys.executable, str(_AUDIT_SCRIPT),
+                cwd=str(_BACKEND_DIR),
+                env=env,
+                stdout=logf,
+                stderr=logf,
+            )
+            await db.qa_jobs.update_one({"id": job_id}, {"$set": {"pid": proc.pid}})
+            rc = await proc.wait()
+        status = "done" if rc == 0 else "failed"
+        await db.qa_jobs.update_one({"id": job_id}, {"$set": {
+            "status": status,
+            "return_code": rc,
+            "log_path": log_path,
+            "finished_at": datetime.now(timezone.utc).isoformat(),
+        }})
+    except Exception as e:
+        await db.qa_jobs.update_one({"id": job_id}, {"$set": {
+            "status": "failed",
+            "error": str(e)[:400],
+            "log_path": log_path,
+            "finished_at": datetime.now(timezone.utc).isoformat(),
+        }})
+
+
+@router.post("/rerun/{category_id}")
+async def qa_rerun(category_id: str, admin: dict = Depends(get_admin_user)) -> dict:
+    """Relance le pipeline fact-check/régen pour une catégorie.
+
+    - Refuse si un job "running" existe déjà pour cette catégorie (anti-double-facturation LLM).
+    - Lance le script en subprocess Python non bloquant. Le statut se lit via `/admin/qa/jobs`.
+    """
+    cat = await db.categories.find_one({"id": category_id})
+    if not cat:
+        raise HTTPException(status_code=404, detail="Catégorie inconnue")
+
+    existing = await db.qa_jobs.find_one({"category_id": category_id, "status": "running"})
+    if existing:
+        raise HTTPException(status_code=409, detail=f"Job déjà en cours pour {category_id} (id={existing['id']})")
+
+    import uuid
+    job_id = str(uuid.uuid4())
+    job_doc = {
+        "id": job_id,
+        "category_id": category_id,
+        "category_title": cat.get("title"),
+        "status": "running",
+        "started_at": datetime.now(timezone.utc).isoformat(),
+        "started_by": admin.get("email"),
+    }
+    await db.qa_jobs.insert_one(job_doc)
+
+    # Fire-and-forget : le task tourne en arrière-plan, on rend la main immédiatement.
+    asyncio.create_task(_run_audit_subprocess(job_id, category_id))
+
+    job_doc.pop("_id", None)
+    return {"ok": True, "job": job_doc}
+
+
+@router.get("/jobs")
+async def qa_jobs(_: dict = Depends(get_admin_user), limit: int = Query(20, ge=1, le=100)) -> list[dict]:
+    """Liste les jobs de fact-check récents (running/done/failed)."""
+    docs = await db.qa_jobs.find({}, {"_id": 0}).sort("started_at", -1).limit(limit).to_list(limit)
+    # Enrichit avec un aperçu des dernières lignes de log pour les jobs récents
+    for j in docs:
+        if j.get("log_path") and os.path.exists(j["log_path"]):
+            try:
+                with open(j["log_path"]) as f:
+                    lines = f.readlines()
+                    j["log_tail"] = "".join(lines[-6:])[-800:]
+            except Exception:
+                pass
+    return docs

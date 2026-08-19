@@ -1,0 +1,23 @@
+{
+  "summary": "Iteration 42 — Tested Admin QA Regen Batch + Search feature. Backend: 9/10 pytest passed, 1 skipped (conflict-409 test skipped on rerun because a prior test's cinema job was still running; the 409 path itself was verified explicitly in the same test on first run and again implicitly during frontend testing when a second click on running category triggered 409-warning path). Frontend: All new UI elements verified — 'Régénérer la catégorie' button per category tile, jobs-running badge, search debounce 400ms with correct results (Piaf → 25 résultats in quality=all), clear button resets, disabled state 'Audit en cours…' appears immediately after click, running badge auto-updated to '2 audit(s) en cours'. Regression: quality select still updates count (flagged=278). window.confirm() dialogs are auto-accepted via page.on('dialog').",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {"ui_bugs": [], "integration_issues": [], "design_issues": []},
+  "test_report_links": [
+    "/app/backend/tests/test_admin_qa_regen.py",
+    "/app/test_reports/pytest/pytest_iter42.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "admin_qa.py _run_audit_subprocess: no timeout / max runtime enforcement — a stuck subprocess would remain 'running' forever and permanently block reruns of that category. Consider a watchdog or max-age check when returning 409.",
+    "qa_rerun: 'running' status is not verified against actual process liveness — if backend crashes mid-job the job row stays 'running' and blocks future reruns until manual DB cleanup. Consider marking jobs 'orphaned' on startup, or checking PID.",
+    "qa_questions: regex search on 4 fields with $or on potentially large collection has no index; performance may degrade for large categories. Consider a text index or Atlas search.",
+    "Frontend AdminQA.jsx: rerun button uses window.confirm() which is not testable by non-admins — acceptable for admin-only view but flag for accessibility."
+  ],
+  "updated_files": ["/app/backend/tests/test_admin_qa_regen.py"],
+  "success_rate": {"backend": "90% (9/10, 1 skipped)", "frontend": "100%"},
+  "test_credentials": "admin@generaquiz.fr / pF44gVBfLdushm3NZ6dN (from /app/memory/test_credentials.md)",
+  "seed_data_creation": "None (test creates real background jobs for cinema and annees-50-60 via subprocess; they consume Emergent LLM credits over ~10min each; can be observed via /admin/qa/jobs).",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "The pytest file /app/backend/tests/test_admin_qa_regen.py must be run with REACT_APP_BACKEND_URL env var exported. The 409-conflict test in TestRerunJob is stateful: on a fresh DB (no running job on 'cinema') it passes; on a repeat run it skips because a cinema job is already running from the previous invocation. To force a re-verification of 409, either drop db.qa_jobs 'running' entries or wait for the previous job to finish. Real subprocess audits were kicked off for cinema + annees-50-60 during this test iteration — main agent should be aware LLM credits are being consumed."
+}

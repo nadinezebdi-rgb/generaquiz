@@ -1508,3 +1508,31 @@ Résultats partiels au moment du finish :
 - Frontend : dashboard rendu, 78 questions flagged listées avec fact-check commentaires, boutons d'action fonctionnels
 - Sécurité : tous les endpoints admin_qa passent par `get_admin_user` → HTTP 403 pour un non-admin
 
+
+## 2026-08-19 (suite 3) — Regen Batch + QA Search
+
+### 🎯 Regen Batch — relance du fact-check depuis le dashboard
+Nouveaux endpoints (rôle admin) :
+- `POST /api/admin/qa/rerun/{category_id}` — lance le script `audit_and_regen_questions.py` en subprocess Python non bloquant. Crée un doc dans `db.qa_jobs` (status: running → done/failed). Refuse HTTP 409 si un job "running" existe déjà pour la même catégorie (anti double-facturation LLM).
+- `GET /api/admin/qa/jobs?limit=10` — liste des jobs récents triés par `started_at desc`, enrichis avec `log_tail` (6 dernières lignes du log) pour un suivi live.
+
+**Frontend** : bouton "▶ Régénérer la catégorie" sur chaque tuile de catégorie. Pendant qu'un job tourne, le bouton se transforme en "Audit en cours…" (disabled) et un mini log tail apparaît sous la tuile. Un badge global "N audit(s) en cours" s'affiche en tête. Polling automatique de `/admin/qa/jobs` toutes les 8 s tant qu'au moins un job est actif.
+
+### 🎯 QA Search — recherche par mot-clé
+- Paramètre `q` ajouté à `GET /api/admin/qa/questions` : cherche insensible à la casse dans `question`, `options`, `fact_check.comment`, `fact_check.correction` (escape regex avant $regex).
+- Frontend : input avec debounce 400 ms, icône Search, bouton × pour effacer. Filtre combiné avec les autres (catégorie, quality).
+
+### Fichiers touchés
+- **Modifié** : `backend/routers/admin_qa.py` (endpoints rerun + jobs + search sur qa_questions), `frontend/src/pages/AdminQA.jsx` (search + rerun buttons + jobs polling)
+
+### Tests
+- Testing agent iteration 42 : **9/10 backend + 100% frontend** (1 skip conflit 409 déjà couvert en amont)
+- Recherche 'Piaf' : 10 résultats retournés côté API et affichés en UI ✅
+- Rerun voyages-france → job créé (status running) puis exécuté en subprocess ✅
+- Anti double-execution 409 : validé ✅
+- Régressions (approve/flag/apply-correction/delete/quality filter) : 0 ✅
+
+### Statut audit global
+- 5/9 catégories déjà auditées (chansons, cinema, cuisine-terroir, culture-40/70-ans)
+- 4/9 restantes : annees-50-60 (partiel 5/100), objets-antan, histoire-france, voyages-france → à relancer depuis le dashboard
+
