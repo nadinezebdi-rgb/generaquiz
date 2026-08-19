@@ -184,11 +184,11 @@ export default function Landing() {
           <div className="text-center max-w-3xl mx-auto mb-14">
             <span className="inline-block bg-mustard text-navy font-bold px-4 py-1 rounded-full text-sm mb-4">Choisissez votre thème</span>
             <h2 className="font-display text-4xl sm:text-5xl font-extrabold text-navy mb-4">
-              Huit univers, huit personnages
+              Neuf univers, neuf personnages
             </h2>
             <p className="text-xl text-navy/70 leading-relaxed">
               Chaque catégorie a son ambassadeur caricaturé pour vous accompagner dans la découverte —
-              avec deux nouvelles thématiques de culture générale pour les <strong>quadras</strong> et les <strong>septuagénaires</strong>.
+              avec notre toute dernière <strong>Voyages &amp; régions de France</strong> guidée par Jeanne la Voyageuse.
             </p>
           </div>
 
@@ -209,6 +209,14 @@ export default function Landing() {
                     className="absolute -top-12 -right-12 w-48 h-48 rounded-full opacity-15 group-hover:opacity-25 transition"
                     style={{ backgroundColor: cat.color }}
                   />
+                  {cat.id === "voyages-france" && (
+                    <span
+                      data-testid={`category-badge-nouveau-${cat.id}`}
+                      className="absolute top-3 right-3 z-10 inline-flex items-center gap-1 bg-terracotta text-white text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full shadow-warm"
+                    >
+                      ✨ Nouveau
+                    </span>
+                  )}
                   <div className="relative">
                     <div className="aspect-square w-32 mx-auto rounded-3xl overflow-hidden bg-cream border-2 border-cream-dark mb-5">
                       <img

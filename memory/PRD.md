@@ -1377,3 +1377,53 @@ GénéraQuiz devient une plateforme intergénérationnelle : JOUER → SE SOUVEN
 - Modèle IA actuel : gpt-5.5 (mettre à jour vers gpt-5.6 dès qu'il est ajouté au catalogue emergentintegrations)
 - Refactor recommandé (non urgent) : `livre.py` fait 1113 lignes, à découper en submodules (chapters/entries/family/coop/pdf/ai) — reporté en backlog technique
 
+
+## 2026-08-19 — Sécurité admin + copy + nouveaux tarifs (Livre imprimé, Offre Pro)
+
+### 🚨 P0 — Rotation du mot de passe admin
+- L'ancien mot de passe `Admin2026!` était visible dans l'historique du chat Emergent (signalé par l'utilisateur).
+- Nouveau mot de passe généré via `secrets.choice(alphanum+special)` sur 20 caractères, stocké **uniquement** dans `/app/backend/.env` et `/app/memory/test_credentials.md` (fichier non servi publiquement).
+- Ancien mot de passe : HTTP 401 ✅ · Nouveau : HTTP 200 ✅
+
+### 🔐 Restauration de l'espace admin
+- **Nouvelle page `AdminHome.jsx`** (route `/app/admin`) : tableau de bord central avec 3 tuiles (Analytics / Codes promo / Signalements).
+- **Nouveau composant `<AdminRoute>`** dans `App.js` : vérifie `user.role === "admin"` côté client (les endpoints `/api/admin/*` étaient déjà protégés par `get_admin_user` côté serveur — testé HTTP 403 pour un compte non-admin).
+- `AdminDropdown` (menu Navbar avatar) enrichi : entrée "Administration → Tableau de bord admin" ajoutée en 1ère position.
+- `MobileMenu` : entrée "Tableau de bord" ajoutée dans la section Admin.
+
+### ✏️ Copy changes
+- Landing : "Huit univers, huit personnages" → **"Neuf univers, neuf personnages"** avec accroche Jeanne la Voyageuse.
+- Carte catégorie "Voyages & régions de France" : badge **"✨ NOUVEAU"** ajouté (Landing + Dashboard).
+- MonLivre chapter modal : bandeau **"✨ Racontez simplement votre souvenir, GénéraQuiz le transforme en un joli récit pour votre livre de vie."** ajouté ; bouton coop renommé "Remplir à deux avec un proche".
+- EarnCredits.jsx : "accès aux 8 catégories" → "accès aux 9 univers".
+
+### 💰 Nouveaux tarifs (page Pricing)
+Nouveau composant `PrintedBookPricing.jsx` injecté sous la reassurance-strip :
+
+**📖 Livre imprimé** (3 offres) :
+| Offre | Prix | Prix/livre | Économie |
+|---|---|---|---|
+| 📕 1 livre | 79,90 € | 79,90 € | — |
+| 📚 2 livres ⭐ (Le plus choisi) | 129,90 € | 64,95 € | 29,90 € |
+| 🎁 3 livres | 179,90 € | 59,97 € | 59,80 € |
++ mention **"PDF gratuit inclus"** pour tous les abonnés · format A5 · impression à la demande. Les CTAs pointent vers `mailto:contact@generaquiz.fr` en attendant le vrai checkout Stripe.
+
+**🏥 Offre Pro** (à partir de 59 €/mois, devis 48h) — 8 catégories affichées : EHPAD, Associations, Clubs du 3ᵉ âge, CCAS, Collectivités territoriales, Structures médicalisées, Médiathèques, Bibliothèques. CTA `mailto:` "Demander un devis".
+
+### Fichiers touchés
+- **Modifiés** : `Landing.jsx`, `Dashboard.jsx`, `MonLivre.jsx`, `EarnCredits.jsx`, `Pricing.jsx`, `App.js` (AdminRoute + route /app/admin), `AdminDropdown.jsx`, `MobileMenu.jsx`, `.env` (nouveau ADMIN_PASSWORD).
+- **Créés** : `AdminHome.jsx`, `PrintedBookPricing.jsx`.
+
+### Tests
+- Login admin avec nouveau mot de passe : HTTP 200 ✅
+- Ancien mot de passe rejeté : HTTP 401 ✅
+- Non-admin sur `/api/admin/analytics/overview` : HTTP 403 ✅
+- Non-admin sur `/api/admin/promo` : HTTP 403 ✅
+- Badge "Nouveau" sur voyages-france : visible Landing + Dashboard ✅
+- Section Livre imprimé + Offre Pro : rendues correctement sur `/app/pricing` ✅
+- Bandeau pitch dans le Livre : visible et bien formaté ✅
+
+### Notes production
+- Aucun endpoint Stripe créé pour les livres imprimés (CTA mailto uniquement) → à câbler en itération suivante avec des PACKAGES dédiés (`livre_1`, `livre_2`, `livre_3`, `pro_lite`, `pro_ehpad`).
+- Le contrôle de rôle côté frontend NE remplace PAS la vérification serveur — les deux sont en place.
+

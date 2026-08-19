@@ -280,13 +280,19 @@ function ChapterModal({ chapter, onClose, onPromptClick, onRewriteClick }) {
           </button>
         </div>
         <div className="p-5 space-y-3">
+          <div className="bg-terracotta/10 border-2 border-terracotta/30 rounded-2xl p-4 text-center" data-testid="livre-pitch-banner">
+            <p className="text-navy leading-relaxed">
+              <span className="text-terracotta text-lg">✨</span>{" "}
+              <span className="font-bold">Racontez simplement votre souvenir</span>, GénéraQuiz le transforme en un joli récit pour votre livre de vie.
+            </p>
+          </div>
           <button
             type="button"
             onClick={openCoop}
             data-testid="livre-coop-open"
             className="w-full inline-flex items-center justify-center gap-2 bg-navy text-cream font-bold px-4 py-3 rounded-2xl hover:bg-navy-dark transition"
           >
-            <Users className="w-4 h-4" /> Remplir ce chapitre à deux (petit-enfant, famille…)
+            <Users className="w-4 h-4" /> Remplir à deux avec un proche
           </button>
           {chapter.prompts.map((p) => {
             const written = entriesByPrompt[p.id] || [];

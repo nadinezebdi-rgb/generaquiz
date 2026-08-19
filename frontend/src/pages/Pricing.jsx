@@ -5,6 +5,7 @@ import { api, formatError } from "@/lib/api";
 import { useAuth } from "@/contexts/AuthContext";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import PrintedBookPricing from "@/components/PrintedBookPricing";
 import { Check, Crown, Users, Sparkles, Loader2, Star, ArrowRight } from "lucide-react";
 
 /**
@@ -210,6 +211,9 @@ export default function Pricing() {
           <span className="inline-flex items-center gap-1"><Check className="w-4 h-4 text-[#3D9970]" /> Annulation en 1 clic</span>
           <span className="inline-flex items-center gap-1"><Check className="w-4 h-4 text-[#3D9970]" /> Support en français</span>
         </div>
+
+        {/* Livre imprimé + Offre Pro */}
+        <PrintedBookPricing />
 
         {/* FAQ mini */}
         <div className="mt-14 max-w-2xl mx-auto">

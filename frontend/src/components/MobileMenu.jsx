@@ -100,6 +100,7 @@ export default function MobileMenu({ variant = "landing" }) {
                   {user.role === "admin" && (
                     <>
                       <div className="mt-2 mb-1 px-3 text-xs uppercase tracking-wider text-navy/50 font-bold">Admin</div>
+                      <MobileLink to="/app/admin" onClick={close} testid="mobile-nav-admin-home" accent>Tableau de bord</MobileLink>
                       <MobileLink to="/app/admin/analytics" onClick={close} testid="mobile-nav-admin-analytics" accent>Analytics</MobileLink>
                       <MobileLink to="/app/admin/promo" onClick={close} accent>Promos</MobileLink>
                       <MobileLink to="/app/admin/reports" onClick={close} accent>Signalements</MobileLink>

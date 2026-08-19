@@ -25,6 +25,7 @@ import CGV from "@/pages/legal/CGV";
 import Confidentialite from "@/pages/legal/Confidentialite";
 import AdminReports from "@/pages/AdminReports";
 import AdminAnalytics from "@/pages/AdminAnalytics";
+import AdminHome from "@/pages/AdminHome";
 import Pourquoi from "@/pages/Pourquoi";
 import EarnCredits from "@/pages/EarnCredits";
 import CoopChallengeCreate from "@/pages/CoopChallengeCreate";
@@ -55,6 +56,28 @@ function ProtectedRoute({ children }) {
   }
   if (!user) {
     return <Navigate to="/login" state={{ from: location.pathname }} replace />;
+  }
+  return children;
+}
+
+/** AdminRoute — guard rôle "admin". Un utilisateur connecté mais non-admin
+ *  est redirigé vers son tableau de bord. Ne remplace PAS la protection
+ *  serveur : tous les endpoints /api/admin/* exigent aussi role=admin. */
+function AdminRoute({ children }) {
+  const { user, loading } = useAuth();
+  const location = useLocation();
+  if (loading || user === null) {
+    return (
+      <div className="min-h-screen flex items-center justify-center paper-bg">
+        <div className="text-navy text-xl font-medium">Chargement...</div>
+      </div>
+    );
+  }
+  if (!user) {
+    return <Navigate to="/login" state={{ from: location.pathname }} replace />;
+  }
+  if (user.role !== "admin") {
+    return <Navigate to="/app/dashboard" replace />;
   }
   return children;
 }
@@ -209,27 +232,35 @@ export default function App() {
           />
           <Route path="/defi/:token" element={<ChallengePlay />} />
           <Route
+            path="/app/admin"
+            element={
+              <AdminRoute>
+                <AdminHome />
+              </AdminRoute>
+            }
+          />
+          <Route
             path="/app/admin/promo"
             element={
-              <ProtectedRoute>
+              <AdminRoute>
                 <AdminPromo />
-              </ProtectedRoute>
+              </AdminRoute>
             }
           />
           <Route
             path="/app/admin/reports"
             element={
-              <ProtectedRoute>
+              <AdminRoute>
                 <AdminReports />
-              </ProtectedRoute>
+              </AdminRoute>
             }
           />
           <Route
             path="/app/admin/analytics"
             element={
-              <ProtectedRoute>
+              <AdminRoute>
                 <AdminAnalytics />
-              </ProtectedRoute>
+              </AdminRoute>
             }
           />
           <Route path="/pourquoi" element={<Pourquoi />} />
