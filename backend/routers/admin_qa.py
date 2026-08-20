@@ -514,6 +514,52 @@ async def _launch_qa_job(category_id: str, admin: dict, kind: str,
             "running_count": running_count, "max_concurrent": _MAX_CONCURRENT_QA_JOBS}
 
 
+@router.post("/jobs/{job_id}/cancel")
+async def qa_cancel_job(job_id: str, admin: dict = Depends(get_admin_user)) -> dict:
+    """Annule un job `running` (kill du subprocess) ou `queued` (retrait file).
+    Idempotent : si le job est déjà terminé, retourne 409."""
+    job = await db.qa_jobs.find_one({"id": job_id})
+    if not job:
+        raise HTTPException(status_code=404, detail="Job introuvable")
+    if job["status"] not in ("running", "queued"):
+        raise HTTPException(status_code=409, detail=f"Job déjà {job['status']} — rien à annuler")
+
+    now_iso = datetime.now(timezone.utc).isoformat()
+    if job["status"] == "queued":
+        # Retrait simple de la file
+        await db.qa_jobs.update_one({"id": job_id}, {"$set": {
+            "status": "cancelled",
+            "finished_at": now_iso,
+            "return_code": -3,
+        }})
+        await record_audit(admin, action="qa.cancel", target_type="qa_job",
+                           target_id=job_id, target_label=job.get("category_id"),
+                           meta={"was": "queued"})
+        return {"ok": True, "was": "queued"}
+
+    # running : on tue le subprocess si son PID est encore vivant
+    pid = job.get("pid")
+    killed = False
+    if pid and _pid_alive(pid):
+        try:
+            os.kill(int(pid), 15)  # SIGTERM
+            killed = True
+        except (OSError, TypeError, ValueError):
+            pass
+    await db.qa_jobs.update_one({"id": job_id}, {"$set": {
+        "status": "cancelled",
+        "finished_at": now_iso,
+        "return_code": -3,
+        "error": "cancelled by admin",
+    }})
+    await record_audit(admin, action="qa.cancel", target_type="qa_job",
+                       target_id=job_id, target_label=job.get("category_id"),
+                       meta={"was": "running", "killed_pid": pid if killed else None})
+    # Dépile un job en attente pour utiliser le slot libéré
+    asyncio.create_task(_dequeue_next())
+    return {"ok": True, "was": "running", "killed_pid": pid if killed else None}
+
+
 @router.get("/jobs")
 async def qa_jobs(_: dict = Depends(get_admin_user), limit: int = Query(20, ge=1, le=100)) -> list[dict]:
     """Liste les jobs de fact-check récents (running/queued/done/failed).

@@ -124,6 +124,18 @@ export default function AdminQA() {
     }
   }
 
+  async function cancelJob(jobId, categoryTitle) {
+    if (!window.confirm(`Annuler le job en cours pour "${categoryTitle}" ?`)) return;
+    try {
+      const { data } = await api.post(`/admin/qa/jobs/${jobId}/cancel`);
+      toast.success(data.was === "queued" ? "Job retiré de la file" : "Job en cours interrompu");
+      loadJobs();
+      loadSummary();
+    } catch (e) {
+      toast.error(formatError(e.response?.data?.detail) || "Impossible d'annuler le job");
+    }
+  }
+
   async function rerunCategory(categoryId, categoryTitle) {
     if (!window.confirm(
       `Relancer le fact-check pour "${categoryTitle}" ?\n\n` +
@@ -238,7 +250,7 @@ export default function AdminQA() {
           ) : (
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
               {summary.map((s) => {
-                const runningJob = jobs.find((j) => j.category_id === s.category_id && j.status === "running");
+                const runningJob = jobs.find((j) => j.category_id === s.category_id && (j.status === "running" || j.status === "queued"));
                 const isRunning = !!runningJob || rerunning === s.category_id;
                 return (
                   <motion.div
@@ -336,6 +348,17 @@ export default function AdminQA() {
                         )}
                       </button>
                     </div>
+                    {runningJob && (runningJob.status === "running" || runningJob.status === "queued") && (
+                      <button
+                        type="button"
+                        onClick={(e) => { e.stopPropagation(); cancelJob(runningJob.id, s.category_title); }}
+                        data-testid={`admin-qa-cancel-${s.category_id}`}
+                        className="mt-2 w-full inline-flex items-center justify-center gap-1.5 bg-white border-2 border-bordeaux text-bordeaux text-xs font-bold uppercase tracking-wider px-2 py-1.5 rounded-full hover:bg-bordeaux hover:text-white transition"
+                      >
+                        <X className="w-3.5 h-3.5" />
+                        {runningJob.status === "queued" ? "Retirer de la file" : "Annuler"}
+                      </button>
+                    )}
                     {runningJob?.log_tail && (
                       <pre className="mt-2 bg-cream text-[10px] font-mono text-navy/70 rounded-md p-2 max-h-20 overflow-y-auto whitespace-pre-wrap">
                         {runningJob.log_tail}

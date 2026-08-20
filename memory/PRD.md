@@ -1,5 +1,18 @@
 # Quiz d'Antan — SaaS pour seniors français
 
+## 2026-02-20 (nuit +) — Bouton Annuler Job
+- **Backend** `POST /admin/qa/jobs/{job_id}/cancel` :
+  - Job `queued` → status `cancelled` + `return_code=-3`
+  - Job `running` → `os.kill(pid, SIGTERM)` (si PID vivant) + status `cancelled` + libère le slot via `_dequeue_next()` (le prochain queued démarre immédiatement)
+  - Job déjà terminé → 409 « Job déjà X — rien à annuler »
+  - Audit `qa.cancel` tracé (was + killed_pid)
+- **Frontend** `AdminQA.jsx` : bouton bordeaux "ANNULER" (ou "Retirer de la file" si queued) sous les boutons Régénérer/Compléter, visible uniquement quand un job actif existe pour la catégorie. Confirmation `window.confirm` avant appel.
+- Testé end-to-end :
+  - queued cancel → `{was: "queued"}` (Chansons retiré de la file)
+  - running cancel → `{was: "running", killed_pid: 6643}` + return_code -15 (SIGTERM propre)
+  - re-cancel job cancelled → 409 « déjà failed »
+
+
 ## 2026-02-20 (nuit) — Robustesse QA Jobs (5 correctifs)
 - **`admin_qa.py`** refonte complète du pilotage des subprocess :
   1. **`_pid_alive(pid)`** — teste `os.kill(pid, 0)` (signal 0 = no-op), traite `OSError/TypeError/ValueError` comme processus mort.
