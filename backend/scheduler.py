@@ -49,6 +49,7 @@ def start_scheduler() -> None:
         send_morning_emails,
     )
     from routers.gamification import settle_finished_week
+    from routers.palier_weekly import pick_weekly_challenge
     from mistral_client import regenerate_all as mistral_regen
     from wordsearch_mistral import generate_one_grid_from_mistral
     from charades_mistral import generate_nightly_charades
@@ -71,12 +72,13 @@ def start_scheduler() -> None:
     # -- Ligues (dimanche 20:00 + lundi 00:05 Paris) ----------------------------
     _schedule(_scheduler, send_league_reminders,     day_of_week="sun", hour=20, minute=0, job_id="league_reminder_sunday_20h")
     _schedule(_scheduler, settle_finished_week,      day_of_week="mon", hour=0,  minute=5, job_id="leagues_weekly_settle")
+    _schedule(_scheduler, pick_weekly_challenge,     day_of_week="mon", hour=0,  minute=10, job_id="weekly_palier_pick")
 
     _scheduler.start()
     logger.info(
-        "[scheduler] démarré — 9 jobs actifs "
+        "[scheduler] démarré — 10 jobs actifs "
         "(quiz 03:00 · wordsearch 03:30 · charades 04:00 · fléchés 04:30 · paliers top-up 05:00 · "
-        "email quotidien 09:00 · relance J-7 10:00 · rappel ligues dim 20:00 · clôture ligues lun 00:05, Europe/Paris)"
+        "email quotidien 09:00 · relance J-7 10:00 · rappel ligues dim 20:00 · clôture ligues lun 00:05 · défi hebdo palier lun 00:10, Europe/Paris)"
     )
 
 

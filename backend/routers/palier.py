@@ -20,6 +20,7 @@ from pydantic import BaseModel
 
 from core import db, get_current_user
 from badges import check_after_palier
+from routers.palier_weekly import record_weekly_score
 
 router = APIRouter(prefix="/palier", tags=["palier"])
 
@@ -210,6 +211,9 @@ async def palier_submit(category_id: str, palier: int, body: PalierSubmit,
         {"user_id": user_id, "category_id": category_id, "palier": palier},
         {"$set": update, "$inc": {"attempts": 1}},
     )
+
+    # Défi Hebdo Palier — enregistre le score si cette tentative matche le défi courant
+    await record_weekly_score(user_id, category_id, palier, score)
 
     # Badges palier (expert / grand maître / 20/20 parfait). Idempotent.
     awarded = await check_after_palier(user_id, category_id, palier, score, PALIER_SIZE, passed)

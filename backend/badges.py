@@ -231,5 +231,14 @@ async def check_after_palier(user_id: str, category_id: str, palier: int,
             if await award_badge(user_id, "palier_grand_maitre",
                                  meta={"categories_count": distinct_cats}):
                 awarded.append("palier_grand_maitre")
+                # Envoi de l'email de félicitations — événementiel, best-effort.
+                try:
+                    from bson import ObjectId
+                    from badge_emails import send_grand_maitre_email
+                    user_doc = await db.users.find_one({"_id": ObjectId(user_id)})
+                    if user_doc:
+                        await send_grand_maitre_email(user_doc, distinct_cats)
+                except Exception as e:
+                    logger.warning(f"[badges] grand-maitre email failed: {e}")
 
     return awarded

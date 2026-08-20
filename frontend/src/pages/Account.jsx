@@ -5,8 +5,92 @@ import { api, formatError } from "@/lib/api";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import {
-  User, Mail, Crown, Calendar, Lock, Loader2, Check, LogOut, Trash2, Save, ArrowRight, Bell, Flame, Gift, Copy,
+  User, Mail, Crown, Calendar, Lock, Loader2, Check, LogOut, Trash2, Save, ArrowRight, Bell, Flame, Gift, Copy, Award,
 } from "lucide-react";
+
+/** Section badges : trophées collectés par l'utilisateur (30 badges statiques
+ *  dans `badges.py` — famille palier, streak, coop, ligue, referral, etc.). */
+function BadgesSection() {
+  const [catalog, setCatalog] = useState(null);
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    let cancelled = false;
+    api.get("/badges/catalog")
+      .then((r) => { if (!cancelled) setCatalog(r.data); })
+      .catch(() => { if (!cancelled) setCatalog([]); })
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
+  }, []);
+  const earned = (catalog || []).filter((b) => b.earned);
+  const locked = (catalog || []).filter((b) => !b.earned);
+  const tierColor = {
+    bronze: "bg-[#CD7F32]/20 text-[#8B5A2B]",
+    argent: "bg-[#C0C0C0]/25 text-navy/70",
+    or: "bg-mustard/30 text-mustard-dark",
+    diamant: "bg-terracotta/20 text-terracotta",
+  };
+  return (
+    <div className="bg-white border-2 border-cream-dark rounded-[28px] p-6 md:p-8 mb-6" data-testid="account-badges">
+      <h2 className="font-display text-2xl font-bold mb-1 flex items-center gap-2 text-navy">
+        <Award className="w-6 h-6" /> Mes trophées
+      </h2>
+      <p className="text-sm text-navy/60 mb-5">
+        {loading ? "Chargement…" : `${earned.length} badge${earned.length > 1 ? "s" : ""} collecté${earned.length > 1 ? "s" : ""} sur ${catalog?.length ?? 0}`}
+      </p>
+
+      {loading ? (
+        <div className="text-center py-6 text-navy/50">
+          <Loader2 className="w-6 h-6 animate-spin mx-auto" />
+        </div>
+      ) : earned.length === 0 ? (
+        <div className="text-center py-8 text-navy/60 italic bg-cream rounded-2xl border-2 border-cream-dark" data-testid="badges-empty">
+          Aucun trophée pour l&apos;instant. Terminez un quiz, validez un palier
+          ou invitez un proche pour décrocher votre premier badge !
+        </div>
+      ) : (
+        <>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 mb-5">
+            {earned.map((b) => (
+              <div
+                key={b.id}
+                data-testid={`badge-earned-${b.id}`}
+                className="bg-cream border-2 border-mustard rounded-2xl p-3 text-center shadow-warm hover:scale-105 transition"
+                title={b.earned_at ? `Obtenu le ${new Date(b.earned_at).toLocaleDateString("fr-FR")}` : ""}
+              >
+                <div className="text-4xl mb-1" role="img" aria-label={b.title}>{b.emoji}</div>
+                <div className="font-bold text-navy text-sm leading-tight">{b.title}</div>
+                <div className="text-[10px] text-navy/60 mt-1">{b.desc}</div>
+                <span className={`inline-block text-[9px] uppercase font-bold tracking-widest px-2 py-0.5 rounded-full mt-2 ${tierColor[b.tier] || "bg-cream-dark text-navy/70"}`}>
+                  {b.tier}
+                </span>
+              </div>
+            ))}
+          </div>
+          {locked.length > 0 && (
+            <details data-testid="badges-locked">
+              <summary className="text-sm font-bold text-navy/70 cursor-pointer hover:text-navy">
+                Voir les {locked.length} badge{locked.length > 1 ? "s" : ""} à débloquer
+              </summary>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 mt-3">
+                {locked.map((b) => (
+                  <div
+                    key={b.id}
+                    className="bg-cream/30 border-2 border-cream-dark rounded-2xl p-3 text-center opacity-70"
+                    title={b.desc}
+                  >
+                    <div className="text-4xl mb-1 grayscale opacity-60" role="img" aria-label="locked">{b.emoji}</div>
+                    <div className="font-bold text-navy/60 text-sm leading-tight">{b.title}</div>
+                    <div className="text-[10px] text-navy/40 mt-1">{b.desc}</div>
+                  </div>
+                ))}
+              </div>
+            </details>
+          )}
+        </>
+      )}
+    </div>
+  );
+}
 
 export default function Account() {
   const { user, refresh, logout } = useAuth();
@@ -207,6 +291,8 @@ export default function Account() {
             </div>
           )}
         </div>
+
+        <BadgesSection />
 
         {/* ============ STREAK & NOTIFICATIONS CARD ============ */}
         <div className="bg-white border-2 border-cream-dark rounded-[28px] p-6 md:p-8 mb-6" data-testid="account-streak-card">

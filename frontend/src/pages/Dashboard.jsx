@@ -38,6 +38,7 @@ export default function Dashboard() {
   const [souvenir, setSouvenir] = useState(null);
   const [showSaver, setShowSaver] = useState(false);
   const [dismissed, setDismissed] = useState(false);
+  const [weekly, setWeekly] = useState(null);
 
   useEffect(() => {
     api.get("/categories").then((r) => setCategories(r.data)).catch(() => {});
@@ -45,6 +46,7 @@ export default function Dashboard() {
     api.get("/attempts").then((r) => setAttempts(r.data || [])).catch(() => {});
     api.get("/daily/leaderboard").then((r) => setDaily(r.data)).catch(() => {});
     api.get("/livre/souvenir-du-jour").then((r) => setSouvenir(r.data)).catch(() => {});
+    api.get("/palier/weekly").then((r) => setWeekly(r.data)).catch(() => {});
   }, []);
 
   // Auto-open the streak saver when the criteria matches and the user
@@ -191,6 +193,62 @@ export default function Dashboard() {
 
         {/* Livre de Vie — progression (visible dès la 1ère entrée) */}
         <LivreProgressCard />
+
+        {/* Défi hebdo palier */}
+        {weekly && weekly.category && (
+          <motion.div
+            initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
+            className="bg-gradient-to-br from-terracotta to-bordeaux text-cream rounded-[28px] p-6 mb-8 shadow-warm"
+            data-testid="dashboard-weekly-challenge"
+          >
+            <div className="flex flex-col md:flex-row items-start md:items-center gap-5">
+              <div className="w-16 h-16 rounded-full bg-mustard text-navy flex items-center justify-center shrink-0 text-3xl">
+                🎯
+              </div>
+              <div className="flex-1 min-w-0">
+                <span className="inline-block bg-cream/20 text-mustard font-bold uppercase tracking-widest text-[10px] px-2 py-0.5 rounded-full mb-1">
+                  Défi de la semaine {weekly.week}
+                </span>
+                <h3 className="font-display text-2xl font-extrabold">
+                  {weekly.category.title} · Palier {weekly.palier}
+                </h3>
+                <p className="text-cream/80 text-sm">
+                  20 questions · seuil 14/20 · classement remis à zéro chaque lundi
+                  {weekly.total_players > 0 && ` · ${weekly.total_players} participant${weekly.total_players > 1 ? "s" : ""}`}
+                </p>
+              </div>
+              <Link
+                to={`/app/parcours/${weekly.category.id}`}
+                data-testid="dashboard-weekly-play"
+                className="inline-flex items-center gap-2 bg-mustard text-navy font-bold px-5 py-3 rounded-full hover:bg-cream transition shrink-0"
+              >
+                Relever le défi <ArrowRight className="w-4 h-4" />
+              </Link>
+            </div>
+
+            {weekly.entries && weekly.entries.length > 0 && (
+              <div className="mt-5 pt-5 border-t border-cream/20">
+                <div className="text-xs uppercase tracking-widest text-mustard font-bold mb-2">Top 3 de la semaine</div>
+                <ol className="space-y-1">
+                  {weekly.entries.slice(0, 3).map((e) => {
+                    const medals = { 1: "🥇", 2: "🥈", 3: "🥉" };
+                    return (
+                      <li
+                        key={e.user_id}
+                        data-testid={`weekly-rank-${e.rank}`}
+                        className={`flex items-center gap-2 text-sm ${e.is_current_user ? "font-bold" : ""}`}
+                      >
+                        <span className="w-6 text-center">{medals[e.rank]}</span>
+                        <span className="flex-1 truncate">{e.name}{e.is_current_user && " · Vous"}</span>
+                        <span className="font-mono text-mustard">{e.best_score}/20</span>
+                      </li>
+                    );
+                  })}
+                </ol>
+              </div>
+            )}
+          </motion.div>
+        )}
 
         {/* Categories grid */}
         <div className="mb-12">

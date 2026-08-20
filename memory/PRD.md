@@ -1,5 +1,19 @@
 # Quiz d'Antan — SaaS pour seniors français
 
+## 2026-02-20 (nuit +) — Trophées profil + Email Grand Maître + Défi Hebdo Palier
+- **Section "Mes trophées"** sur `/app/account` : composant `BadgesSection` qui appelle `/api/badges/catalog`, affiche les badges collectés dans une grille avec emoji + titre + description + tier (bronze/argent/or/diamant). Bouton dépliant "Voir les X badges à débloquer" pour ceux non gagnés.
+- **Email félicitations Grand Maître** : nouveau module `badge_emails.py` avec `send_grand_maitre_email(user, categories_count)`. Wire depuis `badges.check_after_palier` quand le badge `palier_grand_maitre` tombe (best-effort, ne bloque jamais l'attribution). Template HTML façon Resend (👑, CTA "Voir mes trophées").
+- **Défi Hebdo Palier** : nouveau router `routers/palier_weekly.py`
+  - Clé de semaine ISO (`2026-W08`)
+  - `pick_weekly_challenge()` — cron chaque lundi 00:10 Paris, tire une catégorie aléatoire + palier 2..6 (uniforme)
+  - `record_weekly_score()` appelé depuis `palier_submit` — upsert best-of dans `weekly_palier_scores`
+  - `GET /api/palier/weekly` — défi courant + top 10 (auto-tirage si aucun défi)
+- **Scheduler** : +1 job `weekly_palier_pick` lundi 00:10 → total 10 jobs actifs
+- **Dashboard** : bannière gradient terracotta/bordeaux "Défi de la semaine" avec titre catégorie + palier + top 3 (🥇🥈🥉) + CTA "Relever le défi" vers `/app/parcours/{id}`
+- **Top-up Voyages** : en cours, 25/140 (job `5c89f6e5` toujours running).
+- Testé : défi automatiquement tiré au premier hit (`Objets d'antan · Palier 6` pour la W34), bannière rendue avec les 3 badges déjà obtenus visibles sur le profil.
+
+
 ## 2026-02-20 (nuit) — Badges palier + Classement + Top-up Voyages
 - **3 nouveaux badges** dans `badges.py` :
   - `palier_perfect_20` (or) : 20/20 parfait sur un palier (toutes catégories, toutes difficultés)
