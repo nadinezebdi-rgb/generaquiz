@@ -1,5 +1,15 @@
 # Quiz d'Antan — SaaS pour seniors français
 
+## 2026-02-20 (soir) — Progression Granulaire QA + Historique Étendu
+- **Backend** `admin_qa.py` :
+  - `GET /admin/qa/queue` enrichit chaque job `running` et `queued` avec `questions_current` (compte des questions jouables : `difficulty 1..7` ET `quality != flagged`) et `questions_target: 140`.
+  - `GET /admin/qa/jobs` — limite par défaut passée de `20` à `30` (max 100) pour voir l'historique quotidien complet.
+- **Frontend** `AdminQA.jsx` :
+  - `QueueRow` affiche désormais une **mini barre de progression** (h-1.5) sous les estimations, avec le compteur `X / 140` à droite. Barre verte 🟢 si complet, terracotta 🟧 si running, gris 🌫️ si queued.
+  - `loadJobs` : paramètre `limit: 30`.
+- Validé end-to-end : job factice injecté sur `annees-50-60` (137/140 jouables) → l'API remonte `questions_current: 137, questions_target: 140`, l'UI affiche "137 / 140" avec barre à ~98%.
+
+
 ## 2026-02-20 (nuit++) — Tableau File d'Attente QA
 - **Backend** nouveau `GET /admin/qa/queue` :
   - Durée médiane par kind (rerun / topup) calculée sur les 10 derniers `done` — fallback 5 min

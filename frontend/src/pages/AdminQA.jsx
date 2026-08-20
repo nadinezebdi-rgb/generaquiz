@@ -47,7 +47,7 @@ export default function AdminQA() {
 
   const loadJobs = useCallback(async () => {
     try {
-      const { data } = await api.get("/admin/qa/jobs", { params: { limit: 10 } });
+      const { data } = await api.get("/admin/qa/jobs", { params: { limit: 30 } });
       setJobs(data);
     } catch (err) {
       console.debug("Load jobs failed:", err);
@@ -169,16 +169,21 @@ export default function AdminQA() {
   }
 
   async function topupCategory(categoryId, categoryTitle, missing) {
-    if (!window.confirm(
-      `Compléter le parcours "${categoryTitle}" à 140 questions (7 paliers × 20) ?\n\n` +
-      `Il manque ${missing} question(s). Chacune sera générée par Claude Sonnet puis ` +
-      `vérifiée par Claude Opus 4.8. Coût estimé : ~${(missing * 0.03).toFixed(2)}€.`
-    )) return;
+    const known = typeof missing === "number" && missing > 0;
+    const msg = known
+      ? `Compléter le parcours "${categoryTitle}" à 140 questions (7 paliers × 20) ?\n\n` +
+        `Il manque ${missing} question(s). Chacune sera générée par Claude Sonnet puis ` +
+        `vérifiée par Claude Opus 4.8. Coût estimé : ~${(missing * 0.03).toFixed(2)}€.`
+      : `Relancer le top-up pour "${categoryTitle}" ?\n\n` +
+        `Le script est idempotent — il ne générera que les questions encore manquantes ` +
+        `par palier (Sonnet + Opus fact-check).`;
+    if (!window.confirm(msg)) return;
     setRerunning(categoryId);
     try {
       const { data } = await api.post(`/admin/qa/topup/${categoryId}`);
       toast.success(`Top-up démarré : ${data.job.id.slice(0, 8)}`);
       loadJobs();
+      loadQueue();
     } catch (e) {
       const status = e.response?.status;
       const msg = e.response?.data?.detail;
@@ -269,6 +274,38 @@ export default function AdminQA() {
             </div>
           </section>
         )}
+
+        {/* ==================== FAILED JOBS ==================== */}
+        {(() => {
+          const failed = jobs.filter((j) => j.status === "failed" || j.status === "cancelled").slice(0, 5);
+          if (failed.length === 0) return null;
+          return (
+            <section className="mb-8" data-testid="admin-qa-failed">
+              <div className="bg-white border-2 border-bordeaux/30 rounded-2xl p-5">
+                <div className="flex items-center justify-between mb-3">
+                  <h2 className="font-display text-lg font-extrabold text-navy inline-flex items-center gap-2">
+                    <X className="w-4 h-4 text-bordeaux" /> Jobs interrompus récents
+                  </h2>
+                  <span className="text-xs text-navy/60">
+                    Les scripts sont idempotents — un relancement continue là où le précédent s&apos;était arrêté.
+                  </span>
+                </div>
+                <ul className="space-y-2">
+                  {failed.map((j) => (
+                    <FailedRow
+                      key={j.id}
+                      job={j}
+                      onRelaunch={(kind, catId, catTitle) => {
+                        if (kind === "topup") topupCategory(catId, catTitle, 0);
+                        else rerunCategory(catId, catTitle);
+                      }}
+                    />
+                  ))}
+                </ul>
+              </div>
+            </section>
+          );
+        })()}
 
         {/* ==================== SUMMARY ==================== */}
         <section className="mb-10" data-testid="admin-qa-summary">
@@ -665,6 +702,7 @@ function QuestionCard({ q, actionOn, onAction, onDelete, isSelected, onToggleSel
         {q.quality !== "flagged" && (
           <button
             type="button"
+
             disabled={isBusy}
             onClick={() => onAction(q, "flag")}
             data-testid={`admin-qa-flag-${q.id}`}
@@ -705,6 +743,10 @@ function fmtDur(sec) {
 
 function QueueRow({ job, kind, onCancel }) {
   const isRunning = kind === "running";
+  const current = job.questions_current ?? 0;
+  const target = job.questions_target ?? 140;
+  const pct = target > 0 ? Math.min(100, Math.round((current / target) * 100)) : 0;
+  const isComplete = current >= target;
   return (
     <li
       data-testid={`admin-qa-queue-${kind}-${job.category_id}`}
@@ -737,6 +779,18 @@ function QueueRow({ job, kind, onCancel }) {
             </>
           )}
         </div>
+        {/* Progression questions : X / 140 avec barre visuelle */}
+        <div className="mt-1.5 flex items-center gap-2" data-testid={`admin-qa-queue-progress-${job.category_id}`}>
+          <div className="flex-1 h-1.5 bg-navy/10 rounded-full overflow-hidden">
+            <div
+              className={`h-full transition-all ${isComplete ? "bg-emerald-500" : isRunning ? "bg-terracotta" : "bg-navy/40"}`}
+              style={{ width: `${pct}%` }}
+            />
+          </div>
+          <span className={`text-[11px] font-bold tabular-nums shrink-0 ${isComplete ? "text-emerald-600" : "text-navy/70"}`}>
+            {current} / {target}
+          </span>
+        </div>
       </div>
       <button
         type="button"
@@ -745,6 +799,50 @@ function QueueRow({ job, kind, onCancel }) {
         className="inline-flex items-center gap-1 bg-white border-2 border-bordeaux text-bordeaux text-xs font-bold px-3 py-1.5 rounded-full hover:bg-bordeaux hover:text-white transition"
       >
         <X className="w-3.5 h-3.5" /> Annuler
+      </button>
+    </li>
+  );
+}
+
+
+function FailedRow({ job, onRelaunch }) {
+  const failedAt = job.finished_at ? new Date(job.finished_at) : null;
+  const label = job.status === "cancelled" ? "annulé" : "échec";
+  const reasonMap = {
+    "-1": "interrompu (redémarrage backend ou PID mort)",
+    "-2": "timeout (>15 min)",
+    "-3": "annulé par l'admin",
+    "-15": "SIGTERM (annulé)",
+  };
+  const reason = reasonMap[String(job.return_code)] || job.error || `code retour ${job.return_code ?? "?"}`;
+  return (
+    <li
+      data-testid={`admin-qa-failed-${job.id}`}
+      className="flex items-center gap-3 p-3 rounded-xl border-2 bg-bordeaux/5 border-bordeaux/20"
+    >
+      <div className="w-10 h-10 rounded-full flex items-center justify-center bg-bordeaux/15 text-bordeaux font-bold shrink-0">
+        <X className="w-4 h-4" />
+      </div>
+      <div className="flex-1 min-w-0">
+        <div className="font-bold text-navy truncate">
+          {job.category_title || job.category_id}
+          <span className="ml-2 text-[10px] uppercase font-bold tracking-widest text-bordeaux">
+            {job.kind} · {label}
+          </span>
+        </div>
+        <div className="text-xs text-navy/60">
+          {reason}
+          {failedAt && ` · ${failedAt.toLocaleString("fr-FR", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}`}
+        </div>
+      </div>
+      <button
+        type="button"
+        onClick={() => onRelaunch(job.kind, job.category_id, job.category_title || job.category_id)}
+        data-testid={`admin-qa-failed-relaunch-${job.id}`}
+        className="inline-flex items-center gap-1 bg-terracotta text-white text-xs font-bold px-3 py-1.5 rounded-full hover:bg-terracotta-dark transition"
+        title="Relancer le job — le script est idempotent, il reprendra où le précédent s'est arrêté"
+      >
+        <PlayCircle className="w-3.5 h-3.5" /> Relancer
       </button>
     </li>
   );

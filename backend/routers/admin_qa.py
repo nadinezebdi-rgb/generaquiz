@@ -590,6 +590,15 @@ async def qa_queue(_: dict = Depends(get_admin_user)) -> dict:
     running = await db.qa_jobs.find({"status": "running"}, {"_id": 0}).sort("started_at", 1).to_list(20)
     queued = await db.qa_jobs.find({"status": "queued"}, {"_id": 0}).sort("started_at", 1).to_list(20)
 
+    # Compteur de questions jouables par catégorie pour chaque job actif
+    # (playable = difficulty 1..7 ET quality != flagged). Cible = 140.
+    async def _playable_count(cat_id: str) -> int:
+        return await db.questions.count_documents({
+            "category_id": cat_id,
+            "difficulty": {"$gte": 1, "$lte": 7},
+            "quality": {"$ne": "flagged"},
+        })
+
     now = datetime.now(timezone.utc)
     running_out = []
     total_remaining_running = 0.0
@@ -602,11 +611,14 @@ async def qa_queue(_: dict = Depends(get_admin_user)) -> dict:
         expected = avg_by_kind.get(j.get("kind"), 300.0)
         remaining = max(0.0, expected - elapsed)
         total_remaining_running += remaining
+        current = await _playable_count(j["category_id"])
         running_out.append({
             **j,
             "elapsed_sec": int(elapsed),
             "expected_sec": int(expected),
             "remaining_sec": int(remaining),
+            "questions_current": current,
+            "questions_target": 140,
         })
 
     # 3. Pour chaque queued : position + estimation
@@ -623,11 +635,14 @@ async def qa_queue(_: dict = Depends(get_admin_user)) -> dict:
         expected = avg_by_kind.get(j.get("kind"), 300.0)
         # Ce job occupera son slot jusqu'à wait_sec + expected
         slot_free_at[0] = wait_sec + expected
+        current = await _playable_count(j["category_id"])
         queued_out.append({
             **j,
             "position": i + 1,
             "wait_before_start_sec": int(wait_sec),
             "expected_sec": int(expected),
+            "questions_current": current,
+            "questions_target": 140,
         })
 
     return {
@@ -641,7 +656,7 @@ async def qa_queue(_: dict = Depends(get_admin_user)) -> dict:
 
 
 @router.get("/jobs")
-async def qa_jobs(_: dict = Depends(get_admin_user), limit: int = Query(20, ge=1, le=100)) -> list[dict]:
+async def qa_jobs(_: dict = Depends(get_admin_user), limit: int = Query(30, ge=1, le=100)) -> list[dict]:
     """Liste les jobs de fact-check récents (running/queued/done/failed).
     Nettoie les zombies au passage pour que l'admin ne voit plus de fantômes."""
     await _reap_dead_jobs()
