@@ -145,6 +145,27 @@ export default function AdminQA() {
     }
   }
 
+  async function topupCategory(categoryId, categoryTitle, missing) {
+    if (!window.confirm(
+      `Compléter le parcours "${categoryTitle}" à 140 questions (7 paliers × 20) ?\n\n` +
+      `Il manque ${missing} question(s). Chacune sera générée par Claude Sonnet puis ` +
+      `vérifiée par Claude Opus 4.8. Coût estimé : ~${(missing * 0.03).toFixed(2)}€.`
+    )) return;
+    setRerunning(categoryId);
+    try {
+      const { data } = await api.post(`/admin/qa/topup/${categoryId}`);
+      toast.success(`Top-up démarré : ${data.job.id.slice(0, 8)}`);
+      loadJobs();
+    } catch (e) {
+      const status = e.response?.status;
+      const msg = e.response?.data?.detail;
+      if (status === 409) toast.warning(msg || "Job déjà en cours");
+      else toast.error(formatError(msg) || "Impossible de lancer le top-up");
+    } finally {
+      setRerunning(null);
+    }
+  }
+
   // ---- Sélection multi + actions bulk ----
   function toggleSelect(id) {
     setSelected((prev) => {
@@ -250,20 +271,71 @@ export default function AdminQA() {
                         <span className="text-terracotta font-bold">⚠ {s.flagged}</span>
                         <span className="ml-auto text-navy/60">{s.playable_pct}% jouable</span>
                       </div>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={(e) => { e.stopPropagation(); rerunCategory(s.category_id, s.category_title); }}
-                      disabled={isRunning}
-                      data-testid={`admin-qa-rerun-${s.category_id}`}
-                      className="w-full inline-flex items-center justify-center gap-1.5 bg-navy text-cream text-xs font-bold uppercase tracking-wider px-3 py-1.5 rounded-full hover:bg-navy-dark transition disabled:opacity-60"
-                    >
-                      {isRunning ? (
-                        <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Audit en cours…</>
-                      ) : (
-                        <><PlayCircle className="w-3.5 h-3.5" /> Régénérer la catégorie</>
+
+                      {/* Paliers 1..7 — barre 20 questions par palier */}
+                      {s.paliers && (
+                        <div className="mt-3 pt-3 border-t border-cream-dark" data-testid={`admin-qa-paliers-${s.category_id}`}>
+                          <div className="flex items-center justify-between text-xs mb-1.5">
+                            <span className="font-bold text-navy/70">Parcours (7 × 20 = 140)</span>
+                            <span className={`font-bold ${s.missing_for_full_parcours === 0 ? "text-[#2A7350]" : "text-terracotta"}`}>
+                              {s.missing_for_full_parcours === 0
+                                ? "✓ complet"
+                                : `manque ${s.missing_for_full_parcours}`}
+                            </span>
+                          </div>
+                          <div className="flex gap-1">
+                            {s.paliers.map((p) => {
+                              const pct = Math.min(100, (p.count / p.target) * 100);
+                              const full = p.count >= p.target;
+                              return (
+                                <div key={p.palier} className="flex-1" title={`Palier ${p.palier} : ${p.count}/${p.target}`}>
+                                  <div className="h-6 rounded bg-cream-dark overflow-hidden relative">
+                                    <div
+                                      className={`h-full transition-all ${full ? "bg-[#3D9970]" : p.count === 0 ? "bg-cream" : "bg-mustard"}`}
+                                      style={{ width: `${pct}%` }}
+                                    />
+                                    <div className="absolute inset-0 flex items-center justify-center text-[10px] font-bold text-navy">
+                                      {p.palier}
+                                    </div>
+                                  </div>
+                                  <div className="text-[9px] text-navy/50 text-center mt-0.5">{p.count}</div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
                       )}
                     </button>
+                    <div className="grid grid-cols-2 gap-2">
+                      <button
+                        type="button"
+                        onClick={(e) => { e.stopPropagation(); rerunCategory(s.category_id, s.category_title); }}
+                        disabled={isRunning}
+                        data-testid={`admin-qa-rerun-${s.category_id}`}
+                        className="inline-flex items-center justify-center gap-1.5 bg-navy text-cream text-xs font-bold uppercase tracking-wider px-2 py-1.5 rounded-full hover:bg-navy-dark transition disabled:opacity-60"
+                        title="Fact-check via Opus 4.8 + régénère les questions flaguées"
+                      >
+                        {isRunning ? (
+                          <><Loader2 className="w-3.5 h-3.5 animate-spin" /> En cours…</>
+                        ) : (
+                          <><PlayCircle className="w-3.5 h-3.5" /> Régénérer</>
+                        )}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={(e) => { e.stopPropagation(); topupCategory(s.category_id, s.category_title, s.missing_for_full_parcours); }}
+                        disabled={isRunning || s.missing_for_full_parcours === 0}
+                        data-testid={`admin-qa-topup-${s.category_id}`}
+                        className="inline-flex items-center justify-center gap-1.5 bg-terracotta text-white text-xs font-bold uppercase tracking-wider px-2 py-1.5 rounded-full hover:bg-terracotta-dark transition disabled:opacity-40 disabled:cursor-not-allowed"
+                        title="Génère les questions manquantes (Sonnet + Opus fact-check)"
+                      >
+                        {s.missing_for_full_parcours === 0 ? (
+                          <><Check className="w-3.5 h-3.5" /> Complet</>
+                        ) : (
+                          <><Wand2 className="w-3.5 h-3.5" /> Compléter à 140</>
+                        )}
+                      </button>
+                    </div>
                     {runningJob?.log_tail && (
                       <pre className="mt-2 bg-cream text-[10px] font-mono text-navy/70 rounded-md p-2 max-h-20 overflow-y-auto whitespace-pre-wrap">
                         {runningJob.log_tail}

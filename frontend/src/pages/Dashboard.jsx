@@ -230,17 +230,27 @@ export default function Dashboard() {
                     <p className="text-navy/80 text-base line-clamp-2">{cat.description}</p>
                   </div>
                 </div>
-                <div className="relative mt-5 flex items-center justify-between">
+                <div className="relative mt-5 flex items-center justify-between gap-2">
                   <span className="text-xs font-bold uppercase tracking-wider text-navy/60">
                     {cat.count} questions
                   </span>
-                  <Link
-                    to={`/app/quiz/${cat.id}`}
-                    data-testid={`dashboard-play-${cat.id}`}
-                    className="inline-flex items-center gap-2 bg-terracotta hover:bg-terracotta-dark text-white font-bold px-5 py-2.5 rounded-full transition shadow-warm"
-                  >
-                    Jouer <ArrowRight className="w-4 h-4" />
-                  </Link>
+                  <div className="flex gap-2">
+                    <Link
+                      to={`/app/parcours/${cat.id}`}
+                      data-testid={`dashboard-parcours-${cat.id}`}
+                      className="inline-flex items-center gap-1.5 bg-white border-2 border-navy text-navy font-bold text-sm px-3 py-2 rounded-full hover:bg-navy hover:text-cream transition"
+                      title="Parcours à paliers"
+                    >
+                      🏆 Parcours
+                    </Link>
+                    <Link
+                      to={`/app/quiz/${cat.id}`}
+                      data-testid={`dashboard-play-${cat.id}`}
+                      className="inline-flex items-center gap-2 bg-terracotta hover:bg-terracotta-dark text-white font-bold px-4 py-2 rounded-full transition shadow-warm"
+                    >
+                      Jouer <ArrowRight className="w-4 h-4" />
+                    </Link>
+                  </div>
                 </div>
               </motion.div>
             ))}

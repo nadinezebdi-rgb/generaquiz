@@ -29,6 +29,7 @@ import AdminHome from "@/pages/AdminHome";
 import AdminQA from "@/pages/AdminQA";
 import AdminUsers from "@/pages/AdminUsers";
 import AdminAudit from "@/pages/AdminAudit";
+import Parcours from "@/pages/Parcours";
 import Pourquoi from "@/pages/Pourquoi";
 import EarnCredits from "@/pages/EarnCredits";
 import CoopChallengeCreate from "@/pages/CoopChallengeCreate";
@@ -239,6 +240,14 @@ export default function App() {
             element={
               <ProtectedRoute>
                 <QuizPlayer />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/app/parcours/:categoryId"
+            element={
+              <ProtectedRoute>
+                <Parcours />
               </ProtectedRoute>
             }
           />

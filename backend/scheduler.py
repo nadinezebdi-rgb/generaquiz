@@ -53,6 +53,7 @@ def start_scheduler() -> None:
     from wordsearch_mistral import generate_one_grid_from_mistral
     from charades_mistral import generate_nightly_charades
     from fleches_mistral import generate_nightly_fleches
+    from topup_paliers_job import topup_all_categories_nightly
 
     _scheduler = AsyncIOScheduler(timezone="Europe/Paris")
 
@@ -61,6 +62,7 @@ def start_scheduler() -> None:
     _schedule(_scheduler, generate_one_grid_from_mistral, hour=3, minute=30, job_id="wordsearch_generate_nightly")
     _schedule(_scheduler, generate_nightly_charades, hour=4,  minute=0,  job_id="charades_generate_nightly")
     _schedule(_scheduler, generate_nightly_fleches,  hour=4,  minute=30, job_id="fleches_generate_nightly")
+    _schedule(_scheduler, topup_all_categories_nightly, hour=5, minute=0, job_id="paliers_topup_nightly")
 
     # -- E-mails transactionnels (09:00 & 10:00 Paris) --------------------------
     _schedule(_scheduler, send_morning_emails,       hour=9,  minute=0,  job_id="daily_quiz_email")
@@ -72,8 +74,8 @@ def start_scheduler() -> None:
 
     _scheduler.start()
     logger.info(
-        "[scheduler] démarré — 8 jobs actifs "
-        "(quiz 03:00 · wordsearch 03:30 · charades 04:00 · fléchés 04:30 · "
+        "[scheduler] démarré — 9 jobs actifs "
+        "(quiz 03:00 · wordsearch 03:30 · charades 04:00 · fléchés 04:30 · paliers top-up 05:00 · "
         "email quotidien 09:00 · relance J-7 10:00 · rappel ligues dim 20:00 · clôture ligues lun 00:05, Europe/Paris)"
     )
 

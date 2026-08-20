@@ -1,5 +1,21 @@
 # Quiz d'Antan — SaaS pour seniors français
 
+## 2026-02-20 (soir) — Parcours à paliers (140 questions / catégorie)
+- **Backend nouveau**
+  - `topup_paliers.py` : script standalone qui génère les questions manquantes par palier (Sonnet 4.6 + Opus 4.8 fact-check). Prompt intégrant la difficulté (1..7).
+  - `migrate_difficulty.py` : one-shot qui distribue les questions existantes en round-robin sur les 7 paliers (appliqué en preview, 792 questions taggées).
+  - `topup_paliers_job.py` : job nocturne 05:00 Paris qui top-up UNIQUEMENT les catégories avec un déficit ≥ 3.
+  - `routers/palier.py` : parcours utilisateur (`GET /api/palier/categories/{id}`, `POST /{n}/start`, `POST /{n}/submit`) — server-authoritative scoring, 14/20 pour valider, mêmes questions au rejeu, palier N+1 débloqué si palier N completed.
+  - `admin_qa.py` : nouveau `POST /api/admin/qa/topup/{cat_id}` + `qa_summary` enrichi (couverture par palier, `missing_for_full_parcours`).
+  - `scheduler.py` : ajout du 9ᵉ job nocturne `paliers_topup_nightly` à 05:00.
+- **Frontend nouveau**
+  - `pages/Parcours.jsx` : page complète avec 3 états (overview / playing / result). Overview = 7 cartes palier avec verrou/best-score/stock. Play = 20 questions avec nav Préc/Suiv, seuil visible. Result = badge validé/échec + CTA rejouer / palier suivant.
+  - `pages/AdminQA.jsx` : chaque catégorie affiche maintenant les 7 barres palier (vert/jaune/vide + count sous chaque) + boutons **Régénérer** (fact-check Opus) et **Compléter à 140** (top-up Sonnet+Opus, désactivé si déjà complet).
+  - `pages/Dashboard.jsx` : chaque catégorie a un CTA supplémentaire **🏆 Parcours** vers `/app/parcours/{id}`.
+  - Route `/app/parcours/:categoryId` protégée.
+- **Testé** : login admin → QA affiche paliers + Cinéma "complet" désactivé + les autres avec "manque N". `/app/parcours/cinema` overview + play view fonctionnels. Curl : `start` d'un palier 2 sans valider palier 1 renvoie bien 403.
+
+
 ## 2026-02-20 — Rôle Super-Admin + Journal d'audit
 - **Nouveau rôle `superadmin`** au-dessus d'`admin`. Le seed idempotent au démarrage (`server.py`) promeut auto le user défini via `ADMIN_EMAIL` en `superadmin`. Aucun autre superadmin ne peut être créé depuis l'UI (point d'entrée unique = env).
 - **Nouvelles dépendances backend** dans `core.py` :

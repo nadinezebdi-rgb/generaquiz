@@ -30,7 +30,7 @@ router = APIRouter(prefix="/admin/qa", tags=["admin-qa"])
 
 @router.get("/summary")
 async def qa_summary(_: dict = Depends(get_admin_user)) -> list[dict]:
-    """Répartition qualité par catégorie."""
+    """Répartition qualité par catégorie, avec couverture des 7 paliers (20 questions/palier)."""
     cats = await db.categories.find({}, {"_id": 0, "id": 1, "title": 1}).to_list(50)
     out = []
     for c in cats:
@@ -39,6 +39,20 @@ async def qa_summary(_: dict = Depends(get_admin_user)) -> list[dict]:
         verified = await db.questions.count_documents({"category_id": cat_id, "quality": "verified"})
         flagged = await db.questions.count_documents({"category_id": cat_id, "quality": "flagged"})
         unchecked = total - verified - flagged
+
+        # Couverture par palier (difficulty 1..7) — 20 attendues par palier
+        pipeline = [
+            {"$match": {"category_id": cat_id, "quality": {"$ne": "flagged"},
+                        "difficulty": {"$gte": 1, "$lte": 7}}},
+            {"$group": {"_id": "$difficulty", "n": {"$sum": 1}}},
+        ]
+        by_diff = {d["_id"]: d["n"] async for d in db.questions.aggregate(pipeline)}
+        paliers = [{"palier": d, "count": by_diff.get(d, 0), "target": 20,
+                    "missing": max(0, 20 - by_diff.get(d, 0))} for d in range(1, 8)]
+        missing_total = sum(p["missing"] for p in paliers)
+        untagged = await db.questions.count_documents(
+            {"category_id": cat_id, "quality": {"$ne": "flagged"}, "difficulty": {"$exists": False}}
+        )
         out.append({
             "category_id": cat_id,
             "category_title": c["title"],
@@ -47,6 +61,9 @@ async def qa_summary(_: dict = Depends(get_admin_user)) -> list[dict]:
             "flagged": flagged,
             "unchecked": unchecked,
             "playable_pct": round((verified + unchecked) / total * 100) if total else 0,
+            "paliers": paliers,
+            "missing_for_full_parcours": missing_total,
+            "untagged_playable": untagged,
         })
     return out
 
@@ -280,11 +297,12 @@ async def qa_delete(qid: str, admin: dict = Depends(get_admin_user)) -> dict:
 # Les jobs sont stockés dans MongoDB `qa_jobs` pour survivre à un restart.
 _BACKEND_DIR = Path(__file__).parent.parent
 _AUDIT_SCRIPT = _BACKEND_DIR / "audit_and_regen_questions.py"
+_TOPUP_SCRIPT = _BACKEND_DIR / "topup_paliers.py"
 
 
-async def _run_audit_subprocess(job_id: str, category_id: str) -> None:
-    """Lance le script d'audit en subprocess Python détaché. Met à jour le
-    statut du job en DB (running → done / failed) à la fin.
+async def _run_qa_subprocess(job_id: str, category_id: str, script_path: Path) -> None:
+    """Lance un script d'admin QA (audit ou topup) en subprocess détaché.
+    Met à jour le statut du job en DB (running → done / failed) à la fin.
     """
     log_path = f"/tmp/qa_job_{job_id}.log"
     env = os.environ.copy()
@@ -293,7 +311,7 @@ async def _run_audit_subprocess(job_id: str, category_id: str) -> None:
     try:
         with open(log_path, "w") as logf:
             proc = await asyncio.create_subprocess_exec(
-                sys.executable, str(_AUDIT_SCRIPT),
+                sys.executable, str(script_path),
                 cwd=str(_BACKEND_DIR),
                 env=env,
                 stdout=logf,
@@ -324,6 +342,18 @@ async def qa_rerun(category_id: str, admin: dict = Depends(get_admin_user)) -> d
     - Refuse si un job "running" existe déjà pour cette catégorie (anti-double-facturation LLM).
     - Lance le script en subprocess Python non bloquant. Le statut se lit via `/admin/qa/jobs`.
     """
+    return await _launch_qa_job(category_id, admin, "rerun", _AUDIT_SCRIPT, action_label="qa.rerun")
+
+
+@router.post("/topup/{category_id}")
+async def qa_topup(category_id: str, admin: dict = Depends(get_admin_user)) -> dict:
+    """Lance le top-up des paliers : génère les questions manquantes pour
+    atteindre 20 par difficulté (Mistral/Sonnet + Opus fact-check)."""
+    return await _launch_qa_job(category_id, admin, "topup", _TOPUP_SCRIPT, action_label="qa.topup")
+
+
+async def _launch_qa_job(category_id: str, admin: dict, kind: str,
+                         script_path: Path, action_label: str) -> dict:
     cat = await db.categories.find_one({"id": category_id})
     if not cat:
         raise HTTPException(status_code=404, detail="Catégorie inconnue")
@@ -338,17 +368,16 @@ async def qa_rerun(category_id: str, admin: dict = Depends(get_admin_user)) -> d
         "id": job_id,
         "category_id": category_id,
         "category_title": cat.get("title"),
+        "kind": kind,
         "status": "running",
         "started_at": datetime.now(timezone.utc).isoformat(),
         "started_by": admin.get("email"),
     }
     await db.qa_jobs.insert_one(job_doc)
-    await record_audit(admin, action="qa.rerun", target_type="category", target_id=category_id,
-                       target_label=cat.get("title"), meta={"job_id": job_id})
+    await record_audit(admin, action=action_label, target_type="category", target_id=category_id,
+                       target_label=cat.get("title"), meta={"job_id": job_id, "kind": kind})
 
-    # Fire-and-forget : le task tourne en arrière-plan, on rend la main immédiatement.
-    asyncio.create_task(_run_audit_subprocess(job_id, category_id))
-
+    asyncio.create_task(_run_qa_subprocess(job_id, category_id, script_path))
     job_doc.pop("_id", None)
     return {"ok": True, "job": job_doc}
 
