@@ -124,6 +124,10 @@ db = client[DB_NAME]
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 logger = logging.getLogger("quizdantan")
+# Uvicorn peut re-configurer le root logger au niveau WARNING → on force INFO
+# explicitement sur notre logger pour garantir la visibilité des logs de seed
+# et autres diagnostics de démarrage.
+logger.setLevel(logging.INFO)
 
 
 # -------------------- helpers --------------------

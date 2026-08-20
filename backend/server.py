@@ -10,6 +10,7 @@ Modular structure:
 """
 from datetime import datetime, timezone, timedelta
 import asyncio
+import re
 
 from fastapi import APIRouter, Depends, FastAPI
 from fastapi.staticfiles import StaticFiles
@@ -17,7 +18,7 @@ from starlette.middleware.cors import CORSMiddleware
 
 from core import (
     ROOT_DIR, FRONTEND_URL, ADMIN_EMAIL, ADMIN_PASSWORD,
-    client, db, logger, hash_password, verify_password, get_admin_user,
+    client, db, logger, hash_password, get_admin_user,
 )
 from seed_data import CATEGORIES, QUESTIONS
 from daily_email import send_morning_emails
@@ -226,49 +227,74 @@ async def startup():
         if r.modified_count:
             logger.info(f"[grandfathering] {old}→{new}: {r.modified_count} utilisateurs")
 
-    # Seed super-admin — skip complet si ADMIN_EMAIL ou ADMIN_PASSWORD ne sont pas définis.
-    # L'utilisateur défini via ADMIN_EMAIL est le SUPERADMIN unique (rôle=superadmin).
-    # Le rôle "admin" (nommé par un superadmin) reste disponible et est traité comme
-    # administrateur classique dans les guards.
-    if not ADMIN_EMAIL or not ADMIN_PASSWORD:
-        logger.warning("ADMIN_EMAIL / ADMIN_PASSWORD non définis → seed admin ignoré")
+    # ------------------------------------------------------------------
+    # Seed super-admin — IDEMPOTENT à chaque démarrage.
+    #   - Si ADMIN_EMAIL n'est pas défini : on ne fait rien (log warning).
+    #   - Sinon on cherche le compte par email (comparaison INSENSIBLE à la casse) :
+    #       * Introuvable  → on le crée avec role=superadmin (nécessite ADMIN_PASSWORD).
+    #       * Trouvé       → on FORCE role=superadmin via update (sans jamais
+    #                        toucher au mot de passe existant).
+    #   - Chaque branche loggue explicitement ce qu'elle a fait.
+    # ------------------------------------------------------------------
+    if not ADMIN_EMAIL:
+        logger.warning("[seed-admin] ADMIN_EMAIL non défini → seed admin IGNORÉ")
     else:
-        existing = await db.users.find_one({"email": ADMIN_EMAIL})
+        admin_email_norm = ADMIN_EMAIL.strip().lower()
+        # Comparaison insensible à la casse pour ratrapper les comptes créés en
+        # mixed-case avant que l'app normalise à l'inscription.
+        existing = await db.users.find_one(
+            {"email": {"$regex": f"^{re.escape(admin_email_norm)}$", "$options": "i"}}
+        )
         if existing is None:
-            await db.users.insert_one({
-                "email": ADMIN_EMAIL,
-                "password_hash": hash_password(ADMIN_PASSWORD),
-                "name": "Administrateur",
-                "role": "superadmin",
-                "plan": "premium",
-                "plan_tier": "premium",
-                "plan_period": "yearly",
-                "plan_expires_at": (datetime.now(timezone.utc) + timedelta(days=3650)).isoformat(),
-                "created_at": datetime.now(timezone.utc).isoformat(),
-            })
-            logger.info(f"Super-admin créé : {ADMIN_EMAIL}")
-        else:
-            # Backfill idempotent : ADMIN_EMAIL DOIT être superadmin. Si le compte
-            # existe avec role user/admin, on le promeut au démarrage — c'est le
-            # mécanisme de récupération si le rôle a été altéré.
-            backfill_updates: dict = {}
-            if existing.get("role") != "superadmin":
-                backfill_updates["role"] = "superadmin"
-            if not existing.get("plan_tier"):
-                backfill_updates["plan_tier"] = "premium"
-                backfill_updates["plan_period"] = "yearly"
-            if existing.get("plan") != "premium":
-                backfill_updates["plan"] = "premium"
-            if backfill_updates:
-                await db.users.update_one({"email": ADMIN_EMAIL}, {"$set": backfill_updates})
-                logger.info(f"Super-admin backfill : {list(backfill_updates.keys())}")
-
-            if not verify_password(ADMIN_PASSWORD, existing["password_hash"]):
-                await db.users.update_one(
-                    {"email": ADMIN_EMAIL},
-                    {"$set": {"password_hash": hash_password(ADMIN_PASSWORD)}},
+            if not ADMIN_PASSWORD:
+                logger.error(
+                    f"[seed-admin] Compte {admin_email_norm} INTROUVABLE et ADMIN_PASSWORD "
+                    f"non défini → impossible de créer l'admin. Définissez ADMIN_PASSWORD "
+                    f"ou créez le compte manuellement puis relancez le seed."
                 )
-                logger.info("Super-admin password mis à jour")
+            else:
+                await db.users.insert_one({
+                    "email": admin_email_norm,
+                    "password_hash": hash_password(ADMIN_PASSWORD),
+                    "name": "Administrateur",
+                    "role": "superadmin",
+                    "plan": "premium",
+                    "plan_tier": "premium",
+                    "plan_period": "yearly",
+                    "plan_expires_at": (datetime.now(timezone.utc) + timedelta(days=3650)).isoformat(),
+                    "created_at": datetime.now(timezone.utc).isoformat(),
+                })
+                logger.info(f"[seed-admin] CRÉÉ : {admin_email_norm} → role=superadmin")
+        else:
+            # Compte existant : on force role=superadmin (idempotent) et on backfill
+            # les champs plan si absents. Le mot de passe n'est JAMAIS modifié ici.
+            updates: dict = {}
+            previous_role = existing.get("role")
+            if previous_role != "superadmin":
+                updates["role"] = "superadmin"
+            if not existing.get("plan_tier"):
+                updates["plan_tier"] = "premium"
+                updates["plan_period"] = "yearly"
+            if existing.get("plan") != "premium":
+                updates["plan"] = "premium"
+
+            if updates:
+                await db.users.update_one({"_id": existing["_id"]}, {"$set": updates})
+                if "role" in updates:
+                    logger.info(
+                        f"[seed-admin] PROMU : {existing.get('email')} "
+                        f"role={previous_role!r} → 'superadmin' "
+                        f"(backfill: {sorted(updates.keys())})"
+                    )
+                else:
+                    logger.info(
+                        f"[seed-admin] déjà superadmin : {existing.get('email')} "
+                        f"(backfill plan : {sorted(updates.keys())})"
+                    )
+            else:
+                logger.info(
+                    f"[seed-admin] déjà superadmin : {existing.get('email')} — aucun changement"
+                )
 
     # Backfill credits for users registered before the credits system.
     # Idempotent: only acts on users missing the `credits` field.
