@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, Link, useLocation } from "react-router-dom";
 import { Toaster } from "sonner";
 import "@/App.css";
 
@@ -62,8 +62,9 @@ function ProtectedRoute({ children }) {
 }
 
 /** AdminRoute — guard rôle "admin". Un utilisateur connecté mais non-admin
- *  est redirigé vers son tableau de bord. Ne remplace PAS la protection
- *  serveur : tous les endpoints /api/admin/* exigent aussi role=admin. */
+ *  voit un écran "Accès refusé" explicite (plus de redirection silencieuse,
+ *  pour faciliter le diagnostic). Ne remplace PAS la protection serveur : tous
+ *  les endpoints /api/admin/* exigent aussi role=admin. */
 function AdminRoute({ children }) {
   const { user, loading } = useAuth();
   const location = useLocation();
@@ -78,9 +79,46 @@ function AdminRoute({ children }) {
     return <Navigate to="/login" state={{ from: location.pathname }} replace />;
   }
   if (user.role !== "admin") {
-    return <Navigate to="/app/dashboard" replace />;
+    return <AdminAccessDenied role={user.role} />;
   }
   return children;
+}
+
+function AdminAccessDenied({ role }) {
+  return (
+    <div className="min-h-screen paper-bg flex items-center justify-center px-4" data-testid="admin-access-denied">
+      <div className="max-w-md w-full bg-white border-2 border-cream-dark rounded-3xl p-8 text-center shadow-warm">
+        <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-bordeaux/10 text-bordeaux flex items-center justify-center text-3xl">
+          🔒
+        </div>
+        <h1 className="font-display text-2xl font-extrabold text-navy mb-2">
+          Accès refusé
+        </h1>
+        <p className="text-navy/70 mb-1">
+          Droits <strong>administrateur</strong> requis pour accéder à cette page.
+        </p>
+        <p className="text-xs text-navy/50 mb-6">
+          Votre rôle actuel : <code className="bg-cream px-2 py-0.5 rounded font-mono">{role || "user"}</code>
+        </p>
+        <div className="flex flex-col gap-2">
+          <Link
+            to="/app/dashboard"
+            data-testid="admin-denied-back-dashboard"
+            className="inline-flex items-center justify-center gap-2 bg-terracotta text-white font-bold px-5 py-3 rounded-full hover:bg-terracotta-dark transition"
+          >
+            Retour au tableau de bord
+          </Link>
+          <Link
+            to="/"
+            data-testid="admin-denied-back-home"
+            className="inline-flex items-center justify-center gap-2 bg-white border-2 border-navy text-navy font-bold px-5 py-3 rounded-full hover:bg-navy hover:text-cream transition"
+          >
+            Retour à l&apos;accueil
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 export default function App() {
