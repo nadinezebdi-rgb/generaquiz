@@ -213,10 +213,11 @@ async def palier_submit(category_id: str, palier: int, body: PalierSubmit,
     )
 
     # Défi Hebdo Palier — enregistre le score si cette tentative matche le défi courant
-    await record_weekly_score(user_id, category_id, palier, score)
+    matched_weekly = await record_weekly_score(user_id, category_id, palier, score)
 
-    # Badges palier (expert / grand maître / 20/20 parfait). Idempotent.
-    awarded = await check_after_palier(user_id, category_id, palier, score, PALIER_SIZE, passed)
+    # Badges palier (expert / grand maître / 20/20 parfait / fidélité hebdo). Idempotent.
+    awarded = await check_after_palier(user_id, category_id, palier, score, PALIER_SIZE,
+                                        passed, matched_weekly=matched_weekly)
 
     next_unlocked = new_completed and palier < TOTAL_PALIERS
     return {

@@ -39,6 +39,7 @@ export default function Dashboard() {
   const [showSaver, setShowSaver] = useState(false);
   const [dismissed, setDismissed] = useState(false);
   const [weekly, setWeekly] = useState(null);
+  const [weeklyHistory, setWeeklyHistory] = useState([]);
 
   useEffect(() => {
     api.get("/categories").then((r) => setCategories(r.data)).catch(() => {});
@@ -47,6 +48,7 @@ export default function Dashboard() {
     api.get("/daily/leaderboard").then((r) => setDaily(r.data)).catch(() => {});
     api.get("/livre/souvenir-du-jour").then((r) => setSouvenir(r.data)).catch(() => {});
     api.get("/palier/weekly").then((r) => setWeekly(r.data)).catch(() => {});
+    api.get("/palier/weekly/history?limit=4").then((r) => setWeeklyHistory(r.data)).catch(() => {});
   }, []);
 
   // Auto-open the streak saver when the criteria matches and the user
@@ -245,6 +247,34 @@ export default function Dashboard() {
                     );
                   })}
                 </ol>
+              </div>
+            )}
+
+            {weeklyHistory.length > 0 && (
+              <div className="mt-5 pt-5 border-t border-cream/20" data-testid="weekly-history">
+                <div className="text-xs uppercase tracking-widest text-mustard font-bold mb-2">
+                  <Trophy className="w-3 h-3 inline mr-1" /> Champions des semaines passées
+                </div>
+                <ul className="space-y-1">
+                  {weeklyHistory.map((h) => (
+                    <li key={h.week} className="flex items-center gap-2 text-sm text-cream/80">
+                      <span className="font-mono text-cream/60 shrink-0">{h.week}</span>
+                      <span className="flex-1 truncate">
+                        {h.category_title} · P{h.palier}
+                      </span>
+                      <span className="text-right">
+                        {h.winner ? (
+                          <>
+                            <span className="text-mustard font-bold">👑 {h.winner}</span>
+                            <span className="text-cream/50 ml-1">({h.winner_score}/20)</span>
+                          </>
+                        ) : (
+                          <span className="text-cream/40 italic">aucun participant</span>
+                        )}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
               </div>
             )}
           </motion.div>

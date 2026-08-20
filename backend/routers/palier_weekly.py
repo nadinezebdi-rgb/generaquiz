@@ -76,14 +76,14 @@ async def get_current_challenge() -> Optional[dict]:
     return doc
 
 
-async def record_weekly_score(user_id: str, category_id: str, palier: int, score: int) -> None:
+async def record_weekly_score(user_id: str, category_id: str, palier: int, score: int) -> bool:
     """Appelé depuis `palier_submit` — enregistre le meilleur score de la
-    semaine si la tentative matche le défi courant."""
+    semaine si la tentative matche le défi courant. Retourne True si match."""
     challenge = await get_current_challenge()
     if not challenge:
-        return
+        return False
     if challenge["category_id"] != category_id or challenge["palier"] != palier:
-        return
+        return False
     week = challenge["week"]
     # Upsert best-of : ne baisse jamais le score
     await db.weekly_palier_scores.update_one(
@@ -101,6 +101,47 @@ async def record_weekly_score(user_id: str, category_id: str, palier: int, score
         },
         upsert=True,
     )
+    return True
+
+
+@router.get("/history")
+async def weekly_history(limit: int = 4, user: dict = Depends(get_current_user)) -> list[dict]:
+    """4 derniers défis PASSÉS (semaine courante EXCLUE) avec le gagnant de
+    chaque semaine."""
+    current_week = _current_iso_week()
+    challenges = await db.weekly_palier_challenges.find(
+        {"week": {"$ne": current_week}},
+        {"_id": 0}
+    ).sort("week", -1).limit(limit).to_list(limit)
+
+    from bson import ObjectId
+    out = []
+    for ch in challenges:
+        # Gagnant = meilleur score de la semaine
+        winner_row = await db.weekly_palier_scores.find_one(
+            {"week": ch["week"]},
+            {"_id": 0, "user_id": 1, "best_score": 1},
+            sort=[("best_score", -1)],
+        )
+        winner_name = None
+        if winner_row:
+            try:
+                u = await db.users.find_one({"_id": ObjectId(winner_row["user_id"])}, {"name": 1, "email": 1})
+                if u:
+                    winner_name = u.get("name") or (u.get("email") or "").split("@")[0]
+            except Exception:
+                pass
+        total_players = await db.weekly_palier_scores.count_documents({"week": ch["week"]})
+        out.append({
+            "week": ch["week"],
+            "category_id": ch["category_id"],
+            "category_title": ch["category_title"],
+            "palier": ch["palier"],
+            "winner": winner_name,
+            "winner_score": winner_row["best_score"] if winner_row else None,
+            "total_players": total_players,
+        })
+    return out
 
 
 @router.get("")

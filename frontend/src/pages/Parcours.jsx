@@ -84,6 +84,7 @@ export default function Parcours() {
           palier_perfect_20: "🏅 Sans-faute palier — 20/20 !",
           palier_expert: "🎓 Expert d'une catégorie — palier 7 validé !",
           palier_grand_maitre: "👑 Grand Maître — 3 catégories expertes !",
+          weekly_streak_4: "🔥 Fidèle du défi — 4 semaines d'affilée !",
         };
         toast.success(labels[badgeId] || `Badge débloqué : ${badgeId}`);
       });

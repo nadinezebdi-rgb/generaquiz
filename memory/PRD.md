@@ -1,5 +1,13 @@
 # Quiz d'Antan — SaaS pour seniors français
 
+## 2026-02-20 (tard) — Rappel dimanche + Badge fidélité + Historique défis
+- **Rappel Défi Dimanche** — nouveau module `weekly_reminders.py` avec `send_weekly_challenge_reminders()`. Envoi via Resend chaque dimanche 19:00 Paris (nouveau job scheduler `weekly_palier_reminder`) aux users opt-in qui n'ont PAS encore participé (exclusion via un pré-scan de `weekly_palier_scores`). Template HTML dédié avec CTA "Relever le défi".
+- **Badge Fidélité Hebdo** — nouveau badge `weekly_streak_4` (or, famille palier, 🔥 "Fidèle du défi"). Attribué quand l'utilisateur a joué le défi 4 semaines ISO consécutives (calcul via `date.fromisocalendar` sur les 4 dernières entrées `weekly_palier_scores`, écarts de 7 jours). Hook idempotent dans `badges.check_after_palier` (nouveau paramètre `matched_weekly=True`). Toast frontend ajouté.
+- **Historique Défis Passés** — nouveau endpoint `GET /api/palier/weekly/history?limit=4` qui renvoie les 4 défis passés (semaine courante exclue) avec gagnant + score + total_players. Affichage sur la bannière défi hebdo du Dashboard (section "Champions des semaines passées") avec 👑 par gagnant.
+- **Scheduler** : maintenant 11 jobs actifs (ajout `weekly_palier_reminder` dimanche 19:00).
+- **Top-up Voyages/Cuisine** : les 2 tournent en background (Voyages 51/140, Cuisine 91/140). Les subprocess sont tués par les restart du backend — noté comme dette technique (design fragile, un supervisor dédié serait mieux).
+
+
 ## 2026-02-20 (nuit +) — Trophées profil + Email Grand Maître + Défi Hebdo Palier
 - **Section "Mes trophées"** sur `/app/account` : composant `BadgesSection` qui appelle `/api/badges/catalog`, affiche les badges collectés dans une grille avec emoji + titre + description + tier (bronze/argent/or/diamant). Bouton dépliant "Voir les X badges à débloquer" pour ceux non gagnés.
 - **Email félicitations Grand Maître** : nouveau module `badge_emails.py` avec `send_grand_maitre_email(user, categories_count)`. Wire depuis `badges.check_after_palier` quand le badge `palier_grand_maitre` tombe (best-effort, ne bloque jamais l'attribution). Template HTML façon Resend (👑, CTA "Voir mes trophées").
