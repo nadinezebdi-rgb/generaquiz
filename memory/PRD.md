@@ -1,5 +1,18 @@
 # Quiz d'Antan — SaaS pour seniors français
 
+## 2026-02-20 (nuit) — Robustesse QA Jobs (5 correctifs)
+- **`admin_qa.py`** refonte complète du pilotage des subprocess :
+  1. **`_pid_alive(pid)`** — teste `os.kill(pid, 0)` (signal 0 = no-op), traite `OSError/TypeError/ValueError` comme processus mort.
+  2. **`_reap_dead_jobs()`** — parcourt les jobs `running`, passe en `failed` ceux dont le PID est mort. Appelé dans `qa_rerun/qa_topup` AVANT le contrôle 409 et dans `GET /jobs` pour ne plus afficher de fantômes.
+  3. **`sweep_running_jobs_on_startup()`** — au démarrage backend, purge INCONDITIONNELLEMENT tous les jobs `running` (les PID sont morts ET peuvent avoir été réattribués → aucun check PID ici). Log explicite `[qa-jobs] startup sweep — N job(s) running → failed`. Wire dans `server.py::startup`.
+  4. **Timeout 15 min** dans `_run_qa_subprocess` — `asyncio.wait_for(proc.wait(), timeout=900)`, kill si dépassé, marque `failed / return_code=-2 / error="timeout after 900s"`.
+  5. **Sérialisation** — nouvelle limite `_MAX_CONCURRENT_QA_JOBS = 2`. Au 3ᵉ lancement, statut initial `queued` au lieu de `running`. `_dequeue_next()` appelé dans le `finally` de chaque job qui se termine → démarre automatiquement le prochain FIFO par `started_at`.
+- Testé end-to-end :
+  - 8 zombies simulés → tous purgés au restart (log OK)
+  - 3 lancements consécutifs → 2 running + 1 queued visible dans `/api/admin/qa/jobs`
+  - Voyages 120/140 et Cuisine 132/140 en cours en parallèle sans pression mémoire (2 audits Opus max)
+
+
 ## 2026-02-20 (tard) — Rappel dimanche + Badge fidélité + Historique défis
 - **Rappel Défi Dimanche** — nouveau module `weekly_reminders.py` avec `send_weekly_challenge_reminders()`. Envoi via Resend chaque dimanche 19:00 Paris (nouveau job scheduler `weekly_palier_reminder`) aux users opt-in qui n'ont PAS encore participé (exclusion via un pré-scan de `weekly_palier_scores`). Template HTML dédié avec CTA "Relever le défi".
 - **Badge Fidélité Hebdo** — nouveau badge `weekly_streak_4` (or, famille palier, 🔥 "Fidèle du défi"). Attribué quand l'utilisateur a joué le défi 4 semaines ISO consécutives (calcul via `date.fromisocalendar` sur les 4 dernières entrées `weekly_palier_scores`, écarts de 7 jours). Hook idempotent dans `badges.check_after_palier` (nouveau paramètre `matched_weekly=True`). Toast frontend ajouté.

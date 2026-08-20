@@ -299,15 +299,82 @@ _BACKEND_DIR = Path(__file__).parent.parent
 _AUDIT_SCRIPT = _BACKEND_DIR / "audit_and_regen_questions.py"
 _TOPUP_SCRIPT = _BACKEND_DIR / "topup_paliers.py"
 
+# Limite le nombre de jobs Opus/Sonnet simultanés — au-delà, mémoire pod
+# saturée (les crashes du 20/08 ont montré que 8 jobs en parallèle tuent tout
+# le monde silencieusement). Chansons seul est passé en 3'53" — on garde 2.
+_MAX_CONCURRENT_QA_JOBS = 2
+_SUBPROCESS_TIMEOUT_SEC = 15 * 60  # timeout dur pour un audit / topup
+
+
+def _pid_alive(pid: int | None) -> bool:
+    """Retourne True si le PID pointe encore vers un processus vivant.
+    `os.kill(pid, 0)` ne tue pas — c'est un test sans effet. On traite les
+    3 causes possibles d'échec (mauvais type, PID invalide, processus mort)
+    comme « processus mort »."""
+    try:
+        os.kill(int(pid), 0)
+        return True
+    except (OSError, TypeError, ValueError):
+        return False
+
+
+async def _reap_dead_jobs() -> int:
+    """Balaye les jobs `running` dont le PID est mort et les passe en `failed`.
+    Retourne le nombre de jobs nettoyés. À appeler avant tout contrôle 409."""
+    now_iso = datetime.now(timezone.utc).isoformat()
+    reaped = 0
+    async for j in db.qa_jobs.find({"status": "running"}, {"id": 1, "pid": 1}):
+        pid = j.get("pid")
+        # Si pas de PID (job pas encore démarré) OU PID mort → on passe en failed
+        if pid is None or not _pid_alive(pid):
+            r = await db.qa_jobs.update_one(
+                {"id": j["id"], "status": "running"},
+                {"$set": {
+                    "status": "failed",
+                    "return_code": -1,
+                    "finished_at": now_iso,
+                    "error": "process not alive (reaped)",
+                }},
+            )
+            reaped += r.modified_count
+    return reaped
+
+
+async def sweep_running_jobs_on_startup() -> int:
+    """Handler startup — passe INCONDITIONNELLEMENT tous les jobs `running`
+    à `failed`. Après un restart, les PID d'avant sont morts ET peuvent avoir
+    été réattribués à d'autres processus — donc pas de PID check ici."""
+    now_iso = datetime.now(timezone.utc).isoformat()
+    r = await db.qa_jobs.update_many(
+        {"status": "running"},
+        {"$set": {
+            "status": "failed",
+            "return_code": -1,
+            "finished_at": now_iso,
+            "error": "process killed by backend restart (startup sweep)",
+        }},
+    )
+    if r.modified_count:
+        from core import logger
+        logger.info(f"[qa-jobs] startup sweep — {r.modified_count} job(s) running → failed")
+    return r.modified_count
+
+
+async def _count_running() -> int:
+    return await db.qa_jobs.count_documents({"status": "running"})
+
 
 async def _run_qa_subprocess(job_id: str, category_id: str, script_path: Path) -> None:
     """Lance un script d'admin QA (audit ou topup) en subprocess détaché.
-    Met à jour le statut du job en DB (running → done / failed) à la fin.
+    Met à jour le statut du job en DB (running → done / failed / timeout) à la fin.
+    Timeout dur à `_SUBPROCESS_TIMEOUT_SEC` — au-delà, on kill et on marque failed.
     """
     log_path = f"/tmp/qa_job_{job_id}.log"
     env = os.environ.copy()
     env["ONLY_CATEGORY"] = category_id
+    now_iso = lambda: datetime.now(timezone.utc).isoformat()  # noqa: E731
 
+    proc = None
     try:
         with open(log_path, "w") as logf:
             proc = await asyncio.create_subprocess_exec(
@@ -318,29 +385,73 @@ async def _run_qa_subprocess(job_id: str, category_id: str, script_path: Path) -
                 stderr=logf,
             )
             await db.qa_jobs.update_one({"id": job_id}, {"$set": {"pid": proc.pid}})
-            rc = await proc.wait()
+            try:
+                rc = await asyncio.wait_for(proc.wait(), timeout=_SUBPROCESS_TIMEOUT_SEC)
+            except asyncio.TimeoutError:
+                # Timeout — on kill le subprocess et on marque failed
+                try:
+                    proc.kill()
+                    await proc.wait()
+                except Exception:
+                    pass
+                await db.qa_jobs.update_one({"id": job_id}, {"$set": {
+                    "status": "failed",
+                    "return_code": -2,
+                    "log_path": log_path,
+                    "finished_at": now_iso(),
+                    "error": f"timeout after {_SUBPROCESS_TIMEOUT_SEC}s",
+                }})
+                return
         status = "done" if rc == 0 else "failed"
         await db.qa_jobs.update_one({"id": job_id}, {"$set": {
             "status": status,
             "return_code": rc,
             "log_path": log_path,
-            "finished_at": datetime.now(timezone.utc).isoformat(),
+            "finished_at": now_iso(),
         }})
     except Exception as e:
         await db.qa_jobs.update_one({"id": job_id}, {"$set": {
             "status": "failed",
             "error": str(e)[:400],
             "log_path": log_path,
-            "finished_at": datetime.now(timezone.utc).isoformat(),
+            "finished_at": now_iso(),
         }})
+    finally:
+        # Après completion, on tente de dépiler un job "queued" (sérialisation)
+        asyncio.create_task(_dequeue_next())
+
+
+async def _dequeue_next() -> None:
+    """Si un slot se libère (< _MAX_CONCURRENT_QA_JOBS jobs running), démarre
+    le prochain job `queued` (FIFO par started_at)."""
+    while True:
+        # Nettoyage préventif avant chaque dépilage
+        await _reap_dead_jobs()
+        if await _count_running() >= _MAX_CONCURRENT_QA_JOBS:
+            return
+        next_job = await db.qa_jobs.find_one(
+            {"status": "queued"},
+            sort=[("started_at", 1)],
+        )
+        if not next_job:
+            return
+        r = await db.qa_jobs.update_one(
+            {"id": next_job["id"], "status": "queued"},
+            {"$set": {"status": "running", "started_at": datetime.now(timezone.utc).isoformat()}},
+        )
+        if r.modified_count == 0:
+            continue  # race : un autre worker l'a déjà pris
+        script_path = _AUDIT_SCRIPT if next_job.get("kind") == "rerun" else _TOPUP_SCRIPT
+        asyncio.create_task(_run_qa_subprocess(next_job["id"], next_job["category_id"], script_path))
 
 
 @router.post("/rerun/{category_id}")
 async def qa_rerun(category_id: str, admin: dict = Depends(get_admin_user)) -> dict:
     """Relance le pipeline fact-check/régen pour une catégorie.
 
-    - Refuse si un job "running" existe déjà pour cette catégorie (anti-double-facturation LLM).
-    - Lance le script en subprocess Python non bloquant. Le statut se lit via `/admin/qa/jobs`.
+    - Refuse si un job "running" ou "queued" existe déjà pour cette catégorie.
+    - Avant le contrôle 409, purge automatiquement les jobs zombies (PID mort).
+    - Lance le script en subprocess ou file d'attente si trop de jobs en parallèle.
     """
     return await _launch_qa_job(category_id, admin, "rerun", _AUDIT_SCRIPT, action_label="qa.rerun")
 
@@ -358,33 +469,56 @@ async def _launch_qa_job(category_id: str, admin: dict, kind: str,
     if not cat:
         raise HTTPException(status_code=404, detail="Catégorie inconnue")
 
-    existing = await db.qa_jobs.find_one({"category_id": category_id, "status": "running"})
+    # Purge des zombies AVANT le contrôle anti-doublon (le point-clé du fix)
+    reaped = await _reap_dead_jobs()
+    if reaped:
+        from core import logger
+        logger.info(f"[qa-jobs] lancement {category_id}: {reaped} zombie(s) nettoyé(s)")
+
+    existing = await db.qa_jobs.find_one(
+        {"category_id": category_id, "status": {"$in": ["running", "queued"]}}
+    )
     if existing:
-        raise HTTPException(status_code=409, detail=f"Job déjà en cours pour {category_id} (id={existing['id']})")
+        raise HTTPException(
+            status_code=409,
+            detail=f"Job déjà {existing['status']} pour {category_id} (id={existing['id']})",
+        )
 
     import uuid
     job_id = str(uuid.uuid4())
+    running_count = await _count_running()
+    # Sérialisation : au-delà de la limite, on met en file d'attente
+    initial_status = "running" if running_count < _MAX_CONCURRENT_QA_JOBS else "queued"
+
     job_doc = {
         "id": job_id,
         "category_id": category_id,
         "category_title": cat.get("title"),
         "kind": kind,
-        "status": "running",
+        "status": initial_status,
         "started_at": datetime.now(timezone.utc).isoformat(),
         "started_by": admin.get("email"),
     }
     await db.qa_jobs.insert_one(job_doc)
     await record_audit(admin, action=action_label, target_type="category", target_id=category_id,
-                       target_label=cat.get("title"), meta={"job_id": job_id, "kind": kind})
+                       target_label=cat.get("title"),
+                       meta={"job_id": job_id, "kind": kind, "initial_status": initial_status})
 
-    asyncio.create_task(_run_qa_subprocess(job_id, category_id, script_path))
+    if initial_status == "running":
+        asyncio.create_task(_run_qa_subprocess(job_id, category_id, script_path))
+    # else : le job restera "queued" et sera dépilé automatiquement quand un
+    # slot se libère via _dequeue_next() (finally d'un job qui se termine).
+
     job_doc.pop("_id", None)
-    return {"ok": True, "job": job_doc}
+    return {"ok": True, "job": job_doc, "queued": initial_status == "queued",
+            "running_count": running_count, "max_concurrent": _MAX_CONCURRENT_QA_JOBS}
 
 
 @router.get("/jobs")
 async def qa_jobs(_: dict = Depends(get_admin_user), limit: int = Query(20, ge=1, le=100)) -> list[dict]:
-    """Liste les jobs de fact-check récents (running/done/failed)."""
+    """Liste les jobs de fact-check récents (running/queued/done/failed).
+    Nettoie les zombies au passage pour que l'admin ne voit plus de fantômes."""
+    await _reap_dead_jobs()
     docs = await db.qa_jobs.find({}, {"_id": 0}).sort("started_at", -1).limit(limit).to_list(limit)
     # Enrichit avec un aperçu des dernières lignes de log pour les jobs récents
     for j in docs:

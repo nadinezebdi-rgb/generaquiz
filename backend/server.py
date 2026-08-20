@@ -156,6 +156,12 @@ async def startup():
     await db.challenges.create_index("token", unique=True)
     await db.challenges.create_index([("creator_user_id", 1), ("created_at", -1)])
     await db.promo_codes.create_index("code", unique=True)
+
+    # -- QA jobs sweep — au startup, TOUS les jobs "running" sont zombies
+    # (leur PID a été tué par le restart et peut avoir été réattribué). On
+    # les passe inconditionnellement à "failed" AVANT tout test PID.
+    from routers.admin_qa import sweep_running_jobs_on_startup
+    await sweep_running_jobs_on_startup()
     await db.password_reset_tokens.create_index("token", unique=True)
     await db.password_reset_tokens.create_index("expires_at", expireAfterSeconds=0)
     await db.daily_attempts.create_index([("user_id", 1), ("date_key", 1)], unique=True)
