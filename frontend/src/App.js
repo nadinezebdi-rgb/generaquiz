@@ -27,6 +27,8 @@ import AdminReports from "@/pages/AdminReports";
 import AdminAnalytics from "@/pages/AdminAnalytics";
 import AdminHome from "@/pages/AdminHome";
 import AdminQA from "@/pages/AdminQA";
+import AdminUsers from "@/pages/AdminUsers";
+import AdminAudit from "@/pages/AdminAudit";
 import Pourquoi from "@/pages/Pourquoi";
 import EarnCredits from "@/pages/EarnCredits";
 import CoopChallengeCreate from "@/pages/CoopChallengeCreate";
@@ -63,9 +65,10 @@ function ProtectedRoute({ children }) {
 
 /** AdminRoute — guard rôle "admin". Un utilisateur connecté mais non-admin
  *  voit un écran "Accès refusé" explicite (plus de redirection silencieuse,
- *  pour faciliter le diagnostic). Ne remplace PAS la protection serveur : tous
- *  les endpoints /api/admin/* exigent aussi role=admin. */
-function AdminRoute({ children }) {
+ *  pour faciliter le diagnostic). Avec `requireSuperadmin`, seul le rôle
+ *  "superadmin" passe. Ne remplace PAS la protection serveur : tous
+ *  les endpoints /api/admin/* exigent aussi role=admin (ou superadmin). */
+function AdminRoute({ children, requireSuperadmin = false }) {
   const { user, loading } = useAuth();
   const location = useLocation();
   if (loading || user === null) {
@@ -78,13 +81,16 @@ function AdminRoute({ children }) {
   if (!user) {
     return <Navigate to="/login" state={{ from: location.pathname }} replace />;
   }
-  if (user.role !== "admin") {
-    return <AdminAccessDenied role={user.role} />;
+  const isSuper = user.role === "superadmin";
+  const isAdmin = isSuper || user.role === "admin";
+  if (requireSuperadmin ? !isSuper : !isAdmin) {
+    return <AdminAccessDenied role={user.role} requireSuperadmin={requireSuperadmin} />;
   }
   return children;
 }
 
-function AdminAccessDenied({ role }) {
+function AdminAccessDenied({ role, requireSuperadmin = false }) {
+  const requiredLabel = requireSuperadmin ? "super-administrateur" : "administrateur";
   return (
     <div className="min-h-screen paper-bg flex items-center justify-center px-4" data-testid="admin-access-denied">
       <div className="max-w-md w-full bg-white border-2 border-cream-dark rounded-3xl p-8 text-center shadow-warm">
@@ -95,7 +101,7 @@ function AdminAccessDenied({ role }) {
           Accès refusé
         </h1>
         <p className="text-navy/70 mb-1">
-          Droits <strong>administrateur</strong> requis pour accéder à cette page.
+          Droits <strong>{requiredLabel}</strong> requis pour accéder à cette page.
         </p>
         <p className="text-xs text-navy/50 mb-6">
           Votre rôle actuel : <code className="bg-cream px-2 py-0.5 rounded font-mono">{role || "user"}</code>
@@ -307,6 +313,22 @@ export default function App() {
             element={
               <AdminRoute>
                 <AdminQA />
+              </AdminRoute>
+            }
+          />
+          <Route
+            path="/app/admin/users"
+            element={
+              <AdminRoute>
+                <AdminUsers />
+              </AdminRoute>
+            }
+          />
+          <Route
+            path="/app/admin/audit"
+            element={
+              <AdminRoute requireSuperadmin>
+                <AdminAudit />
               </AdminRoute>
             }
           />

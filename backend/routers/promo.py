@@ -5,7 +5,7 @@ from datetime import datetime, timezone, timedelta
 from bson import ObjectId
 from fastapi import APIRouter, Depends, HTTPException
 
-from core import db, get_current_user, get_admin_user, LIFETIME_DAYS, PromoCreate, PromoRedeem
+from core import db, get_current_user, get_admin_user, record_audit, LIFETIME_DAYS, PromoCreate, PromoRedeem
 
 router = APIRouter(tags=["promo"])
 
@@ -67,6 +67,9 @@ async def admin_create_promo(body: PromoCreate, admin: dict = Depends(get_admin_
            "created_by": str(admin["_id"])}
     result = await db.promo_codes.insert_one(doc)
     doc["_id"] = result.inserted_id
+    await record_audit(admin, action="promo.create", target_type="promo",
+                       target_id=str(result.inserted_id), target_label=code,
+                       meta={"duration_days": doc["duration_days"], "max_uses": doc["max_uses"]})
     return _promo_to_public(doc)
 
 
@@ -88,6 +91,9 @@ async def admin_toggle_promo(promo_id: str, admin: dict = Depends(get_admin_user
     new_active = not promo.get("active", True)
     await db.promo_codes.update_one({"_id": oid}, {"$set": {"active": new_active}})
     promo["active"] = new_active
+    await record_audit(admin, action="promo.toggle", target_type="promo",
+                       target_id=promo_id, target_label=promo.get("code"),
+                       before={"active": not new_active}, after={"active": new_active})
     return _promo_to_public(promo)
 
 
@@ -97,7 +103,10 @@ async def admin_delete_promo(promo_id: str, admin: dict = Depends(get_admin_user
         oid = ObjectId(promo_id)
     except Exception:
         raise HTTPException(status_code=400, detail="ID invalide")
+    promo = await db.promo_codes.find_one({"_id": oid}, {"code": 1})
     result = await db.promo_codes.delete_one({"_id": oid})
     if result.deleted_count == 0:
         raise HTTPException(status_code=404, detail="Code introuvable")
+    await record_audit(admin, action="promo.delete", target_type="promo",
+                       target_id=promo_id, target_label=(promo or {}).get("code"))
     return {"ok": True}

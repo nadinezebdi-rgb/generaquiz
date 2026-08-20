@@ -1,5 +1,26 @@
 # Quiz d'Antan — SaaS pour seniors français
 
+## 2026-02-20 — Rôle Super-Admin + Journal d'audit
+- **Nouveau rôle `superadmin`** au-dessus d'`admin`. Le seed idempotent au démarrage (`server.py`) promeut auto le user défini via `ADMIN_EMAIL` en `superadmin`. Aucun autre superadmin ne peut être créé depuis l'UI (point d'entrée unique = env).
+- **Nouvelles dépendances backend** dans `core.py` :
+  - `get_admin_user` accepte désormais `admin` ET `superadmin`.
+  - `get_superadmin_user` réservé aux actions gouvernance (change_role, audit).
+  - `record_audit(admin, action, ...)` — helper never-raise qui écrit dans `admin_audit_log`.
+- **Nouveaux endpoints** :
+  - `GET /api/admin/users` (admin) — recherche/filtre/paginé
+  - `POST /api/admin/users/{id}/role` (superadmin) — assigne `admin`/`user`. Garde-fous : pas d'auto-modification, pas de modification d'un superadmin, pas de promotion superadmin.
+  - `GET /api/admin/audit` (superadmin) — filtre action/email/mot-clé
+  - `GET /api/admin/audit/actions` — distinct
+- **Instrumentation audit** sur : `user.role_change`, `qa.bulk_approve`, `qa.bulk_delete`, `qa.bulk_flag`, `qa.delete`, `qa.rerun`, `promo.create`, `promo.toggle`, `promo.delete`.
+- **Frontend** :
+  - Nouvelle page `/app/admin/users` (`AdminUsers.jsx`) : table filtre + boutons Promouvoir/Rétrograder visibles UNIQUEMENT si le user courant est superadmin. Bandeau explicatif si simple admin.
+  - Nouvelle page `/app/admin/audit` (`AdminAudit.jsx`) : liste chrono avec badges d'action, diff avant/après en JSON, filtre par action/mot-clé.
+  - `AdminRoute` accepte prop `requireSuperadmin` (utilisé pour `/app/admin/audit`).
+  - `AdminDropdown` + `MobileMenu` élargis : "Utilisateurs" pour tous les admins, "Journal d'audit" (badge SUPER) uniquement pour superadmin.
+  - Navbar/MobileMenu : la condition d'affichage passe de `role === "admin"` à `role in ("admin","superadmin")`.
+- **Tests curl OK** : superadmin peut lister/changer les rôles + voir l'audit ; le journal enregistre correctement admin_email, target_label, before, after et timestamp.
+
+
 ## 2026-02-19 (soir) — Feuilleter Le Livre (mode plein écran)
 - **Nouveau composant** `frontend/src/components/FeuilleterModal.jsx` : mode plein écran type « vrai livre ». Structure :
   - Page 0 : couverture (nom auteur + année + titre « Mes souvenirs. Mon histoire. »)

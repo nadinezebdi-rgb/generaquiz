@@ -97,7 +97,7 @@ export default function MobileMenu({ variant = "landing" }) {
                     Crédits {typeof user.credits === "number" ? `(${user.credits})` : ""}
                   </MobileLink>
                   <MobileLink to="/app/account" onClick={close} testid="mobile-nav-account">Mon compte</MobileLink>
-                  {user.role === "admin" && (
+                  {(user.role === "admin" || user.role === "superadmin") && (
                     <>
                       <div className="mt-2 mb-1 px-3 text-xs uppercase tracking-wider text-navy/50 font-bold">Admin</div>
                       <MobileLink to="/app/admin" onClick={close} testid="mobile-nav-admin-home" accent>Tableau de bord</MobileLink>
@@ -105,6 +105,10 @@ export default function MobileMenu({ variant = "landing" }) {
                       <MobileLink to="/app/admin/promo" onClick={close} accent>Promos</MobileLink>
                       <MobileLink to="/app/admin/reports" onClick={close} accent>Signalements</MobileLink>
                       <MobileLink to="/app/admin/qa" onClick={close} accent>Qualité IA</MobileLink>
+                      <MobileLink to="/app/admin/users" onClick={close} testid="mobile-nav-admin-users" accent>Utilisateurs</MobileLink>
+                      {user.role === "superadmin" && (
+                        <MobileLink to="/app/admin/audit" onClick={close} testid="mobile-nav-admin-audit" accent>Journal d&apos;audit</MobileLink>
+                      )}
                     </>
                   )}
                 </>

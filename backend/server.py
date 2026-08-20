@@ -41,6 +41,8 @@ from routers import atelier as atelier_router
 from routers import livre as livre_router
 from routers import livre_ai as livre_ai_router
 from routers import admin_qa as admin_qa_router
+from routers import admin_users as admin_users_router
+from routers import admin_audit as admin_audit_router
 from routers import ehpad as ehpad_router
 from routers import admin_analytics as admin_analytics_router
 from routers import charades as charades_router
@@ -108,6 +110,8 @@ api.include_router(atelier_router.router)
 api.include_router(livre_router.router)
 api.include_router(livre_ai_router.router)
 api.include_router(admin_qa_router.router)
+api.include_router(admin_users_router.router)
+api.include_router(admin_audit_router.router)
 api.include_router(ehpad_router.router)
 api.include_router(admin_analytics_router.router)
 api.include_router(charades_router.router)
@@ -222,7 +226,10 @@ async def startup():
         if r.modified_count:
             logger.info(f"[grandfathering] {old}→{new}: {r.modified_count} utilisateurs")
 
-    # Seed admin — skip complet si ADMIN_EMAIL ou ADMIN_PASSWORD ne sont pas définis
+    # Seed super-admin — skip complet si ADMIN_EMAIL ou ADMIN_PASSWORD ne sont pas définis.
+    # L'utilisateur défini via ADMIN_EMAIL est le SUPERADMIN unique (rôle=superadmin).
+    # Le rôle "admin" (nommé par un superadmin) reste disponible et est traité comme
+    # administrateur classique dans les guards.
     if not ADMIN_EMAIL or not ADMIN_PASSWORD:
         logger.warning("ADMIN_EMAIL / ADMIN_PASSWORD non définis → seed admin ignoré")
     else:
@@ -232,21 +239,21 @@ async def startup():
                 "email": ADMIN_EMAIL,
                 "password_hash": hash_password(ADMIN_PASSWORD),
                 "name": "Administrateur",
-                "role": "admin",
+                "role": "superadmin",
                 "plan": "premium",
                 "plan_tier": "premium",
                 "plan_period": "yearly",
                 "plan_expires_at": (datetime.now(timezone.utc) + timedelta(days=3650)).isoformat(),
                 "created_at": datetime.now(timezone.utc).isoformat(),
             })
-            logger.info(f"Admin créé : {ADMIN_EMAIL}")
+            logger.info(f"Super-admin créé : {ADMIN_EMAIL}")
         else:
-            # Backfill idempotent : le rôle admin DOIT être présent, même sur un compte
-            # créé par inscription normale. Sinon un utilisateur inscrit avec ADMIN_EMAIL
-            # avant le seed reste bloqué en user standard pour toujours.
+            # Backfill idempotent : ADMIN_EMAIL DOIT être superadmin. Si le compte
+            # existe avec role user/admin, on le promeut au démarrage — c'est le
+            # mécanisme de récupération si le rôle a été altéré.
             backfill_updates: dict = {}
-            if existing.get("role") != "admin":
-                backfill_updates["role"] = "admin"
+            if existing.get("role") != "superadmin":
+                backfill_updates["role"] = "superadmin"
             if not existing.get("plan_tier"):
                 backfill_updates["plan_tier"] = "premium"
                 backfill_updates["plan_period"] = "yearly"
@@ -254,14 +261,14 @@ async def startup():
                 backfill_updates["plan"] = "premium"
             if backfill_updates:
                 await db.users.update_one({"email": ADMIN_EMAIL}, {"$set": backfill_updates})
-                logger.info(f"Admin backfill : {list(backfill_updates.keys())}")
+                logger.info(f"Super-admin backfill : {list(backfill_updates.keys())}")
 
             if not verify_password(ADMIN_PASSWORD, existing["password_hash"]):
                 await db.users.update_one(
                     {"email": ADMIN_EMAIL},
                     {"$set": {"password_hash": hash_password(ADMIN_PASSWORD)}},
                 )
-                logger.info("Admin password mis à jour")
+                logger.info("Super-admin password mis à jour")
 
     # Backfill credits for users registered before the credits system.
     # Idempotent: only acts on users missing the `credits` field.

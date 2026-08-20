@@ -237,9 +237,47 @@ async def get_current_user(request: Request) -> dict:
 
 
 async def get_admin_user(user: dict = Depends(get_current_user)) -> dict:
-    if user.get("role") != "admin":
+    # superadmin est un admin renforcé — il passe le guard admin
+    if user.get("role") not in ("admin", "superadmin"):
         raise HTTPException(status_code=403, detail="Accès administrateur requis")
     return user
+
+
+async def get_superadmin_user(user: dict = Depends(get_current_user)) -> dict:
+    if user.get("role") != "superadmin":
+        raise HTTPException(status_code=403, detail="Accès super-administrateur requis")
+    return user
+
+
+# -------------------- audit log --------------------
+async def record_audit(admin: dict, action: str, *,
+                       target_type: str | None = None,
+                       target_id: str | None = None,
+                       target_label: str | None = None,
+                       before: Any = None,
+                       after: Any = None,
+                       meta: dict | None = None) -> None:
+    """Trace une action admin sensible dans admin_audit_log.
+
+    Never raises — l'audit ne doit jamais bloquer l'action fonctionnelle.
+    """
+    try:
+        await db.admin_audit_log.insert_one({
+            "id": str(ObjectId()),
+            "admin_id": str(admin.get("_id")) if admin.get("_id") else None,
+            "admin_email": admin.get("email"),
+            "admin_role": admin.get("role"),
+            "action": action,
+            "target_type": target_type,
+            "target_id": target_id,
+            "target_label": target_label,
+            "before": before,
+            "after": after,
+            "meta": meta or {},
+            "created_at": datetime.now(timezone.utc).isoformat(),
+        })
+    except Exception as e:
+        logger.warning(f"audit log failed for action={action}: {e}")
 
 
 # -------------------- rate limiter (in-memory, IP-based) --------------------

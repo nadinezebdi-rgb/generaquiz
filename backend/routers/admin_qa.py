@@ -23,7 +23,7 @@ from typing import Literal
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
 
-from core import db, get_admin_user
+from core import db, get_admin_user, record_audit
 
 router = APIRouter(prefix="/admin/qa", tags=["admin-qa"])
 
@@ -118,13 +118,17 @@ async def qa_bulk_approve(body: BulkBody, admin: dict = Depends(get_admin_user))
             },
         }},
     )
+    await record_audit(admin, action="qa.bulk_approve", target_type="questions",
+                       meta={"requested": len(body.ids), "modified": r.modified_count, "ids": body.ids[:20]})
     return {"ok": True, "requested": len(body.ids), "matched": r.matched_count, "modified": r.modified_count}
 
 
 @router.post("/bulk/delete")
-async def qa_bulk_delete(body: BulkBody, _: dict = Depends(get_admin_user)) -> dict:
+async def qa_bulk_delete(body: BulkBody, admin: dict = Depends(get_admin_user)) -> dict:
     """Supprime en masse. Aucun undo — l'UI doit demander confirmation."""
     r = await db.questions.delete_many({"id": {"$in": body.ids}})
+    await record_audit(admin, action="qa.bulk_delete", target_type="questions",
+                       meta={"requested": len(body.ids), "deleted": r.deleted_count, "ids": body.ids[:20]})
     return {"ok": True, "requested": len(body.ids), "deleted": r.deleted_count}
 
 
@@ -142,6 +146,8 @@ async def qa_bulk_flag(body: BulkBody, admin: dict = Depends(get_admin_user)) ->
             },
         }},
     )
+    await record_audit(admin, action="qa.bulk_flag", target_type="questions",
+                       meta={"requested": len(body.ids), "modified": r.modified_count, "ids": body.ids[:20]})
     return {"ok": True, "requested": len(body.ids), "matched": r.matched_count, "modified": r.modified_count}
 
 
@@ -251,10 +257,11 @@ async def qa_apply_correction(
 
 
 @router.delete("/{qid}")
-async def qa_delete(qid: str, _: dict = Depends(get_admin_user)) -> dict:
+async def qa_delete(qid: str, admin: dict = Depends(get_admin_user)) -> dict:
     r = await db.questions.delete_one({"id": qid})
     if r.deleted_count == 0:
         raise HTTPException(status_code=404, detail="Question introuvable")
+    await record_audit(admin, action="qa.delete", target_type="question", target_id=qid)
     return {"ok": True}
 
 # =============================================================================
@@ -336,6 +343,8 @@ async def qa_rerun(category_id: str, admin: dict = Depends(get_admin_user)) -> d
         "started_by": admin.get("email"),
     }
     await db.qa_jobs.insert_one(job_doc)
+    await record_audit(admin, action="qa.rerun", target_type="category", target_id=category_id,
+                       target_label=cat.get("title"), meta={"job_id": job_id})
 
     # Fire-and-forget : le task tourne en arrière-plan, on rend la main immédiatement.
     asyncio.create_task(_run_audit_subprocess(job_id, category_id))

@@ -46,7 +46,7 @@ export default function Navbar({ variant = "landing" }) {
                 )}
               </Link>
               <Link to="/app/account" data-testid="nav-account" className="px-3 py-2 text-base font-semibold text-navy hover:text-terracotta transition whitespace-nowrap">Mon compte</Link>
-              {user.role === "admin" && <AdminDropdown />}
+              {(user.role === "admin" || user.role === "superadmin") && <AdminDropdown />}
               <button
                 data-testid="nav-logout"
                 onClick={async () => { await logout(); navigate("/"); }}
