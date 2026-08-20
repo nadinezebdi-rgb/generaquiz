@@ -19,6 +19,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 
 from core import db, get_current_user
+from badges import check_after_palier
 
 router = APIRouter(prefix="/palier", tags=["palier"])
 
@@ -210,6 +211,9 @@ async def palier_submit(category_id: str, palier: int, body: PalierSubmit,
         {"$set": update, "$inc": {"attempts": 1}},
     )
 
+    # Badges palier (expert / grand maître / 20/20 parfait). Idempotent.
+    awarded = await check_after_palier(user_id, category_id, palier, score, PALIER_SIZE, passed)
+
     next_unlocked = new_completed and palier < TOTAL_PALIERS
     return {
         "score": score,
@@ -219,4 +223,78 @@ async def palier_submit(category_id: str, palier: int, body: PalierSubmit,
         "completed": new_completed,
         "next_palier_unlocked": next_unlocked,
         "next_palier": palier + 1 if next_unlocked else None,
+        "awarded_badges": awarded,
+    }
+
+
+@router.get("/leaderboard/{category_id}")
+async def palier_leaderboard(category_id: str, limit: int = 10,
+                              user: dict = Depends(get_current_user)) -> dict:
+    """Top 10 des joueurs d'une catégorie : classement par nombre de paliers
+    validés (desc), puis par somme des meilleurs scores (tiebreaker).
+    Retourne aussi le rang de l'utilisateur courant s'il n'est pas dans le top."""
+    cat = await db.categories.find_one({"id": category_id}, {"_id": 0})
+    if not cat:
+        raise HTTPException(status_code=404, detail="Catégorie introuvable")
+
+    # Agrégation : par user, on compte les paliers completed et somme des best_score
+    pipeline = [
+        {"$match": {"category_id": category_id, "completed": True}},
+        {"$group": {
+            "_id": "$user_id",
+            "paliers_completed": {"$sum": 1},
+            "sum_best": {"$sum": "$best_score"},
+            "top_palier": {"$max": "$palier"},
+            "last_played_at": {"$max": "$last_played_at"},
+        }},
+        {"$sort": {"paliers_completed": -1, "sum_best": -1, "last_played_at": 1}},
+    ]
+    all_rows = await db.user_paliers.aggregate(pipeline).to_list(2000)
+
+    # Enrichit avec nom user + calcule rank
+    from bson import ObjectId
+    top = all_rows[:limit]
+    user_ids = [row["_id"] for row in top]
+    users_by_id: dict[str, dict] = {}
+    if user_ids:
+        oids = []
+        for uid in user_ids:
+            try: oids.append(ObjectId(uid))
+            except Exception: pass
+        async for u in db.users.find({"_id": {"$in": oids}}, {"name": 1, "email": 1}):
+            users_by_id[str(u["_id"])] = u
+
+    entries = []
+    for rank, row in enumerate(top, 1):
+        u = users_by_id.get(row["_id"], {})
+        entries.append({
+            "rank": rank,
+            "user_id": row["_id"],
+            "name": u.get("name") or "Anonyme",
+            "paliers_completed": row["paliers_completed"],
+            "sum_best": row["sum_best"],
+            "top_palier": row["top_palier"],
+            "is_current_user": row["_id"] == str(user["_id"]),
+        })
+
+    # Rang de l'utilisateur courant s'il n'est pas dans le top
+    me_row = next((i for i, r in enumerate(all_rows, 1) if r["_id"] == str(user["_id"])), None)
+    me_entry = None
+    if me_row and me_row > limit:
+        row = all_rows[me_row - 1]
+        me_entry = {
+            "rank": me_row,
+            "user_id": row["_id"],
+            "name": user.get("name") or "Vous",
+            "paliers_completed": row["paliers_completed"],
+            "sum_best": row["sum_best"],
+            "top_palier": row["top_palier"],
+            "is_current_user": True,
+        }
+
+    return {
+        "category": cat,
+        "total_players": len(all_rows),
+        "entries": entries,
+        "me_out_of_top": me_entry,
     }

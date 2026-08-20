@@ -1,5 +1,17 @@
 # Quiz d'Antan — SaaS pour seniors français
 
+## 2026-02-20 (nuit) — Badges palier + Classement + Top-up Voyages
+- **3 nouveaux badges** dans `badges.py` :
+  - `palier_perfect_20` (or) : 20/20 parfait sur un palier (toutes catégories, toutes difficultés)
+  - `palier_expert` (or) : valider le palier 7 (Expert) d'une catégorie
+  - `palier_grand_maitre` (diamant) : palier 7 validé dans 3 catégories DISTINCTES
+- **`badges.check_after_palier(...)`** — hook idempotent appelé depuis `palier_submit`. Retourne les badge_ids nouvellement attribués → répercutés en toasts côté UI dans `Parcours.jsx`.
+- **`GET /api/palier/leaderboard/{category_id}`** (auth utilisateur) — top 10 par nombre de paliers validés (desc), tiebreaker sur `sum_best`, puis `last_played_at`. Renvoie aussi le rang de l'utilisateur courant s'il n'est pas dans le top (`me_out_of_top`).
+- **Frontend `Parcours.jsx`** : nouveau composant `Leaderboard` sous les 7 paliers de l'overview, médailles 🥇🥈🥉 sur le top 3, ligne surlignée si c'est l'utilisateur courant. Empty state amical si aucun joueur.
+- **Top-up Voyages lancé** : job `5c89f6e5` en cours, 16 → 25 questions déjà, restera à ~140 après ~30 min (124 questions × Sonnet+Opus).
+- Testé curl : palier 7 avec 20/20 → badges `palier_perfect_20` + `palier_expert` attribués. Leaderboard affiche bien Admin en tête (2 paliers, cumul 40).
+
+
 ## 2026-02-20 (soir) — Parcours à paliers (140 questions / catégorie)
 - **Backend nouveau**
   - `topup_paliers.py` : script standalone qui génère les questions manquantes par palier (Sonnet 4.6 + Opus 4.8 fact-check). Prompt intégrant la difficulté (1..7).

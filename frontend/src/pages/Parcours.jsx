@@ -78,6 +78,15 @@ export default function Parcours() {
       const { data } = await api.post(`/palier/categories/${categoryId}/${palier}/submit`, payload);
       setResult(data);
       setMode("result");
+      // Toast pour chaque nouveau badge — récompense visible immédiatement
+      (data.awarded_badges || []).forEach((badgeId) => {
+        const labels = {
+          palier_perfect_20: "🏅 Sans-faute palier — 20/20 !",
+          palier_expert: "🎓 Expert d'une catégorie — palier 7 validé !",
+          palier_grand_maitre: "👑 Grand Maître — 3 catégories expertes !",
+        };
+        toast.success(labels[badgeId] || `Badge débloqué : ${badgeId}`);
+      });
       await refresh();
     } catch (e) {
       toast.error(formatError(e.response?.data?.detail) || "Impossible de soumettre");
@@ -179,10 +188,87 @@ function OverviewView({ overview, onStart, navigate }) {
         </div>
       </header>
 
-      <div className="grid gap-3">
+      <div className="grid gap-3 mb-8">
         {paliers.map((p, i) => <PalierRow key={p.palier} palier={p} onStart={onStart} lastInList={i === paliers.length - 1} />)}
       </div>
+
+      <Leaderboard categoryId={category.id} />
     </>
+  );
+}
+
+function Leaderboard({ categoryId }) {
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    let cancelled = false;
+    api.get(`/palier/leaderboard/${categoryId}?limit=10`)
+      .then((r) => { if (!cancelled) setData(r.data); })
+      .catch(() => { if (!cancelled) setData({ entries: [], total_players: 0 }); })
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
+  }, [categoryId]);
+
+  if (loading) return null;
+  if (!data) return null;
+
+  return (
+    <section className="bg-white border-2 border-cream-dark rounded-3xl p-6" data-testid="parcours-leaderboard">
+      <div className="flex items-center gap-2 mb-4">
+        <Trophy className="w-5 h-5 text-mustard-dark" />
+        <h2 className="font-display text-xl font-extrabold">Classement de la catégorie</h2>
+        <span className="ml-auto text-xs text-navy/50">{data.total_players} joueur{data.total_players > 1 ? "s" : ""}</span>
+      </div>
+      {data.entries.length === 0 ? (
+        <p className="text-center text-navy/50 py-6 italic">
+          Aucun palier validé pour l&apos;instant. Soyez le premier à décrocher la 1ʳᵉ place !
+        </p>
+      ) : (
+        <ol className="space-y-2">
+          {data.entries.map((e) => <LeaderboardRow key={e.user_id} entry={e} />)}
+          {data.me_out_of_top && (
+            <>
+              <li className="text-center text-xs text-navy/40 py-1">···</li>
+              <LeaderboardRow entry={data.me_out_of_top} />
+            </>
+          )}
+        </ol>
+      )}
+    </section>
+  );
+}
+
+function LeaderboardRow({ entry }) {
+  const medals = { 1: "🥇", 2: "🥈", 3: "🥉" };
+  const medal = medals[entry.rank];
+  return (
+    <li
+      data-testid={`leaderboard-row-${entry.rank}`}
+      className={`flex items-center gap-3 p-3 rounded-2xl border-2 ${
+        entry.is_current_user
+          ? "border-terracotta bg-terracotta/10"
+          : "border-cream-dark bg-cream/40"
+      }`}
+    >
+      <span className={`w-10 h-10 rounded-full flex items-center justify-center font-display text-lg font-extrabold shrink-0 ${
+        entry.rank <= 3 ? "bg-mustard text-navy" : "bg-white text-navy/60"
+      }`}>
+        {medal || entry.rank}
+      </span>
+      <div className="flex-1 min-w-0">
+        <div className="font-bold truncate">
+          {entry.name}
+          {entry.is_current_user && <span className="ml-2 text-[10px] uppercase font-bold text-terracotta">Vous</span>}
+        </div>
+        <div className="text-xs text-navy/60">
+          {entry.paliers_completed} palier{entry.paliers_completed > 1 ? "s" : ""} · top palier {entry.top_palier}
+        </div>
+      </div>
+      <div className="text-right">
+        <div className="font-display text-xl font-extrabold text-bordeaux">{entry.sum_best}</div>
+        <div className="text-[10px] text-navy/50 uppercase tracking-wider">score cumulé</div>
+      </div>
+    </li>
   );
 }
 
