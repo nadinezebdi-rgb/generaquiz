@@ -560,6 +560,86 @@ async def qa_cancel_job(job_id: str, admin: dict = Depends(get_admin_user)) -> d
     return {"ok": True, "was": "running", "killed_pid": pid if killed else None}
 
 
+@router.get("/queue")
+async def qa_queue(_: dict = Depends(get_admin_user)) -> dict:
+    """Vue focalisée sur les jobs actifs : running + queued, ordonnés,
+    avec temps écoulé, position et estimation d'attente.
+
+    Estimation basée sur la durée médiane des 10 derniers jobs `done` du même
+    `kind` (rerun ou topup). Fallback : 5 min si aucune donnée."""
+    await _reap_dead_jobs()
+
+    # 1. Durée médiane par kind (10 derniers done)
+    from statistics import median
+    avg_by_kind: dict[str, float] = {}
+    for kind in ("rerun", "topup"):
+        durations: list[float] = []
+        async for j in db.qa_jobs.find(
+            {"kind": kind, "status": "done", "finished_at": {"$exists": True}, "started_at": {"$exists": True}},
+            {"started_at": 1, "finished_at": 1, "_id": 0},
+        ).sort("finished_at", -1).limit(10):
+            try:
+                st = datetime.fromisoformat(j["started_at"])
+                ft = datetime.fromisoformat(j["finished_at"])
+                durations.append((ft - st).total_seconds())
+            except (ValueError, KeyError):
+                continue
+        avg_by_kind[kind] = median(durations) if durations else 300.0  # 5 min fallback
+
+    # 2. Jobs actifs (running d'abord, puis queued par ordre started_at)
+    running = await db.qa_jobs.find({"status": "running"}, {"_id": 0}).sort("started_at", 1).to_list(20)
+    queued = await db.qa_jobs.find({"status": "queued"}, {"_id": 0}).sort("started_at", 1).to_list(20)
+
+    now = datetime.now(timezone.utc)
+    running_out = []
+    total_remaining_running = 0.0
+    for j in running:
+        try:
+            st = datetime.fromisoformat(j["started_at"])
+            elapsed = (now - st).total_seconds()
+        except (ValueError, KeyError):
+            elapsed = 0.0
+        expected = avg_by_kind.get(j.get("kind"), 300.0)
+        remaining = max(0.0, expected - elapsed)
+        total_remaining_running += remaining
+        running_out.append({
+            **j,
+            "elapsed_sec": int(elapsed),
+            "expected_sec": int(expected),
+            "remaining_sec": int(remaining),
+        })
+
+    # 3. Pour chaque queued : position + estimation
+    #    On assume que le prochain slot se libère quand le job en cours le plus
+    #    proche de la fin termine (min des remaining).
+    remainings = sorted([r["remaining_sec"] for r in running_out]) or [0]
+    queued_out = []
+    # pipe = liste des instants (en secondes) où un slot se libère, actualisée
+    slot_free_at = list(remainings)  # secondes avant chaque libération
+    for i, j in enumerate(queued):
+        # Le prochain slot dispo = min de la liste
+        slot_free_at.sort()
+        wait_sec = slot_free_at[0]
+        expected = avg_by_kind.get(j.get("kind"), 300.0)
+        # Ce job occupera son slot jusqu'à wait_sec + expected
+        slot_free_at[0] = wait_sec + expected
+        queued_out.append({
+            **j,
+            "position": i + 1,
+            "wait_before_start_sec": int(wait_sec),
+            "expected_sec": int(expected),
+        })
+
+    return {
+        "max_concurrent": _MAX_CONCURRENT_QA_JOBS,
+        "running_count": len(running_out),
+        "queued_count": len(queued_out),
+        "avg_by_kind": {k: int(v) for k, v in avg_by_kind.items()},
+        "running": running_out,
+        "queued": queued_out,
+    }
+
+
 @router.get("/jobs")
 async def qa_jobs(_: dict = Depends(get_admin_user), limit: int = Query(20, ge=1, le=100)) -> list[dict]:
     """Liste les jobs de fact-check récents (running/queued/done/failed).

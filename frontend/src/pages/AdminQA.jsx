@@ -31,6 +31,7 @@ export default function AdminQA() {
   const [busy, setBusy] = useState(false);
   const [actionOn, setActionOn] = useState(null); // question id being acted on
   const [jobs, setJobs] = useState([]);
+  const [queue, setQueue] = useState(null);
   const [rerunning, setRerunning] = useState(null); // category_id being rerun
   const [selected, setSelected] = useState(() => new Set()); // ids selectionnés pour bulk
   const [bulkBusy, setBulkBusy] = useState(false);
@@ -50,6 +51,15 @@ export default function AdminQA() {
       setJobs(data);
     } catch (err) {
       console.debug("Load jobs failed:", err);
+    }
+  }, []);
+
+  const loadQueue = useCallback(async () => {
+    try {
+      const { data } = await api.get("/admin/qa/queue");
+      setQueue(data);
+    } catch (err) {
+      console.debug("Load queue failed:", err);
     }
   }, []);
 
@@ -80,18 +90,18 @@ export default function AdminQA() {
     return () => clearTimeout(t);
   }, [searchQ]);
 
-  useEffect(() => { loadSummary(); loadJobs(); }, [loadSummary, loadJobs]);
+  useEffect(() => { loadSummary(); loadJobs(); loadQueue(); }, [loadSummary, loadJobs, loadQueue]);
   useEffect(() => { loadItems(); }, [loadItems]);
   // Reset selection quand les items visibles changent (filtre/search/catégorie)
   useEffect(() => { setSelected(new Set()); }, [selectedCat, quality, debouncedQ]);
 
-  // Auto-refresh jobs + summary while a job is running
+  // Auto-refresh jobs + queue + summary while a job is running or queued
   useEffect(() => {
-    const anyRunning = jobs.some((j) => j.status === "running");
-    if (!anyRunning) return undefined;
-    const iv = setInterval(() => { loadJobs(); loadSummary(); }, 8000);
+    const anyActive = jobs.some((j) => j.status === "running") || (queue?.queued_count ?? 0) > 0;
+    if (!anyActive) return undefined;
+    const iv = setInterval(() => { loadJobs(); loadQueue(); loadSummary(); }, 8000);
     return () => clearInterval(iv);
-  }, [jobs, loadJobs, loadSummary]);
+  }, [jobs, queue, loadJobs, loadQueue, loadSummary]);
 
   async function doAction(q, endpoint, extraBody = {}) {
     setActionOn(q.id);
@@ -130,6 +140,7 @@ export default function AdminQA() {
       const { data } = await api.post(`/admin/qa/jobs/${jobId}/cancel`);
       toast.success(data.was === "queued" ? "Job retiré de la file" : "Job en cours interrompu");
       loadJobs();
+      loadQueue();
       loadSummary();
     } catch (e) {
       toast.error(formatError(e.response?.data?.detail) || "Impossible d'annuler le job");
@@ -234,6 +245,30 @@ export default function AdminQA() {
         <p className="text-navy/70 mb-8">
           Questions vérifiées automatiquement par Claude Opus 4.8. Les questions <strong>flagged</strong> sont automatiquement exclues du tirage.
         </p>
+
+        {/* ==================== QUEUE ==================== */}
+        {queue && (queue.running_count > 0 || queue.queued_count > 0) && (
+          <section className="mb-8" data-testid="admin-qa-queue">
+            <div className="bg-white border-2 border-terracotta/40 rounded-2xl p-5">
+              <div className="flex items-center justify-between mb-3">
+                <h2 className="font-display text-lg font-extrabold text-navy inline-flex items-center gap-2">
+                  <Loader2 className="w-4 h-4 animate-spin text-terracotta" /> File d&apos;attente
+                </h2>
+                <span className="text-xs text-navy/60">
+                  {queue.running_count}/{queue.max_concurrent} en cours · {queue.queued_count} en attente
+                </span>
+              </div>
+              <ul className="space-y-2">
+                {queue.running.map((j) => (
+                  <QueueRow key={j.id} job={j} kind="running" onCancel={cancelJob} />
+                ))}
+                {queue.queued.map((j) => (
+                  <QueueRow key={j.id} job={j} kind="queued" onCancel={cancelJob} />
+                ))}
+              </ul>
+            </div>
+          </section>
+        )}
 
         {/* ==================== SUMMARY ==================== */}
         <section className="mb-10" data-testid="admin-qa-summary">
@@ -659,3 +694,59 @@ function QuestionCard({ q, actionOn, onAction, onDelete, isSelected, onToggleSel
     </div>
   );
 }
+
+function fmtDur(sec) {
+  if (sec == null || sec <= 0) return "—";
+  const m = Math.floor(sec / 60);
+  const s = Math.floor(sec % 60);
+  if (m === 0) return `${s}s`;
+  return `${m}min${s > 0 ? ` ${s}s` : ""}`;
+}
+
+function QueueRow({ job, kind, onCancel }) {
+  const isRunning = kind === "running";
+  return (
+    <li
+      data-testid={`admin-qa-queue-${kind}-${job.category_id}`}
+      className={`flex items-center gap-3 p-3 rounded-xl border-2 ${
+        isRunning ? "bg-terracotta/5 border-terracotta/30" : "bg-cream border-cream-dark"
+      }`}
+    >
+      <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold shrink-0 ${
+        isRunning ? "bg-terracotta text-white" : "bg-navy/10 text-navy/70"
+      }`}>
+        {isRunning ? <Loader2 className="w-4 h-4 animate-spin" /> : job.position}
+      </div>
+      <div className="flex-1 min-w-0">
+        <div className="font-bold text-navy truncate">
+          {job.category_title || job.category_id}
+          <span className="ml-2 text-[10px] uppercase font-bold tracking-widest text-navy/50">
+            {job.kind}
+          </span>
+        </div>
+        <div className="text-xs text-navy/60">
+          {isRunning ? (
+            <>
+              en cours depuis <strong>{fmtDur(job.elapsed_sec)}</strong>
+              {" · fin estimée dans "}<strong>{fmtDur(job.remaining_sec)}</strong>
+            </>
+          ) : (
+            <>
+              position {job.position} · démarrage estimé dans <strong>{fmtDur(job.wait_before_start_sec)}</strong>
+              {" · durée typique "}<strong>{fmtDur(job.expected_sec)}</strong>
+            </>
+          )}
+        </div>
+      </div>
+      <button
+        type="button"
+        onClick={() => onCancel(job.id, job.category_title || job.category_id)}
+        data-testid={`admin-qa-queue-cancel-${job.id}`}
+        className="inline-flex items-center gap-1 bg-white border-2 border-bordeaux text-bordeaux text-xs font-bold px-3 py-1.5 rounded-full hover:bg-bordeaux hover:text-white transition"
+      >
+        <X className="w-3.5 h-3.5" /> Annuler
+      </button>
+    </li>
+  );
+}
+

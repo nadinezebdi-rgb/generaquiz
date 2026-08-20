@@ -1,5 +1,14 @@
 # Quiz d'Antan — SaaS pour seniors français
 
+## 2026-02-20 (nuit++) — Tableau File d'Attente QA
+- **Backend** nouveau `GET /admin/qa/queue` :
+  - Durée médiane par kind (rerun / topup) calculée sur les 10 derniers `done` — fallback 5 min
+  - Pour chaque `running` : `elapsed_sec` + `remaining_sec` estimé
+  - Pour chaque `queued` : `position` + `wait_before_start_sec` (simulation d'occupation des slots)
+- **Frontend** `AdminQA.jsx` : nouvelle section "File d'attente" tout en haut, visible seulement si des jobs actifs. Auto-refresh 8s si `queued_count > 0`. Chaque ligne = badge position/spinner + catégorie + estimations en français ("fin estimée dans 43s", "démarrage estimé dans 1min 3s") + bouton Annuler direct.
+- Testé end-to-end : 3 jobs lancés → tableau affiche 2 running + 1 queued avec estimations cohérentes.
+
+
 ## 2026-02-20 (nuit +) — Bouton Annuler Job
 - **Backend** `POST /admin/qa/jobs/{job_id}/cancel` :
   - Job `queued` → status `cancelled` + `return_code=-3`
