@@ -160,8 +160,12 @@ async def startup():
     # -- QA jobs sweep — au startup, TOUS les jobs "running" sont zombies
     # (leur PID a été tué par le restart et peut avoir été réattribué). On
     # les passe inconditionnellement à "failed" AVANT tout test PID.
-    from routers.admin_qa import sweep_running_jobs_on_startup
+    from routers.admin_qa import sweep_running_jobs_on_startup, _dequeue_next
     await sweep_running_jobs_on_startup()
+    # Puis on dépile les jobs restés "queued" avant le restart — sinon ils
+    # attendent indéfiniment qu'un running (qui n'existe plus) finisse.
+    import asyncio as _asyncio
+    _asyncio.create_task(_dequeue_next())
     await db.password_reset_tokens.create_index("token", unique=True)
     await db.password_reset_tokens.create_index("expires_at", expireAfterSeconds=0)
     await db.daily_attempts.create_index([("user_id", 1), ("date_key", 1)], unique=True)

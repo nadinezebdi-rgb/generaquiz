@@ -320,23 +320,43 @@ def _pid_alive(pid: int | None) -> bool:
 
 async def _reap_dead_jobs() -> int:
     """Balaye les jobs `running` dont le PID est mort et les passe en `failed`.
-    Retourne le nombre de jobs nettoyés. À appeler avant tout contrôle 409."""
-    now_iso = datetime.now(timezone.utc).isoformat()
+    Retourne le nombre de jobs nettoyés. À appeler avant tout contrôle 409.
+
+    ⚠️ Race condition guard : un job vient d'être inséré `running` mais son PID
+    n'est écrit qu'après `create_subprocess_exec`. Pendant cette fenêtre
+    (typiquement < 2s) `pid is None`. On accorde un délai de grâce de 30s
+    avant de considérer un job sans PID comme mort — sinon on tue les jobs
+    qui viennent tout juste de démarrer."""
+    now = datetime.now(timezone.utc)
+    now_iso = now.isoformat()
     reaped = 0
-    async for j in db.qa_jobs.find({"status": "running"}, {"id": 1, "pid": 1}):
+    async for j in db.qa_jobs.find({"status": "running"}, {"id": 1, "pid": 1, "started_at": 1}):
         pid = j.get("pid")
-        # Si pas de PID (job pas encore démarré) OU PID mort → on passe en failed
-        if pid is None or not _pid_alive(pid):
-            r = await db.qa_jobs.update_one(
-                {"id": j["id"], "status": "running"},
-                {"$set": {
-                    "status": "failed",
-                    "return_code": -1,
-                    "finished_at": now_iso,
-                    "error": "process not alive (reaped)",
-                }},
-            )
-            reaped += r.modified_count
+        if pid is None:
+            # Grace period : le subprocess est peut-être en train de démarrer
+            try:
+                started = datetime.fromisoformat(j["started_at"])
+                age_sec = (now - started).total_seconds()
+            except (KeyError, ValueError, TypeError):
+                age_sec = 999.0  # started_at illisible → on considère vieux
+            if age_sec < 30:
+                continue  # trop jeune, on laisse le temps au PID d'être écrit
+            reason = "process not alive (pid never written after 30s)"
+        elif not _pid_alive(pid):
+            reason = "process not alive (reaped)"
+        else:
+            continue  # PID vivant → on laisse tourner
+
+        r = await db.qa_jobs.update_one(
+            {"id": j["id"], "status": "running"},
+            {"$set": {
+                "status": "failed",
+                "return_code": -1,
+                "finished_at": now_iso,
+                "error": reason,
+            }},
+        )
+        reaped += r.modified_count
     return reaped
 
 

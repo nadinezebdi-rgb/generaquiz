@@ -1,5 +1,13 @@
 # Quiz d'Antan — SaaS pour seniors français
 
+## 2026-02-20 (soir +) — Correctifs Robustesse Jobs QA (v2)
+- **Contexte** : sur prod, 5 catégories relancées quasi simultanément se sont toutes retrouvées en `failed` au même timestamp (14:51) → signature d'un redémarrage backend prod ou d'une race condition.
+- **Fix 1 — `_reap_dead_jobs` (grace period)** : entre `insert_one` et l'écriture du PID par `_run_qa_subprocess`, un job a `status=running` mais `pid=None`. L'ancien code tuait immédiatement ces jobs qui venaient de naître. Nouveau : délai de grâce de **30 s** avant de considérer un job sans PID comme mort. Message d'erreur explicite : `pid never written after 30s`.
+- **Fix 2 — Startup dequeue** : `sweep_running_jobs_on_startup` était bien câblé mais `_dequeue_next()` ne l'était pas. Résultat : après un restart du backend, les jobs `queued` restaient bloqués indéfiniment. Ajout de `asyncio.create_task(_dequeue_next())` dans `server.py::startup` juste après le sweep.
+- **Test unitaire** (backend) : deux jobs `running` sans PID insérés — jeune (5 s) préservé, vieux (60 s) reaped correctement avec `error="pid never written after 30s"`.
+- **Action requise** : republier en prod pour appliquer ces fixes avant de relancer les 5 catégories neuves (Voyages, Génération 70, Génération 40, Cuisine, Histoire).
+
+
 ## 2026-02-20 (soir) — Progression Granulaire QA + Historique Étendu
 - **Backend** `admin_qa.py` :
   - `GET /admin/qa/queue` enrichit chaque job `running` et `queued` avec `questions_current` (compte des questions jouables : `difficulty 1..7` ET `quality != flagged`) et `questions_target: 140`.
