@@ -5,7 +5,7 @@ import { api, formatError } from "@/lib/api";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import {
-  User, Mail, Crown, Calendar, Lock, Loader2, Check, LogOut, Trash2, Save, ArrowRight, Bell, Flame, Gift, Copy, Award,
+  User, Mail, Crown, Calendar, Lock, Loader2, Check, LogOut, Trash2, Save, ArrowRight, Bell, Flame, Gift, Copy, Award, Ticket,
 } from "lucide-react";
 
 /** Section badges : trophées collectés par l'utilisateur (30 badges statiques
@@ -114,6 +114,10 @@ export default function Account() {
   const [referral, setReferral] = useState(null); // {code, invite_link, referral_count, bonus}
   const [copied, setCopied] = useState(null); // 'code' | 'link' | null
 
+  const [promoCode, setPromoCode] = useState("");
+  const [redeemingPromo, setRedeemingPromo] = useState(false);
+  const [promoMsg, setPromoMsg] = useState(null); // {type:'success'|'error', text}
+
   const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
@@ -185,6 +189,30 @@ export default function Account() {
     } catch (e2) {
       alert(formatError(e2.response?.data?.detail) || "Erreur");
       setDeleting(false);
+    }
+  };
+
+  const handleRedeemPromo = async (e) => {
+    e.preventDefault();
+    const code = promoCode.trim().toUpperCase();
+    if (!code) return;
+    setRedeemingPromo(true);
+    setPromoMsg(null);
+    try {
+      const { data } = await api.post("/promo/redeem", { code });
+      setPromoMsg({
+        type: "success",
+        text: `🎁 ${data.label || "Premium activé"}${data.is_lifetime ? " — accès à vie" : ""}`,
+      });
+      setPromoCode("");
+      if (refresh) refresh();
+    } catch (e2) {
+      setPromoMsg({
+        type: "error",
+        text: formatError(e2.response?.data?.detail) || "Code invalide",
+      });
+    } finally {
+      setRedeemingPromo(false);
     }
   };
 
@@ -292,6 +320,51 @@ export default function Account() {
               </Link>
             </div>
           )}
+
+          {/* ============ Redeem code promo — dispo pour tous ============ */}
+          <div className={`mt-5 pt-5 border-t ${isPremium ? "border-mustard/25" : "border-cream-dark"}`}>
+            <label className={`block text-sm font-bold mb-2 flex items-center gap-2 ${isPremium ? "text-mustard" : "text-navy"}`}>
+              <Ticket className="w-4 h-4" />
+              {isPremium ? "Ajouter un code cadeau" : "Vous avez un code promo ?"}
+            </label>
+            <form onSubmit={handleRedeemPromo} className="flex flex-col sm:flex-row gap-2">
+              <input
+                data-testid="account-promo-input"
+                type="text"
+                value={promoCode}
+                onChange={(e) => setPromoCode(e.target.value.toUpperCase())}
+                placeholder="FAMILLE2026"
+                maxLength={40}
+                disabled={redeemingPromo}
+                className={`flex-1 px-4 py-3 text-base rounded-2xl border-2 uppercase tracking-wider min-h-[52px] ${
+                  isPremium
+                    ? "bg-white/10 border-mustard/40 text-cream placeholder:text-cream/40 focus:border-mustard"
+                    : "bg-white border-cream-dark focus:border-navy"
+                } disabled:opacity-60`}
+              />
+              <button
+                type="submit"
+                data-testid="account-promo-submit"
+                disabled={!promoCode.trim() || redeemingPromo}
+                className="inline-flex items-center justify-center gap-2 bg-terracotta hover:bg-terracotta-dark text-white font-bold px-5 py-3 rounded-full shadow-warm min-h-[52px] disabled:opacity-50 transition shrink-0"
+              >
+                {redeemingPromo ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
+                {redeemingPromo ? "Activation…" : "Activer"}
+              </button>
+            </form>
+            {promoMsg && (
+              <div
+                data-testid={`account-promo-${promoMsg.type}`}
+                className={`mt-3 rounded-xl p-3 text-sm font-medium ${
+                  promoMsg.type === "success"
+                    ? "bg-[#3D9970]/15 border-2 border-[#3D9970]/40 text-navy"
+                    : "bg-[#D9534F]/10 border-2 border-[#D9534F]/40 text-navy"
+                }`}
+              >
+                {promoMsg.text}
+              </div>
+            )}
+          </div>
         </div>
 
         <BadgesSection />

@@ -1,5 +1,12 @@
 # Quiz d'Antan — SaaS pour seniors français
 
+## 2026-02-21 (soir) — Champ Code promo sur `/app/account`
+- **Frontend `Account.jsx`** : nouveau bloc "Vous avez un code promo ?" (compte free) / "Ajouter un code cadeau" (compte Premium) intégré dans la card Abonnement, sous la ligne d'expiration.
+- Design contextuel : sur fond navy pour un compte Premium (input bg-white/10 + label mustard), sur fond blanc pour un compte free.
+- Bouton **Activer** avec spinner pendant la requête, `disabled` si champ vide. Rafraîchissement automatique de `useAuth()` après succès pour que la page affiche instantanément le nouveau plan.
+- **4 scénarios E2E validés** : register free → code INVALIDE (404) → redeem FAMILLE2026 (plan=premium, lifetime=true) → re-redeem refusé (protection anti-double via `redeemed_by`).
+
+
 ## 2026-02-21 (après-midi) — Code cadeau FAMILLE2026 + champ Code promo inscription
 ### Contexte
 Ancien code `FAMILLE2026` (Premium à vie) avait été désactivé automatiquement par le seed startup. L'utilisateur veut le réactiver et l'exposer directement dans le formulaire d'inscription pour un onboarding cadeau instantané.
