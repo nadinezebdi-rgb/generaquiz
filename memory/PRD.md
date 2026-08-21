@@ -1,5 +1,12 @@
 # Quiz d'Antan — SaaS pour seniors français
 
+## 2026-02-20 (nuit +) — HOTFIX Cloudflare 520 : Désactivation Auto-Seed Startup
+- **Incident** : après republish prod du feature "Auto-Seed", le pod prod a renvoyé une erreur Cloudflare 520 (`origin sent response Cloudflare could not parse`) — cause = OOM du pod déclenché par les 2 subprocess Mistral+Opus lancés en parallèle avec le boot du backend.
+- **Fix** `server.py` : suppression de l'appel `_delayed_auto_seed()` au startup. L'auto-seed reste **strictement à la demande** via le bouton "Auto-seed toutes les catégories manquantes" dans `/app/admin/qa` (endpoint `POST /api/admin/qa/auto-seed`).
+- **Vérifié** : backend redémarre propre (aucun log `auto-seed` au startup), `/api/categories` = 200, endpoint manuel toujours fonctionnel.
+- **Action requise** : republier prod pour supprimer l'auto-seed startup + résoudre le Cloudflare 520.
+
+
 ## 2026-02-20 (nuit) — Auto-Seed Catégories
 - **Backend** `admin_qa.py` :
   - Nouvelle fonction `auto_seed_understocked_categories()` : détecte toutes les catégories avec `playable < 140` questions et lance un top-up pour chacune via `_launch_qa_job`. Idempotent grâce au queue anti-doublon (409). Retour structuré `{launched, queued, already_running, skipped_complete, categories: [...]}`.
