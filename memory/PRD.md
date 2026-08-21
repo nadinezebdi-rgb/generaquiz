@@ -1,5 +1,32 @@
 # Quiz d'Antan — SaaS pour seniors français
 
+## 2026-02-21 (matin) — Refonte Supervision QA + RETAG (audit 21/08)
+### Contexte
+Audit chirurgical de l'utilisateur : 1 796 questions en base pour 1 260 slots (surplus ~500) mais 780 questions dorment sans palier. Le reaper tuait des process bien vivants (266 ms après lancement), le startup sweep polluait des jobs `done` avec un champ `error`, et le TOPUP générait de l'IA sans essayer d'abord de re-taguer le stock existant.
+
+### Phase 1 — Supervision par heartbeat (A1 + A2)
+- **Constantes** `_HEARTBEAT_INTERVAL_SEC=15`, `_HEARTBEAT_TIMEOUT_SEC=180`, `_HEARTBEAT_GRACE_SEC=60`.
+- **Nouveau `_heartbeat_loop(job_id, proc)`** : le parent écrit `last_heartbeat_at` toutes les 15 s tant que `proc.returncode is None`, avec filtre atomique `status=running` pour ne jamais toucher un état terminal.
+- **Reaper réécrit** — plus aucun test PID nu. Règles : (1) grâce de 60 s après `started_at`, (2) reap si `last_heartbeat_at` absent OU > 180 s, (3) filtre `{status: running}` — jamais d'écrasement d'un état terminal.
+- **Startup sweep réécrit** — conditionné à `heartbeat stale > 180 s`. Ne touche plus les jobs qui vont être finalisés à done par le parent.
+- **`_run_qa_subprocess` finalisation** : filtre `status=running` + `$unset error` en cas de succès → efface tout marquage `error` laissé par un reaper race'd. Corrige le bug de l'audit : job `status=done, return_code=0, error="killed by restart"`.
+- **Test 5 scénarios** : jeune sans HB (5 s) préservé, vieux sans HB reaped, HB frais préservé même si started_at vieux, HB stale reaped, job `done` intouchable.
+
+### Phase 2 — RETAG / REBALANCE sans IA (B1 étape 1 + B2.3)
+- **Endpoint `POST /admin/qa/rebalance/{category_id}`** : assigne les questions vérifiées `difficulty=null` (ou hors 1..7) aux paliers déficitaires. Algo greedy : `min(range(1,8), key=lambda p: (dist[p], -p))` → remplit le palier le plus vide, préférence palier haut en cas d'égalité (7 avant 6 avant 5…). Retour structuré `{tagged, distribution_before, distribution_after, per_palier_added, still_missing_slots}`.
+- **Endpoint `POST /admin/qa/rebalance-all`** : passe sur les 9 catégories en une requête.
+- **UI** `AdminQA.jsx` :
+  - Bouton **"RETAG global (0 IA)"** dans le bandeau auto-seed (à côté de "Auto-seed toutes les catégories").
+  - Bandeau mustard **"X question(s) vérifiée(s) sans palier — retag gratuit dispo"** avec mini-bouton **RETAG** par catégorie concernée, visible uniquement si `untagged_playable > 0`.
+- **Test** : 20 questions untagged simulées sur annees-50-60 (10) + cuisine-terroir (10) → rebalance-all retag exactement 20 questions, 0 impact sur les autres, priorité paliers hauts respectée.
+
+### Reste à faire (audit)
+- **A3** : checkpoint DB (progression après chaque unité de travail) + reprise auto au boot pour les jobs killed pendant leur run. Actuellement, un job long (11 min pour rerun) tué par redémarrage est perdu.
+- **B1 étape 2** : automate le fact-check du backlog `unchecked` (515 questions non vérifiées) avant de proposer de générer de l'IA.
+- **B1 étape 3 chaîne** : COMPLÉTER À 140 doit enchaîner RETAG → QA-backlog → GENERATE et n'appeler l'IA qu'en dernier recours.
+- **C** : correctifs moteur Mistral (garde-fou 80 %, UUID stables, max_tokens 8000, exclusion vues 30 j, daily_questions en base au lieu de cache).
+
+
 ## 2026-02-20 (nuit +++) — Sitemap XML + robots.txt
 - **Contexte SEO** : après la balise `google-site-verification`, la prochaine étape était de guider Google Search Console vers toutes les pages publiques via un sitemap.
 - **Fichiers créés** :

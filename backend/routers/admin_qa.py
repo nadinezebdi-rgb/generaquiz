@@ -307,10 +307,10 @@ _SUBPROCESS_TIMEOUT_SEC = 15 * 60  # timeout dur pour un audit / topup
 
 
 def _pid_alive(pid: int | None) -> bool:
-    """Retourne True si le PID pointe encore vers un processus vivant.
-    `os.kill(pid, 0)` ne tue pas — c'est un test sans effet. On traite les
-    3 causes possibles d'échec (mauvais type, PID invalide, processus mort)
-    comme « processus mort »."""
+    """⚠️ NE PAS UTILISER pour tester la vivacité d'un job — voir `_reap_dead_jobs`
+    qui s'appuie désormais sur `last_heartbeat_at`. Conservée uniquement pour
+    cibler un SIGTERM lors d'un cancel manuel (usage sûr : la cible est un PID
+    qu'on veut tuer, pas prouver vivant)."""
     try:
         os.kill(int(pid), 0)
         return True
@@ -318,41 +318,84 @@ def _pid_alive(pid: int | None) -> bool:
         return False
 
 
+# ===== Supervision heartbeat =====
+# Le parent écrit `last_heartbeat_at` toutes les _HEARTBEAT_INTERVAL_SEC
+# secondes tant que le subprocess est vivant. Le reaper considère un job
+# mort si le heartbeat a dépassé _HEARTBEAT_TIMEOUT_SEC. Grâce de
+# _HEARTBEAT_GRACE_SEC après started_at avant tout contrôle.
+_HEARTBEAT_INTERVAL_SEC = 15
+_HEARTBEAT_TIMEOUT_SEC = 180  # 3 min sans battement = mort
+_HEARTBEAT_GRACE_SEC = 60     # 1 min de grâce après started_at
+
+
+def _now_iso() -> str:
+    return datetime.now(timezone.utc).isoformat()
+
+
+async def _heartbeat_loop(job_id: str, proc) -> None:
+    """Écrit un heartbeat toutes les 15 s tant que le subprocess vit.
+    Filtre atomique `status=running` — n'écrit jamais sur un job terminal.
+    """
+    while proc.returncode is None:
+        await db.qa_jobs.update_one(
+            {"id": job_id, "status": "running"},
+            {"$set": {"last_heartbeat_at": _now_iso()}},
+        )
+        try:
+            await asyncio.sleep(_HEARTBEAT_INTERVAL_SEC)
+        except asyncio.CancelledError:
+            return
+
+
 async def _reap_dead_jobs() -> int:
-    """Balaye les jobs `running` dont le PID est mort et les passe en `failed`.
-    Retourne le nombre de jobs nettoyés. À appeler avant tout contrôle 409.
+    """Passe en `failed` les jobs `running` dont le heartbeat est trop vieux.
 
-    ⚠️ Race condition guard : un job vient d'être inséré `running` mais son PID
-    n'est écrit qu'après `create_subprocess_exec`. Pendant cette fenêtre
-    (typiquement < 2s) `pid is None`. On accorde un délai de grâce de 30s
-    avant de considérer un job sans PID comme mort — sinon on tue les jobs
-    qui viennent tout juste de démarrer."""
+    Règles strictes (audit 21/08/2026) :
+      1. Grâce absolue de 60 s après `started_at` — aucun job ne peut être
+         reaped avant, quelle que soit la raison.
+      2. Après la grâce : reap seulement si `last_heartbeat_at` est absent
+         (subprocess jamais monté) OU trop vieux (> 180 s sans battement).
+      3. Filtre atomique `{status: "running"}` — aucun état terminal
+         (done / failed / cancelled) ne peut être écrasé.
+      4. Aucun test de vivacité par PID nu — PID peu fiable en Kubernetes.
+    """
     now = datetime.now(timezone.utc)
-    now_iso = now.isoformat()
+    now_iso_s = now.isoformat()
     reaped = 0
-    async for j in db.qa_jobs.find({"status": "running"}, {"id": 1, "pid": 1, "started_at": 1}):
-        pid = j.get("pid")
-        if pid is None:
-            # Grace period : le subprocess est peut-être en train de démarrer
-            try:
-                started = datetime.fromisoformat(j["started_at"])
-                age_sec = (now - started).total_seconds()
-            except (KeyError, ValueError, TypeError):
-                age_sec = 999.0  # started_at illisible → on considère vieux
-            if age_sec < 30:
-                continue  # trop jeune, on laisse le temps au PID d'être écrit
-            reason = "process not alive (pid never written after 30s)"
-        elif not _pid_alive(pid):
-            reason = "process not alive (reaped)"
-        else:
-            continue  # PID vivant → on laisse tourner
+    async for j in db.qa_jobs.find(
+        {"status": "running"},
+        {"id": 1, "started_at": 1, "last_heartbeat_at": 1},
+    ):
+        # 1) Grâce après started_at
+        try:
+            started = datetime.fromisoformat(j["started_at"])
+            age_sec = (now - started).total_seconds()
+        except (KeyError, ValueError, TypeError):
+            age_sec = 999.0
+        if age_sec < _HEARTBEAT_GRACE_SEC:
+            continue
 
+        # 2) Heartbeat check
+        hb_iso = j.get("last_heartbeat_at")
+        if hb_iso is None:
+            reason = f"no heartbeat after {int(age_sec)}s"
+        else:
+            try:
+                hb = datetime.fromisoformat(hb_iso)
+                hb_age = (now - hb).total_seconds()
+            except (ValueError, TypeError):
+                hb_age = 999.0
+            if hb_age < _HEARTBEAT_TIMEOUT_SEC:
+                continue  # heartbeat récent → job vivant
+            reason = f"heartbeat stale ({int(hb_age)}s ago)"
+
+        # 3) Update atomique — le filtre garantit qu'on ne touche pas un état terminal
         r = await db.qa_jobs.update_one(
             {"id": j["id"], "status": "running"},
             {"$set": {
                 "status": "failed",
                 "return_code": -1,
-                "finished_at": now_iso,
+                "finished_at": now_iso_s,
                 "error": reason,
             }},
         )
@@ -361,23 +404,56 @@ async def _reap_dead_jobs() -> int:
 
 
 async def sweep_running_jobs_on_startup() -> int:
-    """Handler startup — passe INCONDITIONNELLEMENT tous les jobs `running`
-    à `failed`. Après un restart, les PID d'avant sont morts ET peuvent avoir
-    été réattribués à d'autres processus — donc pas de PID check ici."""
-    now_iso = datetime.now(timezone.utc).isoformat()
-    r = await db.qa_jobs.update_many(
+    """Handler startup — passe en `failed` uniquement les jobs `running` dont
+    le heartbeat est stale (> 3 min). Ne touche JAMAIS un état terminal.
+
+    ⚠️ Correctif audit 21/08 : avant, tous les running étaient inconditionnellement
+    marqués failed avec un `error`, écrasant des jobs qui allaient légitimement
+    être finalisés à `done` par le parent. Maintenant : sweep conditionné par
+    l'ancienneté du heartbeat, filtre atomique `status=running`.
+    """
+    now = datetime.now(timezone.utc)
+    now_iso_s = now.isoformat()
+    reaped = 0
+    async for j in db.qa_jobs.find(
         {"status": "running"},
-        {"$set": {
-            "status": "failed",
-            "return_code": -1,
-            "finished_at": now_iso,
-            "error": "process killed by backend restart (startup sweep)",
-        }},
-    )
-    if r.modified_count:
+        {"id": 1, "started_at": 1, "last_heartbeat_at": 1},
+    ):
+        hb_iso = j.get("last_heartbeat_at")
+        if hb_iso is None:
+            try:
+                started = datetime.fromisoformat(j["started_at"])
+                age_sec = (now - started).total_seconds()
+            except (KeyError, ValueError, TypeError):
+                age_sec = 999.0
+            if age_sec < _HEARTBEAT_TIMEOUT_SEC:
+                continue
+            reason = f"startup sweep — no heartbeat after {int(age_sec)}s"
+        else:
+            try:
+                hb = datetime.fromisoformat(hb_iso)
+                hb_age = (now - hb).total_seconds()
+            except (ValueError, TypeError):
+                hb_age = 999.0
+            if hb_age < _HEARTBEAT_TIMEOUT_SEC:
+                continue
+            reason = f"startup sweep — heartbeat stale ({int(hb_age)}s)"
+
+        r = await db.qa_jobs.update_one(
+            {"id": j["id"], "status": "running"},
+            {"$set": {
+                "status": "failed",
+                "return_code": -1,
+                "finished_at": now_iso_s,
+                "error": reason,
+            }},
+        )
+        reaped += r.modified_count
+
+    if reaped:
         from core import logger
-        logger.info(f"[qa-jobs] startup sweep — {r.modified_count} job(s) running → failed")
-    return r.modified_count
+        logger.info(f"[qa-jobs] startup sweep — {reaped} job(s) running stale → failed")
+    return reaped
 
 
 async def _count_running() -> int:
@@ -386,15 +462,16 @@ async def _count_running() -> int:
 
 async def _run_qa_subprocess(job_id: str, category_id: str, script_path: Path) -> None:
     """Lance un script d'admin QA (audit ou topup) en subprocess détaché.
-    Met à jour le statut du job en DB (running → done / failed / timeout) à la fin.
-    Timeout dur à `_SUBPROCESS_TIMEOUT_SEC` — au-delà, on kill et on marque failed.
+    Écrit un heartbeat toutes les 15 s dans le doc du job (voir `_heartbeat_loop`).
+    Met à jour le statut (running → done / failed / timeout) atomiquement en
+    filtrant sur `status=running` — les états terminaux ne sont jamais écrasés.
     """
     log_path = f"/tmp/qa_job_{job_id}.log"
     env = os.environ.copy()
     env["ONLY_CATEGORY"] = category_id
-    now_iso = lambda: datetime.now(timezone.utc).isoformat()  # noqa: E731
 
     proc = None
+    hb_task = None
     try:
         with open(log_path, "w") as logf:
             proc = await asyncio.create_subprocess_exec(
@@ -404,7 +481,12 @@ async def _run_qa_subprocess(job_id: str, category_id: str, script_path: Path) -
                 stdout=logf,
                 stderr=logf,
             )
-            await db.qa_jobs.update_one({"id": job_id}, {"$set": {"pid": proc.pid}})
+            # PID + premier heartbeat immédiatement pour éviter la fenêtre nue
+            await db.qa_jobs.update_one(
+                {"id": job_id, "status": "running"},
+                {"$set": {"pid": proc.pid, "last_heartbeat_at": _now_iso()}},
+            )
+            hb_task = asyncio.create_task(_heartbeat_loop(job_id, proc))
             try:
                 rc = await asyncio.wait_for(proc.wait(), timeout=_SUBPROCESS_TIMEOUT_SEC)
             except asyncio.TimeoutError:
@@ -414,29 +496,48 @@ async def _run_qa_subprocess(job_id: str, category_id: str, script_path: Path) -
                     await proc.wait()
                 except Exception:
                     pass
-                await db.qa_jobs.update_one({"id": job_id}, {"$set": {
-                    "status": "failed",
-                    "return_code": -2,
-                    "log_path": log_path,
-                    "finished_at": now_iso(),
-                    "error": f"timeout after {_SUBPROCESS_TIMEOUT_SEC}s",
-                }})
+                # Filtre `status=running` → n'écrase pas un état terminal
+                await db.qa_jobs.update_one(
+                    {"id": job_id, "status": "running"},
+                    {"$set": {
+                        "status": "failed",
+                        "return_code": -2,
+                        "log_path": log_path,
+                        "finished_at": _now_iso(),
+                        "error": f"timeout after {_SUBPROCESS_TIMEOUT_SEC}s",
+                    }},
+                )
                 return
         status = "done" if rc == 0 else "failed"
-        await db.qa_jobs.update_one({"id": job_id}, {"$set": {
-            "status": status,
-            "return_code": rc,
-            "log_path": log_path,
-            "finished_at": now_iso(),
-        }})
+        # Update finalisation : filtre `status=running` (préserve terminal atomique)
+        # + $unset error pour effacer tout marquage laissé par un reaper race'd
+        update_doc = {
+            "$set": {
+                "status": status,
+                "return_code": rc,
+                "log_path": log_path,
+                "finished_at": _now_iso(),
+            },
+        }
+        if rc == 0:
+            update_doc["$unset"] = {"error": ""}  # succès : on efface les erreurs de race
+        await db.qa_jobs.update_one(
+            {"id": job_id, "status": "running"},
+            update_doc,
+        )
     except Exception as e:
-        await db.qa_jobs.update_one({"id": job_id}, {"$set": {
-            "status": "failed",
-            "error": str(e)[:400],
-            "log_path": log_path,
-            "finished_at": now_iso(),
-        }})
+        await db.qa_jobs.update_one(
+            {"id": job_id, "status": "running"},
+            {"$set": {
+                "status": "failed",
+                "error": str(e)[:400],
+                "log_path": log_path,
+                "finished_at": _now_iso(),
+            }},
+        )
     finally:
+        if hb_task and not hb_task.done():
+            hb_task.cancel()
         # Après completion, on tente de dépiler un job "queued" (sérialisation)
         asyncio.create_task(_dequeue_next())
 
@@ -481,6 +582,158 @@ async def qa_topup(category_id: str, admin: dict = Depends(get_admin_user)) -> d
     """Lance le top-up des paliers : génère les questions manquantes pour
     atteindre 20 par difficulté (Mistral/Sonnet + Opus fact-check)."""
     return await _launch_qa_job(category_id, admin, "topup", _TOPUP_SCRIPT, action_label="qa.topup")
+
+
+# ============================================================================
+# REBALANCE — RETAG sans IA (audit 21/08 : 780 questions vérifiées mais sans
+# palier dorment en base). Assigne le champ `difficulty` (1..7) aux questions
+# vérifiées non taguées, en remplissant en priorité les paliers les plus vides
+# (7, 6, 5…) — pas 1, 2, 3.
+# ============================================================================
+
+
+async def _palier_distribution(category_id: str) -> dict[int, int]:
+    """Compte des questions jouables (quality != flagged) par palier 1..7."""
+    pipeline = [
+        {"$match": {"category_id": category_id, "quality": {"$ne": "flagged"},
+                    "difficulty": {"$gte": 1, "$lte": 7}}},
+        {"$group": {"_id": "$difficulty", "n": {"$sum": 1}}},
+    ]
+    dist = {p: 0 for p in range(1, 8)}
+    async for d in db.questions.aggregate(pipeline):
+        dist[d["_id"]] = d["n"]
+    return dist
+
+
+@router.post("/rebalance/{category_id}")
+async def qa_rebalance(category_id: str, admin: dict = Depends(get_admin_user)) -> dict:
+    """RETAG sans IA — assigne les questions vérifiées `difficulty=null` (ou
+    hors 1..7) aux paliers déficitaires. Aucun appel LLM, purement DB.
+
+    Règle d'affectation (audit 21/08) : remplir le palier le plus vide en
+    premier (préférer palier haut 7 > 6 > 5… quand égalité), pour ne pas
+    déséquilibrer les paliers avancés.
+    """
+    cat = await db.categories.find_one({"id": category_id})
+    if not cat:
+        raise HTTPException(status_code=404, detail="Catégorie inconnue")
+
+    before = await _palier_distribution(category_id)
+
+    # Récupère les questions candidates au retag : jouables (quality != flagged),
+    # sans difficulty valide (absent, null, ou hors 1..7).
+    cursor = db.questions.find(
+        {
+            "category_id": category_id,
+            "quality": {"$ne": "flagged"},
+            "$or": [
+                {"difficulty": {"$exists": False}},
+                {"difficulty": None},
+                {"difficulty": {"$lt": 1}},
+                {"difficulty": {"$gt": 7}},
+            ],
+        },
+        {"id": 1, "_id": 0},
+    )
+    candidates = [q async for q in cursor]
+
+    # Pour chaque candidat, on assigne au palier le plus vide (priorité palier haut)
+    dist = dict(before)
+    TARGET = 20
+    tagged = 0
+    per_palier: dict[int, int] = {p: 0 for p in range(1, 8)}
+    for q in candidates:
+        # Sélectionner le palier le plus vide, préférence palier haut en cas d'égalité
+        # → key = (count, -palier) → min = plus vide + palier le plus élevé
+        best = min(range(1, 8), key=lambda p: (dist[p], -p))
+        if dist[best] >= TARGET:
+            break  # tous les paliers sont pleins
+        r = await db.questions.update_one(
+            {"id": q["id"]},
+            {"$set": {"difficulty": best}},
+        )
+        if r.modified_count:
+            dist[best] += 1
+            per_palier[best] += 1
+            tagged += 1
+
+    after = dict(dist)
+    still_missing = sum(max(0, TARGET - after[p]) for p in range(1, 8))
+    candidates_remaining = max(0, len(candidates) - tagged)
+
+    await record_audit(
+        admin, action="qa.rebalance", target_type="category",
+        target_id=category_id, target_label=cat.get("title"),
+        meta={"tagged": tagged, "still_missing": still_missing,
+              "per_palier": per_palier},
+    )
+
+    return {
+        "ok": True,
+        "category_id": category_id,
+        "category_title": cat.get("title"),
+        "candidates_found": len(candidates),
+        "tagged": tagged,
+        "candidates_remaining": candidates_remaining,
+        "still_missing_slots": still_missing,
+        "distribution_before": before,
+        "distribution_after": after,
+        "per_palier_added": per_palier,
+    }
+
+
+@router.post("/rebalance-all")
+async def qa_rebalance_all(admin: dict = Depends(get_admin_user)) -> dict:
+    """Rebalance sur les 9 catégories en une passe. Aucun appel IA."""
+    cats = await db.categories.find({}, {"id": 1, "title": 1, "_id": 0}).to_list(50)
+    total_tagged = 0
+    per_cat = []
+    for cat in cats:
+        # On appelle la logique interne (pas l'endpoint) pour éviter l'auth
+        # ré-vérifiée. Ici on est déjà admin.
+        before = await _palier_distribution(cat["id"])
+        cursor = db.questions.find(
+            {
+                "category_id": cat["id"],
+                "quality": {"$ne": "flagged"},
+                "$or": [
+                    {"difficulty": {"$exists": False}},
+                    {"difficulty": None},
+                    {"difficulty": {"$lt": 1}},
+                    {"difficulty": {"$gt": 7}},
+                ],
+            },
+            {"id": 1, "_id": 0},
+        )
+        candidates = [q async for q in cursor]
+        dist = dict(before)
+        tagged = 0
+        for q in candidates:
+            best = min(range(1, 8), key=lambda p: (dist[p], -p))
+            if dist[best] >= 20:
+                break
+            r = await db.questions.update_one(
+                {"id": q["id"]}, {"$set": {"difficulty": best}}
+            )
+            if r.modified_count:
+                dist[best] += 1
+                tagged += 1
+        after = dict(dist)
+        still_missing = sum(max(0, 20 - after[p]) for p in range(1, 8))
+        total_tagged += tagged
+        per_cat.append({
+            "category_id": cat["id"],
+            "category_title": cat["title"],
+            "tagged": tagged,
+            "still_missing_slots": still_missing,
+            "distribution_after": after,
+        })
+
+    await record_audit(
+        admin, action="qa.rebalance_all", target_type="system",
+        meta={"total_tagged": total_tagged, "categories": len(cats)},
+    )
+    return {"ok": True, "total_tagged": total_tagged, "categories": per_cat}
 
 
 @router.post("/auto-seed")

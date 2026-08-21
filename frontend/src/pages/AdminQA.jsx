@@ -213,6 +213,38 @@ export default function AdminQA() {
     }
   }
 
+  async function rebalanceCategory(categoryId, categoryTitle) {
+    if (!window.confirm(
+      `RETAG (0 appel IA) pour "${categoryTitle}" ?\n\n` +
+      `Assigne les questions vérifiées sans palier aux paliers les plus vides ` +
+      `(priorité paliers hauts 7→6→5…). Aucun coût, purement DB.`
+    )) return;
+    try {
+      const { data } = await api.post(`/admin/qa/rebalance/${categoryId}`);
+      toast.success(
+        `${data.tagged} question(s) taguée(s) — reste ${data.still_missing_slots} slot(s) vide(s)`
+      );
+      loadSummary();
+    } catch (e) {
+      toast.error(formatError(e.response?.data?.detail) || "Rebalance impossible");
+    }
+  }
+
+  async function rebalanceAll() {
+    if (!window.confirm(
+      `RETAG global (0 appel IA) sur les 9 catégories ?\n\n` +
+      `Assigne les questions vérifiées sans palier aux paliers déficitaires. ` +
+      `Objectif : combler les slots avec le stock existant AVANT toute génération IA.`
+    )) return;
+    try {
+      const { data } = await api.post(`/admin/qa/rebalance-all`);
+      toast.success(`${data.total_tagged} question(s) taguée(s) au total sur ${data.categories.length} catégorie(s)`);
+      loadSummary();
+    } catch (e) {
+      toast.error(formatError(e.response?.data?.detail) || "Rebalance global impossible");
+    }
+  }
+
   // ---- Sélection multi + actions bulk ----
   function toggleSelect(id) {
     setSelected((prev) => {
@@ -275,14 +307,25 @@ export default function AdminQA() {
           <div className="text-sm text-navy/80 flex-1 min-w-0">
             <strong className="text-navy">Auto-seed intelligent</strong> — remplit d&apos;un coup toutes les catégories sous la barre des 140 questions. Idempotent, queue serialise à 2 en parallèle.
           </div>
-          <button
-            type="button"
-            onClick={autoSeedAll}
-            data-testid="admin-qa-auto-seed-btn"
-            className="inline-flex items-center gap-2 bg-terracotta text-white text-sm font-bold px-4 py-2 rounded-full hover:bg-terracotta-dark shadow-warm transition shrink-0"
-          >
-            <Sparkles className="w-4 h-4" /> Auto-seed toutes les catégories manquantes
-          </button>
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              type="button"
+              onClick={rebalanceAll}
+              data-testid="admin-qa-rebalance-all-btn"
+              className="inline-flex items-center gap-2 bg-white border-2 border-navy/30 text-navy text-sm font-bold px-4 py-2 rounded-full hover:border-navy transition"
+              title="Retag sans IA — assigne les questions vérifiées sans palier aux paliers vides. Toujours essayer avant l'auto-seed."
+            >
+              <Wand2 className="w-4 h-4" /> RETAG global (0 IA)
+            </button>
+            <button
+              type="button"
+              onClick={autoSeedAll}
+              data-testid="admin-qa-auto-seed-btn"
+              className="inline-flex items-center gap-2 bg-terracotta text-white text-sm font-bold px-4 py-2 rounded-full hover:bg-terracotta-dark shadow-warm transition"
+            >
+              <Sparkles className="w-4 h-4" /> Auto-seed toutes les catégories manquantes
+            </button>
+          </div>
         </div>
 
         {/* ==================== QUEUE ==================== */}
@@ -424,6 +467,23 @@ export default function AdminQA() {
                         </div>
                       )}
                     </button>
+                    {/* Info stock disponible sans IA (untagged verified questions) */}
+                    {s.untagged_playable > 0 && (
+                      <div className="mb-2 flex items-center gap-2 bg-mustard/15 border border-mustard/30 rounded-lg px-2.5 py-1.5" data-testid={`admin-qa-untagged-${s.category_id}`}>
+                        <span className="text-[11px] text-navy/80 flex-1">
+                          <strong className="text-navy">{s.untagged_playable}</strong> question(s) vérifiée(s) sans palier — retag gratuit dispo
+                        </span>
+                        <button
+                          type="button"
+                          onClick={(e) => { e.stopPropagation(); rebalanceCategory(s.category_id, s.category_title); }}
+                          data-testid={`admin-qa-rebalance-${s.category_id}`}
+                          className="inline-flex items-center gap-1 bg-navy text-cream text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-full hover:bg-navy-dark transition"
+                          title="Retag sans IA — assigne les questions vérifiées sans palier"
+                        >
+                          <Wand2 className="w-3 h-3" /> RETAG
+                        </button>
+                      </div>
+                    )}
                     <div className="grid grid-cols-2 gap-2">
                       <button
                         type="button"
