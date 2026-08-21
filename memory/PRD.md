@@ -1,5 +1,15 @@
 # Quiz d'Antan — SaaS pour seniors français
 
+## 2026-02-20 (nuit +++) — Sitemap XML + robots.txt
+- **Contexte SEO** : après la balise `google-site-verification`, la prochaine étape était de guider Google Search Console vers toutes les pages publiques via un sitemap.
+- **Fichiers créés** :
+  - `/app/frontend/public/sitemap.xml` : 10 URLs — landing, pourquoi, quiz-du-jour (daily), ehpad, voyages-france (showcase), register, login, cgu, cgv, confidentialite. Chaque URL a un `<changefreq>` et `<priority>` cohérents.
+  - `/app/frontend/public/robots.txt` : autorise les pages publiques, **bloque `/app/*`** (auth requise) + `/defi/*` + `/livre/coop/*` (URLs privées), pointe vers `https://generaquiz.fr/sitemap.xml`.
+- **Servi correctement** : `curl /sitemap.xml` = 200, `curl /robots.txt` = 200 depuis l'URL publique preview.
+- **Note SEO** : les catégories, paliers et chapitres du Livre sont derrière `/app/*` (auth requise) → Google ne peut pas les crawler. Pour les indexer, il faudrait créer des landing pages publiques `/decouvrir/:categoryId` (comme le `/voyages-france` existant). Ajouté au backlog.
+- **Action** : republier prod pour que Google Search Console puisse détecter le sitemap et lancer le crawl.
+
+
 ## 2026-02-20 (nuit ++) — Auto-Seed Nocturne (queue-safe)
 - **Contexte** : le job `topup_all_categories_nightly` déjà planifié à 05:00 Paris lançait des subprocess Mistral+Opus en série SANS passer par le queue manager → risque de collision mémoire avec un run admin manuel simultané, et aucune visibilité dashboard.
 - **Refactor** `topup_paliers_job.py` : délègue désormais à `auto_seed_understocked_categories()` (queue serialisée, max 2 en parallèle, 100 % idempotent via 409 anti-doublon, visibilité admin complète).
