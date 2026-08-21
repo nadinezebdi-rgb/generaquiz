@@ -483,6 +483,17 @@ async def qa_topup(category_id: str, admin: dict = Depends(get_admin_user)) -> d
     return await _launch_qa_job(category_id, admin, "topup", _TOPUP_SCRIPT, action_label="qa.topup")
 
 
+@router.post("/auto-seed")
+async def qa_auto_seed(admin: dict = Depends(get_admin_user)) -> dict:
+    """Déclenche l'auto-seed : lance un top-up pour chaque catégorie
+    sous-approvisionnée (< 140 questions jouables). Idempotent — le queue
+    empêche les doublons."""
+    result = await auto_seed_understocked_categories()
+    await record_audit(admin, action="qa.auto_seed_manual", target_type="system",
+                       meta={"summary": {k: v for k, v in result.items() if k != "categories"}})
+    return result
+
+
 async def _launch_qa_job(category_id: str, admin: dict, kind: str,
                          script_path: Path, action_label: str) -> dict:
     cat = await db.categories.find_one({"id": category_id})
@@ -532,6 +543,73 @@ async def _launch_qa_job(category_id: str, admin: dict, kind: str,
     job_doc.pop("_id", None)
     return {"ok": True, "job": job_doc, "queued": initial_status == "queued",
             "running_count": running_count, "max_concurrent": _MAX_CONCURRENT_QA_JOBS}
+
+
+async def auto_seed_understocked_categories() -> dict:
+    """Détecte les catégories sous-approvisionnées (< 140 questions jouables)
+    et lance automatiquement un top-up pour chacune.
+
+    Idempotent :
+      - le queue anti-doublon empêche de lancer 2 fois pour la même catégorie
+      - respecte la limite `_MAX_CONCURRENT_QA_JOBS` (les surplus vont en `queued`)
+
+    À appeler au startup après le seed des catégories. Non-bloquant : le retour
+    est immédiat, les subprocess Mistral/Opus tournent en arrière-plan.
+
+    Retourne un dict {launched, queued, skipped, already_running, cats: [...]}
+    """
+    from core import logger
+
+    # Purge des zombies avant la détection
+    await _reap_dead_jobs()
+
+    cats = await db.categories.find({}, {"id": 1, "title": 1, "_id": 0}).to_list(200)
+    system_admin = {"email": "system@auto-seed", "role": "admin"}
+    launched, queued_c, already, skipped = 0, 0, 0, 0
+    details: list[dict] = []
+
+    for cat in cats:
+        cat_id = cat["id"]
+        playable = await db.questions.count_documents({
+            "category_id": cat_id,
+            "difficulty": {"$gte": 1, "$lte": 7},
+            "quality": {"$ne": "flagged"},
+        })
+        if playable >= 140:
+            skipped += 1
+            continue
+        try:
+            res = await _launch_qa_job(cat_id, system_admin, "topup",
+                                       _TOPUP_SCRIPT, action_label="qa.auto_seed")
+            if res.get("queued"):
+                queued_c += 1
+            else:
+                launched += 1
+            details.append({"category_id": cat_id, "playable": playable,
+                            "status": res["job"]["status"]})
+            logger.info(f"[auto-seed] {cat_id}: {playable}/140 → {res['job']['status']}")
+        except HTTPException as e:
+            if e.status_code == 409:
+                already += 1
+                details.append({"category_id": cat_id, "playable": playable,
+                                "status": "already_running_or_queued"})
+                logger.debug(f"[auto-seed] {cat_id}: déjà en cours (409)")
+            else:
+                logger.warning(f"[auto-seed] {cat_id}: erreur {e.status_code} {e.detail}")
+        except Exception as e:
+            logger.warning(f"[auto-seed] {cat_id}: exception {type(e).__name__}: {e}")
+
+    summary = {
+        "launched": launched,
+        "queued": queued_c,
+        "already_running": already,
+        "skipped_complete": skipped,
+        "categories": details,
+    }
+    if launched or queued_c:
+        logger.info(f"[auto-seed] bilan : {launched} lancé(s), {queued_c} en file, "
+                    f"{already} déjà en cours, {skipped} déjà complet(s)")
+    return summary
 
 
 @router.post("/jobs/{job_id}/cancel")

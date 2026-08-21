@@ -1,5 +1,17 @@
 # Quiz d'Antan — SaaS pour seniors français
 
+## 2026-02-20 (nuit) — Auto-Seed Catégories
+- **Backend** `admin_qa.py` :
+  - Nouvelle fonction `auto_seed_understocked_categories()` : détecte toutes les catégories avec `playable < 140` questions et lance un top-up pour chacune via `_launch_qa_job`. Idempotent grâce au queue anti-doublon (409). Retour structuré `{launched, queued, already_running, skipped_complete, categories: [...]}`.
+  - Nouvel endpoint `POST /api/admin/qa/auto-seed` (admin only) — audit tracé `qa.auto_seed_manual`.
+- **Backend** `server.py` : au startup, après le seed des catégories/questions et le start du scheduler, appel non-bloquant à `auto_seed_understocked_categories()` avec délai de 5 s (laisse le pod démarrer avant de lancer les subprocess LLM). Toute nouvelle catégorie ajoutée à `seed_data.py` sera automatiquement remplie à 140 questions au prochain déploiement, sans aucune action manuelle admin.
+- **Frontend** `AdminQA.jsx` : bandeau terracotta "Auto-seed intelligent" tout en haut avec bouton **"Auto-seed toutes les catégories manquantes"** (icône Sparkles). Toast informatif détaillant le bilan (launched/queued/already/skipped).
+- **Test validé** :
+  - Startup logs : `[auto-seed] 2 lancé(s), 6 en file, 0 déjà en cours, 1 déjà complet(s)` — Cinéma à 140/140 skippé correctement.
+  - Endpoint manuel `/auto-seed` : premier appel = 2+6 lancés/queued, second appel immédiat = `0 launched, 0 queued, 8 already_running` (idempotence parfaite).
+  - Jobs de test annulés proprement, subprocess Mistral tués, DB nettoyée.
+
+
 ## 2026-02-20 (soir +) — Correctifs Robustesse Jobs QA (v2)
 - **Contexte** : sur prod, 5 catégories relancées quasi simultanément se sont toutes retrouvées en `failed` au même timestamp (14:51) → signature d'un redémarrage backend prod ou d'une race condition.
 - **Fix 1 — `_reap_dead_jobs` (grace period)** : entre `insert_one` et l'écriture du PID par `_run_qa_subprocess`, un job a `status=running` mais `pid=None`. L'ancien code tuait immédiatement ces jobs qui venaient de naître. Nouveau : délai de grâce de **30 s** avant de considérer un job sans PID comme mort. Message d'erreur explicite : `pid never written after 30s`.

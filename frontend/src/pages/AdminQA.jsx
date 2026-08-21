@@ -5,7 +5,7 @@ import { api, formatError } from "@/lib/api";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import {
-  ShieldCheck, Filter, Check, X, Wand2, Trash2, RefreshCcw, AlertTriangle, Loader2, ChevronLeft, Search, PlayCircle, CheckSquare, Square,
+  ShieldCheck, Filter, Check, X, Wand2, Trash2, RefreshCcw, AlertTriangle, Loader2, ChevronLeft, Search, PlayCircle, CheckSquare, Square, Sparkles,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 
@@ -147,6 +147,25 @@ export default function AdminQA() {
     }
   }
 
+  async function autoSeedAll() {
+    if (!window.confirm(
+      `Lancer un top-up automatique pour toutes les catégories sous-approvisionnées (< 140 questions) ?\n\n` +
+      `Le queue serialise les jobs (max 2 en parallèle) — les autres attendent leur tour. ` +
+      `Aucun doublon : les catégories déjà en cours ou complètes sont ignorées.`
+    )) return;
+    try {
+      const { data } = await api.post(`/admin/qa/auto-seed`);
+      const summary = `${data.launched} lancé(s) · ${data.queued} en file · ${data.already_running} déjà en cours · ${data.skipped_complete} déjà complet(s)`;
+      if (data.launched + data.queued === 0) toast.info(`Rien à faire : ${summary}`);
+      else toast.success(`Auto-seed déclenché : ${summary}`);
+      loadJobs();
+      loadQueue();
+      loadSummary();
+    } catch (e) {
+      toast.error(formatError(e.response?.data?.detail) || "Auto-seed impossible");
+    }
+  }
+
   async function rerunCategory(categoryId, categoryTitle) {
     if (!window.confirm(
       `Relancer le fact-check pour "${categoryTitle}" ?\n\n` +
@@ -250,6 +269,21 @@ export default function AdminQA() {
         <p className="text-navy/70 mb-8">
           Questions vérifiées automatiquement par Claude Opus 4.8. Les questions <strong>flagged</strong> sont automatiquement exclues du tirage.
         </p>
+
+        {/* Auto-seed : bouton global pour lancer un top-up sur toutes les catégories < 140 */}
+        <div className="mb-6 flex items-center justify-between gap-3 flex-wrap bg-terracotta/5 border border-terracotta/25 rounded-2xl p-4">
+          <div className="text-sm text-navy/80 flex-1 min-w-0">
+            <strong className="text-navy">Auto-seed intelligent</strong> — remplit d&apos;un coup toutes les catégories sous la barre des 140 questions. Idempotent, queue serialise à 2 en parallèle.
+          </div>
+          <button
+            type="button"
+            onClick={autoSeedAll}
+            data-testid="admin-qa-auto-seed-btn"
+            className="inline-flex items-center gap-2 bg-terracotta text-white text-sm font-bold px-4 py-2 rounded-full hover:bg-terracotta-dark shadow-warm transition shrink-0"
+          >
+            <Sparkles className="w-4 h-4" /> Auto-seed toutes les catégories manquantes
+          </button>
+        </div>
 
         {/* ==================== QUEUE ==================== */}
         {queue && (queue.running_count > 0 || queue.queued_count > 0) && (

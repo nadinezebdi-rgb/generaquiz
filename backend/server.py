@@ -160,7 +160,11 @@ async def startup():
     # -- QA jobs sweep — au startup, TOUS les jobs "running" sont zombies
     # (leur PID a été tué par le restart et peut avoir été réattribué). On
     # les passe inconditionnellement à "failed" AVANT tout test PID.
-    from routers.admin_qa import sweep_running_jobs_on_startup, _dequeue_next
+    from routers.admin_qa import (
+        sweep_running_jobs_on_startup,
+        _dequeue_next,
+        auto_seed_understocked_categories,
+    )
     await sweep_running_jobs_on_startup()
     # Puis on dépile les jobs restés "queued" avant le restart — sinon ils
     # attendent indéfiniment qu'un running (qui n'existe plus) finisse.
@@ -360,6 +364,22 @@ async def startup():
 
     # Schedule all cron jobs (voir scheduler.py pour la matrice complète)
     start_scheduler()
+
+    # Auto-seed des catégories sous-approvisionnées (< 140 questions jouables).
+    # Non-bloquant : les subprocess Mistral/Opus tournent en arrière-plan.
+    # Idempotent : le queue anti-doublon empêche de lancer 2 fois la même catégorie.
+    # Petit délai (5 s) pour laisser le startup se terminer avant de lancer les
+    # subprocess LLM (évite de saturer la mémoire pod au boot).
+    async def _delayed_auto_seed():
+        await _asyncio.sleep(5)
+        try:
+            summary = await auto_seed_understocked_categories()
+            if summary["launched"] or summary["queued"]:
+                logger.info(f"[startup-auto-seed] {summary['launched']} lancé(s), "
+                            f"{summary['queued']} en file, {summary['already_running']} déjà en cours")
+        except Exception as e:
+            logger.warning(f"[startup-auto-seed] échec : {type(e).__name__}: {e}")
+    _asyncio.create_task(_delayed_auto_seed())
 
 
 @app.on_event("shutdown")
