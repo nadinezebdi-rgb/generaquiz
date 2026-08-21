@@ -1,5 +1,21 @@
 # Quiz d'Antan — SaaS pour seniors français
 
+## 2026-02-21 (après-midi) — Code cadeau FAMILLE2026 + champ Code promo inscription
+### Contexte
+Ancien code `FAMILLE2026` (Premium à vie) avait été désactivé automatiquement par le seed startup. L'utilisateur veut le réactiver et l'exposer directement dans le formulaire d'inscription pour un onboarding cadeau instantané.
+
+### Changements
+- **Seed `server.py`** : `FAMILLE2026` de nouveau seedé (idempotent, préserve l'historique used_count si le doc existait déjà). `duration_days=36500` (100 ans = lifetime), `max_uses=None` (illimité), `label="Cadeau Famille — accès Premium à vie"`.
+- **Register.jsx** :
+  - Nouveau champ **Code promo** caché derrière un lien "J'ai un code promo" (comme le code de parrainage). Auto-révélé si `?promo=CODE` en query string.
+  - Rédemption post-inscription : après le `register()`, si `promoCode` non vide → appel `/api/promo/redeem` en best-effort. Une éventuelle erreur n'empêche pas l'inscription — bandeau vert 🎁 si OK, bandeau mustard ⚠️ si KO (avec invitation à ressayer depuis Mon compte).
+- **Test E2E** : nouvel user free → `POST /api/promo/redeem {code:"FAMILLE2026"}` → `plan="premium"`, `plan_expires_at=2126-07-28`, `is_lifetime=true`.
+
+### Anti-fraude
+- `redeem_promo` bloque déjà les rachats multiples par le même user (`redeemed_by`).
+- `is_lifetime` = duration ≥ LIFETIME_DAYS renvoyé au front — l'UI Account affichera "à vie" automatiquement.
+
+
 ## 2026-02-21 (fin matinée) — 2 fixes signalés par audit externe
 ### Bug 1 — /app/admin/promo bloqué pour superadmin
 - **Cause** : `AdminPromo.jsx` faisait un test en égalité stricte `user.role !== "admin"` alors que le compte user est `superadmin`. Les autres pages admin acceptent les 2 rôles via `AdminGuard`.

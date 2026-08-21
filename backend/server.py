@@ -339,23 +339,28 @@ async def startup():
         logger.info(f"Codes parrainage rétroactifs : {backfill_count} utilisateurs")
 
     # Seed default promo codes (idempotent)
-    # Note: les codes "à vie" (FAMILLE2026) ne sont plus seedés par défaut en prod.
-    # L'admin peut toujours les créer manuellement via /api/promo/create si besoin.
     default_promos = [
         {"code": "DECOUVERTE30", "label": "Essai 30 jours — 50 utilisations",
          "duration_days": 30, "max_uses": 50, "expires_at": None, "active": True},
+        # FAMILLE2026 : code cadeau — débloque Premium à vie, usage illimité
+        {"code": "FAMILLE2026", "label": "Cadeau Famille — accès Premium à vie",
+         "duration_days": 36500, "max_uses": None, "expires_at": None, "active": True},
     ]
-    # Désactiver le code FAMILLE2026 historique s'il est encore actif en base
-    await db.promo_codes.update_many(
-        {"code": "FAMILLE2026", "active": True},
-        {"$set": {"active": False}},
-    )
     for promo in default_promos:
-        if not await db.promo_codes.find_one({"code": promo["code"]}):
+        existing = await db.promo_codes.find_one({"code": promo["code"]})
+        if not existing:
             await db.promo_codes.insert_one({**promo, "used_count": 0, "redeemed_by": [],
                                              "created_at": datetime.now(timezone.utc).isoformat(),
                                              "created_by": "system"})
             logger.info(f"Promo seedé : {promo['code']}")
+        elif not existing.get("active"):
+            # Réactive un code désactivé auparavant, sans perdre l'historique used_count
+            await db.promo_codes.update_one(
+                {"code": promo["code"]},
+                {"$set": {"active": True, "duration_days": promo["duration_days"],
+                          "max_uses": promo["max_uses"], "label": promo["label"]}}
+            )
+            logger.info(f"Promo réactivé : {promo['code']}")
 
     # Seed 5 word-search grids on first boot (idempotent).
     from wordsearch_mistral import seed_grids_if_empty
