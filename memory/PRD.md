@@ -1,5 +1,16 @@
 # Quiz d'Antan — SaaS pour seniors français
 
+## 2026-02-20 (nuit ++) — Auto-Seed Nocturne (queue-safe)
+- **Contexte** : le job `topup_all_categories_nightly` déjà planifié à 05:00 Paris lançait des subprocess Mistral+Opus en série SANS passer par le queue manager → risque de collision mémoire avec un run admin manuel simultané, et aucune visibilité dashboard.
+- **Refactor** `topup_paliers_job.py` : délègue désormais à `auto_seed_understocked_categories()` (queue serialisée, max 2 en parallèle, 100 % idempotent via 409 anti-doublon, visibilité admin complète).
+- **Logs enrichis** : bilan structuré `X lancé(s), Y en file, Z déjà en cours, W déjà complet(s)` + détail par catégorie (`id: playable/140 → status`). Facile à reconstituer chaque matin.
+- **Planning conservé** : 05:00 Paris, APRÈS le régen Mistral 03:00 (qui `delete_many + insert_many` sur les catégories — donc top-up avant serait perdu) et les jeux annexes 03:30/04:00/04:30. Trafic proche de 0 à cette heure.
+- **Tests** :
+  - Job appelé en direct : 2 lancé(s) + 6 en file + 1 complet skippé, log détaillé.
+  - Scheduler startup log affiche bien `auto-seed paliers 05:00`.
+  - Jobs de test annulés, subprocess Mistral tués.
+
+
 ## 2026-02-20 (nuit +) — HOTFIX Cloudflare 520 : Désactivation Auto-Seed Startup
 - **Incident** : après republish prod du feature "Auto-Seed", le pod prod a renvoyé une erreur Cloudflare 520 (`origin sent response Cloudflare could not parse`) — cause = OOM du pod déclenché par les 2 subprocess Mistral+Opus lancés en parallèle avec le boot du backend.
 - **Fix** `server.py` : suppression de l'appel `_delayed_auto_seed()` au startup. L'auto-seed reste **strictement à la demande** via le bouton "Auto-seed toutes les catégories manquantes" dans `/app/admin/qa` (endpoint `POST /api/admin/qa/auto-seed`).

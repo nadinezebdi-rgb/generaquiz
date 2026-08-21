@@ -12,6 +12,7 @@ Matrice horaire (Europe/Paris) :
   03:30     Génération grille Mots Mêlés            chaque jour
   04:00     Génération charades Mistral             chaque jour
   04:30     Génération grille Mots Fléchés          chaque jour
+  05:00     Auto-seed paliers (queue serialisée)    chaque jour
   09:00     E-mail « Quiz du jour »                 chaque jour
   10:00     E-mail J-7 renouvellement Premium       chaque jour
   20:00     Rappel « fin de saison » ligues         chaque dimanche
@@ -79,7 +80,7 @@ def start_scheduler() -> None:
     _scheduler.start()
     logger.info(
         "[scheduler] démarré — 11 jobs actifs "
-        "(quiz 03:00 · wordsearch 03:30 · charades 04:00 · fléchés 04:30 · paliers top-up 05:00 · "
+        "(quiz 03:00 · wordsearch 03:30 · charades 04:00 · fléchés 04:30 · auto-seed paliers 05:00 · "
         "email quotidien 09:00 · relance J-7 10:00 · rappel ligues dim 20:00 · rappel défi dim 19:00 · "
         "clôture ligues lun 00:05 · défi hebdo palier lun 00:10, Europe/Paris)"
     )
