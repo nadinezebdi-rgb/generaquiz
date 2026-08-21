@@ -188,6 +188,24 @@ def _age_group(birth_year: Optional[int]) -> Optional[str]:
     return "libre"
 
 
+def is_premium_active(u: dict) -> bool:
+    """True si l'utilisateur a un plan Premium ENCORE actif (non expiré).
+    Prend en charge plan_expires_at absent (lifetime) et passé (expiré).
+    Utilisé par les gates de features Premium pour éviter que les comptes
+    expirés continuent d'avoir accès aux quotas / features premium.
+    """
+    if u.get("plan") != "premium":
+        return False
+    exp_raw = u.get("plan_expires_at")
+    if not exp_raw:
+        return True  # pas de date → considéré lifetime
+    try:
+        exp = datetime.fromisoformat(exp_raw)
+        return exp >= datetime.now(timezone.utc)
+    except (ValueError, TypeError):
+        return True  # date illisible → fail open pour ne pas priver un client payant
+
+
 def user_to_public(u: dict) -> dict:
     # Compute level info from xp_total for the client badges/progress ring.
     # Lazy import to avoid circular ref.
@@ -196,9 +214,23 @@ def user_to_public(u: dict) -> dict:
         level_info = compute_level(int(u.get("xp_total") or 0))
     except Exception:
         level_info = {"level": 1, "progress_pct": 0, "xp_to_next": 50, "next_level_at": 50, "xp_in_level": 0}
+
+    # Normalise le plan : si plan_expires_at est passé, on renvoie "free".
+    # Ainsi le frontend et tout consommateur de /me voient un état cohérent
+    # même si le champ `plan` en base n'a pas encore été rétrogradé.
+    plan = u.get("plan", "free")
+    plan_expires_at = u.get("plan_expires_at")
+    if plan == "premium" and plan_expires_at:
+        try:
+            exp = datetime.fromisoformat(plan_expires_at)
+            if exp < datetime.now(timezone.utc):
+                plan = "free"  # abonnement expiré
+        except (ValueError, TypeError):
+            pass
+
     return {"id": str(u["_id"]), "email": u["email"], "name": u.get("name", ""),
-            "role": u.get("role", "user"), "plan": u.get("plan", "free"),
-            "plan_expires_at": u.get("plan_expires_at"), "created_at": u.get("created_at"),
+            "role": u.get("role", "user"), "plan": plan,
+            "plan_expires_at": plan_expires_at, "created_at": u.get("created_at"),
             "plan_tier": u.get("plan_tier"),          # "club" | "famille" | "premium" | None
             "plan_period": u.get("plan_period"),      # "monthly" | "yearly" | None
             "streak_current": int(u.get("streak_current") or 0),

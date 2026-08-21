@@ -1,5 +1,26 @@
 # Quiz d'Antan — SaaS pour seniors français
 
+## 2026-02-21 (fin matinée) — 2 fixes signalés par audit externe
+### Bug 1 — /app/admin/promo bloqué pour superadmin
+- **Cause** : `AdminPromo.jsx` faisait un test en égalité stricte `user.role !== "admin"` alors que le compte user est `superadmin`. Les autres pages admin acceptent les 2 rôles via `AdminGuard`.
+- **Fix** :
+  - `AdminPromo.jsx:39` : `if (user && (user.role === "admin" || user.role === "superadmin"))` — l'appel `fetchPromos()` déclenche bien pour superadmin.
+  - `AdminPromo.jsx:45` : garde d'affichage acceptant les 2 rôles.
+  - `AdminReports.jsx:26,55` : même bug corrigé sur la page signalements.
+- **Vérifié** : `/api/auth/me` renvoie `role=superadmin`, la page promo se charge.
+
+### Bug 2 — Abonnement Premium marqué "actif" même expiré
+- **Cause** : `Account.jsx` calculait `isPremium = user.plan === "premium"` sans comparer `plan_expires_at` à la date du jour. Le backend n'invalide pas non plus le plan côté DB à l'échéance.
+- **Fix frontend** `Account.jsx` : nouveau `isExpired = expiresDate < now && !isLifetime`, `isPremium = user.plan === "premium" && !isExpired`.
+- **Fix backend** `core.py` :
+  - `user_to_public()` : renvoie `plan="free"` si `plan_expires_at` est passé — tous les consommateurs de `/api/auth/me` voient un état cohérent, y compris l'admin panel.
+  - Nouvel helper `is_premium_active(user)` : True si `plan == "premium"` ET (pas d'expiration OU expiration ≥ maintenant). Fail-open sur date illisible (protection client payant).
+- **Gates critiques rebranchés sur `is_premium_active`** :
+  - `routers/quiz.py` : `limit = 30 if premium actif else 5` + champ `is_premium` retourné au client.
+  - `routers/challenges.py` : Défi Famille bloqué si Premium expiré (402).
+- **Testé 5 scénarios** : futur → True, passé → False, lifetime → True, free → False, date corrompue → True (fail-open).
+
+
 ## 2026-02-21 (matin) — Refonte Supervision QA + RETAG (audit 21/08)
 ### Contexte
 Audit chirurgical de l'utilisateur : 1 796 questions en base pour 1 260 slots (surplus ~500) mais 780 questions dorment sans palier. Le reaper tuait des process bien vivants (266 ms après lancement), le startup sweep polluait des jobs `done` avec un champ `error`, et le TOPUP générait de l'IA sans essayer d'abord de re-taguer le stock existant.

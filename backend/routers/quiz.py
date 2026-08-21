@@ -10,7 +10,7 @@ from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends, HTTPException
 
-from core import db, get_current_user, AttemptCreate
+from core import db, get_current_user, AttemptCreate, is_premium_active
 from routers.referral import grant_referral_bonus_if_eligible
 from progression import record_category_mastery
 from badges import check_after_attempt
@@ -35,7 +35,7 @@ async def get_questions(category_id: str, user: dict = Depends(get_current_user)
 
     Les questions renvoyées sont ensuite tracées dans `user_seen_questions`.
     """
-    limit = 30 if user.get("plan") == "premium" else 5
+    limit = 30 if is_premium_active(user) else 5
     cat = await db.categories.find_one({"id": category_id}, {"_id": 0})
     if not cat:
         raise HTTPException(status_code=404, detail="Catégorie introuvable")
@@ -122,7 +122,7 @@ async def get_questions(category_id: str, user: dict = Depends(get_current_user)
     return {
         "category": cat,
         "questions": qs,
-        "is_premium": user.get("plan") == "premium",
+        "is_premium": is_premium_active(user),
         "pool": {
             "total": playable_total,
             "seen_recently": seen_playable,

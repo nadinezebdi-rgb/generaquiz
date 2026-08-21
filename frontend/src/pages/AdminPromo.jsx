@@ -36,13 +36,13 @@ export default function AdminPromo() {
   };
 
   useEffect(() => {
-    if (user && user.role === "admin") fetchPromos();
+    if (user && (user.role === "admin" || user.role === "superadmin")) fetchPromos();
     else if (user) setFetching(false);
   }, [user]);
 
   if (loading) return <div className="min-h-screen paper-bg flex items-center justify-center text-navy text-xl">Chargement...</div>;
   if (!user) return <Navigate to="/login" replace />;
-  if (user.role !== "admin") {
+  if (user.role !== "admin" && user.role !== "superadmin") {
     return (
       <div className="min-h-screen paper-bg">
         <Navbar variant="app" />
