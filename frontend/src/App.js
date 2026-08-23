@@ -31,6 +31,7 @@ import AdminUsers from "@/pages/AdminUsers";
 import AdminAudit from "@/pages/AdminAudit";
 import Parcours from "@/pages/Parcours";
 import Pourquoi from "@/pages/Pourquoi";
+import VoteRedirect from "@/pages/VoteRedirect";
 import EarnCredits from "@/pages/EarnCredits";
 import CoopChallengeCreate from "@/pages/CoopChallengeCreate";
 import CoopChallengePlay from "@/pages/CoopChallengePlay";
@@ -382,6 +383,9 @@ export default function App() {
               </ProtectedRoute>
             }
           />
+          {/* Redirection publique vers la page de vote Emergent */}
+          <Route path="/voter" element={<VoteRedirect />} />
+          <Route path="/vote" element={<VoteRedirect />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>
