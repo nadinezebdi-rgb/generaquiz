@@ -10,6 +10,7 @@ Modular structure:
 """
 from datetime import datetime, timezone, timedelta
 import asyncio
+import re
 
 from fastapi import APIRouter, Depends, FastAPI
 from fastapi.staticfiles import StaticFiles
@@ -17,7 +18,7 @@ from starlette.middleware.cors import CORSMiddleware
 
 from core import (
     ROOT_DIR, FRONTEND_URL, ADMIN_EMAIL, ADMIN_PASSWORD,
-    client, db, logger, hash_password, verify_password, get_admin_user,
+    client, db, logger, hash_password, get_admin_user,
 )
 from seed_data import CATEGORIES, QUESTIONS
 from daily_email import send_morning_emails
@@ -40,6 +41,11 @@ from routers import progression as progression_router
 from routers import atelier as atelier_router
 from routers import livre as livre_router
 from routers import livre_ai as livre_ai_router
+from routers import admin_qa as admin_qa_router
+from routers import admin_users as admin_users_router
+from routers import admin_audit as admin_audit_router
+from routers import palier as palier_router
+from routers import palier_weekly as palier_weekly_router
 from routers import ehpad as ehpad_router
 from routers import admin_analytics as admin_analytics_router
 from routers import charades as charades_router
@@ -124,6 +130,11 @@ api.include_router(progression_router.router)
 api.include_router(atelier_router.router)
 api.include_router(livre_router.router)
 api.include_router(livre_ai_router.router)
+api.include_router(admin_qa_router.router)
+api.include_router(admin_users_router.router)
+api.include_router(admin_audit_router.router)
+api.include_router(palier_router.router)
+api.include_router(palier_weekly_router.router)
 api.include_router(ehpad_router.router)
 api.include_router(admin_analytics_router.router)
 api.include_router(charades_router.router)
@@ -163,6 +174,19 @@ async def startup():
     await db.challenges.create_index("token", unique=True)
     await db.challenges.create_index([("creator_user_id", 1), ("created_at", -1)])
     await db.promo_codes.create_index("code", unique=True)
+
+    # -- QA jobs sweep — au startup, TOUS les jobs "running" sont zombies
+    # (leur PID a été tué par le restart et peut avoir été réattribué). On
+    # les passe inconditionnellement à "failed" AVANT tout test PID.
+    from routers.admin_qa import (
+        sweep_running_jobs_on_startup,
+        _dequeue_next,
+    )
+    await sweep_running_jobs_on_startup()
+    # Puis on dépile les jobs restés "queued" avant le restart — sinon ils
+    # attendent indéfiniment qu'un running (qui n'existe plus) finisse.
+    import asyncio as _asyncio
+    _asyncio.create_task(_dequeue_next())
     await db.password_reset_tokens.create_index("token", unique=True)
     await db.password_reset_tokens.create_index("expires_at", expireAfterSeconds=0)
     await db.daily_attempts.create_index([("user_id", 1), ("date_key", 1)], unique=True)
@@ -221,43 +245,91 @@ async def startup():
     from routers.livre import _migrate_legacy_chapters
     await _migrate_legacy_chapters()
 
-    # Seed admin
-    # Guard: never auto-seed or reset the admin account when ADMIN_PASSWORD is
-    # unset. This prevents creating an admin with an empty/guessable password.
-    if not ADMIN_PASSWORD:
-        logger.warning(
-            "ADMIN_PASSWORD non defini - seed admin saute. "
-            "Definir la variable ADMIN_PASSWORD pour gerer le compte admin."
+    # ============ Grandfathering : mapping des anciens plan_tier → nouveaux ============
+    # Les abonnés existants voient leur plan_tier réétiqueté :
+    #   club     → solo         (garde leur ancien prix Stripe)
+    #   famille  → famille_v2   (garde leur ancien prix Stripe)
+    #   premium  → heritage     (garde leur ancien prix Stripe)
+    # L'abonnement Stripe reste sur l'ancien package (`club_monthly` etc.), donc
+    # personne ne subit une hausse à la reconduction. Le nouveau `plan_tier`
+    # permet uniquement d'unifier l'affichage/permissions côté app.
+    from motor.motor_asyncio import AsyncIOMotorClient  # noqa: F401
+    for old, new in [("club", "solo"), ("famille", "famille_v2"), ("premium", "heritage")]:
+        r = await db.users.update_many(
+            {"plan_tier": old, "grandfathered": {"$ne": True}},
+            {"$set": {"plan_tier": new, "grandfathered": True, "grandfathered_from": old}},
         )
+        if r.modified_count:
+            logger.info(f"[grandfathering] {old}→{new}: {r.modified_count} utilisateurs")
+
+    # ------------------------------------------------------------------
+    # Seed super-admin — IDEMPOTENT à chaque démarrage.
+    #   - Si ADMIN_EMAIL n'est pas défini : on ne fait rien (log warning).
+    #   - Sinon on cherche le compte par email (comparaison INSENSIBLE à la casse) :
+    #       * Introuvable  → on le crée avec role=superadmin (nécessite ADMIN_PASSWORD).
+    #       * Trouvé       → on FORCE role=superadmin via update (sans jamais
+    #                        toucher au mot de passe existant).
+    #   - Chaque branche loggue explicitement ce qu'elle a fait.
+    # ------------------------------------------------------------------
+    if not ADMIN_EMAIL:
+        logger.warning("[seed-admin] ADMIN_EMAIL non défini → seed admin IGNORÉ")
     else:
-        existing = await db.users.find_one({"email": ADMIN_EMAIL})
+        admin_email_norm = ADMIN_EMAIL.strip().lower()
+        # Comparaison insensible à la casse pour ratrapper les comptes créés en
+        # mixed-case avant que l'app normalise à l'inscription.
+        existing = await db.users.find_one(
+            {"email": {"$regex": f"^{re.escape(admin_email_norm)}$", "$options": "i"}}
+        )
         if existing is None:
-            await db.users.insert_one({
-                "email": ADMIN_EMAIL,
-                "password_hash": hash_password(ADMIN_PASSWORD),
-                "name": "Administrateur",
-                "role": "admin",
-                "plan": "premium",
-                "plan_tier": "premium",
-                "plan_period": "yearly",
-                "plan_expires_at": (datetime.now(timezone.utc) + timedelta(days=3650)).isoformat(),
-                "created_at": datetime.now(timezone.utc).isoformat(),
-            })
-            logger.info(f"Admin créé : {ADMIN_EMAIL}")
+            if not ADMIN_PASSWORD:
+                logger.error(
+                    f"[seed-admin] Compte {admin_email_norm} INTROUVABLE et ADMIN_PASSWORD "
+                    f"non défini → impossible de créer l'admin. Définissez ADMIN_PASSWORD "
+                    f"ou créez le compte manuellement puis relancez le seed."
+                )
+            else:
+                await db.users.insert_one({
+                    "email": admin_email_norm,
+                    "password_hash": hash_password(ADMIN_PASSWORD),
+                    "name": "Administrateur",
+                    "role": "superadmin",
+                    "plan": "premium",
+                    "plan_tier": "premium",
+                    "plan_period": "yearly",
+                    "plan_expires_at": (datetime.now(timezone.utc) + timedelta(days=3650)).isoformat(),
+                    "created_at": datetime.now(timezone.utc).isoformat(),
+                })
+                logger.info(f"[seed-admin] CRÉÉ : {admin_email_norm} → role=superadmin")
         else:
-            if not verify_password(ADMIN_PASSWORD, existing["password_hash"]):
-                await db.users.update_one(
-                    {"email": ADMIN_EMAIL},
-                    {"$set": {"password_hash": hash_password(ADMIN_PASSWORD)}},
-                )
-                logger.info("Admin password mis à jour")
-            # Idempotent backfill of Sprint B tier fields for admin seeded before 3-tier model
+            # Compte existant : on force role=superadmin (idempotent) et on backfill
+            # les champs plan si absents. Le mot de passe n'est JAMAIS modifié ici.
+            updates: dict = {}
+            previous_role = existing.get("role")
+            if previous_role != "superadmin":
+                updates["role"] = "superadmin"
             if not existing.get("plan_tier"):
-                await db.users.update_one(
-                    {"email": ADMIN_EMAIL},
-                    {"$set": {"plan_tier": "premium", "plan_period": "yearly"}},
+                updates["plan_tier"] = "premium"
+                updates["plan_period"] = "yearly"
+            if existing.get("plan") != "premium":
+                updates["plan"] = "premium"
+
+            if updates:
+                await db.users.update_one({"_id": existing["_id"]}, {"$set": updates})
+                if "role" in updates:
+                    logger.info(
+                        f"[seed-admin] PROMU : {existing.get('email')} "
+                        f"role={previous_role!r} → 'superadmin' "
+                        f"(backfill: {sorted(updates.keys())})"
+                    )
+                else:
+                    logger.info(
+                        f"[seed-admin] déjà superadmin : {existing.get('email')} "
+                        f"(backfill plan : {sorted(updates.keys())})"
+                    )
+            else:
+                logger.info(
+                    f"[seed-admin] déjà superadmin : {existing.get('email')} — aucun changement"
                 )
-                logger.info("Admin plan_tier/plan_period backfilled (Sprint B)")
 
     # Backfill credits for users registered before the credits system.
     # Idempotent: only acts on users missing the `credits` field.
@@ -285,23 +357,28 @@ async def startup():
         logger.info(f"Codes parrainage rétroactifs : {backfill_count} utilisateurs")
 
     # Seed default promo codes (idempotent)
-    # Note: les codes "à vie" (FAMILLE2026) ne sont plus seedés par défaut en prod.
-    # L'admin peut toujours les créer manuellement via /api/promo/create si besoin.
     default_promos = [
         {"code": "DECOUVERTE30", "label": "Essai 30 jours — 50 utilisations",
          "duration_days": 30, "max_uses": 50, "expires_at": None, "active": True},
+        # FAMILLE2026 : code cadeau — débloque Premium à vie, usage illimité
+        {"code": "FAMILLE2026", "label": "Cadeau Famille — accès Premium à vie",
+         "duration_days": 36500, "max_uses": None, "expires_at": None, "active": True},
     ]
-    # Désactiver le code FAMILLE2026 historique s'il est encore actif en base
-    await db.promo_codes.update_many(
-        {"code": "FAMILLE2026", "active": True},
-        {"$set": {"active": False}},
-    )
     for promo in default_promos:
-        if not await db.promo_codes.find_one({"code": promo["code"]}):
+        existing = await db.promo_codes.find_one({"code": promo["code"]})
+        if not existing:
             await db.promo_codes.insert_one({**promo, "used_count": 0, "redeemed_by": [],
                                              "created_at": datetime.now(timezone.utc).isoformat(),
                                              "created_by": "system"})
             logger.info(f"Promo seedé : {promo['code']}")
+        elif not existing.get("active"):
+            # Réactive un code désactivé auparavant, sans perdre l'historique used_count
+            await db.promo_codes.update_one(
+                {"code": promo["code"]},
+                {"$set": {"active": True, "duration_days": promo["duration_days"],
+                          "max_uses": promo["max_uses"], "label": promo["label"]}}
+            )
+            logger.info(f"Promo réactivé : {promo['code']}")
 
     # Seed 5 word-search grids on first boot (idempotent).
     from wordsearch_mistral import seed_grids_if_empty
@@ -309,6 +386,12 @@ async def startup():
 
     # Schedule all cron jobs (voir scheduler.py pour la matrice complète)
     start_scheduler()
+
+    # NOTE : l'auto-seed au startup a été DÉSACTIVÉ car il lançait 2 subprocess
+    # Mistral+Opus en même temps que le boot → pic mémoire → OOM du pod prod
+    # → erreur Cloudflare 520. L'auto-seed reste disponible **à la demande**
+    # via le bouton "Auto-seed toutes les catégories manquantes" dans
+    # /app/admin/qa (endpoint POST /api/admin/qa/auto-seed).
 
 
 @app.on_event("shutdown")

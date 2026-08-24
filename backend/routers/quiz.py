@@ -10,7 +10,7 @@ from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends, HTTPException
 
-from core import db, get_current_user, AttemptCreate
+from core import db, get_current_user, AttemptCreate, is_premium_active
 from routers.referral import grant_referral_bonus_if_eligible
 from progression import record_category_mastery
 from badges import check_after_attempt
@@ -25,16 +25,111 @@ async def list_categories():
 
 @router.get("/categories/{category_id}/questions")
 async def get_questions(category_id: str, user: dict = Depends(get_current_user)):
-    limit = 30 if user.get("plan") == "premium" else 5
+    """Tirage des questions d'un quiz avec deux garde-fous critiques :
+
+    1. Anti-répétition (Correctif A) : les questions vues par l'utilisateur
+       dans les 30 derniers jours sont exclues. Si le pool restant est trop
+       petit, on complète en repêchant les plus anciennes vues.
+    2. Signalements (Correctif C) : les questions ayant reçu au moins 2
+       signalements non traités sont exclues automatiquement.
+
+    Les questions renvoyées sont ensuite tracées dans `user_seen_questions`.
+    """
+    limit = 30 if is_premium_active(user) else 5
     cat = await db.categories.find_one({"id": category_id}, {"_id": 0})
     if not cat:
         raise HTTPException(status_code=404, detail="Catégorie introuvable")
-    qs = await db.questions.aggregate([
-        {"$match": {"category_id": category_id}},
+
+    user_id = str(user["_id"])
+
+    # 1) Questions déjà vues dans les 30 derniers jours
+    from datetime import timedelta
+    since = datetime.now(timezone.utc) - timedelta(days=30)
+    seen_docs = await db.user_seen_questions.find(
+        {"user_id": user_id, "category_id": category_id, "seen_at": {"$gte": since.isoformat()}},
+        {"_id": 0, "question_id": 1},
+    ).to_list(2000)
+    seen_ids = {d["question_id"] for d in seen_docs}
+
+    # 2) Questions "toxiques" : signalées ≥2 fois avec statut != "dismissed"
+    reported = await db.question_reports.aggregate([
+        {"$match": {"category_id": category_id, "status": {"$ne": "dismissed"}}},
+        {"$group": {"_id": "$question_id", "n": {"$sum": 1}}},
+        {"$match": {"n": {"$gte": 2}}},
+    ]).to_list(500)
+    reported_ids = {r["_id"] for r in reported}
+
+    excluded_ids = seen_ids | reported_ids
+
+    # 3) Premier tirage : questions non-vues, non-signalées, ET non "flagged" par le fact-check
+    #    (quality peut être "verified", "flagged", ou absent — on exclut uniquement "flagged")
+    base_match = {
+        "category_id": category_id,
+        "id": {"$nin": list(excluded_ids)},
+        "quality": {"$ne": "flagged"},
+    }
+    pipeline = [
+        {"$match": base_match},
         {"$sample": {"size": limit}},
         {"$project": {"_id": 0}},
-    ]).to_list(limit)
-    return {"category": cat, "questions": qs, "is_premium": user.get("plan") == "premium"}
+    ]
+    qs = await db.questions.aggregate(pipeline).to_list(limit)
+
+    # 4) Si pas assez de nouvelles questions, on repêche les vues les plus anciennes
+    #    (mais on garde le filtre signalements — jamais de question toxique)
+    if len(qs) < limit:
+        needed = limit - len(qs)
+        chosen_ids = {q["id"] for q in qs}
+        # Repêche : questions vues (les plus anciennes en priorité), hors signalées et hors flagged
+        fallback = await db.questions.aggregate([
+            {"$match": {
+                "category_id": category_id,
+                "id": {"$nin": list(reported_ids | chosen_ids)},
+                "quality": {"$ne": "flagged"},
+            }},
+            {"$sample": {"size": needed}},
+            {"$project": {"_id": 0}},
+        ]).to_list(needed)
+        qs.extend(fallback)
+
+    # 5) Trace les questions montrées à l'utilisateur (upsert pour rafraîchir seen_at)
+    if qs:
+        now_iso = datetime.now(timezone.utc).isoformat()
+        from pymongo import UpdateOne
+        await db.user_seen_questions.bulk_write([
+            UpdateOne(
+                {"user_id": user_id, "question_id": q["id"], "category_id": category_id},
+                {"$set": {"seen_at": now_iso, "category_id": category_id}, "$inc": {"seen_count": 1}},
+                upsert=True,
+            )
+            for q in qs
+        ], ordered=False)
+
+    # 6) Compteur : X/N questions restantes non vues (basé sur les questions JOUABLES uniquement)
+    playable_total = await db.questions.count_documents({
+        "category_id": category_id,
+        "quality": {"$ne": "flagged"},
+        "id": {"$nin": list(reported_ids)} if reported_ids else {"$exists": True},
+    })
+    # seen_ids peut inclure des questions désormais flagged — on garde le comptage simple :
+    seen_playable = await db.questions.count_documents({
+        "category_id": category_id,
+        "quality": {"$ne": "flagged"},
+        "id": {"$in": list(seen_ids)},
+    }) if seen_ids else 0
+    remaining = max(0, playable_total - seen_playable)
+
+    return {
+        "category": cat,
+        "questions": qs,
+        "is_premium": is_premium_active(user),
+        "pool": {
+            "total": playable_total,
+            "seen_recently": seen_playable,
+            "remaining_fresh": remaining,
+            "reported_excluded": len(reported_ids),
+        },
+    }
 
 
 @router.post("/attempts")

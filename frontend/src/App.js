@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, Link, useLocation } from "react-router-dom";
 import { Toaster } from "sonner";
 import "@/App.css";
 
@@ -27,7 +27,12 @@ import Confidentialite from "@/pages/legal/Confidentialite";
 import AdminReports from "@/pages/AdminReports";
 import AdminAnalytics from "@/pages/AdminAnalytics";
 import AdminHome from "@/pages/AdminHome";
+import AdminQA from "@/pages/AdminQA";
+import AdminUsers from "@/pages/AdminUsers";
+import AdminAudit from "@/pages/AdminAudit";
+import Parcours from "@/pages/Parcours";
 import Pourquoi from "@/pages/Pourquoi";
+import VoteRedirect from "@/pages/VoteRedirect";
 import EarnCredits from "@/pages/EarnCredits";
 import CoopChallengeCreate from "@/pages/CoopChallengeCreate";
 import CoopChallengePlay from "@/pages/CoopChallengePlay";
@@ -62,9 +67,11 @@ function ProtectedRoute({ children }) {
 }
 
 /** AdminRoute — guard rôle "admin". Un utilisateur connecté mais non-admin
- *  est redirigé vers son tableau de bord. Ne remplace PAS la protection
- *  serveur : tous les endpoints /api/admin/* exigent aussi role=admin. */
-function AdminRoute({ children }) {
+ *  voit un écran "Accès refusé" explicite (plus de redirection silencieuse,
+ *  pour faciliter le diagnostic). Avec `requireSuperadmin`, seul le rôle
+ *  "superadmin" passe. Ne remplace PAS la protection serveur : tous
+ *  les endpoints /api/admin/* exigent aussi role=admin (ou superadmin). */
+function AdminRoute({ children, requireSuperadmin = false }) {
   const { user, loading } = useAuth();
   const location = useLocation();
   if (loading || user === null) {
@@ -77,10 +84,50 @@ function AdminRoute({ children }) {
   if (!user) {
     return <Navigate to="/login" state={{ from: location.pathname }} replace />;
   }
-  if (user.role !== "admin") {
-    return <Navigate to="/app/dashboard" replace />;
+  const isSuper = user.role === "superadmin";
+  const isAdmin = isSuper || user.role === "admin";
+  if (requireSuperadmin ? !isSuper : !isAdmin) {
+    return <AdminAccessDenied role={user.role} requireSuperadmin={requireSuperadmin} />;
   }
   return children;
+}
+
+function AdminAccessDenied({ role, requireSuperadmin = false }) {
+  const requiredLabel = requireSuperadmin ? "super-administrateur" : "administrateur";
+  return (
+    <div className="min-h-screen paper-bg flex items-center justify-center px-4" data-testid="admin-access-denied">
+      <div className="max-w-md w-full bg-white border-2 border-cream-dark rounded-3xl p-8 text-center shadow-warm">
+        <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-bordeaux/10 text-bordeaux flex items-center justify-center text-3xl">
+          🔒
+        </div>
+        <h1 className="font-display text-2xl font-extrabold text-navy mb-2">
+          Accès refusé
+        </h1>
+        <p className="text-navy/70 mb-1">
+          Droits <strong>{requiredLabel}</strong> requis pour accéder à cette page.
+        </p>
+        <p className="text-xs text-navy/50 mb-6">
+          Votre rôle actuel : <code className="bg-cream px-2 py-0.5 rounded font-mono">{role || "user"}</code>
+        </p>
+        <div className="flex flex-col gap-2">
+          <Link
+            to="/app/dashboard"
+            data-testid="admin-denied-back-dashboard"
+            className="inline-flex items-center justify-center gap-2 bg-terracotta text-white font-bold px-5 py-3 rounded-full hover:bg-terracotta-dark transition"
+          >
+            Retour au tableau de bord
+          </Link>
+          <Link
+            to="/"
+            data-testid="admin-denied-back-home"
+            className="inline-flex items-center justify-center gap-2 bg-white border-2 border-navy text-navy font-bold px-5 py-3 rounded-full hover:bg-navy hover:text-cream transition"
+          >
+            Retour à l&apos;accueil
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 export default function App() {
@@ -198,6 +245,14 @@ export default function App() {
               </ProtectedRoute>
             }
           />
+          <Route
+            path="/app/parcours/:categoryId"
+            element={
+              <ProtectedRoute>
+                <Parcours />
+              </ProtectedRoute>
+            }
+          />
           <Route path="/app/pricing" element={<Pricing />} />
           <Route
             path="/app/success"
@@ -264,6 +319,30 @@ export default function App() {
               </AdminRoute>
             }
           />
+          <Route
+            path="/app/admin/qa"
+            element={
+              <AdminRoute>
+                <AdminQA />
+              </AdminRoute>
+            }
+          />
+          <Route
+            path="/app/admin/users"
+            element={
+              <AdminRoute>
+                <AdminUsers />
+              </AdminRoute>
+            }
+          />
+          <Route
+            path="/app/admin/audit"
+            element={
+              <AdminRoute requireSuperadmin>
+                <AdminAudit />
+              </AdminRoute>
+            }
+          />
           <Route path="/pourquoi" element={<Pourquoi />} />
           <Route
             path="/app/earn-credits"
@@ -313,6 +392,9 @@ export default function App() {
               </ProtectedRoute>
             }
           />
+          {/* Redirection publique vers la page de vote Emergent */}
+          <Route path="/voter" element={<VoteRedirect />} />
+          <Route path="/vote" element={<VoteRedirect />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>

@@ -1,0 +1,25 @@
+# robots.txt — GénéraQuiz
+# Cadence : Google & Bing bots ont accès aux pages publiques uniquement.
+# Les routes sous /app/* nécessitent une authentification et n'ont pas
+# vocation à être indexées (contenu personnel, admin, jeu en session).
+
+User-agent: *
+Allow: /
+Allow: /pourquoi
+Allow: /quiz-du-jour
+Allow: /ehpad
+Allow: /voyages-france
+Allow: /cgu
+Allow: /cgv
+Allow: /confidentialite
+Allow: /register
+Allow: /login
+
+# Zones protégées par authentification — inutile de crawler
+Disallow: /app/
+Disallow: /forgot-password
+Disallow: /reset-password
+Disallow: /defi/
+Disallow: /livre/coop/
+
+Sitemap: https://generaquiz.fr/sitemap.xml

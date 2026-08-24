@@ -1,305 +1,325 @@
-import { useEffect, useMemo, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
-import { api, formatError } from "@/lib/api";
-import { useAuth } from "@/contexts/AuthContext";
+import { useState, useEffect } from "react";
+import { Link, useSearchParams } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
+import { Check, Star, Sparkles, Gift, ChevronRight, Phone, Mail, Loader2 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { PLANS, GIFTS, pricePresentation, annualDiscountBadge, fmt } from "@/config/pricing";
+import ProPricing from "@/components/ProPricing";
 import PrintedBookPricing from "@/components/PrintedBookPricing";
-import { Check, Crown, Users, Sparkles, Loader2, Star, ArrowRight } from "lucide-react";
+import { startCheckout } from "@/lib/checkout";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
 
 /**
- * Pricing — 3 paliers (Club Mémoire / Famille / Premium) × 2 périodes (mensuel / annuel).
+ * Pricing — Nouvelle grille tarifaire GénéraQuiz.
  *
- * Backend est source de vérité (server-side PACKAGES) : le client se contente
- * de sélectionner un `package_id` que Stripe checkout facturera au bon montant.
+ * 4 plans B2C (Découverte / Solo / Famille / Héritage) + section "Offrir"
+ * (cadeaux) + Livre imprimé + Offre Pro. Toutes les valeurs viennent de
+ * /config/pricing.js.
  */
-const TIER_META = {
-  club: {
-    key: "club",
-    title: "Club Mémoire",
-    tagline: "L'essentiel pour s'entretenir chaque jour",
-    icon: Sparkles,
-    color: "border-cream-dark",
-    features: [
-      "Quiz illimités dans toutes les catégories",
-      "Progression et badges",
-      "Historique complet",
-      "Streaks et Ligues hebdomadaires",
-    ],
-  },
-  famille: {
-    key: "famille",
-    title: "Famille",
-    tagline: "Jusqu'à 5 comptes, l'esprit d'équipe",
-    icon: Users,
-    color: "border-terracotta ring-4 ring-terracotta/20",
-    badge: "Le plus populaire",
-    features: [
-      "Tout Club Mémoire, pour 5 personnes",
-      "Classement familial privé",
-      "Défis coopératifs illimités",
-      "Quiz privés entre proches",
-      "Notifications famille",
-    ],
-  },
-  premium: {
-    key: "premium",
-    title: "Premium",
-    tagline: "Le meilleur de GénéraQuiz",
-    icon: Crown,
-    color: "border-navy",
-    features: [
-      "Tout Famille",
-      "Quiz exclusifs (nouvelles catégories en avant-première)",
-      "Statistiques avancées (Score Mémoire 5 axes)",
-      "Support prioritaire",
-      "Accès anticipé aux nouveautés",
-    ],
-  },
-};
-
-const YEARLY_SAVINGS = { club: 10, famille: 16, premium: 26 };
 
 export default function Pricing() {
-  const { user } = useAuth();
-  const navigate = useNavigate();
-  const [packages, setPackages] = useState([]);
-  const [period, setPeriod] = useState("monthly"); // "monthly" | "yearly"
-  const [buying, setBuying] = useState(null);
-  const [err, setErr] = useState("");
+  const [period, setPeriod] = useState("yearly"); // 'monthly' | 'yearly'
+  const annualBadge = annualDiscountBadge();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const { user, loading } = useAuth();
 
+  function switchToYearly() { setPeriod("yearly"); }
+
+  // Reprise du checkout après connexion / inscription : si un pkg est en attente
+  // (URL ?pkg=... ou sessionStorage), on relance dès que l'utilisateur est
+  // authentifié.
   useEffect(() => {
-    api.get("/packages").then((r) => setPackages(r.data)).catch(() => {});
-  }, []);
-
-  // Group packages by tier and period for easy lookup by the card
-  const byKey = useMemo(() => {
-    const m = {};
-    for (const p of packages) m[`${p.tier}_${p.period}`] = p;
-    return m;
-  }, [packages]);
-
-  const buy = async (packageId) => {
-    if (!user) {
-      navigate(`/login?next=/app/pricing`);
-      return;
+    if (loading) return;
+    const urlPkg = searchParams.get("pkg");
+    let pending = urlPkg;
+    if (!pending) {
+      try { pending = sessionStorage.getItem("pending_checkout_package"); } catch { /* storage bloqué */ }
     }
-    setBuying(packageId);
-    setErr("");
-    try {
-      const origin = window.location.origin;
-      const { data } = await api.post("/checkout/session", { package_id: packageId, origin_url: origin });
-      window.location.href = data.url;
-    } catch (e) {
-      setErr(formatError(e.response?.data?.detail) || "Impossible de démarrer le paiement");
-      setBuying(null);
+    if (!pending) return;
+    if (!user) return; // pas connecté → on garde le pkg et on attend
+    // On nettoie AVANT la redirection Stripe pour éviter les boucles
+    try { sessionStorage.removeItem("pending_checkout_package"); } catch { /* storage bloqué */ }
+    if (urlPkg) {
+      const next = new URLSearchParams(searchParams);
+      next.delete("pkg");
+      setSearchParams(next, { replace: true });
     }
-  };
-
-  const currentTier = user?.plan_tier || null;
+    startCheckout(pending, {
+      onError: (msg) => toast.error(msg || "Impossible d'ouvrir le paiement."),
+    });
+  }, [user, loading, searchParams, setSearchParams]);
 
   return (
-    <div className="min-h-screen paper-bg">
+    <div className="min-h-screen bg-cream text-navy">
       <Navbar />
-      <main id="tarifs" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
 
-        <div className="text-center max-w-2xl mx-auto mb-8">
-          <span className="inline-block bg-bordeaux text-cream font-bold px-4 py-1.5 rounded-full text-xs uppercase tracking-wider mb-4">
-            Tarifs simples & justes
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        {/* HEADER */}
+        <div className="text-center max-w-3xl mx-auto mb-10">
+          <span className="inline-block bg-cream border-2 border-mustard-dark text-navy font-bold px-4 py-1.5 rounded-full text-sm mb-4">
+            Tarifs simples
           </span>
-          <h1 className="font-display text-4xl md:text-5xl font-extrabold text-navy mb-3" data-testid="pricing-title">
-            Trois formules, <span className="text-terracotta italic">une seule promesse</span>
+          <h1 className="font-display text-4xl sm:text-5xl font-extrabold mb-3" data-testid="pricing-h1">
+            Choisissez ce qui <span className="text-terracotta italic">vous ressemble</span>
           </h1>
-          <p className="text-navy/70 text-lg">
-            Sans engagement · Annulation en 1 clic · Essai gratuit inclus
+          <p className="text-lg text-navy/70">
+            Sans engagement · Résiliable à tout moment · Support en français
           </p>
         </div>
 
-        {/* Period toggle */}
-        <div className="flex justify-center mb-10" data-testid="pricing-period-toggle">
-          <div className="bg-white border-2 border-cream-dark rounded-full p-1 inline-flex">
-            <button
-              type="button"
-              onClick={() => setPeriod("monthly")}
-              data-testid="pricing-period-monthly"
-              className={`px-5 py-2 rounded-full font-bold text-sm transition ${
-                period === "monthly" ? "bg-navy text-cream" : "text-navy/60 hover:text-navy"
-              }`}
-            >
-              Mensuel
-            </button>
-            <button
-              type="button"
-              onClick={() => setPeriod("yearly")}
-              data-testid="pricing-period-yearly"
-              className={`px-5 py-2 rounded-full font-bold text-sm transition inline-flex items-center gap-2 ${
-                period === "yearly" ? "bg-navy text-cream" : "text-navy/60 hover:text-navy"
-              }`}
-            >
-              Annuel
-              <span className="bg-mustard text-navy text-[10px] font-extrabold px-1.5 py-0.5 rounded-full uppercase">-16%</span>
-            </button>
-          </div>
+        {/* TOGGLE Mensuel / Annuel */}
+        <div className="flex items-center justify-center gap-3 mb-10" data-testid="pricing-toggle">
+          <button
+            type="button"
+            onClick={() => setPeriod("monthly")}
+            data-testid="pricing-toggle-monthly"
+            className={`px-5 py-2 rounded-full font-bold text-sm transition ${period === "monthly" ? "bg-navy text-cream" : "text-navy/60 hover:text-navy"}`}
+          >
+            Mensuel
+          </button>
+          <button
+            type="button"
+            onClick={() => setPeriod("yearly")}
+            data-testid="pricing-toggle-yearly"
+            className={`inline-flex items-center gap-2 px-5 py-2 rounded-full font-bold text-sm transition ${period === "yearly" ? "bg-navy text-cream" : "text-navy/60 hover:text-navy"}`}
+          >
+            Annuel
+            <span className="bg-terracotta text-white text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full">
+              {annualBadge}
+            </span>
+          </button>
         </div>
 
-        {/* Tier grid */}
-        <div className="grid lg:grid-cols-4 gap-5">
-          {/* Gratuit */}
-          <TierCard
-            testid="pricing-tier-free"
-            title="Découverte"
-            price="0 €"
-            period=""
-            tagline="Pour tester GénéraQuiz sans engagement"
-            features={[
-              "Quiz du Jour quotidien",
-              "5 questions par catégorie",
-              "3 badges de démarrage",
-              "Historique 7 jours",
-            ]}
-            ctaLabel={currentTier ? "Formule actuelle inférieure" : (user ? "Formule actuelle" : "Créer un compte")}
-            ctaDisabled={!!currentTier}
-            onCta={() => user ? null : navigate("/register")}
-            highlight={!user && !currentTier}
-            color="border-cream-dark"
-          />
-
-          {["club", "famille", "premium"].map((tier) => {
-            const meta = TIER_META[tier];
-            const Icon = meta.icon;
-            const pkg = byKey[`${tier}_${period}`];
-            const displayed = period === "yearly" && pkg ? (pkg.amount / 12) : pkg?.amount;
-            const isCurrent = currentTier === tier;
-            const canUpgrade = !!pkg;
-            const label = isCurrent
-              ? "Formule actuelle"
-              : buying === pkg?.id
-              ? "Redirection…"
-              : "Choisir cette formule";
-            return (
-              <TierCard
-                key={tier}
-                testid={`pricing-tier-${tier}`}
-                title={meta.title}
-                price={displayed ? `${displayed.toFixed(2).replace(".", ",")} €` : "—"}
-                periodLabel={period === "yearly" ? " /mois, facturé annuellement" : " /mois"}
-                priceExtra={period === "yearly" && pkg ? `Soit ${pkg.amount.toFixed(2).replace(".", ",")} € par an — économie ${YEARLY_SAVINGS[tier]} €` : null}
-                tagline={meta.tagline}
-                features={meta.features}
-                icon={Icon}
-                badge={meta.badge}
-                highlight={tier === "famille"}
-                color={meta.color}
-                ctaLabel={label}
-                ctaDisabled={!canUpgrade || isCurrent || buying === pkg?.id}
-                onCta={() => canUpgrade && buy(pkg.id)}
-              />
-            );
-          })}
+        {/* PLANS */}
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
+          {PLANS.map((plan) => (
+            <PlanCard key={plan.id} plan={plan} period={period} switchToYearly={switchToYearly} />
+          ))}
         </div>
 
-        {err && (
-          <div className="mt-6 max-w-lg mx-auto bg-bordeaux/10 border-2 border-bordeaux/40 rounded-xl p-4 text-bordeaux font-medium text-center" data-testid="pricing-error">
-            {err}
-          </div>
+        {period === "yearly" && (
+          <p className="text-xs text-navy/50 text-center mb-14" data-testid="pricing-legal-annual">
+            Prix TTC. Abonnement annuel débité en une fois, renouvelable par tacite reconduction. Résiliable à tout moment.
+          </p>
         )}
 
-        {/* Reassurance strip */}
-        <div className="mt-10 text-center text-sm text-navy/60 flex items-center justify-center gap-4 flex-wrap" data-testid="pricing-reassurance">
-          <span className="inline-flex items-center gap-1"><Check className="w-4 h-4 text-[#3D9970]" /> Paiement sécurisé Stripe</span>
-          <span className="inline-flex items-center gap-1"><Check className="w-4 h-4 text-[#3D9970]" /> Annulation en 1 clic</span>
-          <span className="inline-flex items-center gap-1"><Check className="w-4 h-4 text-[#3D9970]" /> Support en français</span>
-        </div>
+        {/* ============ SECTION OFFRIR ============ */}
+        <section className="mt-14 mb-14" data-testid="offrir-section">
+          <div className="text-center max-w-3xl mx-auto mb-8">
+            <span className="inline-block bg-terracotta text-white font-bold px-4 py-1.5 rounded-full text-xs uppercase tracking-wider mb-4">
+              <Gift className="w-3.5 h-3.5 inline mr-1" /> Offrir GénéraQuiz
+            </span>
+            <h2 className="font-display text-3xl md:text-4xl font-extrabold mb-3" data-testid="offrir-title">
+              Le plus beau cadeau à faire à ses <span className="text-terracotta italic">parents ou grands-parents</span>
+            </h2>
+            <p className="text-navy/70">
+              Un abonnement, un coffret, ou simplement leur Livre de Vie — à offrir pour un anniversaire, une fête ou pour Noël.
+            </p>
+          </div>
+          <div className="grid md:grid-cols-3 gap-4">
+            {GIFTS.map((g) => (
+              <GiftCard key={g.id} gift={g} />
+            ))}
+          </div>
+          <p className="text-xs text-navy/50 text-center mt-4">
+            Chaque cadeau : destinataire, message personnalisé et choix de la date d&apos;envoi. Génération d&apos;un code cadeau à usage unique après paiement.
+          </p>
+        </section>
 
-        {/* Livre imprimé + Offre Pro */}
+        {/* ============ LIVRE IMPRIMÉ ============ */}
         <PrintedBookPricing />
 
-        {/* FAQ mini */}
-        <div className="mt-14 max-w-2xl mx-auto">
-          <h2 className="font-display text-2xl font-bold text-navy mb-4 text-center">Questions fréquentes</h2>
-          <div className="space-y-2">
-            <details className="bg-white border-2 border-cream-dark rounded-2xl p-4">
-              <summary className="font-bold text-navy cursor-pointer">Puis-je changer de formule à tout moment ?</summary>
-              <p className="mt-2 text-navy/70">Oui, vous pouvez passer d&apos;une formule à l&apos;autre depuis votre espace Mon Compte. La différence est calculée au prorata.</p>
-            </details>
-            <details className="bg-white border-2 border-cream-dark rounded-2xl p-4">
-              <summary className="font-bold text-navy cursor-pointer">Comment fonctionne la formule Famille ?</summary>
-              <p className="mt-2 text-navy/70">Vous invitez jusqu&apos;à 5 proches par email. Ils créent leur propre compte gratuitement et bénéficient automatiquement de tous les avantages. Idéal pour connecter petits-enfants et grands-parents !</p>
-            </details>
-            <details className="bg-white border-2 border-cream-dark rounded-2xl p-4">
-              <summary className="font-bold text-navy cursor-pointer">Puis-je annuler mon abonnement ?</summary>
-              <p className="mt-2 text-navy/70">Oui, à tout moment depuis votre espace personnel. Vous gardez l&apos;accès jusqu&apos;à la fin de la période payée, puis basculez automatiquement en Découverte.</p>
-            </details>
-          </div>
-        </div>
+        {/* ============ OFFRE PRO ============ */}
+        <ProPricing />
       </main>
+
       <Footer />
     </div>
   );
 }
 
-function TierCard({
-  testid, title, price, periodLabel = "", priceExtra, tagline, features, icon: Icon,
-  badge, highlight, color, ctaLabel, ctaDisabled, onCta,
-}) {
+function PlanCard({ plan, period, switchToYearly }) {
+  const pres = pricePresentation(plan, period);
+  const isFree = plan.mensuel === 0 && plan.annuel === 0;
+  const [loading, setLoading] = useState(false);
+
+  const packageId = plan.stripeIds?.[period] ?? null;
+
+  async function handleCheckout() {
+    if (loading) return;
+    setLoading(true);
+    await startCheckout(packageId, {
+      onError: (msg) => {
+        toast.error(msg || "Impossible d'ouvrir le paiement.");
+        setLoading(false);
+      },
+    });
+    // En cas de succès on est redirigé, sinon on remet loading à false via onError.
+  }
+
   return (
     <motion.div
-      initial={{ opacity: 0, y: 14 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      transition={{ duration: 0.4 }}
-      data-testid={testid}
-      className={`relative bg-white rounded-[28px] p-6 border-2 flex flex-col ${color || "border-cream-dark"} ${
-        highlight ? "shadow-warm scale-[1.02]" : ""
+      initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
+      className={`relative bg-white rounded-3xl border-2 p-6 flex flex-col ${
+        plan.populaire ? "border-terracotta shadow-warm ring-4 ring-terracotta/15 scale-[1.02]" : "border-cream-dark"
       }`}
+      data-testid={`plan-card-${plan.id}`}
     >
-      {badge && (
-        <div
-          data-testid={`${testid}-badge`}
-          className="absolute -top-3 left-1/2 -translate-x-1/2 bg-terracotta text-white text-[11px] font-extrabold uppercase tracking-widest px-3 py-1 rounded-full shadow-warm"
-        >
-          <Star className="w-3 h-3 inline mr-1 fill-current" />
-          {badge}
-        </div>
+      {plan.populaire && (
+        <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-terracotta text-white text-[11px] font-extrabold uppercase tracking-widest px-3 py-1 rounded-full inline-flex items-center gap-1 shadow-warm">
+          <Star className="w-3 h-3 fill-current" /> Le plus populaire
+        </span>
       )}
-      {Icon && (
-        <div className={`w-11 h-11 rounded-2xl bg-cream flex items-center justify-center mb-3`}>
-          <Icon className="w-5 h-5 text-terracotta" strokeWidth={2.5} />
-        </div>
-      )}
-      <div className="font-display text-xl font-extrabold text-navy mb-1">{title}</div>
-      <div className="text-sm text-navy/60 mb-4 min-h-[40px]">{tagline}</div>
-      <div className="mb-1">
-        <span className="font-display text-4xl font-extrabold text-navy" data-testid={`${testid}-price`}>{price}</span>
-        <span className="text-sm text-navy/60">{periodLabel}</span>
-      </div>
-      {priceExtra && <div className="text-xs text-terracotta font-bold mb-4">{priceExtra}</div>}
-      {!priceExtra && <div className="mb-4" />}
 
-      <ul className="space-y-2 mb-6 flex-1">
-        {features.map((f) => (
-          <li key={f} className="flex items-start gap-2 text-sm text-navy/85">
-            <Check className="w-4 h-4 text-[#3D9970] mt-0.5 shrink-0" strokeWidth={3} />
+      <h3 className="font-display text-2xl font-extrabold text-navy mb-1">{plan.nom}</h3>
+      <p className="text-sm text-navy/60 mb-4 min-h-[36px]">{plan.tagline}</p>
+
+      {/* Prix : ordre STRICT du brief */}
+      <div className="mb-4">
+        {period === "yearly" && pres.reference != null && pres.reference !== plan.annuel && (
+          <div className="text-sm text-navy/40 line-through" data-testid={`plan-ref-${plan.id}`}>
+            {fmt(pres.reference)}
+          </div>
+        )}
+        <div className="flex items-baseline gap-1">
+          <span className="font-display text-4xl font-extrabold text-bordeaux" data-testid={`plan-price-${plan.id}`}>
+            {pres.main}
+          </span>
+          {pres.suffix && <span className="text-sm text-navy/60">{pres.suffix}</span>}
+        </div>
+        {period === "yearly" && pres.monthlyEquivalent != null && (
+          <p className="text-xs text-navy/50 mt-1" data-testid={`plan-equiv-${plan.id}`}>
+            soit {fmt(pres.monthlyEquivalent)}/mois
+          </p>
+        )}
+        {period === "yearly" && pres.economie != null && pres.economie > 0 && (
+          <span
+            className="inline-flex items-center gap-1 bg-[#3D9970]/15 text-[#2A7350] font-bold px-2 py-0.5 rounded-full text-xs mt-2"
+            data-testid={`plan-eco-${plan.id}`}
+          >
+            <Sparkles className="w-3 h-3" /> Économisez {fmt(pres.economie)} (−{pres.pourcentage} %)
+          </span>
+        )}
+        {isFree && <p className="text-xs text-navy/50 mt-1">Sans carte bancaire · à vie</p>}
+        {pres.note && !isFree && (
+          <p className="text-xs text-mustard-dark mt-2 font-semibold">{pres.note}</p>
+        )}
+      </div>
+
+      <p className="text-xs text-navy/50 mb-3 uppercase tracking-wider font-bold">
+        {plan.comptes} compte{plan.comptes > 1 ? "s" : ""}
+      </p>
+
+      <ul className="space-y-2 mb-5 flex-1">
+        {plan.features.map((f) => (
+          <li key={f} className="flex items-start gap-2 text-sm text-navy/80">
+            <Check className="w-4 h-4 mt-0.5 shrink-0 text-terracotta" strokeWidth={3} />
             <span>{f}</span>
           </li>
         ))}
       </ul>
 
+      {plan.argumentValue && period === "yearly" && (
+        <div className="bg-cream border border-cream-dark rounded-xl p-3 mb-4 text-xs text-navy/70" data-testid={`plan-argument-${plan.id}`}>
+          {plan.argumentValue}
+        </div>
+      )}
+
+      {pres.available ? (
+        plan.ctaTo ? (
+          <Link
+            to={plan.ctaTo}
+            data-testid={`plan-cta-${plan.id}`}
+            className="w-full inline-flex items-center justify-center gap-2 bg-terracotta text-white font-bold px-5 py-3 rounded-full hover:bg-terracotta-dark transition min-h-[52px]"
+          >
+            {plan.cta} <ChevronRight className="w-4 h-4" />
+          </Link>
+        ) : (
+          <button
+            type="button"
+            onClick={handleCheckout}
+            disabled={loading || !packageId}
+            data-testid={`plan-cta-${plan.id}`}
+            className={`w-full inline-flex items-center justify-center gap-2 font-bold px-5 py-3 rounded-full transition min-h-[52px] disabled:opacity-70 disabled:cursor-not-allowed ${
+              plan.populaire ? "bg-terracotta text-white hover:bg-terracotta-dark shadow-warm" : "bg-navy text-cream hover:bg-navy-dark"
+            }`}
+          >
+            {loading ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" /> Redirection…
+              </>
+            ) : (
+              <>
+                {plan.cta} <ChevronRight className="w-4 h-4" />
+              </>
+            )}
+          </button>
+        )
+      ) : (
+        <button
+          type="button"
+          onClick={switchToYearly}
+          data-testid={`plan-cta-${plan.id}`}
+          className="w-full inline-flex items-center justify-center gap-2 bg-white border-2 border-navy text-navy font-bold px-5 py-3 rounded-full hover:bg-navy hover:text-cream transition min-h-[52px]"
+        >
+          Passer en annuel <ChevronRight className="w-4 h-4" />
+        </button>
+      )}
+    </motion.div>
+  );
+}
+
+function GiftCard({ gift }) {
+  const [loading, setLoading] = useState(false);
+
+  async function handleCheckout() {
+    if (loading) return;
+    setLoading(true);
+    await startCheckout(gift.stripeId, {
+      onError: (msg) => {
+        toast.error(msg || "Impossible d'ouvrir le paiement.");
+        setLoading(false);
+      },
+    });
+  }
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
+      className={`relative bg-white rounded-3xl p-6 border-2 flex flex-col ${
+        gift.highlight ? "border-terracotta ring-4 ring-terracotta/15 shadow-warm" : "border-cream-dark"
+      }`}
+      data-testid={`gift-card-${gift.id}`}
+    >
+      {gift.badge && (
+        <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-terracotta text-white text-[11px] font-extrabold uppercase tracking-widest px-3 py-1 rounded-full shadow-warm">
+          {gift.badge}
+        </span>
+      )}
+      <Gift className="w-8 h-8 text-terracotta mb-3" />
+      <h3 className="font-display text-xl font-extrabold text-navy mb-1">{gift.nom}</h3>
+      <div className="font-display text-3xl font-extrabold text-bordeaux mb-2">{fmt(gift.prix)}</div>
+      <p className="text-sm text-navy/70 mb-4 flex-1">{gift.description}</p>
       <button
         type="button"
-        onClick={onCta}
-        disabled={ctaDisabled}
-        data-testid={`${testid}-cta`}
-        className={`w-full inline-flex items-center justify-center gap-2 font-bold px-5 py-3 rounded-full text-sm transition min-h-[48px] ${
-          highlight
-            ? "bg-terracotta hover:bg-terracotta-dark text-white shadow-warm"
-            : "bg-navy hover:bg-navy-dark text-cream"
-        } disabled:opacity-50 disabled:cursor-not-allowed`}
+        onClick={handleCheckout}
+        disabled={loading || !gift.stripeId}
+        data-testid={`gift-cta-${gift.id}`}
+        className={`w-full inline-flex items-center justify-center gap-2 font-bold px-5 py-3 rounded-full transition min-h-[52px] disabled:opacity-70 disabled:cursor-not-allowed ${
+          gift.highlight ? "bg-terracotta text-white hover:bg-terracotta-dark" : "bg-navy text-cream hover:bg-navy-dark"
+        }`}
       >
-        {ctaLabel === "Redirection…" ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
-        {ctaLabel}
-        {!ctaDisabled && ctaLabel !== "Redirection…" && <ArrowRight className="w-4 h-4" />}
+        {loading ? (
+          <>
+            <Loader2 className="w-4 h-4 animate-spin" /> Redirection…
+          </>
+        ) : (
+          <>
+            <Gift className="w-4 h-4" /> Offrir maintenant
+          </>
+        )}
       </button>
     </motion.div>
   );

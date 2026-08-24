@@ -141,18 +141,74 @@ export default function Challenges() {
           )}
         </div>
 
-        {/* ============ CLASSIC SECTION HEADER ============ */}
-        {isPremium && (
-          <div className="mb-4">
+        {/* ============ CLASSIC SECTION HEADER — visible pour tous ============ */}
+        <div className="mb-4">
+          <div className="flex items-center gap-2 flex-wrap">
             <h2 className="font-display text-2xl font-bold text-navy flex items-center gap-2">
               <Users className="w-6 h-6 text-terracotta" /> Défi Classique
             </h2>
-            <p className="text-sm text-navy/60">Quiz partagé par lien — chacun joue de son côté et compare les scores.</p>
+            {!isPremium && (
+              <span className="inline-flex items-center gap-1 bg-mustard/40 text-navy text-xs font-bold px-2.5 py-1 rounded-full uppercase tracking-wider">
+                <Crown className="w-3 h-3" /> Premium
+              </span>
+            )}
           </div>
-        )}
+          <p className="text-sm text-navy/60">Quiz partagé par lien — chacun joue de son côté et compare les scores.</p>
+        </div>
 
         {loading ? (
           <div className="text-navy/60 text-lg">Chargement...</div>
+        ) : !isPremium ? (
+          // Non-premium : aperçu de 2 cards de démo verrouillées + CTA d'upgrade
+          <div className="grid md:grid-cols-2 gap-6" data-testid="challenges-demo-locked">
+            {[
+              { title: "Chansons françaises", participants: 3, mascot: "🎵" },
+              { title: "Cinéma d'antan", participants: 5, mascot: "🎬" },
+            ].map((demo, i) => (
+              <div
+                key={i}
+                className="relative bg-white border-2 border-cream-dark rounded-[24px] p-6 opacity-70 pointer-events-none"
+              >
+                <div className="flex items-start gap-4 mb-4">
+                  <div className="w-16 h-16 rounded-2xl bg-cream border-2 border-cream-dark flex items-center justify-center text-3xl shrink-0">
+                    {demo.mascot}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-display text-xl font-bold text-navy">{demo.title}</h3>
+                    <div className="flex items-center gap-3 text-sm text-navy/60 mt-1">
+                      <span>10 questions</span>
+                      <span>·</span>
+                      <span>Aperçu</span>
+                    </div>
+                  </div>
+                </div>
+                <div className="flex items-center justify-between bg-cream rounded-2xl px-4 py-3 mb-4">
+                  <div className="flex items-center gap-2 text-navy">
+                    <Users className="w-5 h-5 text-terracotta" />
+                    <span className="font-bold">{demo.participants} participants</span>
+                  </div>
+                  <div className="flex items-center gap-1 text-navy">
+                    <Trophy className="w-5 h-5 text-mustard-dark" />
+                    <span className="font-bold">—</span>
+                  </div>
+                </div>
+                <div className="w-full inline-flex items-center justify-center gap-2 bg-navy/40 text-white font-bold px-5 py-3 rounded-full">
+                  <Share2 className="w-4 h-4" /> Voir & partager
+                </div>
+              </div>
+            ))}
+
+            {/* Overlay CTA sous les 2 cards démo */}
+            <div className="md:col-span-2 -mt-2 flex items-center justify-center">
+              <Link
+                to="/app/pricing"
+                data-testid="challenges-demo-upgrade"
+                className="inline-flex items-center gap-2 bg-mustard hover:bg-mustard-dark text-navy font-bold px-6 py-4 rounded-full shadow-warm transition"
+              >
+                <Crown className="w-5 h-5" /> Débloquer les Défis avec Premium <ArrowRight className="w-4 h-4" />
+              </Link>
+            </div>
+          </div>
         ) : items.length === 0 ? (
           <div className="bg-white border-2 border-cream-dark rounded-[28px] p-10 text-center" data-testid="challenges-empty">
             <Users className="w-14 h-14 mx-auto text-terracotta/60 mb-4" strokeWidth={2} />

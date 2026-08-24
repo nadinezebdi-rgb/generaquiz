@@ -1,5 +1,298 @@
 # Quiz d'Antan — SaaS pour seniors français
 
+## 2026-02-24 (soir) — Timeouts QA différenciés par kind
+- **Contexte** : screenshot prod du 24/08 montrait 2 jobs RERUN (Objets d'antan, Histoire de France) en échec avec message `timeout (>15 min)`. Diagnostic : Mistral+Opus tournaient correctement, mais l'audit complet de 200+ questions sur ces grosses catégories dépassait le hard timeout unique de 15 min.
+- **Fix** `admin_qa.py` :
+  - Constante unique `_SUBPROCESS_TIMEOUT_SEC = 15 min` remplacée par un dict `_TIMEOUT_BY_KIND = {"topup": 15*60, "rerun": 30*60}` + fallback `_SUBPROCESS_TIMEOUT_SEC_DEFAULT = 15 min` pour tout kind inconnu.
+  - `_run_qa_subprocess` accepte un paramètre `kind` (défaut `"topup"`), calcule `timeout_sec = _TIMEOUT_BY_KIND.get(kind, DEFAULT)`, l'utilise dans `asyncio.wait_for` et le renvoie dans le message d'erreur (`"timeout after 1800s (rerun)"`).
+  - Les 2 appelants (`_dequeue_next` + `_launch_qa_job`) transmettent maintenant le `kind` correct.
+- **Vérifié runtime** : `topup=15 min`, `rerun=30 min`, `default=15 min`.
+
+
+## 2026-02-24 — Défis : Signaler + Section visible aux non-Premium
+### 1. Bouton "Signaler" dans ChallengePlay
+- Le composant `ReportButton` (déjà utilisé sur `QuizPlayer.jsx` et `DailyQuiz.jsx`) est maintenant intégré dans `ChallengePlay.jsx`.
+- Positionné en top-right sous la question, visible **uniquement aux utilisateurs connectés** (`user && q.id`) — les participants anonymes du lien partagé ne voient pas le bouton pour éviter les 401.
+- Utilise l'ID de question déjà exposé par `_public_challenge` côté backend, aucun changement API nécessaire.
+
+### 2. Section Défi Classique visible aux non-Premium
+- Avant : `Challenges.jsx` cachait entièrement la section classique pour les non-Premium (seul le mode coop hero était visible).
+- Après : la section **"Défi Classique"** est visible pour tous, avec :
+  - Badge `PREMIUM` mustard à côté du titre pour les non-Premium
+  - **Deux cards de démo verrouillées** (Chansons françaises, Cinéma d'antan) en `opacity-70 pointer-events-none` — donne à voir ce qu'on obtient en Premium
+  - **CTA pilule mustard** "Débloquer les Défis avec Premium" (`data-testid="challenges-demo-upgrade"`) sous les cards
+- Gating serveur inchangé : `POST /api/challenges` bloque toujours les non-Premium avec 402 via `is_premium_active` (protection couche métier).
+
+### Tests
+- Non-Premium (`free-view-*@test.fr`) sur `/app/challenges` : section démo visible + CTA d'upgrade ✅
+- Premium (`admin@generaquiz.fr`) sur `/defi/nr9Fl6G4wRU` : bouton "Signaler" 🚩 visible en haut à droite de la question ✅
+- Anonyme via lien partagé : bouton Signaler masqué (pas de spam anonyme) ✅
+
+
+## 2026-02-21 (soir) — Champ Code promo sur `/app/account`
+- **Frontend `Account.jsx`** : nouveau bloc "Vous avez un code promo ?" (compte free) / "Ajouter un code cadeau" (compte Premium) intégré dans la card Abonnement, sous la ligne d'expiration.
+- Design contextuel : sur fond navy pour un compte Premium (input bg-white/10 + label mustard), sur fond blanc pour un compte free.
+- Bouton **Activer** avec spinner pendant la requête, `disabled` si champ vide. Rafraîchissement automatique de `useAuth()` après succès pour que la page affiche instantanément le nouveau plan.
+- **4 scénarios E2E validés** : register free → code INVALIDE (404) → redeem FAMILLE2026 (plan=premium, lifetime=true) → re-redeem refusé (protection anti-double via `redeemed_by`).
+
+
+## 2026-02-21 (après-midi) — Code cadeau FAMILLE2026 + champ Code promo inscription
+### Contexte
+Ancien code `FAMILLE2026` (Premium à vie) avait été désactivé automatiquement par le seed startup. L'utilisateur veut le réactiver et l'exposer directement dans le formulaire d'inscription pour un onboarding cadeau instantané.
+
+### Changements
+- **Seed `server.py`** : `FAMILLE2026` de nouveau seedé (idempotent, préserve l'historique used_count si le doc existait déjà). `duration_days=36500` (100 ans = lifetime), `max_uses=None` (illimité), `label="Cadeau Famille — accès Premium à vie"`.
+- **Register.jsx** :
+  - Nouveau champ **Code promo** caché derrière un lien "J'ai un code promo" (comme le code de parrainage). Auto-révélé si `?promo=CODE` en query string.
+  - Rédemption post-inscription : après le `register()`, si `promoCode` non vide → appel `/api/promo/redeem` en best-effort. Une éventuelle erreur n'empêche pas l'inscription — bandeau vert 🎁 si OK, bandeau mustard ⚠️ si KO (avec invitation à ressayer depuis Mon compte).
+- **Test E2E** : nouvel user free → `POST /api/promo/redeem {code:"FAMILLE2026"}` → `plan="premium"`, `plan_expires_at=2126-07-28`, `is_lifetime=true`.
+
+### Anti-fraude
+- `redeem_promo` bloque déjà les rachats multiples par le même user (`redeemed_by`).
+- `is_lifetime` = duration ≥ LIFETIME_DAYS renvoyé au front — l'UI Account affichera "à vie" automatiquement.
+
+
+## 2026-02-21 (fin matinée) — 2 fixes signalés par audit externe
+### Bug 1 — /app/admin/promo bloqué pour superadmin
+- **Cause** : `AdminPromo.jsx` faisait un test en égalité stricte `user.role !== "admin"` alors que le compte user est `superadmin`. Les autres pages admin acceptent les 2 rôles via `AdminGuard`.
+- **Fix** :
+  - `AdminPromo.jsx:39` : `if (user && (user.role === "admin" || user.role === "superadmin"))` — l'appel `fetchPromos()` déclenche bien pour superadmin.
+  - `AdminPromo.jsx:45` : garde d'affichage acceptant les 2 rôles.
+  - `AdminReports.jsx:26,55` : même bug corrigé sur la page signalements.
+- **Vérifié** : `/api/auth/me` renvoie `role=superadmin`, la page promo se charge.
+
+### Bug 2 — Abonnement Premium marqué "actif" même expiré
+- **Cause** : `Account.jsx` calculait `isPremium = user.plan === "premium"` sans comparer `plan_expires_at` à la date du jour. Le backend n'invalide pas non plus le plan côté DB à l'échéance.
+- **Fix frontend** `Account.jsx` : nouveau `isExpired = expiresDate < now && !isLifetime`, `isPremium = user.plan === "premium" && !isExpired`.
+- **Fix backend** `core.py` :
+  - `user_to_public()` : renvoie `plan="free"` si `plan_expires_at` est passé — tous les consommateurs de `/api/auth/me` voient un état cohérent, y compris l'admin panel.
+  - Nouvel helper `is_premium_active(user)` : True si `plan == "premium"` ET (pas d'expiration OU expiration ≥ maintenant). Fail-open sur date illisible (protection client payant).
+- **Gates critiques rebranchés sur `is_premium_active`** :
+  - `routers/quiz.py` : `limit = 30 if premium actif else 5` + champ `is_premium` retourné au client.
+  - `routers/challenges.py` : Défi Famille bloqué si Premium expiré (402).
+- **Testé 5 scénarios** : futur → True, passé → False, lifetime → True, free → False, date corrompue → True (fail-open).
+
+
+## 2026-02-21 (matin) — Refonte Supervision QA + RETAG (audit 21/08)
+### Contexte
+Audit chirurgical de l'utilisateur : 1 796 questions en base pour 1 260 slots (surplus ~500) mais 780 questions dorment sans palier. Le reaper tuait des process bien vivants (266 ms après lancement), le startup sweep polluait des jobs `done` avec un champ `error`, et le TOPUP générait de l'IA sans essayer d'abord de re-taguer le stock existant.
+
+### Phase 1 — Supervision par heartbeat (A1 + A2)
+- **Constantes** `_HEARTBEAT_INTERVAL_SEC=15`, `_HEARTBEAT_TIMEOUT_SEC=180`, `_HEARTBEAT_GRACE_SEC=60`.
+- **Nouveau `_heartbeat_loop(job_id, proc)`** : le parent écrit `last_heartbeat_at` toutes les 15 s tant que `proc.returncode is None`, avec filtre atomique `status=running` pour ne jamais toucher un état terminal.
+- **Reaper réécrit** — plus aucun test PID nu. Règles : (1) grâce de 60 s après `started_at`, (2) reap si `last_heartbeat_at` absent OU > 180 s, (3) filtre `{status: running}` — jamais d'écrasement d'un état terminal.
+- **Startup sweep réécrit** — conditionné à `heartbeat stale > 180 s`. Ne touche plus les jobs qui vont être finalisés à done par le parent.
+- **`_run_qa_subprocess` finalisation** : filtre `status=running` + `$unset error` en cas de succès → efface tout marquage `error` laissé par un reaper race'd. Corrige le bug de l'audit : job `status=done, return_code=0, error="killed by restart"`.
+- **Test 5 scénarios** : jeune sans HB (5 s) préservé, vieux sans HB reaped, HB frais préservé même si started_at vieux, HB stale reaped, job `done` intouchable.
+
+### Phase 2 — RETAG / REBALANCE sans IA (B1 étape 1 + B2.3)
+- **Endpoint `POST /admin/qa/rebalance/{category_id}`** : assigne les questions vérifiées `difficulty=null` (ou hors 1..7) aux paliers déficitaires. Algo greedy : `min(range(1,8), key=lambda p: (dist[p], -p))` → remplit le palier le plus vide, préférence palier haut en cas d'égalité (7 avant 6 avant 5…). Retour structuré `{tagged, distribution_before, distribution_after, per_palier_added, still_missing_slots}`.
+- **Endpoint `POST /admin/qa/rebalance-all`** : passe sur les 9 catégories en une requête.
+- **UI** `AdminQA.jsx` :
+  - Bouton **"RETAG global (0 IA)"** dans le bandeau auto-seed (à côté de "Auto-seed toutes les catégories").
+  - Bandeau mustard **"X question(s) vérifiée(s) sans palier — retag gratuit dispo"** avec mini-bouton **RETAG** par catégorie concernée, visible uniquement si `untagged_playable > 0`.
+- **Test** : 20 questions untagged simulées sur annees-50-60 (10) + cuisine-terroir (10) → rebalance-all retag exactement 20 questions, 0 impact sur les autres, priorité paliers hauts respectée.
+
+### Reste à faire (audit)
+- **A3** : checkpoint DB (progression après chaque unité de travail) + reprise auto au boot pour les jobs killed pendant leur run. Actuellement, un job long (11 min pour rerun) tué par redémarrage est perdu.
+- **B1 étape 2** : automate le fact-check du backlog `unchecked` (515 questions non vérifiées) avant de proposer de générer de l'IA.
+- **B1 étape 3 chaîne** : COMPLÉTER À 140 doit enchaîner RETAG → QA-backlog → GENERATE et n'appeler l'IA qu'en dernier recours.
+- **C** : correctifs moteur Mistral (garde-fou 80 %, UUID stables, max_tokens 8000, exclusion vues 30 j, daily_questions en base au lieu de cache).
+
+
+## 2026-02-20 (nuit +++) — Sitemap XML + robots.txt
+- **Contexte SEO** : après la balise `google-site-verification`, la prochaine étape était de guider Google Search Console vers toutes les pages publiques via un sitemap.
+- **Fichiers créés** :
+  - `/app/frontend/public/sitemap.xml` : 10 URLs — landing, pourquoi, quiz-du-jour (daily), ehpad, voyages-france (showcase), register, login, cgu, cgv, confidentialite. Chaque URL a un `<changefreq>` et `<priority>` cohérents.
+  - `/app/frontend/public/robots.txt` : autorise les pages publiques, **bloque `/app/*`** (auth requise) + `/defi/*` + `/livre/coop/*` (URLs privées), pointe vers `https://generaquiz.fr/sitemap.xml`.
+- **Servi correctement** : `curl /sitemap.xml` = 200, `curl /robots.txt` = 200 depuis l'URL publique preview.
+- **Note SEO** : les catégories, paliers et chapitres du Livre sont derrière `/app/*` (auth requise) → Google ne peut pas les crawler. Pour les indexer, il faudrait créer des landing pages publiques `/decouvrir/:categoryId` (comme le `/voyages-france` existant). Ajouté au backlog.
+- **Action** : republier prod pour que Google Search Console puisse détecter le sitemap et lancer le crawl.
+
+
+## 2026-02-20 (nuit ++) — Auto-Seed Nocturne (queue-safe)
+- **Contexte** : le job `topup_all_categories_nightly` déjà planifié à 05:00 Paris lançait des subprocess Mistral+Opus en série SANS passer par le queue manager → risque de collision mémoire avec un run admin manuel simultané, et aucune visibilité dashboard.
+- **Refactor** `topup_paliers_job.py` : délègue désormais à `auto_seed_understocked_categories()` (queue serialisée, max 2 en parallèle, 100 % idempotent via 409 anti-doublon, visibilité admin complète).
+- **Logs enrichis** : bilan structuré `X lancé(s), Y en file, Z déjà en cours, W déjà complet(s)` + détail par catégorie (`id: playable/140 → status`). Facile à reconstituer chaque matin.
+- **Planning conservé** : 05:00 Paris, APRÈS le régen Mistral 03:00 (qui `delete_many + insert_many` sur les catégories — donc top-up avant serait perdu) et les jeux annexes 03:30/04:00/04:30. Trafic proche de 0 à cette heure.
+- **Tests** :
+  - Job appelé en direct : 2 lancé(s) + 6 en file + 1 complet skippé, log détaillé.
+  - Scheduler startup log affiche bien `auto-seed paliers 05:00`.
+  - Jobs de test annulés, subprocess Mistral tués.
+
+
+## 2026-02-20 (nuit +) — HOTFIX Cloudflare 520 : Désactivation Auto-Seed Startup
+- **Incident** : après republish prod du feature "Auto-Seed", le pod prod a renvoyé une erreur Cloudflare 520 (`origin sent response Cloudflare could not parse`) — cause = OOM du pod déclenché par les 2 subprocess Mistral+Opus lancés en parallèle avec le boot du backend.
+- **Fix** `server.py` : suppression de l'appel `_delayed_auto_seed()` au startup. L'auto-seed reste **strictement à la demande** via le bouton "Auto-seed toutes les catégories manquantes" dans `/app/admin/qa` (endpoint `POST /api/admin/qa/auto-seed`).
+- **Vérifié** : backend redémarre propre (aucun log `auto-seed` au startup), `/api/categories` = 200, endpoint manuel toujours fonctionnel.
+- **Action requise** : republier prod pour supprimer l'auto-seed startup + résoudre le Cloudflare 520.
+
+
+## 2026-02-20 (nuit) — Auto-Seed Catégories
+- **Backend** `admin_qa.py` :
+  - Nouvelle fonction `auto_seed_understocked_categories()` : détecte toutes les catégories avec `playable < 140` questions et lance un top-up pour chacune via `_launch_qa_job`. Idempotent grâce au queue anti-doublon (409). Retour structuré `{launched, queued, already_running, skipped_complete, categories: [...]}`.
+  - Nouvel endpoint `POST /api/admin/qa/auto-seed` (admin only) — audit tracé `qa.auto_seed_manual`.
+- **Backend** `server.py` : au startup, après le seed des catégories/questions et le start du scheduler, appel non-bloquant à `auto_seed_understocked_categories()` avec délai de 5 s (laisse le pod démarrer avant de lancer les subprocess LLM). Toute nouvelle catégorie ajoutée à `seed_data.py` sera automatiquement remplie à 140 questions au prochain déploiement, sans aucune action manuelle admin.
+- **Frontend** `AdminQA.jsx` : bandeau terracotta "Auto-seed intelligent" tout en haut avec bouton **"Auto-seed toutes les catégories manquantes"** (icône Sparkles). Toast informatif détaillant le bilan (launched/queued/already/skipped).
+- **Test validé** :
+  - Startup logs : `[auto-seed] 2 lancé(s), 6 en file, 0 déjà en cours, 1 déjà complet(s)` — Cinéma à 140/140 skippé correctement.
+  - Endpoint manuel `/auto-seed` : premier appel = 2+6 lancés/queued, second appel immédiat = `0 launched, 0 queued, 8 already_running` (idempotence parfaite).
+  - Jobs de test annulés proprement, subprocess Mistral tués, DB nettoyée.
+
+
+## 2026-02-20 (soir +) — Correctifs Robustesse Jobs QA (v2)
+- **Contexte** : sur prod, 5 catégories relancées quasi simultanément se sont toutes retrouvées en `failed` au même timestamp (14:51) → signature d'un redémarrage backend prod ou d'une race condition.
+- **Fix 1 — `_reap_dead_jobs` (grace period)** : entre `insert_one` et l'écriture du PID par `_run_qa_subprocess`, un job a `status=running` mais `pid=None`. L'ancien code tuait immédiatement ces jobs qui venaient de naître. Nouveau : délai de grâce de **30 s** avant de considérer un job sans PID comme mort. Message d'erreur explicite : `pid never written after 30s`.
+- **Fix 2 — Startup dequeue** : `sweep_running_jobs_on_startup` était bien câblé mais `_dequeue_next()` ne l'était pas. Résultat : après un restart du backend, les jobs `queued` restaient bloqués indéfiniment. Ajout de `asyncio.create_task(_dequeue_next())` dans `server.py::startup` juste après le sweep.
+- **Test unitaire** (backend) : deux jobs `running` sans PID insérés — jeune (5 s) préservé, vieux (60 s) reaped correctement avec `error="pid never written after 30s"`.
+- **Action requise** : republier en prod pour appliquer ces fixes avant de relancer les 5 catégories neuves (Voyages, Génération 70, Génération 40, Cuisine, Histoire).
+
+
+## 2026-02-20 (soir) — Progression Granulaire QA + Historique Étendu
+- **Backend** `admin_qa.py` :
+  - `GET /admin/qa/queue` enrichit chaque job `running` et `queued` avec `questions_current` (compte des questions jouables : `difficulty 1..7` ET `quality != flagged`) et `questions_target: 140`.
+  - `GET /admin/qa/jobs` — limite par défaut passée de `20` à `30` (max 100) pour voir l'historique quotidien complet.
+- **Frontend** `AdminQA.jsx` :
+  - `QueueRow` affiche désormais une **mini barre de progression** (h-1.5) sous les estimations, avec le compteur `X / 140` à droite. Barre verte 🟢 si complet, terracotta 🟧 si running, gris 🌫️ si queued.
+  - `loadJobs` : paramètre `limit: 30`.
+- Validé end-to-end : job factice injecté sur `annees-50-60` (137/140 jouables) → l'API remonte `questions_current: 137, questions_target: 140`, l'UI affiche "137 / 140" avec barre à ~98%.
+
+
+## 2026-02-20 (nuit++) — Tableau File d'Attente QA
+- **Backend** nouveau `GET /admin/qa/queue` :
+  - Durée médiane par kind (rerun / topup) calculée sur les 10 derniers `done` — fallback 5 min
+  - Pour chaque `running` : `elapsed_sec` + `remaining_sec` estimé
+  - Pour chaque `queued` : `position` + `wait_before_start_sec` (simulation d'occupation des slots)
+- **Frontend** `AdminQA.jsx` : nouvelle section "File d'attente" tout en haut, visible seulement si des jobs actifs. Auto-refresh 8s si `queued_count > 0`. Chaque ligne = badge position/spinner + catégorie + estimations en français ("fin estimée dans 43s", "démarrage estimé dans 1min 3s") + bouton Annuler direct.
+- Testé end-to-end : 3 jobs lancés → tableau affiche 2 running + 1 queued avec estimations cohérentes.
+
+
+## 2026-02-20 (nuit +) — Bouton Annuler Job
+- **Backend** `POST /admin/qa/jobs/{job_id}/cancel` :
+  - Job `queued` → status `cancelled` + `return_code=-3`
+  - Job `running` → `os.kill(pid, SIGTERM)` (si PID vivant) + status `cancelled` + libère le slot via `_dequeue_next()` (le prochain queued démarre immédiatement)
+  - Job déjà terminé → 409 « Job déjà X — rien à annuler »
+  - Audit `qa.cancel` tracé (was + killed_pid)
+- **Frontend** `AdminQA.jsx` : bouton bordeaux "ANNULER" (ou "Retirer de la file" si queued) sous les boutons Régénérer/Compléter, visible uniquement quand un job actif existe pour la catégorie. Confirmation `window.confirm` avant appel.
+- Testé end-to-end :
+  - queued cancel → `{was: "queued"}` (Chansons retiré de la file)
+  - running cancel → `{was: "running", killed_pid: 6643}` + return_code -15 (SIGTERM propre)
+  - re-cancel job cancelled → 409 « déjà failed »
+
+
+## 2026-02-20 (nuit) — Robustesse QA Jobs (5 correctifs)
+- **`admin_qa.py`** refonte complète du pilotage des subprocess :
+  1. **`_pid_alive(pid)`** — teste `os.kill(pid, 0)` (signal 0 = no-op), traite `OSError/TypeError/ValueError` comme processus mort.
+  2. **`_reap_dead_jobs()`** — parcourt les jobs `running`, passe en `failed` ceux dont le PID est mort. Appelé dans `qa_rerun/qa_topup` AVANT le contrôle 409 et dans `GET /jobs` pour ne plus afficher de fantômes.
+  3. **`sweep_running_jobs_on_startup()`** — au démarrage backend, purge INCONDITIONNELLEMENT tous les jobs `running` (les PID sont morts ET peuvent avoir été réattribués → aucun check PID ici). Log explicite `[qa-jobs] startup sweep — N job(s) running → failed`. Wire dans `server.py::startup`.
+  4. **Timeout 15 min** dans `_run_qa_subprocess` — `asyncio.wait_for(proc.wait(), timeout=900)`, kill si dépassé, marque `failed / return_code=-2 / error="timeout after 900s"`.
+  5. **Sérialisation** — nouvelle limite `_MAX_CONCURRENT_QA_JOBS = 2`. Au 3ᵉ lancement, statut initial `queued` au lieu de `running`. `_dequeue_next()` appelé dans le `finally` de chaque job qui se termine → démarre automatiquement le prochain FIFO par `started_at`.
+- Testé end-to-end :
+  - 8 zombies simulés → tous purgés au restart (log OK)
+  - 3 lancements consécutifs → 2 running + 1 queued visible dans `/api/admin/qa/jobs`
+  - Voyages 120/140 et Cuisine 132/140 en cours en parallèle sans pression mémoire (2 audits Opus max)
+
+
+## 2026-02-20 (tard) — Rappel dimanche + Badge fidélité + Historique défis
+- **Rappel Défi Dimanche** — nouveau module `weekly_reminders.py` avec `send_weekly_challenge_reminders()`. Envoi via Resend chaque dimanche 19:00 Paris (nouveau job scheduler `weekly_palier_reminder`) aux users opt-in qui n'ont PAS encore participé (exclusion via un pré-scan de `weekly_palier_scores`). Template HTML dédié avec CTA "Relever le défi".
+- **Badge Fidélité Hebdo** — nouveau badge `weekly_streak_4` (or, famille palier, 🔥 "Fidèle du défi"). Attribué quand l'utilisateur a joué le défi 4 semaines ISO consécutives (calcul via `date.fromisocalendar` sur les 4 dernières entrées `weekly_palier_scores`, écarts de 7 jours). Hook idempotent dans `badges.check_after_palier` (nouveau paramètre `matched_weekly=True`). Toast frontend ajouté.
+- **Historique Défis Passés** — nouveau endpoint `GET /api/palier/weekly/history?limit=4` qui renvoie les 4 défis passés (semaine courante exclue) avec gagnant + score + total_players. Affichage sur la bannière défi hebdo du Dashboard (section "Champions des semaines passées") avec 👑 par gagnant.
+- **Scheduler** : maintenant 11 jobs actifs (ajout `weekly_palier_reminder` dimanche 19:00).
+- **Top-up Voyages/Cuisine** : les 2 tournent en background (Voyages 51/140, Cuisine 91/140). Les subprocess sont tués par les restart du backend — noté comme dette technique (design fragile, un supervisor dédié serait mieux).
+
+
+## 2026-02-20 (nuit +) — Trophées profil + Email Grand Maître + Défi Hebdo Palier
+- **Section "Mes trophées"** sur `/app/account` : composant `BadgesSection` qui appelle `/api/badges/catalog`, affiche les badges collectés dans une grille avec emoji + titre + description + tier (bronze/argent/or/diamant). Bouton dépliant "Voir les X badges à débloquer" pour ceux non gagnés.
+- **Email félicitations Grand Maître** : nouveau module `badge_emails.py` avec `send_grand_maitre_email(user, categories_count)`. Wire depuis `badges.check_after_palier` quand le badge `palier_grand_maitre` tombe (best-effort, ne bloque jamais l'attribution). Template HTML façon Resend (👑, CTA "Voir mes trophées").
+- **Défi Hebdo Palier** : nouveau router `routers/palier_weekly.py`
+  - Clé de semaine ISO (`2026-W08`)
+  - `pick_weekly_challenge()` — cron chaque lundi 00:10 Paris, tire une catégorie aléatoire + palier 2..6 (uniforme)
+  - `record_weekly_score()` appelé depuis `palier_submit` — upsert best-of dans `weekly_palier_scores`
+  - `GET /api/palier/weekly` — défi courant + top 10 (auto-tirage si aucun défi)
+- **Scheduler** : +1 job `weekly_palier_pick` lundi 00:10 → total 10 jobs actifs
+- **Dashboard** : bannière gradient terracotta/bordeaux "Défi de la semaine" avec titre catégorie + palier + top 3 (🥇🥈🥉) + CTA "Relever le défi" vers `/app/parcours/{id}`
+- **Top-up Voyages** : en cours, 25/140 (job `5c89f6e5` toujours running).
+- Testé : défi automatiquement tiré au premier hit (`Objets d'antan · Palier 6` pour la W34), bannière rendue avec les 3 badges déjà obtenus visibles sur le profil.
+
+
+## 2026-02-20 (nuit) — Badges palier + Classement + Top-up Voyages
+- **3 nouveaux badges** dans `badges.py` :
+  - `palier_perfect_20` (or) : 20/20 parfait sur un palier (toutes catégories, toutes difficultés)
+  - `palier_expert` (or) : valider le palier 7 (Expert) d'une catégorie
+  - `palier_grand_maitre` (diamant) : palier 7 validé dans 3 catégories DISTINCTES
+- **`badges.check_after_palier(...)`** — hook idempotent appelé depuis `palier_submit`. Retourne les badge_ids nouvellement attribués → répercutés en toasts côté UI dans `Parcours.jsx`.
+- **`GET /api/palier/leaderboard/{category_id}`** (auth utilisateur) — top 10 par nombre de paliers validés (desc), tiebreaker sur `sum_best`, puis `last_played_at`. Renvoie aussi le rang de l'utilisateur courant s'il n'est pas dans le top (`me_out_of_top`).
+- **Frontend `Parcours.jsx`** : nouveau composant `Leaderboard` sous les 7 paliers de l'overview, médailles 🥇🥈🥉 sur le top 3, ligne surlignée si c'est l'utilisateur courant. Empty state amical si aucun joueur.
+- **Top-up Voyages lancé** : job `5c89f6e5` en cours, 16 → 25 questions déjà, restera à ~140 après ~30 min (124 questions × Sonnet+Opus).
+- Testé curl : palier 7 avec 20/20 → badges `palier_perfect_20` + `palier_expert` attribués. Leaderboard affiche bien Admin en tête (2 paliers, cumul 40).
+
+
+## 2026-02-20 (soir) — Parcours à paliers (140 questions / catégorie)
+- **Backend nouveau**
+  - `topup_paliers.py` : script standalone qui génère les questions manquantes par palier (Sonnet 4.6 + Opus 4.8 fact-check). Prompt intégrant la difficulté (1..7).
+  - `migrate_difficulty.py` : one-shot qui distribue les questions existantes en round-robin sur les 7 paliers (appliqué en preview, 792 questions taggées).
+  - `topup_paliers_job.py` : job nocturne 05:00 Paris qui top-up UNIQUEMENT les catégories avec un déficit ≥ 3.
+  - `routers/palier.py` : parcours utilisateur (`GET /api/palier/categories/{id}`, `POST /{n}/start`, `POST /{n}/submit`) — server-authoritative scoring, 14/20 pour valider, mêmes questions au rejeu, palier N+1 débloqué si palier N completed.
+  - `admin_qa.py` : nouveau `POST /api/admin/qa/topup/{cat_id}` + `qa_summary` enrichi (couverture par palier, `missing_for_full_parcours`).
+  - `scheduler.py` : ajout du 9ᵉ job nocturne `paliers_topup_nightly` à 05:00.
+- **Frontend nouveau**
+  - `pages/Parcours.jsx` : page complète avec 3 états (overview / playing / result). Overview = 7 cartes palier avec verrou/best-score/stock. Play = 20 questions avec nav Préc/Suiv, seuil visible. Result = badge validé/échec + CTA rejouer / palier suivant.
+  - `pages/AdminQA.jsx` : chaque catégorie affiche maintenant les 7 barres palier (vert/jaune/vide + count sous chaque) + boutons **Régénérer** (fact-check Opus) et **Compléter à 140** (top-up Sonnet+Opus, désactivé si déjà complet).
+  - `pages/Dashboard.jsx` : chaque catégorie a un CTA supplémentaire **🏆 Parcours** vers `/app/parcours/{id}`.
+  - Route `/app/parcours/:categoryId` protégée.
+- **Testé** : login admin → QA affiche paliers + Cinéma "complet" désactivé + les autres avec "manque N". `/app/parcours/cinema` overview + play view fonctionnels. Curl : `start` d'un palier 2 sans valider palier 1 renvoie bien 403.
+
+
+## 2026-02-20 — Rôle Super-Admin + Journal d'audit
+- **Nouveau rôle `superadmin`** au-dessus d'`admin`. Le seed idempotent au démarrage (`server.py`) promeut auto le user défini via `ADMIN_EMAIL` en `superadmin`. Aucun autre superadmin ne peut être créé depuis l'UI (point d'entrée unique = env).
+- **Nouvelles dépendances backend** dans `core.py` :
+  - `get_admin_user` accepte désormais `admin` ET `superadmin`.
+  - `get_superadmin_user` réservé aux actions gouvernance (change_role, audit).
+  - `record_audit(admin, action, ...)` — helper never-raise qui écrit dans `admin_audit_log`.
+- **Nouveaux endpoints** :
+  - `GET /api/admin/users` (admin) — recherche/filtre/paginé
+  - `POST /api/admin/users/{id}/role` (superadmin) — assigne `admin`/`user`. Garde-fous : pas d'auto-modification, pas de modification d'un superadmin, pas de promotion superadmin.
+  - `GET /api/admin/audit` (superadmin) — filtre action/email/mot-clé
+  - `GET /api/admin/audit/actions` — distinct
+- **Instrumentation audit** sur : `user.role_change`, `qa.bulk_approve`, `qa.bulk_delete`, `qa.bulk_flag`, `qa.delete`, `qa.rerun`, `promo.create`, `promo.toggle`, `promo.delete`.
+- **Frontend** :
+  - Nouvelle page `/app/admin/users` (`AdminUsers.jsx`) : table filtre + boutons Promouvoir/Rétrograder visibles UNIQUEMENT si le user courant est superadmin. Bandeau explicatif si simple admin.
+  - Nouvelle page `/app/admin/audit` (`AdminAudit.jsx`) : liste chrono avec badges d'action, diff avant/après en JSON, filtre par action/mot-clé.
+  - `AdminRoute` accepte prop `requireSuperadmin` (utilisé pour `/app/admin/audit`).
+  - `AdminDropdown` + `MobileMenu` élargis : "Utilisateurs" pour tous les admins, "Journal d'audit" (badge SUPER) uniquement pour superadmin.
+  - Navbar/MobileMenu : la condition d'affichage passe de `role === "admin"` à `role in ("admin","superadmin")`.
+- **Tests curl OK** : superadmin peut lister/changer les rôles + voir l'audit ; le journal enregistre correctement admin_email, target_label, before, after et timestamp.
+
+
+## 2026-02-19 (soir) — Feuilleter Le Livre (mode plein écran)
+- **Nouveau composant** `frontend/src/components/FeuilleterModal.jsx` : mode plein écran type « vrai livre ». Structure :
+  - Page 0 : couverture (nom auteur + année + titre « Mes souvenirs. Mon histoire. »)
+  - Pour chaque chapitre avec entrées : page-titre (emoji + Chapitre N + label + nb souvenirs) puis 1 page par souvenir (question en italique, texte avec lettrine terracotta, photos en grille, date en pied)
+  - Page finale : « À suivre… »
+- Alimenté par `/api/livre/entries` (déjà existant, tri chrono par chapitre). Empty state si `total_entries === 0`.
+- **Navigation** : boutons latéraux + clavier `←/→/Home/End/Échap` + swipe tactile (framer-motion drag) + table des matières horizontale cliquable en bas.
+- **Wired dans** `pages/MonLivre.jsx` : bouton « Feuilleter mon livre » (desktop + variante mobile), désactivé si aucun souvenir. Bouton PDF conservé pour téléchargement/impression.
+
+
+## 2026-02-19 — Stripe frontend wiring + EHPAD alignée sur Wivy
+- **Câblage Stripe B2C + Cadeaux (P0 DONE)**
+  - `frontend/src/lib/checkout.js` (nouveau) : helper `startCheckout(packageId)` → POST `/api/checkout/session` puis redirect Stripe. 401 → redirect `/register?next=/app/pricing&pkg=<id>` + sessionStorage `pending_checkout_package`.
+  - `frontend/src/config/pricing.js` : Famille rebranchée sur `famille_v2_monthly` / `famille_v2_yearly` (les anciens `famille_*` sont legacy grandfathering). `GIFTS[]` reçoit un champ `stripeId` (`gift_famille` / `gift_heritage` / `gift_livre`).
+  - `frontend/src/pages/Pricing.jsx` : `PlanCard` et `GiftCard` CTA → `startCheckout()` avec loader + toast. Reprise auto d'un `pkg` en attente au retour sur `/app/pricing`.
+  - `frontend/src/pages/Register.jsx` : respecte `?next=` + `?pkg=` après inscription.
+  - **Vérifié via curl** (admin token) : les 8 packages (`solo_monthly`, `solo_yearly`, `famille_v2_monthly`, `famille_v2_yearly`, `heritage_yearly`, `gift_famille`, `gift_heritage`, `gift_livre`) créent chacun une session Stripe valide.
+
+- **Offre EHPAD alignée sur Wivy (nouveau)**
+  - `pricing.js` : suppression de `PRO_PLANS` / `PRO_SETUP_FEE` (multi-paliers mensuels). Remplacés par :
+    - `PRO_RESIDENCE` : 990 € HT/an (1 188 € TTC), utilisateurs illimités, 12 mois, sans reconduction tacite.
+    - `PRO_RESEAU` : sur devis pour multi-sites.
+    - `PRO_STEPS` : 4 étapes (devis → signature → facture → activation).
+    - `PRO_TYPES` élargi (EHPAD, résidences services, résidences autonomie, accueil de jour, foyers logements, USLD, associations, CCAS).
+  - `components/ProPricing.jsx` refonte complète : héro + 2 cartes (Résidence highlight / Réseau devis) + 3 pastilles de réassurance (sans tacite / essai gratuit / illimité) + process 4 étapes façon Wivy. CTA principaux : *Demander un devis* + *Essai gratuit*.
+
+- **Backlog inchangé** : Coop Notifications (P1), Feuilleter Le Livre (P1), EHPAD Superviseur (P2), EHPAD CRM Brevo (P2), Stripe B2B checkout (P2).
+
+
 ## Problem Statement (verbatim)
 "fais moi un saas avec les données ci jointes, avec des personnages caricaturé"
 Source data: French senior quiz platform (6 categories, 8 activities, sample questions).
@@ -1426,4 +1719,144 @@ Nouveau composant `PrintedBookPricing.jsx` injecté sous la reassurance-strip :
 ### Notes production
 - Aucun endpoint Stripe créé pour les livres imprimés (CTA mailto uniquement) → à câbler en itération suivante avec des PACKAGES dédiés (`livre_1`, `livre_2`, `livre_3`, `pro_lite`, `pro_ehpad`).
 - Le contrôle de rôle côté frontend NE remplace PAS la vérification serveur — les deux sont en place.
+
+
+## 2026-08-19 (suite) — Anti-répétition + Fact-check IA + fix seed admin
+
+### 🎯 Correctif A — Anti-répétition
+- Nouvelle collection `user_seen_questions {user_id, category_id, question_id, seen_at, seen_count}` upsert à chaque tirage.
+- `GET /categories/{id}/questions` : exclut les questions vues dans les 30 derniers jours, avec fallback repêche si <5 restantes.
+- Réponse enrichie de `pool: {total, seen_recently, remaining_fresh, reported_excluded}`.
+- Widget frontend "📚 X/N nouvelles questions à découvrir" affiché en tête de quiz.
+
+### 🎯 Correctif C — Exclusion signalements
+- Le tirage exclut désormais les questions ayant ≥2 signalements avec statut ≠ "dismissed".
+- Backend automatique, aucun bouton à activer côté admin.
+
+### 🎯 Correctif B3 + D — Fact-check IA permanent (pipeline)
+- Nouveau script `audit_and_regen_questions.py` :
+  - Fact-check via **Claude Opus 4.8** (JSON strict, seuil confidence ≥ 85, verdicts correct/doubtful/wrong)
+  - Régénération via **Claude Sonnet 4.6** avec prompt strict anti-hallucination
+  - Chaque question générée est re-vérifiée avant insertion (double-passe)
+- Champs ajoutés : `questions.quality: "verified"|"flagged"` + `questions.fact_check: {verdict, confidence, comment, correction, checked_at, checker_model}`
+- Les questions `quality: "flagged"` sont automatiquement exclues du tirage côté `quiz.py`.
+- Rapport JSON généré dans `/tmp/qa_report_{category}.json`.
+
+**Résultat audit Chansons (100 questions)** : 46 verified · 54 flagged · 7 régen OK · 47 régen refusées → pool jouable = **53 questions** au lieu de 100. Exemples d'erreurs détectées : "Mon Légionnaire" datée 1945 (vraie date 1936), "Amsterdam hymne à la liberté" (interprétation subjective), etc.
+
+### 🚨 Fix seed admin (bugs signalés par l'utilisateur)
+- Retrait des valeurs par défaut hardcodées : `ADMIN_EMAIL` et `ADMIN_PASSWORD` n'ont **plus de fallback** dans `core.py`. Si absents, le seed est **skip complet** avec un warning log.
+- Backfill idempotent du rôle admin : à chaque startup, si un compte existe avec `ADMIN_EMAIL` mais `role != "admin"`, le rôle est **forcé à "admin"** (idem plan_tier + plan). Résout le cas où un utilisateur s'était inscrit avec l'email admin avant le seed.
+- Vérifié : `admin@generaquiz.fr` login HTTP 200, role=admin dans `/auth/me`.
+- Note historique : l'ancienne valeur par défaut `Admin2026!` a été présente dans le code source jusqu'à ce commit. Si le repo est publié, elle reste dans l'historique Git.
+
+### Fichiers touchés
+- **Modifiés** : `core.py` (retrait défauts admin), `server.py` (seed skip + backfill rôle), `routers/quiz.py` (anti-répétition + exclusion flagged/signalés + pool), `frontend/src/pages/QuizPlayer.jsx` (affichage pool).
+- **Créés** : `audit_and_regen_questions.py` (pipeline QA), `/tmp/qa_report_chansons.json` (rapport).
+
+### Prochaines étapes
+- Lancer l'audit sur les autres catégories : `ONLY_CATEGORY=cinema python audit_and_regen_questions.py`, etc.
+- Coût estimé : ~2-3€ Emergent LLM Key pour 800 questions (8 catégories × 100).
+- Durée : ~10 min par catégorie via LLM externe.
+
+
+## 2026-08-19 (suite 2) — Admin QA Dashboard + audit des 7 autres catégories
+
+### 🎯 Admin QA Dashboard `/app/admin/qa`
+Nouveau backend `routers/admin_qa.py` + nouvelle page `AdminQA.jsx`.
+
+**Endpoints (rôle admin)** :
+- `GET /admin/qa/summary` — répartition par catégorie (verified/flagged/unchecked/% jouable)
+- `GET /admin/qa/questions?category_id&quality&limit&offset` — liste paginée triée par confidence croissante
+- `POST /admin/qa/{id}/approve` — force verified (retour au tirage)
+- `POST /admin/qa/{id}/flag` — force flagged (retire du tirage)
+- `POST /admin/qa/{id}/apply-correction` — applique la correction textuelle proposée par le fact-check (sauvegarde original dans `original_snapshot`)
+- `DELETE /admin/qa/{id}` — suppression définitive
+
+**Frontend** :
+- Résumé visuel : 9 cartes catégorie avec barre 3 couleurs (vert verified / crème unchecked / orange flagged) + % jouable
+- Filtres : catégorie sélectionnée + quality (flagged/verified/unchecked/all)
+- Liste : question + 4 options (bonne en vert), verdict + confidence, commentaire fact-check, correction proposée si dispo
+- Actions : Approuver / Appliquer la correction / Flagger / Supprimer
+- Toutes les actions retirent l'item de la liste localement + rafraîchissent le résumé
+
+### 🎯 Audit lancé sur les 7 catégories restantes (en background)
+Script `run_all_audits.sh` séquentiel dans `/tmp/audit_all.log` : cinema → cuisine-terroir → culture-40-ans → culture-70-ans → annees-50-60 → objets-antan → voyages-france → histoire-france. ~10 min/catégorie.
+
+Résultats partiels au moment du finish :
+- Chansons : 53 verified / 54 flagged / 7 régen OK (100 %)
+- Cinema : ~45/100 en cours (39 verified déjà, 24 flagged)
+
+### Ajouts UI navigation
+- AdminHome : passage à 4 tuiles (ajout "Qualité IA") avec grid `lg:grid-cols-4`
+- AdminDropdown Navbar : 5 entrées (Admin / Analytics / Promos / Signalements / Qualité IA)
+- MobileMenu : entrée "Qualité IA" ajoutée dans la section Admin
+
+### Fichiers touchés
+- **Créés** : `backend/routers/admin_qa.py`, `frontend/src/pages/AdminQA.jsx`, `/tmp/run_all_audits.sh`
+- **Modifiés** : `backend/server.py` (registre routeur admin_qa), `frontend/src/App.js` (route /app/admin/qa + import), `AdminHome.jsx` (4ᵉ tuile + grid 4 cols), `AdminDropdown.jsx` (5ᵉ entrée), `MobileMenu.jsx` (idem)
+
+### Tests
+- Backend endpoints admin QA : summary + questions filtrées OK, actions approve/flag/apply-correction/delete OK
+- Frontend : dashboard rendu, 78 questions flagged listées avec fact-check commentaires, boutons d'action fonctionnels
+- Sécurité : tous les endpoints admin_qa passent par `get_admin_user` → HTTP 403 pour un non-admin
+
+
+## 2026-08-19 (suite 3) — Regen Batch + QA Search
+
+### 🎯 Regen Batch — relance du fact-check depuis le dashboard
+Nouveaux endpoints (rôle admin) :
+- `POST /api/admin/qa/rerun/{category_id}` — lance le script `audit_and_regen_questions.py` en subprocess Python non bloquant. Crée un doc dans `db.qa_jobs` (status: running → done/failed). Refuse HTTP 409 si un job "running" existe déjà pour la même catégorie (anti double-facturation LLM).
+- `GET /api/admin/qa/jobs?limit=10` — liste des jobs récents triés par `started_at desc`, enrichis avec `log_tail` (6 dernières lignes du log) pour un suivi live.
+
+**Frontend** : bouton "▶ Régénérer la catégorie" sur chaque tuile de catégorie. Pendant qu'un job tourne, le bouton se transforme en "Audit en cours…" (disabled) et un mini log tail apparaît sous la tuile. Un badge global "N audit(s) en cours" s'affiche en tête. Polling automatique de `/admin/qa/jobs` toutes les 8 s tant qu'au moins un job est actif.
+
+### 🎯 QA Search — recherche par mot-clé
+- Paramètre `q` ajouté à `GET /api/admin/qa/questions` : cherche insensible à la casse dans `question`, `options`, `fact_check.comment`, `fact_check.correction` (escape regex avant $regex).
+- Frontend : input avec debounce 400 ms, icône Search, bouton × pour effacer. Filtre combiné avec les autres (catégorie, quality).
+
+### Fichiers touchés
+- **Modifié** : `backend/routers/admin_qa.py` (endpoints rerun + jobs + search sur qa_questions), `frontend/src/pages/AdminQA.jsx` (search + rerun buttons + jobs polling)
+
+### Tests
+- Testing agent iteration 42 : **9/10 backend + 100% frontend** (1 skip conflit 409 déjà couvert en amont)
+- Recherche 'Piaf' : 10 résultats retournés côté API et affichés en UI ✅
+- Rerun voyages-france → job créé (status running) puis exécuté en subprocess ✅
+- Anti double-execution 409 : validé ✅
+- Régressions (approve/flag/apply-correction/delete/quality filter) : 0 ✅
+
+### Statut audit global
+- 5/9 catégories déjà auditées (chansons, cinema, cuisine-terroir, culture-40/70-ans)
+- 4/9 restantes : annees-50-60 (partiel 5/100), objets-antan, histoire-france, voyages-france → à relancer depuis le dashboard
+
+
+## 2026-08-19 (suite 4) — QA Bulk Actions
+
+### 🎯 Actions groupées sur le dashboard `/app/admin/qa`
+Nouveaux endpoints admin (rôle admin) :
+- `POST /api/admin/qa/bulk/approve` `{ids:[]}` → `quality: verified` sur toutes
+- `POST /api/admin/qa/bulk/flag` `{ids:[]}` → `quality: flagged` sur toutes
+- `POST /api/admin/qa/bulk/delete` `{ids:[]}` → suppression définitive
+
+Validation Pydantic : `ids` obligatoire, 1 à 500 éléments (HTTP 422 sinon).
+
+### 🐛 Fix route-order critique
+Les routes `/bulk/*` étaient interceptées par `/{qid}/approve|flag|apply-correction` (FastAPI matche par ordre de déclaration → `qid = "bulk"`). Correction : les routes bulk sont maintenant déclarées **avant** les routes paramétrées.
+
+### Frontend
+- Checkbox sur chaque `QuestionCard` (data-testid `admin-qa-select-{id}`) → surlignage ring terracotta quand sélectionnée
+- Bouton "Tout sélectionner (N) / Tout désélectionner" en tête de liste
+- Barre sticky en bas de page (data-testid `admin-qa-bulk-bar`) qui apparaît dès qu'au moins 1 item est sélectionné : compteur + 3 boutons (Approuver / Flagger / Supprimer) + ×
+- Suppression demande `window.confirm()` avec message "Aucun retour arrière possible"
+- Sélection reset automatique quand catégorie / quality / recherche changent
+
+### Fichiers touchés
+- Backend : `routers/admin_qa.py` (nouveaux endpoints bulk + réordonnancement)
+- Frontend : `pages/AdminQA.jsx` (state selected + handlers + UI checkboxes + sticky bar)
+
+### Tests
+- Testing agent iteration 43 : **8/9 backend (1 skip destructif volontaire) + 100% frontend**, 0 régression
+- Fix route-order vérifié : `POST /bulk/approve` retourne `{ok:true, matched:N, modified:N}` (200) au lieu du 404 du handler single-question
+- Validation Pydantic : HTTP 422 sur ids vides ou > 500
+- Sécurité : HTTP 403 pour non-admin sur tous les endpoints bulk
 

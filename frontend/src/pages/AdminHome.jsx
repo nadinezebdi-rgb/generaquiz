@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { BarChart3, Gift, Flag, ArrowRight, ShieldCheck } from "lucide-react";
+import { BarChart3, Gift, Flag, ArrowRight, ShieldCheck, ClipboardCheck } from "lucide-react";
 
 /**
  * AdminHome — page d'index de l'espace admin.
@@ -41,6 +41,14 @@ const TILES = [
     accent: "bg-navy/10 text-navy",
     testid: "admin-tile-reports",
   },
+  {
+    to: "/app/admin/qa",
+    icon: ClipboardCheck,
+    label: "Qualité IA",
+    desc: "Modérer les questions fact-checkées par Claude Opus (verified / flagged / corrections).",
+    accent: "bg-bordeaux/15 text-bordeaux",
+    testid: "admin-tile-qa",
+  },
 ];
 
 export default function AdminHome() {
@@ -65,7 +73,7 @@ export default function AdminHome() {
           Accédez aux outils d&apos;administration de GénéraQuiz. Chaque section est protégée par un contrôle de rôle serveur.
         </p>
 
-        <div className="grid md:grid-cols-3 gap-4">
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
           {TILES.map((t, i) => {
             const Icon = t.icon;
             return (

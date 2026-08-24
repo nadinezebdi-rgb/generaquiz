@@ -48,6 +48,11 @@ BADGES: list[dict] = [
     {"id": "atelier_5",        "title": "Écrivain de vie",    "desc": "5 ateliers mémoire terminés",         "emoji": "📖", "tier": "or",      "family": "atelier"},
     # -- Charades / Jeux de mots --
     {"id": "amateur_mots",     "title": "Amateur de mots",    "desc": "10 charades résolues",                "emoji": "🎭", "tier": "or",      "family": "words"},
+    # -- Parcours (paliers 7×20) --
+    {"id": "palier_expert",    "title": "Expert d'une catégorie", "desc": "Valider le palier 7 (Expert) d'une catégorie", "emoji": "🎓", "tier": "or",      "family": "palier"},
+    {"id": "palier_grand_maitre", "title": "Grand Maître",    "desc": "Valider le palier 7 dans 3 catégories différentes", "emoji": "👑", "tier": "diamant", "family": "palier"},
+    {"id": "palier_perfect_20", "title": "Sans-faute palier", "desc": "20/20 sur un palier (score parfait)",   "emoji": "💯", "tier": "or",     "family": "palier"},
+    {"id": "weekly_streak_4",   "title": "Fidèle du défi",    "desc": "Relever le défi hebdo 4 semaines d'affilée", "emoji": "🔥", "tier": "or",     "family": "palier"},
 ]
 BADGE_INDEX = {b["id"]: b for b in BADGES}
 
@@ -190,3 +195,81 @@ async def check_after_league_settle(user_id: str, new_tier: str, promoted: bool)
         if await award_badge(user_id, "league_diamond"):
             awarded.append("league_diamond")
     return awarded
+
+
+async def check_after_palier(user_id: str, category_id: str, palier: int,
+                             score: int, total: int, passed: bool,
+                             matched_weekly: bool = False) -> list[str]:
+    """Appelé depuis `palier_submit` après le scoring server-authoritative.
+
+    Attribue :
+      - palier_perfect_20 : score == 20/20 sur un palier
+      - palier_expert     : palier 7 validé (au moins 1 catégorie)
+      - palier_grand_maitre : palier 7 validé dans ≥ 3 catégories distinctes
+      - weekly_streak_4   : 4 défis hebdo consécutifs relevés (si matched_weekly)
+    """
+    awarded: list[str] = []
+    # 20/20 parfait — attribué même si palier < 7 (récompense l'exploit)
+    if score == total and total > 0:
+        if await award_badge(user_id, "palier_perfect_20",
+                             meta={"category_id": category_id, "palier": palier}):
+            awarded.append("palier_perfect_20")
+
+    # Palier expert (7) validé
+    if palier == 7 and passed:
+        if await award_badge(user_id, "palier_expert",
+                             meta={"category_id": category_id}):
+            awarded.append("palier_expert")
+
+        # Vérifie le compteur d'Experts (≥ 3 catégories) → Grand Maître
+        # Compte les catégories DISTINCTES où le user a completed palier 7
+        pipeline = [
+            {"$match": {"user_id": user_id, "palier": 7, "completed": True}},
+            {"$group": {"_id": "$category_id"}},
+        ]
+        distinct_cats = 0
+        async for _ in db.user_paliers.aggregate(pipeline):
+            distinct_cats += 1
+        if distinct_cats >= 3:
+            if await award_badge(user_id, "palier_grand_maitre",
+                                 meta={"categories_count": distinct_cats}):
+                awarded.append("palier_grand_maitre")
+                # Envoi de l'email de félicitations — événementiel, best-effort.
+                try:
+                    from bson import ObjectId
+                    from badge_emails import send_grand_maitre_email
+                    user_doc = await db.users.find_one({"_id": ObjectId(user_id)})
+                    if user_doc:
+                        await send_grand_maitre_email(user_doc, distinct_cats)
+                except Exception as e:
+                    logger.warning(f"[badges] grand-maitre email failed: {e}")
+
+    # Fidélité défi hebdo — 4 semaines consécutives
+    if matched_weekly:
+        weeks = await db.weekly_palier_scores.find(
+            {"user_id": user_id},
+            {"_id": 0, "week": 1},
+        ).sort("week", -1).limit(4).to_list(4)
+        if len(weeks) >= 4 and _weeks_are_consecutive([w["week"] for w in weeks]):
+            if await award_badge(user_id, "weekly_streak_4",
+                                 meta={"weeks": [w["week"] for w in weeks]}):
+                awarded.append("weekly_streak_4")
+
+    return awarded
+
+
+def _weeks_are_consecutive(weeks: list[str]) -> bool:
+    """Vérifie que 4 semaines ISO (`YYYY-Www`) sont consécutives (décroissantes).
+    Gère le passage d'année (S52/S53 → S01)."""
+    from datetime import date, timedelta
+    try:
+        dates = []
+        for w in weeks:
+            year, wk = w.split("-W")
+            # date.fromisocalendar(year, week, day) — jour 1 = lundi
+            dates.append(date.fromisocalendar(int(year), int(wk), 1))
+    except (ValueError, IndexError):
+        return False
+    # Trie desc et vérifie qu'entre chaque paire il y a exactement 7 jours
+    dates.sort(reverse=True)
+    return all((dates[i] - dates[i + 1]).days == 7 for i in range(len(dates) - 1))

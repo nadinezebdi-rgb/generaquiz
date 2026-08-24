@@ -84,7 +84,7 @@ export default function QuizPlayer() {
     );
   }
 
-  const { category, questions, is_premium } = data;
+  const { category, questions, is_premium, pool } = data;
   const total = questions.length;
   const q = questions[idx];
   const currentMember = familyMode && members.length > 0 ? members[responderIdx] : null;
@@ -225,6 +225,14 @@ export default function QuizPlayer() {
             <div className="text-xs font-bold uppercase tracking-wider text-navy/60">Catégorie</div>
             <h1 className="font-display text-2xl md:text-3xl font-extrabold text-navy">{category.title}</h1>
             <p className="text-navy/70 text-base">Animée par {category.mascot_name}</p>
+            {pool && (
+              <p className="text-xs text-navy/50 mt-1" data-testid="quiz-pool-info">
+                <span className="inline-flex items-center gap-1">
+                  📚 {pool.remaining_fresh}/{pool.total} nouvelles questions à découvrir
+                  {pool.seen_recently > 0 && <span className="text-navy/40">· {pool.seen_recently} déjà vues (30 j)</span>}
+                </span>
+              </p>
+            )}
           </div>
           {!is_premium && (
             <Link to="/app/pricing" className="hidden md:inline-flex items-center gap-2 bg-mustard hover:bg-mustard-dark text-navy font-bold px-4 py-2 rounded-full text-sm">

@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { api, formatError } from "@/lib/api";
-import { Sparkles, UserPlus, Mail, Lock, User, Gift, Check, X } from "lucide-react";
+import { Sparkles, UserPlus, Mail, Lock, User, Gift, Check, X, Ticket } from "lucide-react";
 
 export default function Register() {
   const { register } = useAuth();
@@ -14,8 +14,11 @@ export default function Register() {
   const [password, setPassword] = useState("");
   const [referralCode, setReferralCode] = useState(searchParams.get("code") || "");
   const [birthYear, setBirthYear] = useState("");
+  const [promoCode, setPromoCode] = useState(searchParams.get("promo") || "");
   const [codeStatus, setCodeStatus] = useState(null); // null | 'checking' | {valid, sponsor_name, bonus} | {valid:false}
+  const [promoMsg, setPromoMsg] = useState(null); // {ok: true, label} | {ok: false, msg}
   const [showReferral, setShowReferral] = useState(!!searchParams.get("code"));
+  const [showPromo, setShowPromo] = useState(!!searchParams.get("promo"));
   const [err, setErr] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -41,12 +44,31 @@ export default function Register() {
   const submit = async (e) => {
     e.preventDefault();
     setErr("");
+    setPromoMsg(null);
     setLoading(true);
     try {
       const finalCode = codeStatus && codeStatus.valid ? referralCode.trim().toUpperCase() : null;
       const by = birthYear ? parseInt(birthYear, 10) : null;
       await register(name, email, password, finalCode, by);
-      navigate("/app/dashboard");
+      // Rédemption du code promo optionnel — best-effort, n'empêche pas l'inscription
+      const promoTrim = promoCode.trim().toUpperCase();
+      if (promoTrim) {
+        try {
+          const { data } = await api.post("/promo/redeem", { code: promoTrim });
+          setPromoMsg({ ok: true, label: data.label || "Premium activé", lifetime: data.is_lifetime });
+        } catch (pe) {
+          setPromoMsg({ ok: false, msg: formatError(pe.response?.data?.detail) || "Code promo invalide" });
+        }
+      }
+      // Reprise checkout / redirection ciblée si ?next=... a été fourni
+      const next = searchParams.get("next");
+      const pkg = searchParams.get("pkg");
+      if (next) {
+        const target = pkg ? `${next}${next.includes("?") ? "&" : "?"}pkg=${encodeURIComponent(pkg)}` : next;
+        navigate(target);
+      } else {
+        navigate("/app/dashboard");
+      }
     } catch (e2) {
       setErr(formatError(e2.response?.data?.detail) || e2.message);
     } finally {
@@ -198,6 +220,47 @@ export default function Register() {
               >
                 <Gift className="w-4 h-4" /> J&apos;ai un code de parrainage
               </button>
+            )}
+
+            {/* ============ Code promo (activation Premium) ============ */}
+            {showPromo ? (
+              <div>
+                <label className="block text-sm font-bold text-navy mb-2 flex items-center gap-2">
+                  <Ticket className="w-4 h-4 text-terracotta" /> Code promo <span className="text-navy/50 font-normal">(facultatif)</span>
+                </label>
+                <input
+                  data-testid="register-promo-code"
+                  type="text"
+                  value={promoCode}
+                  onChange={(e) => setPromoCode(e.target.value.toUpperCase())}
+                  placeholder="FAMILLE2026"
+                  maxLength={40}
+                  className="w-full px-4 py-4 text-lg rounded-2xl border-2 border-cream-dark focus:border-navy bg-white min-h-[56px] uppercase tracking-wider"
+                />
+                <p className="text-xs text-navy/60 mt-1.5">
+                  Activez Premium immédiatement si vous disposez d&apos;un code cadeau.
+                </p>
+              </div>
+            ) : (
+              <button
+                type="button"
+                data-testid="register-show-promo"
+                onClick={() => setShowPromo(true)}
+                className="text-sm text-navy/60 hover:text-terracotta font-medium inline-flex items-center gap-1"
+              >
+                <Ticket className="w-4 h-4" /> J&apos;ai un code promo
+              </button>
+            )}
+
+            {promoMsg && promoMsg.ok && (
+              <div data-testid="register-promo-ok" className="bg-[#3D9970]/10 border-2 border-[#3D9970]/40 rounded-xl p-3 text-navy text-sm">
+                🎁 Code appliqué : <strong>{promoMsg.label}</strong>{promoMsg.lifetime ? " (à vie)" : ""}
+              </div>
+            )}
+            {promoMsg && !promoMsg.ok && (
+              <div data-testid="register-promo-ko" className="bg-mustard/15 border-2 border-mustard/40 rounded-xl p-3 text-navy text-sm">
+                ⚠️ Code promo non appliqué : {promoMsg.msg}. Vous êtes bien inscrit(e), vous pouvez ressayer depuis votre compte.
+              </div>
             )}
 
             {err && (

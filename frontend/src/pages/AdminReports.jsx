@@ -23,7 +23,7 @@ export default function AdminReports() {
   const [status, setStatus] = useState("pending");
 
   useEffect(() => {
-    if (user && user.role !== "admin") navigate("/app/dashboard");
+    if (user && user.role !== "admin" && user.role !== "superadmin") navigate("/app/dashboard");
   }, [user, navigate]);
 
   const load = async () => {
@@ -52,7 +52,7 @@ export default function AdminReports() {
     }
   };
 
-  if (!user || user.role !== "admin") return null;
+  if (!user || (user.role !== "admin" && user.role !== "superadmin")) return null;
 
   return (
     <div className="min-h-screen paper-bg">

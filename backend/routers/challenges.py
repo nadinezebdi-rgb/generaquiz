@@ -5,7 +5,7 @@ from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends, HTTPException
 
-from core import db, get_current_user, ChallengeCreate, ChallengeParticipate
+from core import db, get_current_user, ChallengeCreate, ChallengeParticipate, is_premium_active
 
 router = APIRouter(prefix="/challenges", tags=["challenges"])
 
@@ -27,7 +27,7 @@ def _public_challenge(doc: dict, include_correct: bool = False) -> dict:
 
 @router.post("")
 async def create_challenge(body: ChallengeCreate, user: dict = Depends(get_current_user)):
-    if user.get("plan") != "premium":
+    if not is_premium_active(user):
         raise HTTPException(status_code=402, detail="Le Défi Famille est réservé aux membres Premium")
     cat = await db.categories.find_one({"id": body.category_id}, {"_id": 0})
     if not cat:
