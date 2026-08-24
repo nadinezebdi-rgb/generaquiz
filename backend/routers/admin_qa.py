@@ -303,7 +303,17 @@ _TOPUP_SCRIPT = _BACKEND_DIR / "topup_paliers.py"
 # saturée (les crashes du 20/08 ont montré que 8 jobs en parallèle tuent tout
 # le monde silencieusement). Chansons seul est passé en 3'53" — on garde 2.
 _MAX_CONCURRENT_QA_JOBS = 2
-_SUBPROCESS_TIMEOUT_SEC = 15 * 60  # timeout dur pour un audit / topup
+
+# Timeouts durs par type de job. Le RERUN (audit complet de 200+ questions)
+# tourne facilement 11-13 min sur les grosses catégories (Histoire de France,
+# Objets d'antan) — 15 min était trop juste et provoquait des timeouts alors
+# que le duo Mistral+Opus tournait normalement. Le TOPUP reste à 15 min car
+# il ne génère que les manquantes (typiquement 20-40 questions).
+_TIMEOUT_BY_KIND: dict[str, int] = {
+    "topup": 15 * 60,   # 15 min
+    "rerun": 30 * 60,   # 30 min — audit complet volumineux
+}
+_SUBPROCESS_TIMEOUT_SEC_DEFAULT = 15 * 60  # fallback si kind inconnu
 
 
 def _pid_alive(pid: int | None) -> bool:
@@ -460,15 +470,18 @@ async def _count_running() -> int:
     return await db.qa_jobs.count_documents({"status": "running"})
 
 
-async def _run_qa_subprocess(job_id: str, category_id: str, script_path: Path) -> None:
+async def _run_qa_subprocess(job_id: str, category_id: str, script_path: Path, kind: str = "topup") -> None:
     """Lance un script d'admin QA (audit ou topup) en subprocess détaché.
     Écrit un heartbeat toutes les 15 s dans le doc du job (voir `_heartbeat_loop`).
     Met à jour le statut (running → done / failed / timeout) atomiquement en
     filtrant sur `status=running` — les états terminaux ne sont jamais écrasés.
+
+    Le timeout dur dépend du `kind` : topup=15 min, rerun=30 min (audit complet).
     """
     log_path = f"/tmp/qa_job_{job_id}.log"
     env = os.environ.copy()
     env["ONLY_CATEGORY"] = category_id
+    timeout_sec = _TIMEOUT_BY_KIND.get(kind, _SUBPROCESS_TIMEOUT_SEC_DEFAULT)
 
     proc = None
     hb_task = None
@@ -488,7 +501,7 @@ async def _run_qa_subprocess(job_id: str, category_id: str, script_path: Path) -
             )
             hb_task = asyncio.create_task(_heartbeat_loop(job_id, proc))
             try:
-                rc = await asyncio.wait_for(proc.wait(), timeout=_SUBPROCESS_TIMEOUT_SEC)
+                rc = await asyncio.wait_for(proc.wait(), timeout=timeout_sec)
             except asyncio.TimeoutError:
                 # Timeout — on kill le subprocess et on marque failed
                 try:
@@ -504,7 +517,7 @@ async def _run_qa_subprocess(job_id: str, category_id: str, script_path: Path) -
                         "return_code": -2,
                         "log_path": log_path,
                         "finished_at": _now_iso(),
-                        "error": f"timeout after {_SUBPROCESS_TIMEOUT_SEC}s",
+                        "error": f"timeout after {timeout_sec}s ({kind})",
                     }},
                 )
                 return
@@ -563,7 +576,9 @@ async def _dequeue_next() -> None:
         if r.modified_count == 0:
             continue  # race : un autre worker l'a déjà pris
         script_path = _AUDIT_SCRIPT if next_job.get("kind") == "rerun" else _TOPUP_SCRIPT
-        asyncio.create_task(_run_qa_subprocess(next_job["id"], next_job["category_id"], script_path))
+        asyncio.create_task(_run_qa_subprocess(
+            next_job["id"], next_job["category_id"], script_path, kind=next_job.get("kind", "topup")
+        ))
 
 
 @router.post("/rerun/{category_id}")
@@ -789,7 +804,7 @@ async def _launch_qa_job(category_id: str, admin: dict, kind: str,
                        meta={"job_id": job_id, "kind": kind, "initial_status": initial_status})
 
     if initial_status == "running":
-        asyncio.create_task(_run_qa_subprocess(job_id, category_id, script_path))
+        asyncio.create_task(_run_qa_subprocess(job_id, category_id, script_path, kind=kind))
     # else : le job restera "queued" et sera dépilé automatiquement quand un
     # slot se libère via _dequeue_next() (finally d'un job qui se termine).
 

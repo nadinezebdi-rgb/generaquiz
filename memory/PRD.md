@@ -1,5 +1,14 @@
 # Quiz d'Antan — SaaS pour seniors français
 
+## 2026-02-24 (soir) — Timeouts QA différenciés par kind
+- **Contexte** : screenshot prod du 24/08 montrait 2 jobs RERUN (Objets d'antan, Histoire de France) en échec avec message `timeout (>15 min)`. Diagnostic : Mistral+Opus tournaient correctement, mais l'audit complet de 200+ questions sur ces grosses catégories dépassait le hard timeout unique de 15 min.
+- **Fix** `admin_qa.py` :
+  - Constante unique `_SUBPROCESS_TIMEOUT_SEC = 15 min` remplacée par un dict `_TIMEOUT_BY_KIND = {"topup": 15*60, "rerun": 30*60}` + fallback `_SUBPROCESS_TIMEOUT_SEC_DEFAULT = 15 min` pour tout kind inconnu.
+  - `_run_qa_subprocess` accepte un paramètre `kind` (défaut `"topup"`), calcule `timeout_sec = _TIMEOUT_BY_KIND.get(kind, DEFAULT)`, l'utilise dans `asyncio.wait_for` et le renvoie dans le message d'erreur (`"timeout after 1800s (rerun)"`).
+  - Les 2 appelants (`_dequeue_next` + `_launch_qa_job`) transmettent maintenant le `kind` correct.
+- **Vérifié runtime** : `topup=15 min`, `rerun=30 min`, `default=15 min`.
+
+
 ## 2026-02-24 — Défis : Signaler + Section visible aux non-Premium
 ### 1. Bouton "Signaler" dans ChallengePlay
 - Le composant `ReportButton` (déjà utilisé sur `QuizPlayer.jsx` et `DailyQuiz.jsx`) est maintenant intégré dans `ChallengePlay.jsx`.
