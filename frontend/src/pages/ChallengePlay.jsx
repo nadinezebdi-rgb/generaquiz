@@ -2,8 +2,10 @@ import { useEffect, useState, useRef, useMemo } from "react";
 import { useParams, Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { api, BACKEND_URL } from "@/lib/api";
+import { useAuth } from "@/contexts/AuthContext";
 import { Sparkles, ChevronRight, Trophy, ArrowRight, Check, X } from "lucide-react";
 import ScoreCard from "@/components/ScoreCard";
+import ReportButton from "@/components/ReportButton";
 
 // Fisher-Yates: shuffle options + return mapping[displayedIdx] = originalIdx
 function shuffleOptions(options) {
@@ -20,6 +22,7 @@ function shuffleOptions(options) {
 
 export default function ChallengePlay() {
   const { token } = useParams();
+  const { user } = useAuth();
   const [data, setData] = useState(null);
   const [err, setErr] = useState("");
   const [stage, setStage] = useState("intro"); // intro | playing | done | error
@@ -204,6 +207,15 @@ export default function ChallengePlay() {
               <h2 data-testid="play-question" className="font-display text-3xl md:text-4xl lg:text-5xl font-extrabold text-navy leading-snug mb-7">
                 {q.question}
               </h2>
+
+              {/* Signaler la question — visible uniquement pour les utilisateurs connectés
+                  (les visiteurs anonymes qui répondent via le lien de partage ne peuvent pas
+                  signaler). Utilise `q.id` fourni par le backend pour cibler la bonne question. */}
+              {user && q.id && (
+                <div className="-mt-4 mb-4 flex justify-end">
+                  <ReportButton questionId={q.id} />
+                </div>
+              )}
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
                 {shuffled && shuffled.options.map((opt, i) => {

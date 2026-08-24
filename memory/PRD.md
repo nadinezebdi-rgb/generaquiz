@@ -1,5 +1,25 @@
 # Quiz d'Antan — SaaS pour seniors français
 
+## 2026-02-24 — Défis : Signaler + Section visible aux non-Premium
+### 1. Bouton "Signaler" dans ChallengePlay
+- Le composant `ReportButton` (déjà utilisé sur `QuizPlayer.jsx` et `DailyQuiz.jsx`) est maintenant intégré dans `ChallengePlay.jsx`.
+- Positionné en top-right sous la question, visible **uniquement aux utilisateurs connectés** (`user && q.id`) — les participants anonymes du lien partagé ne voient pas le bouton pour éviter les 401.
+- Utilise l'ID de question déjà exposé par `_public_challenge` côté backend, aucun changement API nécessaire.
+
+### 2. Section Défi Classique visible aux non-Premium
+- Avant : `Challenges.jsx` cachait entièrement la section classique pour les non-Premium (seul le mode coop hero était visible).
+- Après : la section **"Défi Classique"** est visible pour tous, avec :
+  - Badge `PREMIUM` mustard à côté du titre pour les non-Premium
+  - **Deux cards de démo verrouillées** (Chansons françaises, Cinéma d'antan) en `opacity-70 pointer-events-none` — donne à voir ce qu'on obtient en Premium
+  - **CTA pilule mustard** "Débloquer les Défis avec Premium" (`data-testid="challenges-demo-upgrade"`) sous les cards
+- Gating serveur inchangé : `POST /api/challenges` bloque toujours les non-Premium avec 402 via `is_premium_active` (protection couche métier).
+
+### Tests
+- Non-Premium (`free-view-*@test.fr`) sur `/app/challenges` : section démo visible + CTA d'upgrade ✅
+- Premium (`admin@generaquiz.fr`) sur `/defi/nr9Fl6G4wRU` : bouton "Signaler" 🚩 visible en haut à droite de la question ✅
+- Anonyme via lien partagé : bouton Signaler masqué (pas de spam anonyme) ✅
+
+
 ## 2026-02-21 (soir) — Champ Code promo sur `/app/account`
 - **Frontend `Account.jsx`** : nouveau bloc "Vous avez un code promo ?" (compte free) / "Ajouter un code cadeau" (compte Premium) intégré dans la card Abonnement, sous la ligne d'expiration.
 - Design contextuel : sur fond navy pour un compte Premium (input bg-white/10 + label mustard), sur fond blanc pour un compte free.
