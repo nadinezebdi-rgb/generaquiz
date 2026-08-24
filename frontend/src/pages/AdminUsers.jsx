@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
-import { Search, Loader2, ShieldCheck, ShieldOff, Users as UsersIcon, Crown } from "lucide-react";
+import { Search, Loader2, ShieldCheck, ShieldOff, Users as UsersIcon, Crown, Copy, Check } from "lucide-react";
 import { api, formatError } from "@/lib/api";
 import { useAuth } from "@/contexts/AuthContext";
 import Navbar from "@/components/Navbar";
@@ -23,6 +23,7 @@ export default function AdminUsers() {
   const [q, setQ] = useState("");
   const [roleFilter, setRoleFilter] = useState("");
   const [pendingId, setPendingId] = useState(null);
+  const [copied, setCopied] = useState(false);
 
   const refresh = useCallback(async () => {
     setLoading(true);
@@ -57,6 +58,16 @@ export default function AdminUsers() {
       setPendingId(null);
     }
   }
+
+  const copyEmails = async () => {
+    try {
+      await navigator.clipboard.writeText(users.map((u) => u.email).join(", "));
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    } catch {
+      toast.error("Copie impossible");
+    }
+  };
 
   const counts = useMemo(() => {
     const c = { superadmin: 0, admin: 0, user: 0, other: 0 };
@@ -107,6 +118,15 @@ export default function AdminUsers() {
             <option value="admin">admin</option>
             <option value="user">user</option>
           </select>
+          <button
+            type="button"
+            onClick={copyEmails}
+            data-testid="admin-users-copy-emails"
+            className="inline-flex items-center gap-2 border-2 border-cream-dark rounded-full px-4 py-2 font-bold text-sm hover:bg-cream transition"
+          >
+            {copied ? <Check className="w-4 h-4 text-terracotta" /> : <Copy className="w-4 h-4" />}
+            {copied ? "Copié !" : "Copier les emails"}
+          </button>
         </div>
 
         {loading ? (

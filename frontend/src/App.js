@@ -16,6 +16,7 @@ import ChallengeNew from "@/pages/ChallengeNew";
 import ChallengeDetail from "@/pages/ChallengeDetail";
 import ChallengePlay from "@/pages/ChallengePlay";
 import AdminPromo from "@/pages/AdminPromo";
+import AdminUsers from "@/pages/AdminUsers";
 import Account from "@/pages/Account";
 import ForgotPassword from "@/pages/ForgotPassword";
 import ResetPassword from "@/pages/ResetPassword";
@@ -348,6 +349,14 @@ export default function App() {
             element={
               <ProtectedRoute>
                 <EarnCredits />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/app/admin/users"
+            element={
+              <ProtectedRoute>
+                <AdminUsers />
               </ProtectedRoute>
             }
           />
