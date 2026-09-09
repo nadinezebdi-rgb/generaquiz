@@ -30,6 +30,38 @@
     <priority>0.8</priority>
   </url>
 
+  <!-- ===================== Rubrique Bien vieillir ===================== -->
+  <url>
+    <loc>https://generaquiz.fr/bien-vieillir</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://generaquiz.fr/bien-vieillir/stimulation-cognitive</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://generaquiz.fr/bien-vieillir/entretenir-sa-memoire</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://generaquiz.fr/bien-vieillir/rompre-isolement</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://generaquiz.fr/bien-vieillir/aidants-familiaux</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://generaquiz.fr/bien-vieillir/activites-ehpad</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
   <!-- ===================== Compte & inscription ===================== -->
   <url>
     <loc>https://generaquiz.fr/register</loc>
