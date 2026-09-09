@@ -28,7 +28,6 @@ import AdminReports from "@/pages/AdminReports";
 import AdminAnalytics from "@/pages/AdminAnalytics";
 import AdminHome from "@/pages/AdminHome";
 import AdminQA from "@/pages/AdminQA";
-import AdminUsers from "@/pages/AdminUsers";
 import AdminAudit from "@/pages/AdminAudit";
 import Parcours from "@/pages/Parcours";
 import Pourquoi from "@/pages/Pourquoi";
@@ -49,6 +48,8 @@ import { EhpadNewSession, EhpadSessionView } from "@/pages/EhpadSession";
 import Charades from "@/pages/Charades";
 import MotsMeles from "@/pages/MotsMeles";
 import MotsFleches from "@/pages/MotsFleches";
+import BienVieillir from "@/pages/BienVieillir";
+import FicheBienVieillir from "@/pages/FicheBienVieillir";
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();
@@ -148,6 +149,8 @@ export default function App() {
           <Route path="/confidentialite" element={<Confidentialite />} />
           <Route path="/ehpad" element={<Ehpad />} />
           <Route path="/voyages-france" element={<VoyagesShowcase />} />
+          <Route path="/bien-vieillir" element={<BienVieillir />} />
+          <Route path="/bien-vieillir/:slug" element={<FicheBienVieillir />} />
           <Route path="/livre/coop/:code" element={<LivreCoop />} />
           <Route
             path="/app/atelier"
@@ -349,14 +352,6 @@ export default function App() {
             element={
               <ProtectedRoute>
                 <EarnCredits />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/app/admin/users"
-            element={
-              <ProtectedRoute>
-                <AdminUsers />
               </ProtectedRoute>
             }
           />

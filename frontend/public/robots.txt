@@ -9,6 +9,7 @@ Allow: /pourquoi
 Allow: /quiz-du-jour
 Allow: /ehpad
 Allow: /voyages-france
+Allow: /bien-vieillir
 Allow: /cgu
 Allow: /cgv
 Allow: /confidentialite

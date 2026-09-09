@@ -74,6 +74,7 @@ export default function MobileMenu({ variant = "landing" }) {
                   <MobileAnchor href="#demo" onClick={close}>Essai gratuit</MobileAnchor>
                   <MobileAnchor href="#tarifs" onClick={close}>Tarifs</MobileAnchor>
                   <MobileLink to="/pourquoi" onClick={close}>Pourquoi ça marche</MobileLink>
+                  <MobileLink to="/bien-vieillir" onClick={close} testid="mobile-nav-bien-vieillir">🌿 Bien vieillir</MobileLink>
                   <MobileLink to="/ehpad" onClick={close}>Pour les EHPAD</MobileLink>
                 </>
               )}
