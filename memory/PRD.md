@@ -1,5 +1,29 @@
 # Quiz d'Antan — SaaS pour seniors français
 
+## 2026-11-10 — Thème « Bien vieillir » + fin de l'audit pipeline QA (A3, B2-3, C)
+### Thème Bien vieillir (10ᵉ catégorie)
+- `seed_data.py` : catégorie `bien-vieillir` (icône heart, #6A994E, mascotte **Lucienne la Pétillante** générée Nano Banana → `static/mascots/bien-vieillir.png`) + 21 questions seed (3 par palier 1..7, helper `QB`, 7 discussion_prompts). Force-seed au boot si catégorie vide.
+- Livre : `bien-vieillir → transmission` (mapping chapitre + memory trigger « Quel est votre secret pour garder la forme et le moral ? »).
+- Badge « Nouveau » déplacé de Voyages vers Bien vieillir (Landing + Dashboard). `ICON_MAP` Landing : heart/map.
+- `GET /api/categories` : `count` = vrai nombre de questions jouables (plus de « 100 » figé).
+- **En prod** : republier, puis `/app/admin/qa` → « Compléter » sur Bien vieillir (ou attendre l'auto-seed 05:00).
+### A3 — Checkpoint & reprise auto
+- `qa_pipeline.py` : `retag_untagged`, `palier_distribution`, `JobCheckpoint` (progress {phase, done, total} écrit après chaque unité de travail, filtré par `segment_id` → un orphelin/annulé s'arrête seul, exit 3).
+- `admin_qa.py` : `_resume_or_fail` — timeout AVEC progression, kill par signal (OOM/restart) ou heartbeat mort → job remis `queued` (`resume_count`, max 3 reprises) et repart du checkpoint ; sinon `failed`. `qa_watchdog_loop` (60 s) lancé au startup. Logs en append. `created_at` stable → le RERUN saute les questions déjà vérifiées depuis le début du job.
+- UI QueueRow : badge « reprise n/3 » + ligne « phase · checkpoint X / Y ».
+### B2-3 — Hiérarchie TOPUP
+- `topup_paliers.py` : 1) RETAG vérifiées sans palier (0 IA) → 2) fact-check Opus du backlog non vérifié sans palier → 3) génération IA seulement pour les slots restants. IDs `uuid4`.
+### C — Moteur
+- `mistral_client.py` : garde-fou 80 % ; ne remplace QUE le pool brut (non vérifié ET sans palier) — vérifiées/taguées préservées, IDs stables ; IDs `m_{cat}_{uuid}` ; `max_tokens=8000`.
+- `daily.py` : quiz du jour persisté dans `daily_quizzes` (index unique date_key), exclut les flagged.
+- Exclusion vues 30 j : déjà en place dans `GET /categories/{id}/questions`.
+### Correctifs issus du test (iteration_44)
+- Palier start : n'enregistre plus un tirage incomplet (< 20) → plus de 409 bloquant après top-up.
+- QuizPlayer : flag `ignore` (double fetch StrictMode).
+- Suppression de compte : purge daily_attempts, user_paliers, user_seen_questions, ligues, badges, stats, weekly scores.
+### Tests
+- `backend/tests/manual_qa_resume_check.py` : 7/7 PASS (reprise, plafond, terminal intouchable, superseded, RETAG 0 IA, orphelin exit 3). Backlog fact-check testé (2 Opus → 140/140, 0 génération). Mistral guard mocké PASS. testing_agent iteration_44 : backend 17/17, frontend OK.
+
 ## 2026-02-24 (soir) — Timeouts QA différenciés par kind
 - **Contexte** : screenshot prod du 24/08 montrait 2 jobs RERUN (Objets d'antan, Histoire de France) en échec avec message `timeout (>15 min)`. Diagnostic : Mistral+Opus tournaient correctement, mais l'audit complet de 200+ questions sur ces grosses catégories dépassait le hard timeout unique de 15 min.
 - **Fix** `admin_qa.py` :
@@ -93,7 +117,7 @@ Audit chirurgical de l'utilisateur : 1 796 questions en base pour 1 260 slots (s
   - Bandeau mustard **"X question(s) vérifiée(s) sans palier — retag gratuit dispo"** avec mini-bouton **RETAG** par catégorie concernée, visible uniquement si `untagged_playable > 0`.
 - **Test** : 20 questions untagged simulées sur annees-50-60 (10) + cuisine-terroir (10) → rebalance-all retag exactement 20 questions, 0 impact sur les autres, priorité paliers hauts respectée.
 
-### Reste à faire (audit)
+### Reste à faire (audit) — ✅ TOUT FAIT le 2026-11-10 (voir entrée en tête)
 - **A3** : checkpoint DB (progression après chaque unité de travail) + reprise auto au boot pour les jobs killed pendant leur run. Actuellement, un job long (11 min pour rerun) tué par redémarrage est perdu.
 - **B1 étape 2** : automate le fact-check du backlog `unchecked` (515 questions non vérifiées) avant de proposer de générer de l'IA.
 - **B1 étape 3 chaîne** : COMPLÉTER À 140 doit enchaîner RETAG → QA-backlog → GENERATE et n'appeler l'IA qu'en dernier recours.

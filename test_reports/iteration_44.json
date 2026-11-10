@@ -1,0 +1,40 @@
+{
+  "summary": "Tested the 'Bien vieillir' theme, the QA rebalance refactor, the QA queue/jobs endpoints and daily-quiz persistence, on both backend and frontend. Backend: 17/17 pytest cases pass (tests/test_iteration44_bien_vieillir.py). /api/categories returns 10 categories and bien-vieillir has the right title, mascot_name and mascot_image; the mascot PNG returns 200. The 21 seeded questions (bv1..bv21) cover difficulty 1..7, 3 per palier, and each question matches its explanation. Palier start with only 3 questions returns 409 'Stock insuffisant', no crash. Palier 2 returns 403. memory-trigger/bien-vieillir maps to transmission. rebalance/{id}, rebalance-all (a no-op: 0 untagged questions in the DB), queue, jobs and summary all return 200 with the expected keys. Daily quiz returns 5 questions, the same on every call, and a daily_quizzes doc exists for 2026-11-10. Daily submit scores 3/5 correctly and returns 409 on a second submit (checked with a TEST_ user, deleted afterwards). Frontend: on the landing page, the Bien vieillir card has the Nouveau badge and voyages-france no longer does. On the dashboard, the card has its badge; the 'Jouer' button opens /app/quiz/bien-vieillir and all 21 questions could be played. The end-of-quiz memory trigger shows the bien-vieillir prompt. On the Parcours page, the start button is disabled with a 'STOCK 3/20' warning. /app/admin/qa loads with no JS errors and no failing API calls, and shows the bien-vieillir row.",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {"endpoint": "POST /api/palier/categories/{id}/{n}/start", "issue": "When stock is low (e.g. 3/20), the first start still saves those 3 question_ids in user_paliers and then returns 409. Each later start reuses the saved ids (because question_ids exists and the palier is not completed), so the user keeps getting 409 even after a top-up refills the palier to 20. Reproduced in preview: the admin got a user_paliers doc with ['bv3','bv1','bv2']. Fix: do not save the draw when len(qs) < PALIER_SIZE, or redraw when the saved set has fewer than 20 ids. The UI currently disables the button when stock < 20, which limits the impact, but a direct API call or a stale UI still creates the doc."},
+      {"endpoint": "seed_data CATEGORIES bien-vieillir", "issue": "The category doc has count: 100, but only 21 questions exist. The landing page and dashboard show '100 QUESTIONS', which is misleading. Compute the real count or set it to 21."},
+      {"endpoint": "DELETE /api/auth/account", "issue": "Deleting an account does not delete daily_attempts, user_paliers, user_seen_questions or league_scores. Orphan rows stay in the daily leaderboard. This is not new."}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "QuizPlayer.jsx useEffect (line 42)", "issue": "GET /categories/{id}/questions is fetched twice because React.StrictMode runs the effect twice and there is no cancel/ignore flag. The first question shown is replaced after about 500ms. In one run, answering right after the page loaded showed the explanation of a different question (Alzheimer text on the 'boisson' question). Each extra fetch also writes to user_seen_questions. In dev only; production builds run effects once. Add an AbortController or an 'ignore' flag in the effect cleanup.", "selector": "[data-testid=quiz-question]", "priority": "LOW"}
+    ],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "Dashboard card bien-vieillir", "issues": ["The whole card is not clickable; only the Parcours and Jouer buttons are. This matches the other cards, so it is fine. The 'Nouveau' badge sits close to the decorative circle but does not overlap the title."]}
+    ]
+  },
+  "test_report_links": ["/app/backend/tests/test_iteration44_bien_vieillir.py", "/app/test_reports/pytest/pytest_iter44.xml"],
+  "action_items": [
+    "palier_start: do not save question_ids when stock < PALIER_SIZE, or redraw when the saved set is incomplete, so users are not stuck on 409 after a top-up",
+    "Set the bien-vieillir category count to the real number of questions (21), or compute it from the DB",
+    "QuizPlayer: add an ignore/abort flag so the question set is not replaced while the user is answering",
+    "Optional: delete daily_attempts, user_paliers and user_seen_questions on account deletion"
+  ],
+  "critical_code_review_comments": [
+    "daily.get_daily_questions_cached: storing with $setOnInsert and then re-reading is race-safe. Old daily_quizzes docs are never pruned (minor; consider a TTL index). GET /daily/quiz returns correct_index publicly; this is known and needed for anonymous play.",
+    "admin_qa._dequeue_next sorts queued jobs by started_at, so resumed jobs (which keep their original started_at) go to the front of the queue. This looks intended.",
+    "mistral_client.regenerate_category only deletes quality != verified AND untagged questions. bien-vieillir questions have quality=None but have a difficulty, so they are protected.",
+    "The bien-vieillir seed questions have no 'quality' field (None). They are playable because filters use $ne flagged, but they show as unverified in the QA stats."
+  ],
+  "updated_files": ["/app/backend/tests/test_iteration44_bien_vieillir.py"],
+  "success_rate": {"backend": "100% (17/17)", "frontend": "100% of requested flows"},
+  "seed_data_creation": "No seed data. Temporary TEST_ user created and deleted for daily submit. The admin user_paliers doc created by the palier start test (bien-vieillir palier 1) was deleted. Data left on the admin account: 1 bien-vieillir quiz attempt (3/21) and user_seen_questions rows from UI play.",
+  "test_credentials": "admin@generaquiz.fr / pF44gVBfLdushm3NZ6dN (works; httpOnly access_token and refresh_token cookies are set; CORS uses an explicit origin with credentials)",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "No topup, rerun, auto-seed or Mistral regen was triggered. rebalance-all was safe to run because the DB has 0 untagged non-flagged questions. In preview, bien-vieillir has only 3 questions per palier, so Parcours start is disabled in the UI and returns 409 from the API."
+}

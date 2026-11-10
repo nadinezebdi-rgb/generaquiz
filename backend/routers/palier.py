@@ -121,7 +121,7 @@ async def palier_start(category_id: str, palier: int, user: dict = Depends(get_c
     question_ids = doc.get("question_ids") if doc else None
     completed = bool(doc and doc.get("completed"))
 
-    if question_ids and not completed:
+    if question_ids and not completed and len(question_ids) >= PALIER_SIZE:
         # Rejeu → mêmes questions
         qs = await db.questions.find(
             {"id": {"$in": question_ids}}, {"_id": 0, "fact_check": 0}
@@ -137,6 +137,7 @@ async def palier_start(category_id: str, palier: int, user: dict = Depends(get_c
         ]
         qs = await db.questions.aggregate(pipeline).to_list(PALIER_SIZE)
         question_ids = [q["id"] for q in qs]
+    if len(qs) >= PALIER_SIZE and not (doc and doc.get("question_ids") == question_ids):
         await db.user_paliers.update_one(
             {"user_id": user_id, "category_id": category_id, "palier": palier},
             {"$set": {

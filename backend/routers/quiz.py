@@ -20,7 +20,14 @@ router = APIRouter(tags=["quiz"])
 
 @router.get("/categories")
 async def list_categories():
-    return await db.categories.find({}, {"_id": 0}).to_list(100)
+    cats = await db.categories.find({}, {"_id": 0}).to_list(100)
+    counts = {d["_id"]: d["n"] async for d in db.questions.aggregate([
+        {"$match": {"quality": {"$ne": "flagged"}}},
+        {"$group": {"_id": "$category_id", "n": {"$sum": 1}}},
+    ])}
+    for c in cats:
+        c["count"] = counts.get(c["id"], 0)
+    return cats
 
 
 @router.get("/categories/{category_id}/questions")

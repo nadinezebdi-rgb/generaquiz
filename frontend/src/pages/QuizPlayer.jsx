@@ -40,10 +40,12 @@ export default function QuizPlayer() {
   const startTime = useRef(Date.now());
 
   useEffect(() => {
+    let ignore = false;
     api
       .get(`/categories/${categoryId}/questions`)
-      .then((r) => setData(r.data))
-      .catch((e) => setErr(e.response?.data?.detail || "Erreur de chargement"));
+      .then((r) => { if (!ignore) setData(r.data); })
+      .catch((e) => { if (!ignore) setErr(e.response?.data?.detail || "Erreur de chargement"); });
+    return () => { ignore = true; };
   }, [categoryId]);
 
   // Always-called hook: shuffle options for the current question.
