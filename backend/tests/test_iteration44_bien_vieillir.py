@@ -28,7 +28,7 @@ class TestCategories:
         assert len(cats) == 10
         bv = next(c for c in cats if c["id"] == "bien-vieillir")
         assert bv["title"] == "Bien vieillir"
-        assert bv["mascot_name"] == "Lucienne la Pétillante"
+        assert bv["mascot_name"] == "Lucette la Pétillante"
         assert bv["mascot_image"] == "/api/static/mascots/bien-vieillir.png"
         assert "_id" not in bv
 

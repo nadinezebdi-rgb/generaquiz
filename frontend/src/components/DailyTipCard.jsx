@@ -3,11 +3,13 @@ import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Lightbulb, ArrowRight } from "lucide-react";
 import { api, BACKEND_URL } from "@/lib/api";
+import { ShareTipButton } from "@/components/ShareTipButton";
 
-const fmtDate = (k) => {
+export const fmtTipDate = (k) => {
   const s = new Date(`${k}T12:00:00`).toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" });
   return s.charAt(0).toUpperCase() + s.slice(1);
 };
+const fmtDate = fmtTipDate;
 
 export const DailyTipCard = ({ ctaTo = "/app/quiz/bien-vieillir", ctaLabel = "Tester mes connaissances" }) => {
   const [data, setData] = useState(null);
@@ -33,7 +35,7 @@ export const DailyTipCard = ({ ctaTo = "/app/quiz/bien-vieillir", ctaLabel = "Te
       <div className="relative flex flex-col sm:flex-row gap-5 items-start">
         <img
           src={`${BACKEND_URL}/api/static/mascots/bien-vieillir.png`}
-          alt="Lucienne la Pétillante"
+          alt="Lucette la Pétillante"
           className="w-20 h-20 rounded-2xl border-2 border-white shadow-soft object-cover shrink-0 bg-cream"
         />
         <div className="flex-1 min-w-0">
@@ -52,7 +54,7 @@ export const DailyTipCard = ({ ctaTo = "/app/quiz/bien-vieillir", ctaLabel = "Te
           <p className="text-sm text-navy font-bold mb-4" data-testid="daily-tip-action">
             Aujourd&apos;hui : <span className="font-normal italic">{tip.action}</span>
           </p>
-          <div className="flex items-center gap-4 flex-wrap">
+          <div className="flex items-center gap-3 flex-wrap">
             <Link
               to={ctaTo}
               data-testid="daily-tip-quiz-cta"
@@ -60,8 +62,16 @@ export const DailyTipCard = ({ ctaTo = "/app/quiz/bien-vieillir", ctaLabel = "Te
             >
               {ctaLabel} <ArrowRight className="w-4 h-4" />
             </Link>
-            <span className="text-xs text-navy/75">Conseil général de Lucienne, relu par IA — il ne remplace pas l&apos;avis de votre médecin.</span>
+            <ShareTipButton tip={tip} testId="daily-tip-share-whatsapp" />
+            <Link
+              to="/conseils-bien-vieillir"
+              data-testid="daily-tip-archive-link"
+              className="text-sm font-bold text-navy underline underline-offset-4 hover:text-[#6A994E] transition-colors"
+            >
+              Tous les conseils
+            </Link>
           </div>
+          <p className="text-xs text-navy/75 mt-3">Conseil général de Lucette, relu par IA — il ne remplace pas l&apos;avis de votre médecin.</p>
         </div>
       </div>
     </motion.section>

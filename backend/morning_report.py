@@ -104,7 +104,7 @@ def render_html(r: dict) -> str:
 <table style="width:100%;border-collapse:collapse">{stock_rows}</table>
 <h2 style="font-size:16px;margin-top:20px">Autres tâches de la nuit</h2>
 <p style="font-size:13px;margin:4px 0">Régénération Mistral : <b>{escape(str(regen.get("status") or "—"))}</b> · {regen.get("total") or 0} question(s) · fin {escape(str(regen.get("finished_at") or "—"))[:16]}</p>
-<p style="font-size:13px;margin:4px 0">Conseil du jour de Lucienne : {tip_line}</p>
+<p style="font-size:13px;margin:4px 0">Conseil du jour de Lucette : {tip_line}</p>
 <p style="margin-top:20px"><a href="{FRONTEND_URL}/app/admin/qa" style="background:#E07A5F;color:#fff;padding:10px 18px;border-radius:999px;text-decoration:none;font-weight:700">Ouvrir l'admin QA</a></p>
 </div></div>"""
 

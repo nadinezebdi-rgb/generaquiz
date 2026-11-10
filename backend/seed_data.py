@@ -77,7 +77,7 @@ CATEGORIES = [
         "description": "Santé, mémoire, alimentation, sommeil, activité physique et astuces pour vivre longtemps en forme.",
         "color": "#6A994E", "icon": "heart",
         "mascot_image": "/api/static/mascots/bien-vieillir.png",
-        "mascot_name": "Lucienne la Pétillante", "count": 100,
+        "mascot_name": "Lucette la Pétillante", "count": 100,
     },
 ]
 

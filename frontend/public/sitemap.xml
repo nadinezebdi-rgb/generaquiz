@@ -34,6 +34,19 @@
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
+  <url>
+    <loc>https://generaquiz.fr/conseils-bien-vieillir</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url><loc>https://generaquiz.fr/decouvrir/annees-50-60</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://generaquiz.fr/decouvrir/chansons</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://generaquiz.fr/decouvrir/cinema</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://generaquiz.fr/decouvrir/objets-antan</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://generaquiz.fr/decouvrir/histoire-france</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://generaquiz.fr/decouvrir/cuisine-terroir</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://generaquiz.fr/decouvrir/culture-40-ans</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://generaquiz.fr/decouvrir/culture-70-ans</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
 
   <!-- ===================== Compte & inscription ===================== -->
   <url>

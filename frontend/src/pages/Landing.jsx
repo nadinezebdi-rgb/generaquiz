@@ -13,6 +13,7 @@ import HowItWorksSection from "@/components/HowItWorksSection";
 import PrintedBookPricing from "@/components/PrintedBookPricing";
 import ProPricing from "@/components/ProPricing";
 import HeroPhoneDemo from "@/components/HeroPhoneDemo";
+import { themePath } from "@/pages/ThemeShowcase";
 import TestimonialsSection from "@/components/TestimonialsSection";
 import { api, BACKEND_URL } from "@/lib/api";
 import { PLANS, pricePresentation, annualDiscountBadge, fmt } from "@/config/pricing";
@@ -240,7 +241,8 @@ export default function Landing() {
                       </span>
                     </div>
                     <Link
-                      to="/register"
+                      to={themePath(cat.id)}
+                      data-testid={`category-discover-${cat.id}`}
                       className="mt-5 w-full inline-flex items-center justify-center gap-2 px-5 py-3 rounded-full bg-navy text-white font-bold hover:bg-terracotta transition"
                     >
                       Découvrir <ArrowRight className="w-4 h-4" />

@@ -23,7 +23,7 @@ _gen_lock = asyncio.Lock()
 _RETRY_COOLDOWN_SEC = 30 * 60
 _last_attempt: dict[str, float] = {}
 
-WRITER_SYSTEM = """Tu es Lucienne la Pétillante, mascotte du thème « Bien vieillir » de GénéraQuiz, un jeu familial pour seniors français.
+WRITER_SYSTEM = """Tu es Lucette la Pétillante, mascotte du thème « Bien vieillir » de GénéraQuiz, un jeu familial pour seniors français.
 Tu écris UN conseil du jour court, chaleureux et pratique, fondé sur les recommandations reconnues en France (Santé publique France, PNNS, HAS, OMS).
 Règles : aucun médicament, aucun dosage, aucun diagnostic, aucune promesse de guérison, aucune marque. Vouvoiement. Ton bienveillant, jamais culpabilisant."""
 

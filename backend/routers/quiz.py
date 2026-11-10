@@ -30,6 +30,32 @@ async def list_categories():
     return cats
 
 
+@router.get("/categories/{category_id}/showcase")
+async def category_showcase(category_id: str):
+    """Page publique d'un thème : 6 questions vérifiées, renouvelées chaque semaine."""
+    import random
+    cat = await db.categories.find_one({"id": category_id}, {"_id": 0})
+    if not cat:
+        raise HTTPException(status_code=404, detail="Catégorie introuvable")
+    ids = sorted([d["id"] async for d in db.questions.find(
+        {"category_id": category_id, "quality": "verified"}, {"_id": 0, "id": 1})])
+    year, week, _ = datetime.now(timezone.utc).isocalendar()
+    picked = random.Random(f"{category_id}-{year}-{week}").sample(ids, min(6, len(ids)))
+    docs = await db.questions.find(
+        {"id": {"$in": picked}},
+        {"_id": 0, "id": 1, "question": 1, "options": 1, "correct_index": 1,
+         "explanation": 1, "discussion_prompt": 1, "difficulty": 1},
+    ).to_list(6)
+    docs.sort(key=lambda q: (q.get("difficulty") or 9, q["id"]))
+    samples = [{"question": q["question"], "answer": q["options"][q["correct_index"]],
+                "explanation": q.get("explanation", ""), "discussion_prompt": q.get("discussion_prompt")}
+               for q in docs]
+    others = await db.categories.find(
+        {"id": {"$ne": category_id}}, {"_id": 0, "id": 1, "title": 1, "mascot_image": 1, "color": 1}
+    ).to_list(50)
+    return {"category": {**cat, "count": len(ids)}, "samples": samples, "others": others}
+
+
 @router.get("/categories/{category_id}/questions")
 async def get_questions(category_id: str, user: dict = Depends(get_current_user)):
     """Tirage des questions d'un quiz avec deux garde-fous critiques :

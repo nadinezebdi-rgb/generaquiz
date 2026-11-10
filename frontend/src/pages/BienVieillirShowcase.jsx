@@ -28,7 +28,7 @@ export default function BienVieillirShowcase() {
     document.title = "Bien vieillir : le quiz santé et mémoire pour seniors | GénéraQuiz";
     const meta = document.querySelector('meta[name="description"]');
     const prevDesc = meta?.getAttribute("content");
-    meta?.setAttribute("content", "Quiz Bien vieillir : alimentation, sommeil, mémoire, activité physique. 140 questions vérifiées et un conseil santé chaque jour avec Lucienne la Pétillante.");
+    meta?.setAttribute("content", "Quiz Bien vieillir : alimentation, sommeil, mémoire, activité physique. 140 questions vérifiées et un conseil santé chaque jour avec Lucette la Pétillante.");
     return () => {
       document.title = prev;
       if (meta && prevDesc) meta.setAttribute("content", prevDesc);
@@ -49,7 +49,7 @@ export default function BienVieillirShowcase() {
                 Bien <span className="text-[#6A994E] italic">vieillir</span>
               </h1>
               <p className="text-base md:text-lg text-navy/80 leading-relaxed mb-6">
-                Santé, mémoire, alimentation, sommeil et petites astuces pour vivre longtemps en forme. Un quiz à jouer en famille, avec la complicité de <b>Lucienne la Pétillante</b>.
+                Santé, mémoire, alimentation, sommeil et petites astuces pour vivre longtemps en forme. Un quiz à jouer en famille, avec la complicité de <b>Lucette la Pétillante</b>.
               </p>
               <div className="flex flex-wrap gap-2 mb-7" data-testid="bien-vieillir-themes">
                 {THEMES.map((t) => (
@@ -82,12 +82,12 @@ export default function BienVieillirShowcase() {
               <div className="absolute -inset-4 bg-[#6A994E]/15 rounded-full blur-3xl" />
               <img
                 src={`${BACKEND_URL}/api/static/mascots/bien-vieillir.png`}
-                alt="Lucienne la Pétillante, mascotte du thème Bien vieillir"
+                alt="Lucette la Pétillante, mascotte du thème Bien vieillir"
                 className="relative w-full max-w-md mx-auto rounded-3xl shadow-2xl"
                 data-testid="bien-vieillir-lucienne-image"
               />
               <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 bg-white rounded-full px-5 py-2 shadow-warm border-2 border-cream-dark whitespace-nowrap">
-                <span className="font-display font-extrabold text-navy">Lucienne la Pétillante</span>
+                <span className="font-display font-extrabold text-navy">Lucette la Pétillante</span>
               </div>
             </motion.div>
           </div>
@@ -151,7 +151,7 @@ export default function BienVieillirShowcase() {
         </section>
 
         <section className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-          <h2 className="font-display text-3xl md:text-4xl font-extrabold text-navy mb-3">Prêt(e) à jouer avec Lucienne ?</h2>
+          <h2 className="font-display text-3xl md:text-4xl font-extrabold text-navy mb-3">Prêt(e) à jouer avec Lucette ?</h2>
           <p className="text-navy/70 text-base md:text-lg mb-6">Des questions vérifiées, un conseil santé chaque matin, et des souvenirs à partager.</p>
           <div className="flex gap-3 flex-wrap">
             <Link

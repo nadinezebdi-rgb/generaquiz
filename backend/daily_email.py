@@ -15,6 +15,7 @@ from typing import Iterable
 from zoneinfo import ZoneInfo
 
 import resend
+from html import escape
 
 from core import db, logger, FRONTEND_URL, RESEND_API_KEY, SENDER_EMAIL
 
@@ -31,7 +32,31 @@ def _today_key() -> str:
     return datetime.now(PARIS_TZ).strftime("%Y-%m-%d")
 
 
-def _build_morning_email_html(name: str, streak: int, play_url: str) -> str:
+def _build_tip_block(tip: dict | None) -> str:
+    if not tip:
+        return ""
+    page = f"{FRONTEND_URL}/conseils-bien-vieillir/{tip['date_key']}"
+    return f"""
+        <tr><td style="padding:0 30px 24px 30px;">
+          <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#EEF3E8;border:2px solid #C7D8BA;border-radius:18px;">
+            <tr>
+              <td width="84" style="padding:16px 0 16px 16px;vertical-align:top;">
+                <img src="{FRONTEND_URL}/api/static/mascots/bien-vieillir.png" width="68" height="68" alt="Lucette" style="border-radius:14px;display:block;border:2px solid #FFFFFF;">
+              </td>
+              <td style="padding:16px;vertical-align:top;">
+                <div style="font-size:11px;font-weight:bold;letter-spacing:1px;text-transform:uppercase;color:#6A994E;">Le conseil de Lucette · {escape(tip.get('theme', ''))}</div>
+                <div style="font-size:18px;font-weight:bold;color:#1E3A5F;margin:6px 0;">{escape(tip['title'])}</div>
+                <div style="font-size:14px;line-height:1.5;color:#1A2530;">{escape(tip['text'])}</div>
+                <div style="font-size:14px;line-height:1.5;color:#1A2530;margin-top:6px;"><b>Aujourd'hui :</b> <i>{escape(tip.get('action', ''))}</i></div>
+                <a href="{page}" style="display:inline-block;margin-top:10px;color:#6A994E;font-weight:bold;font-size:14px;">Lire et partager le conseil →</a>
+              </td>
+            </tr>
+          </table>
+          <div style="font-size:11px;color:#1E3A5F99;margin-top:6px;">Conseil général, il ne remplace pas l'avis de votre médecin.</div>
+        </td></tr>"""
+
+
+def _build_morning_email_html(name: str, streak: int, play_url: str, tip: dict | None = None) -> str:
     streak_block = ""
     if streak >= 2:
         streak_block = f"""
@@ -64,6 +89,7 @@ def _build_morning_email_html(name: str, streak: int, play_url: str) -> str:
             Jouer maintenant →
           </a>
         </td></tr>
+        {_build_tip_block(tip)}
         <tr><td style="background-color:#F4F1DE;padding:18px 30px;text-align:center;font-size:12px;color:#1E3A5F;">
           Vous recevez cet email car vous êtes inscrit·e à GénéraQuiz.<br/>
           <a href="{FRONTEND_URL}/app/account" style="color:#7A1F2B;">Gérer mes préférences email</a>
@@ -74,11 +100,11 @@ def _build_morning_email_html(name: str, streak: int, play_url: str) -> str:
 </body></html>"""
 
 
-async def _send_one(user: dict) -> bool:
+async def _send_one(user: dict, tip: dict | None = None) -> bool:
     name = user.get("name") or user.get("email", "").split("@")[0]
     streak = int(user.get("streak_current") or 0)
     play_url = f"{FRONTEND_URL}/quiz-du-jour"
-    html = _build_morning_email_html(name, streak, play_url)
+    html = _build_morning_email_html(name, streak, play_url, tip)
     try:
         # resend.Emails.send is synchronous — run in a thread to keep the loop responsive
         await asyncio.to_thread(resend.Emails.send, {
@@ -107,6 +133,7 @@ async def send_morning_emails() -> dict:
     sent = 0
     skipped = 0
     failed = 0
+    tip = await db.daily_tips.find_one({"date_key": today}, {"_id": 0})
 
     # Batch: get all user_ids who already played today (single Mongo query)
     played_user_ids: set[str] = set()
@@ -121,7 +148,7 @@ async def send_morning_emails() -> dict:
         if str(user["_id"]) in played_user_ids:
             skipped += 1
             continue
-        ok = await _send_one(user)
+        ok = await _send_one(user, tip)
         if ok:
             sent += 1
         else:
