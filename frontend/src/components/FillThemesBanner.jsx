@@ -17,10 +17,17 @@ export const FillThemesBanner = ({ summary, onLaunched }) => {
     .sort((a, b) => (a.category_id === FEATURED ? -1 : b.category_id === FEATURED ? 1 : a.playable - b.playable));
 
   async function fillAll() {
+    if (!window.confirm(
+      `Remplir ${incomplete.length} thème(s) jusqu'à ${TARGET} questions ?\n\n` +
+      `Ordre : reclassement du stock (0 IA) → vérification du stock existant → génération IA pour le reste. ` +
+      `Consomme des crédits IA. 2 thèmes en parallèle, les autres en file.`
+    )) return;
     setBusy(true);
     try {
       const { data } = await api.post("/admin/qa/auto-seed");
-      toast.success(`Remplissage lancé : ${data.launched} en cours · ${data.queued} en file · ${data.already_running} déjà en cours`);
+      const summary = `${data.launched} en cours · ${data.queued} en file · ${data.already_running} déjà en cours`;
+      if (data.launched + data.queued === 0) toast.info(`Rien de nouveau à lancer : ${summary}`);
+      else toast.success(`Remplissage lancé : ${summary}`);
       onLaunched?.();
     } catch (e) {
       toast.error(formatError(e.response?.data?.detail) || "Remplissage impossible");
@@ -73,7 +80,7 @@ export const FillThemesBanner = ({ summary, onLaunched }) => {
             {incomplete.length} thème{incomplete.length > 1 ? "s" : ""} à compléter
           </h2>
           <p className="text-sm text-navy/70">
-            Un clic : stock existant reclassé d&apos;abord, puis vérification, et l&apos;IA seulement pour ce qui manque. Reprise automatique en cas de coupure.
+            Un clic : stock existant reclassé d&apos;abord, puis vérifié par Claude Opus, et l&apos;IA ne génère que ce qui manque. Reprise automatique en cas de coupure. Compteur = questions jouables par palier.
           </p>
         </div>
         <div className="flex gap-2 flex-wrap">

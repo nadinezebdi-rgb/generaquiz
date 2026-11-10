@@ -174,7 +174,31 @@ async def topup_category(category: dict, cp: JobCheckpoint) -> dict:
     print(f"  [1/3] RETAG : {rt['tagged']} question(s) vérifiée(s) taguée(s)")
     await _ckpt(cp, phase="backlog", done=done_before + filled, retagged=rt["tagged"])
 
-    # 2) Fact-check du backlog non vérifié et sans palier (Opus seul, pas de génération)
+    # 2a) Fact-check des questions déjà classées mais jamais vérifiées (Opus seul) :
+    #     garantit des paliers 100 % vérifiés ; une refusée libère son slot.
+    tagged_unchecked = await db.questions.find(
+        {"category_id": cat_id, "quality": {"$nin": ["verified", "flagged"]},
+         "difficulty": {"$gte": 1, "$lte": 7}},
+        {"_id": 0},
+    ).to_list(1000)
+    if tagged_unchecked:
+        print(f"  [2/3] Vérification de {len(tagged_unchecked)} question(s) classée(s) non vérifiée(s)")
+    for q in tagged_unchecked:
+        check = await fact_check_question(q)
+        ok = check["verdict"] == "correct" and check["confidence"] >= CONFIDENCE_THRESHOLD
+        await db.questions.update_one({"id": q["id"]}, {"$set": {
+            "quality": "verified" if ok else "flagged",
+            "fact_check": {**{k: check[k] for k in ("verdict", "confidence", "comment", "correction")},
+                           "checked_at": time.time(), "checker_model": FACT_CHECK_MODEL[1]},
+        }})
+        if not ok:
+            dist[q["difficulty"]] -= 1
+        report["backlog_checked"] += 1
+        print(f"    {'✅' if ok else '⚠'} classée ({check['verdict']}/{check['confidence']}) {q['question'][:50]}")
+        await _ckpt(cp, backlog_checked=report["backlog_checked"],
+                    total=done_before + filled + missing_slots(dist, TARGET_PER_PALIER))
+
+    # 2b) Fact-check du backlog non vérifié et sans palier (Opus seul, pas de génération)
     if missing_slots(dist, TARGET_PER_PALIER) > 0:
         backlog = await db.questions.find(
             {"category_id": cat_id, "quality": {"$nin": ["verified", "flagged"]},

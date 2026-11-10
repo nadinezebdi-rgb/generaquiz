@@ -1,5 +1,14 @@
 # Quiz d'Antan — SaaS pour seniors français
 
+## 2026-11-10 (suite) — Remplir en 1 clic · Page /bien-vieillir · Conseil du jour IA · Rapport du matin
+- **Bandeau « X thèmes à compléter »** (`FillThemesBanner.jsx`, admin QA) : liste les thèmes < 140 (Bien vieillir en tête, barres de progression), bouton **Remplir à 140** (confirmation → `POST /admin/qa/auto-seed`) + bouton **Recevoir le rapport du matin maintenant**. L'ancien bouton auto-seed doublon a été retiré (RETAG global conservé).
+- **TOPUP étape 2a** : les questions déjà classées mais jamais vérifiées sont fact-checkées par Opus (refusée → slot libéré) → paliers 100 % vérifiés. Testé : 140 jouables / 140 vérifiées, 0 génération.
+- **Page publique `/bien-vieillir`** (`BienVieillirShowcase.jsx`) : hero Lucienne, 6 questions à révéler, conseil du jour, relances EHPAD, CTA `/register?next=/app/quiz/bien-vieillir`, title + meta description SEO, ajoutée au `sitemap.xml`. Liens cassés `/quiz/voyages-france` corrigés.
+- **Conseil du jour** (`daily_tips.py`, `routers/tips.py`) : Claude Sonnet 4.6 écrit (thème tournant : alimentation, activité, sommeil, mémoire, lien social, prévention, moral), Claude Opus 4.8 relit (exactitude, prudence, pas de médicament) ; 3 essais, cooldown 30 min ; collection `daily_tips`. Cron 02:30 + génération au boot si absent. `GET /api/tips/today` (public, fallback dernier conseil), `GET /api/tips/recent`. Carte `DailyTipCard` sur le Dashboard (tous les comptes) et la page publique, CTA vers le quiz.
+- **Rapport du matin** (`morning_report.py`) : cron 07:30 Paris, envoi Resend à ADMIN_EMAIL + tous les users admin/superadmin. Contenu : questions ajoutées, tâches reprises, échecs, tableau des jobs 24 h (progression, retag/stock/IA, reprises, note), stock jouable par thème, régénération Mistral, conseil du jour. `POST /api/admin/qa/morning-report/send` (admin) pour un envoi immédiat.
+- Divers : navbar admin qui débordait à 1920 px corrigée, date du conseil en français correct, texte « six personnages » retiré.
+- Tests : testing_agent iteration_45 OK (tout fonctionne), retours mineurs corrigés ; `manual_qa_resume_check.py` 7/7.
+
 ## 2026-11-10 — Thème « Bien vieillir » + fin de l'audit pipeline QA (A3, B2-3, C)
 ### Thème Bien vieillir (10ᵉ catégorie)
 - `seed_data.py` : catégorie `bien-vieillir` (icône heart, #6A994E, mascotte **Lucienne la Pétillante** générée Nano Banana → `static/mascots/bien-vieillir.png`) + 21 questions seed (3 par palier 1..7, helper `QB`, 7 discussion_prompts). Force-seed au boot si catégorie vide.

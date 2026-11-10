@@ -100,7 +100,7 @@ def render_html(r: dict) -> str:
 </tr></table>
 <h2 style="font-size:16px">Tâches de remplissage</h2>
 <table style="width:100%;border-collapse:collapse"><tr><th {th}>Thème</th><th {th}>Type</th><th {th}>Statut</th><th {th}>Progression</th><th {th}>Retag · Stock · IA</th><th {th}>Reprises</th><th {th}>Note</th></tr>{job_rows}</table>
-<h2 style="font-size:16px;margin-top:20px">Stock jouable par thème</h2>
+<h2 style="font-size:16px;margin-top:20px">Stock jouable par thème (questions classées par palier)</h2>
 <table style="width:100%;border-collapse:collapse">{stock_rows}</table>
 <h2 style="font-size:16px;margin-top:20px">Autres tâches de la nuit</h2>
 <p style="font-size:13px;margin:4px 0">Régénération Mistral : <b>{escape(str(regen.get("status") or "—"))}</b> · {regen.get("total") or 0} question(s) · fin {escape(str(regen.get("finished_at") or "—"))[:16]}</p>
@@ -112,7 +112,7 @@ def render_html(r: dict) -> str:
 async def send_admin_morning_report() -> dict:
     if not RESEND_API_KEY:
         logger.info("[morning-report] RESEND_API_KEY manquant — envoi sauté")
-        return {"sent": 0, "reason": "no_resend_key"}
+        return {"sent": 0, "recipients": [], "subject": None, "summary": None, "reason": "no_resend_key"}
     report = await build_report()
     html = render_html(report)
     subject = (f"☀️ Rapport du matin : {report['filled']} ajoutée(s), "

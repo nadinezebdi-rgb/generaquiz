@@ -4,8 +4,10 @@ import { motion } from "framer-motion";
 import { Lightbulb, ArrowRight } from "lucide-react";
 import { api, BACKEND_URL } from "@/lib/api";
 
-const fmtDate = (k) =>
-  new Date(`${k}T12:00:00`).toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" });
+const fmtDate = (k) => {
+  const s = new Date(`${k}T12:00:00`).toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" });
+  return s.charAt(0).toUpperCase() + s.slice(1);
+};
 
 export const DailyTipCard = ({ ctaTo = "/app/quiz/bien-vieillir", ctaLabel = "Tester mes connaissances" }) => {
   const [data, setData] = useState(null);
@@ -39,8 +41,8 @@ export const DailyTipCard = ({ ctaTo = "/app/quiz/bien-vieillir", ctaLabel = "Te
             <span className="inline-flex items-center gap-1 bg-[#6A994E] text-white text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full">
               <Lightbulb className="w-3 h-3" /> Conseil du jour
             </span>
-            <span className="text-xs text-navy/60 capitalize" data-testid="daily-tip-date">
-              {data.is_today ? fmtDate(tip.date_key) : `du ${fmtDate(tip.date_key)}`} · {tip.theme}
+            <span className="text-xs text-navy/60" data-testid="daily-tip-date">
+              {data.is_today ? fmtDate(tip.date_key) : `Conseil du ${fmtDate(tip.date_key).toLowerCase()}`} · {tip.theme}
             </span>
           </div>
           <h3 className="font-display text-xl md:text-2xl font-extrabold text-navy mb-2" data-testid="daily-tip-title">
@@ -58,7 +60,7 @@ export const DailyTipCard = ({ ctaTo = "/app/quiz/bien-vieillir", ctaLabel = "Te
             >
               {ctaLabel} <ArrowRight className="w-4 h-4" />
             </Link>
-            <span className="text-[11px] text-navy/50">Conseil général de Lucienne, relu par IA — il ne remplace pas l&apos;avis de votre médecin.</span>
+            <span className="text-xs text-navy/75">Conseil général de Lucienne, relu par IA — il ne remplace pas l&apos;avis de votre médecin.</span>
           </div>
         </div>
       </div>

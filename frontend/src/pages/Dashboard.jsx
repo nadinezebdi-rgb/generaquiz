@@ -90,7 +90,7 @@ export default function Dashboard() {
                 Prêt(e) pour un nouveau quiz ?
               </h1>
               <p className="text-cream/80 text-lg max-w-xl mb-5">
-                Choisissez une catégorie ci-dessous et laissez-vous guider par nos six personnages caricaturés.
+                Choisissez une catégorie ci-dessous et laissez-vous guider par nos personnages caricaturés.
               </p>
               {!isPremium && (
                 <Link

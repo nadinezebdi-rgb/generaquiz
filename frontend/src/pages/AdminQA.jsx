@@ -148,25 +148,6 @@ export default function AdminQA() {
     }
   }
 
-  async function autoSeedAll() {
-    if (!window.confirm(
-      `Lancer un top-up automatique pour toutes les catégories sous-approvisionnées (< 140 questions) ?\n\n` +
-      `Le queue serialise les jobs (max 2 en parallèle) — les autres attendent leur tour. ` +
-      `Aucun doublon : les catégories déjà en cours ou complètes sont ignorées.`
-    )) return;
-    try {
-      const { data } = await api.post(`/admin/qa/auto-seed`);
-      const summary = `${data.launched} lancé(s) · ${data.queued} en file · ${data.already_running} déjà en cours · ${data.skipped_complete} déjà complet(s)`;
-      if (data.launched + data.queued === 0) toast.info(`Rien à faire : ${summary}`);
-      else toast.success(`Auto-seed déclenché : ${summary}`);
-      loadJobs();
-      loadQueue();
-      loadSummary();
-    } catch (e) {
-      toast.error(formatError(e.response?.data?.detail) || "Auto-seed impossible");
-    }
-  }
-
   async function rerunCategory(categoryId, categoryTitle) {
     if (!window.confirm(
       `Relancer le fact-check pour "${categoryTitle}" ?\n\n` +
@@ -305,10 +286,10 @@ export default function AdminQA() {
 
         <FillThemesBanner summary={summary} onLaunched={() => { loadJobs(); loadQueue(); loadSummary(); }} />
 
-        {/* Auto-seed : bouton global pour lancer un top-up sur toutes les catégories < 140 */}
+        {/* RETAG global : reclasse sans IA les questions sans palier */}
         <div className="mb-6 flex items-center justify-between gap-3 flex-wrap bg-terracotta/5 border border-terracotta/25 rounded-2xl p-4">
           <div className="text-sm text-navy/80 flex-1 min-w-0">
-            <strong className="text-navy">Auto-seed intelligent</strong> — remplit d&apos;un coup toutes les catégories sous la barre des 140 questions. Idempotent, queue serialise à 2 en parallèle.
+            <strong className="text-navy">RETAG global</strong> — reclasse dans les paliers vides les questions jouables sans palier, sans aucun appel IA.
           </div>
           <div className="flex items-center gap-2 shrink-0">
             <button
@@ -319,14 +300,6 @@ export default function AdminQA() {
               title="Retag sans IA — assigne les questions vérifiées sans palier aux paliers vides. Toujours essayer avant l'auto-seed."
             >
               <Wand2 className="w-4 h-4" /> RETAG global (0 IA)
-            </button>
-            <button
-              type="button"
-              onClick={autoSeedAll}
-              data-testid="admin-qa-auto-seed-btn"
-              className="inline-flex items-center gap-2 bg-terracotta text-white text-sm font-bold px-4 py-2 rounded-full hover:bg-terracotta-dark shadow-warm transition"
-            >
-              <Sparkles className="w-4 h-4" /> Auto-seed toutes les catégories manquantes
             </button>
           </div>
         </div>
