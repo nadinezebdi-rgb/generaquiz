@@ -6,6 +6,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { DailyTipCard } from "@/components/DailyTipCard";
 import { mascotSrc } from "@/lib/mascot";
+import { ThemeMiniQuiz } from "@/components/MiniQuiz";
 
 const SAMPLES = [
   { q: "Combien de portions de fruits et légumes est-il recommandé de manger chaque jour ?", a: "5 par jour", Icon: Apple },
@@ -129,6 +130,8 @@ export default function BienVieillirShowcase() {
             </div>
           </div>
         </section>
+
+        <ThemeMiniQuiz categoryId="bien-vieillir" color="#6A994E" />
 
         <section className="py-16 bg-[#6A994E]/10">
           <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 grid md:grid-cols-2 gap-10 items-center">

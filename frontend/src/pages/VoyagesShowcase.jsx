@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { ThemeMiniQuiz } from "@/components/MiniQuiz";
 import { MapPin, MessageCircle, Sparkles, ArrowRight, Play, Building2, Heart } from "lucide-react";
 
 /**
@@ -102,6 +103,8 @@ export default function VoyagesShowcase() {
         </section>
 
         {/* ============ EHPAD : DECLENCHEUR DE CONVERSATION ============ */}
+        <ThemeMiniQuiz categoryId="voyages-france" color="#0EA5E9" />
+
         <section className="py-16 bg-gradient-to-br from-terracotta/10 to-mustard/20">
           <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid md:grid-cols-2 gap-10 items-center">

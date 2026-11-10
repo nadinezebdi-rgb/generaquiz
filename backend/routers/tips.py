@@ -2,13 +2,15 @@
 import asyncio
 
 from fastapi import APIRouter, HTTPException, Path, Query
+from pydantic import BaseModel, Field
 
 from core import FRONTEND_URL, db
 from daily_tips import generate_daily_tip, today_key
 
 router = APIRouter(prefix="/tips", tags=["tips"])
 
-_PUBLIC = {"_id": 0, "date_key": 1, "theme": 1, "title": 1, "text": 1, "action": 1}
+_PUBLIC = {"_id": 0, "date_key": 1, "theme": 1, "title": 1, "text": 1, "action": 1,
+           "quiz.question": 1, "quiz.options": 1}
 DATE_RE = r"^\d{4}-\d{2}-\d{2}$"
 
 
@@ -42,3 +44,17 @@ async def tip_by_date(date_key: str = Path(..., pattern=DATE_RE)) -> dict:
     if not tip:
         raise HTTPException(status_code=404, detail="Conseil introuvable")
     return with_share(tip)
+
+
+class TipAnswer(BaseModel):
+    choice: int = Field(..., ge=0, le=3)
+
+
+@router.post("/{date_key}/answer")
+async def tip_answer(body: TipAnswer, date_key: str = Path(..., pattern=DATE_RE)) -> dict:
+    tip = await db.daily_tips.find_one({"date_key": date_key}, {"_id": 0, "quiz": 1})
+    quiz = (tip or {}).get("quiz")
+    if not quiz:
+        raise HTTPException(status_code=404, detail="Question introuvable")
+    return {"correct": body.choice == quiz["correct_index"], "correct_index": quiz["correct_index"],
+            "explanation": quiz["explanation"]}

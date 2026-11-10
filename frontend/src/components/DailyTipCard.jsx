@@ -5,6 +5,7 @@ import { Lightbulb, ArrowRight } from "lucide-react";
 import { api } from "@/lib/api";
 import { mascotSrc } from "@/lib/mascot";
 import { ShareTipButton } from "@/components/ShareTipButton";
+import { TipQuiz } from "@/components/TipQuiz";
 
 export const fmtTipDate = (k) => {
   const s = new Date(`${k}T12:00:00`).toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" });
@@ -55,7 +56,8 @@ export const DailyTipCard = ({ ctaTo = "/app/quiz/bien-vieillir", ctaLabel = "Te
           <p className="text-sm text-navy font-bold mb-4" data-testid="daily-tip-action">
             Aujourd&apos;hui : <span className="font-normal italic">{tip.action}</span>
           </p>
-          <div className="flex items-center gap-3 flex-wrap">
+          <TipQuiz tip={tip} />
+          <div className="flex items-center gap-3 flex-wrap mt-5">
             <Link
               to={ctaTo}
               data-testid="daily-tip-quiz-cta"

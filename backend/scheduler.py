@@ -59,13 +59,13 @@ def start_scheduler() -> None:
     from charades_mistral import generate_nightly_charades
     from fleches_mistral import generate_nightly_fleches
     from topup_paliers_job import topup_all_categories_nightly
-    from daily_tips import generate_daily_tip
+    from daily_tips import daily_tip_job
     from morning_report import send_admin_morning_report
 
     _scheduler = AsyncIOScheduler(timezone="Europe/Paris")
 
     # -- Génération nocturne (03:00 → 04:30 Paris) ------------------------------
-    _schedule(_scheduler, generate_daily_tip,        hour=2,  minute=30, job_id="daily_tip_generate")
+    _schedule(_scheduler, daily_tip_job,             hour=2,  minute=30, job_id="daily_tip_generate")
     _schedule(_scheduler, mistral_regen,             hour=3,  minute=0,  job_id="mistral_regenerate_all")
     _schedule(_scheduler, generate_one_grid_from_mistral, hour=3, minute=30, job_id="wordsearch_generate_nightly")
     _schedule(_scheduler, generate_nightly_charades, hour=4,  minute=0,  job_id="charades_generate_nightly")

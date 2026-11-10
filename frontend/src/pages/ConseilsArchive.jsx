@@ -5,6 +5,7 @@ import { Lightbulb, Play } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { ShareTipButton } from "@/components/ShareTipButton";
+import { TipQuiz } from "@/components/TipQuiz";
 import { fmtTipDate } from "@/components/DailyTipCard";
 import { api } from "@/lib/api";
 import { mascotSrc } from "@/lib/mascot";
@@ -43,14 +44,45 @@ const TipArticle = ({ tip, featured }) => (
     <p className="text-navy/80 leading-relaxed mb-2">{tip.text}</p>
     <p className="text-sm text-navy mb-4"><b>Le geste du jour :</b> <i>{tip.action}</i></p>
     <ShareTipButton tip={tip} testId={`tip-share-${tip.date_key}`} />
+    <TipQuiz tip={tip} />
   </motion.article>
 );
+
+const THEME_FILTERS = [
+  { key: "alimentation", label: "Alimentation" },
+  { key: "activité physique", label: "Activité physique" },
+  { key: "sommeil", label: "Sommeil" },
+  { key: "mémoire", label: "Mémoire" },
+  { key: "lien social", label: "Lien social" },
+  { key: "prévention", label: "Prévention" },
+  { key: "moral & bien-être", label: "Moral & bien-être" },
+];
+const slug = (k) => k.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z]+/g, "-");
+
+const ThemeFilters = ({ tips, value, onChange }) => {
+  const count = (k) => tips.filter((t) => t.theme === k).length;
+  const chip = (active) =>
+    `px-4 py-2 rounded-full text-sm font-bold border-2 transition-colors ${active ? "bg-[#6A994E] border-[#6A994E] text-white" : "bg-white border-cream-dark text-navy hover:border-[#6A994E]"}`;
+  return (
+    <div className="flex flex-wrap gap-2 mb-6" data-testid="conseils-filters" role="group" aria-label="Filtrer par thème">
+      <button type="button" onClick={() => onChange(null)} className={chip(!value)} data-testid="conseils-filter-tous" aria-pressed={!value}>
+        Tous <span className="opacity-70">({tips.length})</span>
+      </button>
+      {THEME_FILTERS.map(({ key, label }) => (
+        <button key={key} type="button" onClick={() => onChange(key)} className={chip(value === key)} data-testid={`conseils-filter-${slug(key)}`} aria-pressed={value === key}>
+          {label} <span className="opacity-70">({count(key)})</span>
+        </button>
+      ))}
+    </div>
+  );
+};
 
 export default function ConseilsArchive() {
   const { dateKey } = useParams();
   const [tips, setTips] = useState(null);
   const [featured, setFeatured] = useState(null);
   const [notFound, setNotFound] = useState(false);
+  const [theme, setTheme] = useState(null);
 
   useEffect(() => {
     let ignore = false;
@@ -70,7 +102,7 @@ export default function ConseilsArchive() {
     featured ? featured.text : "Chaque jour, Lucette partage un conseil simple et vérifié pour bien vieillir : alimentation, sommeil, mémoire, activité physique, lien social.",
   );
 
-  const list = (tips || []).filter((t) => t.date_key !== featured?.date_key);
+  const list = (tips || []).filter((t) => t.date_key !== featured?.date_key && (!theme || t.theme === theme));
 
   return (
     <div className="min-h-screen paper-bg">
@@ -97,9 +129,17 @@ export default function ConseilsArchive() {
         {tips === null ? (
           <p className="text-navy/60" data-testid="conseils-loading">Chargement…</p>
         ) : (
-          <div className="grid gap-5" data-testid="conseils-list">
-            {list.map((t, i) => <TipArticle key={t.date_key} tip={t} featured={!featured && i === 0} />)}
-          </div>
+          <>
+            {featured && <h2 className="font-display text-2xl font-extrabold text-navy mb-4">Les autres conseils</h2>}
+            <ThemeFilters tips={tips} value={theme} onChange={setTheme} />
+            {list.length === 0 ? (
+              <p className="text-navy/70" data-testid="conseils-filter-empty">Pas encore de conseil sur ce thème — Lucette y viendra très bientôt.</p>
+            ) : (
+              <div className="grid gap-5" data-testid="conseils-list">
+                {list.map((t, i) => <TipArticle key={t.date_key} tip={t} featured={!featured && !theme && i === 0} />)}
+              </div>
+            )}
+          </>
         )}
         <div className="mt-12 text-sm">
           <Link to="/bien-vieillir" className="font-bold text-navy underline underline-offset-4 hover:text-[#6A994E]" data-testid="conseils-theme-link">

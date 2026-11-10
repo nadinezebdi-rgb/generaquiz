@@ -9,6 +9,7 @@ plugs the cheating vector where the browser console could send
 from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends, HTTPException
+from pydantic import BaseModel, Field
 
 from core import db, get_current_user, AttemptCreate, is_premium_active
 from routers.referral import grant_referral_bonus_if_eligible
@@ -40,20 +41,41 @@ async def category_showcase(category_id: str):
     ids = sorted([d["id"] async for d in db.questions.find(
         {"category_id": category_id, "quality": "verified"}, {"_id": 0, "id": 1})])
     year, week, _ = datetime.now(timezone.utc).isocalendar()
-    picked = random.Random(f"{category_id}-{year}-{week}").sample(ids, min(6, len(ids)))
-    docs = await db.questions.find(
+    picked = random.Random(f"{category_id}-{year}-{week}").sample(ids, min(9, len(ids)))
+    docs = {q["id"]: q async for q in db.questions.find(
         {"id": {"$in": picked}},
         {"_id": 0, "id": 1, "question": 1, "options": 1, "correct_index": 1,
          "explanation": 1, "discussion_prompt": 1, "difficulty": 1},
-    ).to_list(6)
-    docs.sort(key=lambda q: (q.get("difficulty") or 9, q["id"]))
+    )}
+    shown = sorted((docs[i] for i in picked[:6] if i in docs), key=lambda q: (q.get("difficulty") or 9, q["id"]))
     samples = [{"question": q["question"], "answer": q["options"][q["correct_index"]],
                 "explanation": q.get("explanation", ""), "discussion_prompt": q.get("discussion_prompt")}
-               for q in docs]
+               for q in shown]
+    # Mini-quiz : 3 autres questions, sans la bonne réponse (vérifiée côté serveur)
+    mini = sorted((docs[i] for i in picked[6:9] if i in docs), key=lambda q: q.get("difficulty") or 9)
+    mini_quiz = [{"id": q["id"], "question": q["question"], "options": q["options"]} for q in mini]
     others = await db.categories.find(
         {"id": {"$ne": category_id}}, {"_id": 0, "id": 1, "title": 1, "mascot_image": 1, "color": 1}
     ).to_list(50)
-    return {"category": {**cat, "count": len(ids)}, "samples": samples, "others": others}
+    return {"category": {**cat, "count": len(ids)}, "samples": samples, "mini_quiz": mini_quiz, "others": others}
+
+
+class MiniQuizAnswer(BaseModel):
+    question_id: str
+    choice: int = Field(..., ge=0, le=5)
+
+
+@router.post("/categories/{category_id}/mini-quiz/answer")
+async def mini_quiz_answer(category_id: str, body: MiniQuizAnswer):
+    """Correction publique d'une question du mini-quiz (questions vérifiées uniquement)."""
+    q = await db.questions.find_one(
+        {"id": body.question_id, "category_id": category_id, "quality": "verified"},
+        {"_id": 0, "correct_index": 1, "explanation": 1},
+    )
+    if not q:
+        raise HTTPException(status_code=404, detail="Question introuvable")
+    return {"correct": body.choice == q["correct_index"], "correct_index": q["correct_index"],
+            "explanation": q.get("explanation", "")}
 
 
 @router.get("/categories/{category_id}/questions")

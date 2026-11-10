@@ -5,6 +5,7 @@ from __future__ import annotations
 import asyncio
 import json
 import os
+import random
 import re
 import time
 import uuid
@@ -29,6 +30,11 @@ Règles : aucun médicament, aucun dosage, aucun diagnostic, aucune promesse de 
 
 REVIEW_SYSTEM = """Tu es médecin gériatre et relecteur exigeant. Tu vérifies qu'un conseil santé grand public destiné à des seniors est exact, prudent et conforme aux recommandations françaises/OMS.
 Refuse tout conseil inexact, risqué, culpabilisant, contenant un médicament, un dosage ou un chiffre douteux.
+Réponds UNIQUEMENT en JSON : {"ok": true|false, "raison": "1 phrase"}"""
+
+
+QUIZ_REVIEW_SYSTEM = """Tu es médecin gériatre et vérificateur de quiz. Tu contrôles une question à choix multiples grand public liée à un conseil santé pour seniors.
+Vérifie : la bonne réponse est exacte et sans ambiguïté, les 3 autres sont clairement fausses, l'explication est juste et prudente.
 Réponds UNIQUEMENT en JSON : {"ok": true|false, "raison": "1 phrase"}"""
 
 
@@ -88,6 +94,63 @@ Format JSON STRICT, rien d'autre :
     return None
 
 
+def _valid_quiz(q: dict | None) -> bool:
+    return bool(
+        q and isinstance(q.get("question"), str) and q["question"].strip()
+        and isinstance(q.get("options"), list) and len(q["options"]) == 4
+        and all(isinstance(o, str) and o.strip() for o in q["options"])
+        and len({o.strip().lower() for o in q["options"]}) == 4
+        and isinstance(q.get("bonne_reponse"), int) and 0 <= q["bonne_reponse"] <= 3
+        and isinstance(q.get("explication"), str) and q["explication"].strip()
+    )
+
+
+async def write_tip_quiz(tip: dict) -> dict | None:
+    """Une question QCM liée au conseil, écrite par Sonnet, vérifiée par Opus.
+    Les options sont mélangées (l'IA met souvent la bonne en premier)."""
+    prompt = f"""Conseil du jour :
+Titre : {tip['title']}
+Conseil : {tip['text']}
+Geste : {tip['action']}
+
+Écris UNE question de quiz simple qui teste ce que le lecteur vient d'apprendre dans ce conseil. 4 propositions courtes, une seule correcte.
+Format JSON STRICT, rien d'autre :
+{{"question": "max 140 caractères", "options": ["...", "...", "...", "..."], "bonne_reponse": 0, "explication": "1 phrase, max 200 caractères"}}"""
+    for attempt in range(1, MAX_ATTEMPTS + 1):
+        q = await _ask(GEN_MODEL, WRITER_SYSTEM, prompt)
+        if not _valid_quiz(q):
+            continue
+        good = q["options"][q["bonne_reponse"]]
+        listing = "\n".join(f"- {o}{' (BONNE RÉPONSE)' if o == good else ''}" for o in q["options"])
+        review = await _ask(FACT_CHECK_MODEL, QUIZ_REVIEW_SYSTEM,
+                            f"Question : {q['question']}\nPropositions :\n{listing}\nExplication : {q['explication']}")
+        if review and review.get("ok") is True:
+            options = [o.strip() for o in q["options"]]
+            random.shuffle(options)
+            return {"question": q["question"].strip(), "options": options,
+                    "correct_index": options.index(good.strip()), "explanation": q["explication"].strip()}
+        logger.info(f"[daily-tip] quiz tentative {attempt} refusée : {(review or {}).get('raison')}")
+    return None
+
+
+async def backfill_tip_quizzes(limit: int = 30) -> int:
+    """Ajoute une question aux conseils récents qui n'en ont pas encore."""
+    added = 0
+    async for tip in db.daily_tips.find(
+        {"quiz": {"$exists": False}, "quiz_attempts": {"$not": {"$gte": 2}}}, {"_id": 0}
+    ).sort("date_key", -1).limit(limit):
+        quiz = await write_tip_quiz(tip)
+        if not quiz:
+            await db.daily_tips.update_one({"date_key": tip["date_key"]}, {"$inc": {"quiz_attempts": 1}})
+        else:
+            await db.daily_tips.update_one({"date_key": tip["date_key"], "quiz": {"$exists": False}},
+                                           {"$set": {"quiz": quiz}})
+            added += 1
+    if added:
+        logger.info(f"[daily-tip] {added} question(s) ajoutée(s) aux conseils existants")
+    return added
+
+
 async def generate_daily_tip(date_key: str | None = None) -> dict:
     """Idempotent : ne génère que si aucun conseil n'existe pour ce jour.
     Après un échec, nouvel essai au plus toutes les 30 min (pas de rafale IA)."""
@@ -105,6 +168,9 @@ async def generate_daily_tip(date_key: str | None = None) -> dict:
         if not tip:
             logger.warning(f"[daily-tip] {date_key} : aucun conseil validé après {MAX_ATTEMPTS} tentatives")
             return {"status": "failed", "date_key": date_key}
+        quiz = await write_tip_quiz(tip)
+        if quiz:
+            tip["quiz"] = quiz
         await db.daily_tips.update_one(
             {"date_key": date_key},
             {"$setOnInsert": {"date_key": date_key, "theme": theme, **tip,
@@ -114,3 +180,9 @@ async def generate_daily_tip(date_key: str | None = None) -> dict:
         )
         logger.info(f"[daily-tip] {date_key} ({theme}) : « {tip['title']} »")
         return {"status": "created", "date_key": date_key}
+
+
+async def daily_tip_job() -> None:
+    """Cron 02:30 : conseil du jour + rattrapage des questions manquantes."""
+    await generate_daily_tip()
+    await backfill_tip_quizzes()

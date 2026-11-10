@@ -6,6 +6,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { api } from "@/lib/api";
 import { mascotSrc } from "@/lib/mascot";
+import { MiniQuiz } from "@/components/MiniQuiz";
 
 export const themePath = (id) =>
   id === "bien-vieillir" ? "/bien-vieillir" : id === "voyages-france" ? "/voyages-france" : `/decouvrir/${id}`;
@@ -140,6 +141,8 @@ export default function ThemeShowcase() {
             </div>
           </section>
         )}
+
+        <MiniQuiz categoryId={c.id} questions={data.mini_quiz} color={c.color} />
 
         <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
           <h2 className="font-display text-2xl md:text-3xl font-extrabold text-navy mb-6">Les autres thèmes</h2>

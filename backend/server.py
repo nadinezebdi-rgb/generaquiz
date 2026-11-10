@@ -377,8 +377,8 @@ async def startup():
     # Schedule all cron jobs (voir scheduler.py pour la matrice complète)
     start_scheduler()
     # Conseil du jour : 1 seul appel IA léger si absent (pas de subprocess)
-    from daily_tips import generate_daily_tip
-    _asyncio.create_task(generate_daily_tip())
+    from daily_tips import daily_tip_job
+    _asyncio.create_task(daily_tip_job())
 
     # NOTE : l'auto-seed au startup a été DÉSACTIVÉ car il lançait 2 subprocess
     # Mistral+Opus en même temps que le boot → pic mémoire → OOM du pod prod
