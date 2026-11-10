@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
   Play, Users, Heart, Sparkles, Check, ArrowRight, Star,
-  Brain, Music, Film, Phone, Landmark, Utensils, Book,
+  Brain, Music, Film, Phone, Landmark, Utensils, Book, HeartPulse, Map as MapIcon,
 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -17,7 +17,7 @@ import TestimonialsSection from "@/components/TestimonialsSection";
 import { api, BACKEND_URL } from "@/lib/api";
 import { PLANS, pricePresentation, annualDiscountBadge, fmt } from "@/config/pricing";
 
-const ICON_MAP = { tv: Film, music: Music, film: Film, phone: Phone, landmark: Landmark, utensils: Utensils, sparkles: Sparkles, book: Book };
+const ICON_MAP = { tv: Film, music: Music, film: Film, phone: Phone, landmark: Landmark, utensils: Utensils, sparkles: Sparkles, book: Book, heart: HeartPulse, map: MapIcon };
 
 export default function Landing() {
   const [categories, setCategories] = useState([]);
@@ -212,7 +212,7 @@ export default function Landing() {
                     className="absolute -top-12 -right-12 w-48 h-48 rounded-full opacity-15 group-hover:opacity-25 transition"
                     style={{ backgroundColor: cat.color }}
                   />
-                  {cat.id === "voyages-france" && (
+                  {cat.id === "bien-vieillir" && (
                     <span
                       data-testid={`category-badge-nouveau-${cat.id}`}
                       className="absolute top-3 right-3 z-10 inline-flex items-center gap-1 bg-terracotta text-white text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full shadow-warm"

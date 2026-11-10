@@ -163,15 +163,19 @@ async def startup():
     from routers.admin_qa import (
         sweep_running_jobs_on_startup,
         _dequeue_next,
+        qa_watchdog_loop,
     )
     await sweep_running_jobs_on_startup()
     # Puis on dépile les jobs restés "queued" avant le restart — sinon ils
     # attendent indéfiniment qu'un running (qui n'existe plus) finisse.
     import asyncio as _asyncio
     _asyncio.create_task(_dequeue_next())
+    # Watchdog : reprend les jobs orphelins (heartbeat mort) depuis leur checkpoint
+    _asyncio.create_task(qa_watchdog_loop())
     await db.password_reset_tokens.create_index("token", unique=True)
     await db.password_reset_tokens.create_index("expires_at", expireAfterSeconds=0)
     await db.daily_attempts.create_index([("user_id", 1), ("date_key", 1)], unique=True)
+    await db.daily_quizzes.create_index("date_key", unique=True)
     await db.daily_attempts.create_index([("date_key", 1), ("score", -1), ("duration_seconds", 1)])
     # Gamification indexes
     await db.credit_ledger.create_index([("user_id", 1), ("created_at", -1)])

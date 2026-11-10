@@ -30,6 +30,7 @@ import os
 import re
 import sys
 import time
+import uuid
 from pathlib import Path
 from typing import Any
 
@@ -41,6 +42,7 @@ sys.path.insert(0, str(ROOT_DIR))
 
 from emergentintegrations.llm.chat import LlmChat, UserMessage  # noqa: E402
 from motor.motor_asyncio import AsyncIOMotorClient              # noqa: E402
+from qa_pipeline import JobCheckpoint                           # noqa: E402
 
 MONGO_URL = os.environ["MONGO_URL"]
 DB_NAME = os.environ["DB_NAME"]
@@ -193,17 +195,32 @@ Format JSON strict, rien d'autre :
 # 3. PIPELINE PRINCIPAL
 # ============================================================================
 
-async def audit_category(category: dict, limit: int | None = None) -> dict:
+class Superseded(Exception):
+    """Le job a été annulé ou re-planifié : ce segment doit s'arrêter."""
+
+
+async def audit_category(category: dict, limit: int | None = None, cp: JobCheckpoint | None = None) -> dict:
     cat_id = category["id"]
     print(f"\n=== Catégorie: {cat_id} ({category['title']}) ===")
 
-    query = {"category_id": cat_id}
+    # Reprise (A3) : on saute les questions déjà vérifiées depuis le début du job
+    query: dict = {"category_id": cat_id}
+    done_before = 0
+    if cp and cp.audit_since:
+        query["$or"] = [{"fact_check.checked_at": {"$exists": False}},
+                        {"fact_check.checked_at": {"$lt": cp.audit_since}}]
+        done_before = int((await cp.load()).get("done", 0))
     if limit:
         questions = await db.questions.find(query).limit(limit).to_list(limit)
     else:
-        questions = await db.questions.find(query).to_list(500)
-    print(f"  {len(questions)} questions à auditer")
+        questions = await db.questions.find(query).to_list(2000)
+    print(f"  {len(questions)} questions à auditer (déjà faites : {done_before})")
 
+    async def _ckpt(i: int) -> None:
+        if cp and not await cp.save(phase="audit", done=done_before + i, total=done_before + len(questions)):
+            raise Superseded()
+
+    await _ckpt(0)
     report = {"category_id": cat_id, "total": len(questions), "verified": 0, "flagged": 0, "regenerated": 0, "regen_failed": 0, "flagged_details": []}
     good_texts: list[str] = []
 
@@ -250,12 +267,13 @@ async def audit_category(category: dict, limit: int | None = None) -> dict:
             new_q = await generate_replacement(category, good_texts + [q["question"]])
             if not new_q:
                 report["regen_failed"] += 1
+                await _ckpt(i)
                 continue
 
             check = await fact_check_question({**new_q, "id": f"tmp-{i}"})
             if check["verdict"] == "correct" and check["confidence"] >= CONFIDENCE_THRESHOLD:
                 new_doc = {
-                    "id": f"gen_{cat_id}_{int(time.time()*1000)}_{i}",
+                    "id": f"gen_{cat_id}_{uuid.uuid4().hex[:12]}",
                     "category_id": cat_id,
                     "question": new_q["question"],
                     "options": new_q["options"],
@@ -280,6 +298,7 @@ async def audit_category(category: dict, limit: int | None = None) -> dict:
             else:
                 report["regen_failed"] += 1
                 print(f"    → ❌ regen refusé ({check['verdict']}/{check['confidence']})")
+        await _ckpt(i)
 
     out = Path(f"/tmp/qa_report_{cat_id}.json")
     out.write_text(json.dumps(report, ensure_ascii=False, indent=2))
@@ -300,10 +319,14 @@ async def main():
         print(f"Aucune catégorie trouvée (only={only})")
         return
 
+    cp = JobCheckpoint(db) if not DRY_RUN else None
     all_reports = []
-    for cat in cats:
-        rep = await audit_category(cat, limit=limit)
-        all_reports.append(rep)
+    try:
+        for cat in cats:
+            all_reports.append(await audit_category(cat, limit=limit, cp=cp))
+    except Superseded:
+        print("Job annulé ou re-planifié — arrêt propre de ce segment.")
+        sys.exit(3)
 
     total = sum(r["total"] for r in all_reports)
     verified = sum(r["verified"] for r in all_reports)

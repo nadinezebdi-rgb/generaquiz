@@ -300,7 +300,7 @@ export default function Dashboard() {
                   className="absolute -top-12 -right-12 w-48 h-48 rounded-full opacity-15 group-hover:opacity-30 transition"
                   style={{ backgroundColor: cat.color }}
                 />
-                {cat.id === "voyages-france" && (
+                {cat.id === "bien-vieillir" && (
                   <span
                     data-testid={`dashboard-badge-nouveau-${cat.id}`}
                     className="absolute top-3 right-3 z-10 inline-flex items-center gap-1 bg-terracotta text-white text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full shadow-warm"

@@ -835,6 +835,14 @@ function fmtDur(sec) {
   return `${m}min${s > 0 ? ` ${s}s` : ""}`;
 }
 
+const PHASE_LABEL = {
+  retag: "RETAG (0 IA)",
+  backlog: "Vérification du stock",
+  generate: "Génération IA",
+  audit: "Audit",
+  done: "Terminé",
+};
+
 function QueueRow({ job, kind, onCancel }) {
   const isRunning = kind === "running";
   const current = job.questions_current ?? 0;
@@ -859,7 +867,21 @@ function QueueRow({ job, kind, onCancel }) {
           <span className="ml-2 text-[10px] uppercase font-bold tracking-widest text-navy/50">
             {job.kind}
           </span>
+          {job.resume_count > 0 && (
+            <span
+              data-testid={`admin-qa-queue-resume-${job.category_id}`}
+              title={job.last_interruption || ""}
+              className="ml-2 text-[10px] uppercase font-bold tracking-widest text-navy bg-mustard/40 px-2 py-0.5 rounded-full"
+            >
+              reprise {job.resume_count}/3
+            </span>
+          )}
         </div>
+        {job.progress?.total > 0 && (
+          <div className="text-[11px] text-navy/60" data-testid={`admin-qa-queue-checkpoint-${job.category_id}`}>
+            {PHASE_LABEL[job.progress.phase] || job.progress.phase} · checkpoint <strong>{job.progress.done} / {job.progress.total}</strong>
+          </div>
+        )}
         <div className="text-xs text-navy/60">
           {isRunning ? (
             <>

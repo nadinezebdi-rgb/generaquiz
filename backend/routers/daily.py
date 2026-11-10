@@ -59,13 +59,15 @@ async def _pick_daily_questions(date_key: str) -> list[dict]:
 
     picked: list[dict] = []
     for cat_id in chosen_cats:
-        qs = await db.questions.find({"category_id": cat_id}, {"_id": 0}).to_list(200)
+        qs = await db.questions.find(
+            {"category_id": cat_id, "quality": {"$ne": "flagged"}}, {"_id": 0}
+        ).sort("id", 1).to_list(500)
         if not qs:
             continue
         picked.append(rng.choice(qs))
     # Fallback: top up from any category if we have less than DAILY_QUESTION_COUNT
     if len(picked) < DAILY_QUESTION_COUNT:
-        all_qs = await db.questions.find({}, {"_id": 0}).to_list(2000)
+        all_qs = await db.questions.find({"quality": {"$ne": "flagged"}}, {"_id": 0}).sort("id", 1).to_list(2000)
         rng.shuffle(all_qs)
         for q in all_qs:
             if q not in picked:
@@ -75,22 +77,29 @@ async def _pick_daily_questions(date_key: str) -> list[dict]:
     return picked[:DAILY_QUESTION_COUNT]
 
 
-# In-memory cache to avoid hitting MongoDB for every daily-quiz request and every
-# morning email send. Keyed by date_key; auto-evicts on day rollover.
+# Persisté en base (`daily_quizzes`) : un restart ou la régénération nocturne
+# ne change plus le quiz du jour en cours. Petit cache mémoire en lecture.
 _daily_cache: dict[str, list[dict]] = {}
 
 
 async def get_daily_questions_cached(date_key: str) -> list[dict]:
-    """Cached wrapper around _pick_daily_questions. Same for everyone on a given day."""
+    """Questions du jour — identiques pour tous, stables pour la journée."""
     cached = _daily_cache.get(date_key)
     if cached is not None:
         return cached
-    # On a new day, drop stale entries (small dict but keep it tidy)
-    if _daily_cache:
-        _daily_cache.clear()
-    picked = await _pick_daily_questions(date_key)
-    _daily_cache[date_key] = picked
-    return picked
+    doc = await db.daily_quizzes.find_one({"date_key": date_key}, {"_id": 0})
+    if not doc:
+        picked = await _pick_daily_questions(date_key)
+        await db.daily_quizzes.update_one(
+            {"date_key": date_key},
+            {"$setOnInsert": {"date_key": date_key, "questions": picked,
+                              "created_at": datetime.now(timezone.utc).isoformat()}},
+            upsert=True,
+        )
+        doc = await db.daily_quizzes.find_one({"date_key": date_key}, {"_id": 0})
+    _daily_cache.clear()
+    _daily_cache[date_key] = doc["questions"]
+    return doc["questions"]
 
 
 # -------------------- request models --------------------

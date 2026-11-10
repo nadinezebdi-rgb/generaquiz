@@ -72,6 +72,13 @@ CATEGORIES = [
         "mascot_image": "/api/static/mascots/voyages-france.png",
         "mascot_name": "Jeanne la Voyageuse", "count": 100,
     },
+    {
+        "id": "bien-vieillir", "title": "Bien vieillir",
+        "description": "Santé, mémoire, alimentation, sommeil, activité physique et astuces pour vivre longtemps en forme.",
+        "color": "#6A994E", "icon": "heart",
+        "mascot_image": "/api/static/mascots/bien-vieillir.png",
+        "mascot_name": "Lucienne la Pétillante", "count": 100,
+    },
 ]
 
 
@@ -919,6 +926,88 @@ VOYAGES_QUESTIONS = [
 ]
 
 QUESTIONS.extend(VOYAGES_QUESTIONS)
+
+
+def QB(qid, difficulty, q, opts, correct, exp, discussion=None):
+    d = QD(qid, "bien-vieillir", q, opts, correct, exp, discussion)
+    d["difficulty"] = difficulty
+    return d
+
+
+BIEN_VIEILLIR_QUESTIONS = [
+    QB("bv1", 1, "Combien de portions de fruits et légumes est-il recommandé de manger chaque jour en France ?",
+       ["2", "3", "5", "8"], 2,
+       "Le Programme national nutrition santé (PNNS) recommande au moins 5 fruits et légumes par jour.",
+       "Quel fruit ou légume du jardin ou du marché préférez-vous ?"),
+    QB("bv2", 1, "Quelle boisson est la seule réellement indispensable à l'organisme ?",
+       ["Le café", "L'eau", "Le lait", "Le jus d'orange"], 1,
+       "L'eau est la seule boisson indispensable. Avec l'âge, la sensation de soif diminue : il faut donc boire régulièrement."),
+    QB("bv3", 1, "Quelle activité physique douce est souvent conseillée pour entretenir le cœur et les articulations ?",
+       ["La marche", "Le sprint", "L'haltérophilie lourde", "Le saut à l'élastique"], 0,
+       "La marche régulière entretient le cœur, les muscles et l'équilibre, sans brusquer les articulations.",
+       "Où aimez-vous vous promener ? Avez-vous une balade préférée ?"),
+    QB("bv4", 2, "Quelle vitamine notre peau fabrique-t-elle grâce au soleil ?",
+       ["Vitamine C", "Vitamine D", "Vitamine B12", "Vitamine A"], 1,
+       "Exposée au soleil, la peau produit de la vitamine D, essentielle à la fixation du calcium sur les os."),
+    QB("bv5", 2, "Quel minéral, présent notamment dans les produits laitiers, est essentiel à la solidité des os ?",
+       ["Le fer", "Le calcium", "Le sodium", "Le zinc"], 1,
+       "Le calcium est le principal constituant minéral des os ; on le trouve dans les laitages, certaines eaux et légumes verts."),
+    QB("bv6", 2, "Quel vaccin est recommandé chaque automne aux personnes de 65 ans et plus en France ?",
+       ["Contre la grippe", "Contre la rougeole", "Contre la fièvre jaune", "Contre la rage"], 0,
+       "La vaccination contre la grippe saisonnière est recommandée chaque année et prise en charge à 100 % pour les 65 ans et plus."),
+    QB("bv7", 3, "Selon l'OMS, combien de minutes d'activité physique modérée par semaine sont recommandées aux adultes, y compris après 65 ans ?",
+       ["30 minutes", "75 minutes", "150 minutes", "500 minutes"], 2,
+       "L'OMS recommande au moins 150 minutes (2 h 30) d'activité d'intensité modérée par semaine."),
+    QB("bv8", 3, "Quel jeu de lettres consiste à former des mots sur une grille avec des jetons valant des points ?",
+       ["Le Scrabble", "Le tarot", "La belote", "Les dames"], 0,
+       "Le Scrabble fait travailler le vocabulaire et la mémoire : un classique des clubs et des soirées en famille.",
+       "Jouez-vous à des jeux de société ? Lequel vous fait le plus rire ?"),
+    QB("bv9", 3, "Quel régime alimentaire, riche en huile d'olive, légumes et poisson, est réputé favorable à la longévité ?",
+       ["Le régime méditerranéen", "Le régime carnivore", "Le régime hyperprotéiné", "Le régime liquide"], 0,
+       "Le régime méditerranéen est associé à une meilleure santé cardiovasculaire et à une plus grande longévité.",
+       "Quel plat de votre enfance trouvez-vous à la fois bon et sain ?"),
+    QB("bv10", 4, "Jusqu'à quel âge a vécu la Française Jeanne Calment, doyenne de l'humanité ?",
+       ["109 ans", "115 ans", "122 ans", "130 ans"], 2,
+       "Jeanne Calment (1875-1997), née à Arles, a vécu 122 ans et 164 jours : record officiel de longévité humaine.",
+       "Avez-vous connu un centenaire dans votre famille ou votre village ?"),
+    QB("bv11", 4, "Comment appelle-t-on la perte de masse et de force musculaire liée à l'âge ?",
+       ["L'arthrose", "La sarcopénie", "L'ostéoporose", "La presbytie"], 1,
+       "La sarcopénie se prévient grâce à l'activité physique et à des apports suffisants en protéines."),
+    QB("bv12", 4, "Quel trouble de la vue, qui oblige à éloigner son journal pour lire, apparaît généralement vers 45 ans ?",
+       ["La myopie", "La presbytie", "Le daltonisme", "Le strabisme"], 1,
+       "La presbytie est due à la perte de souplesse du cristallin, qui accommode moins bien de près."),
+    QB("bv13", 5, "Que signifie le sigle APA, aide versée par le département aux personnes âgées en perte d'autonomie ?",
+       ["Allocation personnalisée d'autonomie", "Aide publique aux aînés", "Assurance pour personnes âgées", "Allocation de présence active"], 0,
+       "L'APA, créée en 2002, aide à financer l'aide à domicile ou l'hébergement en établissement à partir de 60 ans."),
+    QB("bv14", 5, "Quelle grille est utilisée en France pour évaluer le degré d'autonomie d'une personne âgée ?",
+       ["La grille AGGIR", "L'échelle de Richter", "L'échelle de Glasgow", "L'échelle de Mohs"], 0,
+       "La grille AGGIR classe les personnes en 6 groupes iso-ressources, du GIR 1 (très dépendant) au GIR 6 (autonome)."),
+    QB("bv15", 5, "Quelle hormone, produite la nuit, aide à réguler le sommeil et diminue avec l'âge ?",
+       ["L'adrénaline", "La mélatonine", "L'insuline", "Le cortisol"], 1,
+       "La mélatonine, sécrétée dans l'obscurité, régule l'horloge biologique ; sa production baisse avec les années.",
+       "Êtes-vous plutôt du matin ou du soir ? Cela a-t-il changé avec le temps ?"),
+    QB("bv16", 6, "Quelle île italienne fait partie des « zones bleues », ces régions du monde comptant de nombreux centenaires ?",
+       ["La Sicile", "La Sardaigne", "Capri", "L'île d'Elbe"], 1,
+       "Les zones bleues comprennent la Sardaigne, Okinawa (Japon), Nicoya (Costa Rica), Icarie (Grèce) et Loma Linda (Californie)."),
+    QB("bv17", 6, "Quelle zone du cerveau, au nom d'animal marin, joue un rôle clé dans la mémoire ?",
+       ["Le cervelet", "L'hippocampe", "Le bulbe rachidien", "L'hypophyse"], 1,
+       "L'hippocampe, dont la forme rappelle l'animal marin, est essentiel à la formation des nouveaux souvenirs."),
+    QB("bv18", 6, "Comment s'appelle la semaine nationale des retraités et personnes âgées, organisée chaque année en octobre en France ?",
+       ["La Semaine bleue", "La Semaine d'or", "La Semaine grise", "La Semaine des aînés"], 0,
+       "La Semaine bleue met chaque automne en lumière la place des aînés dans la société, avec des animations partout en France.",
+       "Participez-vous à des activités dans votre commune ou votre club ?"),
+    QB("bv19", 7, "Quel médecin allemand a décrit en 1906 la maladie neurodégénérative qui porte aujourd'hui son nom ?",
+       ["Alois Alzheimer", "James Parkinson", "Arnold Pick", "Friedrich Lewy"], 0,
+       "Alois Alzheimer présenta en 1906 le cas d'Auguste Deter, première patiente décrite de la maladie d'Alzheimer."),
+    QB("bv20", 7, "Comment s'appellent les extrémités des chromosomes qui raccourcissent à chaque division cellulaire, associées au vieillissement ?",
+       ["Les centromères", "Les télomères", "Les ribosomes", "Les mitochondries"], 1,
+       "Les télomères protègent les chromosomes ; leur étude a valu le prix Nobel de médecine 2009 à Blackburn, Greider et Szostak."),
+    QB("bv21", 7, "Quel biologiste a montré au début des années 1960 que les cellules humaines ne se divisent qu'un nombre limité de fois ?",
+       ["Leonard Hayflick", "Louis Pasteur", "Jacques Monod", "Robert Koch"], 0,
+       "La « limite de Hayflick » : une cellule humaine normale se divise environ 50 fois avant d'entrer en sénescence."),
+]
+
+QUESTIONS.extend(BIEN_VIEILLIR_QUESTIONS)
 
 
 QUESTIONS.extend(_load_extra_questions())

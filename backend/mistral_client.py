@@ -3,8 +3,8 @@
 How it works:
   - At 03:00 Europe/Paris each night (scheduled by daily_email.py), `regenerate_all()` runs.
   - For each of the 8 categories, asks Mistral to produce 100 fresh MCQs in strict JSON.
-  - Replaces the questions in MongoDB atomically per category (delete_many + insert_many).
-  - If Mistral fails for a given category, the existing questions are kept (zero downtime).
+  - Replaces only the raw pool (unverified AND untagged) — verified / palier questions are kept.
+  - If Mistral yields < 80 % of the target, the existing pool is kept (zero downtime).
 """
 from __future__ import annotations
 
@@ -12,6 +12,7 @@ import asyncio
 import json
 import os
 import re
+import uuid
 from datetime import datetime, timezone
 from typing import Optional
 
@@ -20,10 +21,12 @@ from pydantic import BaseModel
 
 from core import db, logger
 from seed_data import CATEGORIES
+from qa_pipeline import UNTAGGED_OR
 
 MISTRAL_MODEL = os.environ.get("MISTRAL_MODEL", "mistral-small-latest")
 QUESTIONS_PER_CATEGORY = 100
 BATCH_SIZE = 25  # Mistral handles ~25 well-structured items per call comfortably
+MIN_REPLACE_RATIO = 0.8  # garde-fou : on ne remplace le pool que si ≥ 80 % de la cible
 
 # Module-level lock — guards against two concurrent regenerations
 # (e.g. an admin double-clicks the button or the cron and a manual run overlap).
@@ -98,7 +101,7 @@ async def _generate_one_batch(client: Mistral, category: dict, n: int, batch_idx
             messages=[{"role": "user", "content": prompt}],
             response_format={"type": "json_object"},
             temperature=0.6,
-            max_tokens=4000,
+            max_tokens=8000,
         )
     resp = await asyncio.to_thread(_call)
     content = resp.choices[0].message.content
@@ -158,7 +161,7 @@ async def regenerate_category(category: dict, target: int = QUESTIONS_PER_CATEGO
                     continue
                 seen_texts.add(key)
                 all_q.append({
-                    "id": f"m_{category['id']}_{len(all_q) + 1}",
+                    "id": f"m_{category['id']}_{uuid.uuid4().hex[:12]}",
                     "category_id": category["id"],
                     "question": item["question"].strip(),
                     "options": [str(o) for o in item["options"]],
@@ -170,15 +173,23 @@ async def regenerate_category(category: dict, target: int = QUESTIONS_PER_CATEGO
                     break
             needed -= added
 
-    if not all_q:
-        logger.warning(f"[mistral] {category['id']} : aucune question valide, on conserve l'ancien pool")
+    if len(all_q) < MIN_REPLACE_RATIO * target:
+        logger.warning(f"[mistral] {category['id']} : {len(all_q)}/{target} questions valides "
+                       f"(< {int(MIN_REPLACE_RATIO * 100)} %), on conserve l'ancien pool")
         return 0
 
-    # Atomic-ish replace: insert new pool first, then delete the old one (by absence of "m_" prefix)
-    # Simpler: delete all + insert all in same operation block.
-    await db.questions.delete_many({"category_id": category["id"]})
+    # On ne remplace QUE l'ancien pool brut (non vérifié ET sans palier). Les
+    # questions vérifiées ou taguées 1..7 (paliers, stats, historiques) sont
+    # protégées et leurs IDs restent stables.
+    old_ids = [d["id"] async for d in db.questions.find(
+        {"category_id": category["id"], "quality": {"$ne": "verified"}, "$or": UNTAGGED_OR},
+        {"_id": 0, "id": 1},
+    )]
     await db.questions.insert_many(all_q)
-    logger.info(f"[mistral] {category['id']} régénéré : {len(all_q)} questions fraîches")
+    if old_ids:
+        await db.questions.delete_many({"id": {"$in": old_ids}})
+    logger.info(f"[mistral] {category['id']} : {len(all_q)} questions fraîches, "
+                f"{len(old_ids)} anciennes brutes remplacées (vérifiées/taguées préservées)")
     return len(all_q)
 
 
