@@ -17,7 +17,7 @@ const SAMPLES = [
   { q: "Quelle zone du cerveau, au nom d'animal marin, joue un rôle clé dans la mémoire ?", a: "L'hippocampe", Icon: Brain },
 ];
 
-const THEMES = ["Alimentation", "Activité physique", "Sommeil", "Mémoire", "Lien social", "Prévention"];
+const THEMES = ["Alimentation", "Activité physique", "Sommeil", "Mémoire", "Lien social", "Prévention", "Moral & bien-être"];
 
 const PLAY_TO = "/register?next=/app/quiz/bien-vieillir";
 

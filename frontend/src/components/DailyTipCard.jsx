@@ -56,7 +56,7 @@ export const DailyTipCard = ({ ctaTo = "/app/quiz/bien-vieillir", ctaLabel = "Te
           <p className="text-sm text-navy font-bold mb-4" data-testid="daily-tip-action">
             Aujourd&apos;hui : <span className="font-normal italic">{tip.action}</span>
           </p>
-          <TipQuiz tip={tip} />
+          <TipQuiz tip={tip} showContinue={false} />
           <div className="flex items-center gap-3 flex-wrap mt-5">
             <Link
               to={ctaTo}

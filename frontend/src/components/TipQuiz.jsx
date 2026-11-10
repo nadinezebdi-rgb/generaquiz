@@ -5,7 +5,7 @@ import { api } from "@/lib/api";
 import { useAuth } from "@/contexts/AuthContext";
 import { QuickQuestion } from "@/components/QuickQuestion";
 
-export const TipQuiz = ({ tip }) => {
+export const TipQuiz = ({ tip, showContinue = true }) => {
   const { user } = useAuth();
   const [done, setDone] = useState(false);
   if (!tip?.quiz) return null;
@@ -23,7 +23,7 @@ export const TipQuiz = ({ tip }) => {
         onAnswer={(choice) => api.post(`/tips/${tip.date_key}/answer`, { choice }).then((r) => r.data)}
         onDone={() => setDone(true)}
       />
-      {done && (
+      {done && showContinue && (
         <Link
           to={user ? "/app/quiz/bien-vieillir" : "/register?next=/app/quiz/bien-vieillir"}
           data-testid={`${testId}-continue`}

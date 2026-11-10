@@ -31,17 +31,23 @@ async def list_categories():
     return cats
 
 
+async def _weekly_pick(category_id: str, weeks_ago: int = 0) -> tuple[list[str], list[str]]:
+    """Tirage déterministe de la semaine ISO : [0:6] exemples, [6:9] mini-quiz."""
+    import random
+    from datetime import timedelta
+    ids = sorted([d["id"] async for d in db.questions.find(
+        {"category_id": category_id, "quality": "verified"}, {"_id": 0, "id": 1})])
+    year, week, _ = (datetime.now(timezone.utc) - timedelta(weeks=weeks_ago)).isocalendar()
+    return ids, random.Random(f"{category_id}-{year}-{week}").sample(ids, min(9, len(ids)))
+
+
 @router.get("/categories/{category_id}/showcase")
 async def category_showcase(category_id: str):
     """Page publique d'un thème : 6 questions vérifiées, renouvelées chaque semaine."""
-    import random
     cat = await db.categories.find_one({"id": category_id}, {"_id": 0})
     if not cat:
         raise HTTPException(status_code=404, detail="Catégorie introuvable")
-    ids = sorted([d["id"] async for d in db.questions.find(
-        {"category_id": category_id, "quality": "verified"}, {"_id": 0, "id": 1})])
-    year, week, _ = datetime.now(timezone.utc).isocalendar()
-    picked = random.Random(f"{category_id}-{year}-{week}").sample(ids, min(9, len(ids)))
+    ids, picked = await _weekly_pick(category_id)
     docs = {q["id"]: q async for q in db.questions.find(
         {"id": {"$in": picked}},
         {"_id": 0, "id": 1, "question": 1, "options": 1, "correct_index": 1,
@@ -67,7 +73,11 @@ class MiniQuizAnswer(BaseModel):
 
 @router.post("/categories/{category_id}/mini-quiz/answer")
 async def mini_quiz_answer(category_id: str, body: MiniQuizAnswer):
-    """Correction publique d'une question du mini-quiz (questions vérifiées uniquement)."""
+    """Correction publique, limitée aux 3 questions du mini-quiz de la semaine
+    (ou de la précédente, pour une page ouverte avant lundi)."""
+    allowed = set((await _weekly_pick(category_id))[1][6:9]) | set((await _weekly_pick(category_id, 1))[1][6:9])
+    if body.question_id not in allowed:
+        raise HTTPException(status_code=404, detail="Question introuvable")
     q = await db.questions.find_one(
         {"id": body.question_id, "category_id": category_id, "quality": "verified"},
         {"_id": 0, "correct_index": 1, "explanation": 1},

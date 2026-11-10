@@ -1,5 +1,11 @@
 # Quiz d'Antan — SaaS pour seniors français
 
+## 2026-11-10 (nuit) — Question sous le conseil · Mini-quiz des pages thèmes · Filtres de l'archive
+- **Question du conseil** : `daily_tips.write_tip_quiz` (Sonnet écrit un QCM lié au conseil, Opus vérifie, options mélangées) ; stockée dans `daily_tips.quiz` ; `backfill_tip_quizzes` (max 2 essais par conseil, champ `quiz_attempts`) ; cron 02:30 = `daily_tip_job` (conseil + rattrapage), aussi au boot. API publique : quiz sans la réponse ; `POST /api/tips/{date}/answer {choice}` → correct, correct_index, explanation. UI `TipQuiz` (+ `QuickQuestion` réutilisable) sur la carte du conseil (sans 2ᵉ bouton) et sur l'archive (« Continuer avec un compte » / « Continuer avec le quiz Bien vieillir » si connecté).
+- **Mini-quiz de la semaine** : `_weekly_pick` (tirage déterministe par semaine ISO : 6 exemples + 3 mini-quiz distincts) ; `showcase.mini_quiz` sans réponses ; `POST /api/categories/{id}/mini-quiz/answer` limité aux 3 questions de la semaine (ou de la précédente) → pas d'aspiration de la banque. UI `MiniQuiz`/`ThemeMiniQuiz` : progression, explication, score /3, « Continuer avec un compte » ; sur `/decouvrir/:id`, `/bien-vieillir`, `/voyages-france` (masqué si aucune question vérifiée).
+- **Filtres de l'archive** : « Tous » + 7 thèmes avec compteurs (hors conseil mis en avant), message vide adapté.
+- Tests : testing_agent iteration_47 — backend 18/18, frontend OK ; retours corrigés (fuite de réponses, compteurs, doublon de bouton, puce « Moral & bien-être »).
+
 ## 2026-11-10 (soir) — Lucette · Conseil dans l'e-mail · Archive des conseils · 8 pages thèmes · Partage WhatsApp
 - **Mascotte renommée Lucienne → Lucette la Pétillante** partout (seed, prompts IA, rapport, front).
 - **E-mail Quiz du jour** (`daily_email.py`) : bloc « Le conseil de Lucette » (titre, conseil, geste du jour, lien vers la page du conseil, mention médecin). Image 160 px PNG (`static/mascots/sm/bien-vieillir.png`).

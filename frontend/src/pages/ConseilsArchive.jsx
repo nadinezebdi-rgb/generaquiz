@@ -102,7 +102,8 @@ export default function ConseilsArchive() {
     featured ? featured.text : "Chaque jour, Lucette partage un conseil simple et vérifié pour bien vieillir : alimentation, sommeil, mémoire, activité physique, lien social.",
   );
 
-  const list = (tips || []).filter((t) => t.date_key !== featured?.date_key && (!theme || t.theme === theme));
+  const others = (tips || []).filter((t) => t.date_key !== featured?.date_key);
+  const list = others.filter((t) => !theme || t.theme === theme);
 
   return (
     <div className="min-h-screen paper-bg">
@@ -128,10 +129,12 @@ export default function ConseilsArchive() {
         {featured && <div className="mb-10"><TipArticle tip={featured} featured /></div>}
         {tips === null ? (
           <p className="text-navy/60" data-testid="conseils-loading">Chargement…</p>
+        ) : others.length === 0 ? (
+          !featured && <p className="text-navy/70" data-testid="conseils-filter-empty">Le premier conseil de Lucette arrive très bientôt.</p>
         ) : (
           <>
             {featured && <h2 className="font-display text-2xl font-extrabold text-navy mb-4">Les autres conseils</h2>}
-            <ThemeFilters tips={tips} value={theme} onChange={setTheme} />
+            <ThemeFilters tips={others} value={theme} onChange={setTheme} />
             {list.length === 0 ? (
               <p className="text-navy/70" data-testid="conseils-filter-empty">Pas encore de conseil sur ce thème — Lucette y viendra très bientôt.</p>
             ) : (

@@ -1,0 +1,38 @@
+{
+  "summary": "Iteration 47: tested the tip quiz (QCM under Lucette's daily tip), the weekly mini-quiz on public theme pages and the theme filters on /conseils-bien-vieillir. Backend: 18/18 pytest tests pass. Public tip payloads never expose correct_index or explanation. /answer returns correct, correct_index and explanation; invalid choice gives 422 and an unknown date gives 404. Showcase mini_quiz holds 3 items with only id, question and options, none overlapping the 6 samples, and stays the same across calls. Cross-category, flagged and unknown question ids give 404. Frontend: every requested anonymous and logged-in flow passed on desktop, and the 390px mobile layout has no horizontal overflow. Found one medium security issue (the answer endpoint leaks answers for the whole question bank) and two small UX issues.",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {"endpoint": "POST /api/categories/{id}/mini-quiz/answer", "issue": "This endpoint reveals the answer to ANY verified question in the category, not only this week's 3 mini-quiz questions. Reproduced: m_cinema_7, m_cinema_8, m_cinema_10, m_cinema_11 and m_cinema_13 all returned 200 with correct_index and explanation, and none is in this week's mini_quiz. With no account and no rate limit, the full bank (e.g. 142 cinema questions) can be harvested, which undermines the server-side scoring and the leagues. Fix: recompute this week's picked[6:9] ids (same seeded Random(f'{cat}-{year}-{week}')) and return 404 for any other id. Optionally add an IP rate limit."}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "ConseilsArchive detail page (/conseils-bien-vieillir/2026-11-10)", "issue": "Under 'Les autres conseils' the chip reads 'Tous (1)' and 'Sommeil (1)', but the list shows the empty message 'Pas encore de conseil sur ce thème'. The counts include the featured tip while the list excludes it. With 'Tous' selected this message is also misleading. Fix: compute counts from tips without the featured one, hide the filters when no other tip exists, or use a different empty text when theme is null.", "selector": "[data-testid='conseils-filter-empty']", "priority": "LOW"}
+    ],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "Dashboard DailyTipCard (logged in)", "issues": ["After answering, two CTAs that look like they do the same thing are stacked: 'Continuer avec le quiz Bien vieillir' (navy) and 'Tester mes connaissances' (green) just below. Consider hiding one."]},
+      {"screen": "/bien-vieillir hero", "issues": ["The theme chips list only 6 themes (Moral & bien-être is missing), while the archive filters list 7."]}
+    ]
+  },
+  "test_report_links": ["/app/backend/tests/test_iteration47_tip_quiz_mini_quiz.py", "/app/test_reports/pytest/pytest_iter47.xml"],
+  "action_items": [
+    "Restrict /categories/{id}/mini-quiz/answer to this week's mini_quiz question ids (stops the answer oracle for the whole bank)",
+    "ConseilsArchive: fix the counts and empty state when a featured tip is shown on the detail route",
+    "Optional: remove the duplicate CTA on the DailyTipCard after answering; add 'Moral & bien-être' to the /bien-vieillir hero chips"
+  ],
+  "critical_code_review_comments": [
+    "quiz.py mini_quiz_answer: validates only category + quality=verified, so it works as an answer oracle (see backend minor)",
+    "QuickQuestion uses key={o} (option text) for option buttons; duplicate options in DB questions would cause React key collisions. Use the index.",
+    "ThemeMiniQuiz on /bien-vieillir and /voyages-france fetches the full /showcase payload only to read mini_quiz; acceptable but wasteful",
+    "Tip quiz and mini-quiz answer endpoints have no rate limiting (public)"
+  ],
+  "updated_files": ["/app/backend/tests/test_iteration47_tip_quiz_mini_quiz.py"],
+  "success_rate": {"backend": "100% (18/18)", "frontend": "100% of requested flows; 1 low-priority UX bug"},
+  "test_credentials": "admin@generaquiz.fr / pF44gVBfLdushm3NZ6dN (works)",
+  "seed_data_creation": "None. No QA jobs, regeneration, emails or tip generation triggered.",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Preview has 1 tip (2026-11-10, sommeil, correct_index=1). bien-vieillir has 0 verified questions, so its mini_quiz is [] and the section is hidden (expected). The dashboard is at /app/dashboard; dismiss the onboarding tour with [data-testid=onboarding-tour-skip] before clicking. The mini-quiz ids change each ISO week."
+}
