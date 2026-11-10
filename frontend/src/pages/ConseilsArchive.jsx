@@ -6,7 +6,8 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { ShareTipButton } from "@/components/ShareTipButton";
 import { fmtTipDate } from "@/components/DailyTipCard";
-import { api, BACKEND_URL } from "@/lib/api";
+import { api } from "@/lib/api";
+import { mascotSrc } from "@/lib/mascot";
 
 const PLAY_TO = "/register?next=/app/quiz/bien-vieillir";
 
@@ -76,7 +77,7 @@ export default function ConseilsArchive() {
       <Navbar variant="landing" />
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10" data-testid="conseils-archive">
         <div className="flex items-center gap-5 mb-8">
-          <img src={`${BACKEND_URL}/api/static/mascots/bien-vieillir.png`} alt="Lucette la Pétillante" className="w-20 h-20 rounded-2xl border-2 border-white shadow-soft object-cover bg-cream" />
+          <img src={mascotSrc("/api/static/mascots/bien-vieillir.png", "sm")} alt="Lucette la Pétillante" className="w-20 h-20 rounded-2xl border-2 border-white shadow-soft object-cover bg-cream" />
           <div>
             <span className="inline-flex items-center gap-1 bg-[#6A994E] text-white text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full mb-2">
               <Lightbulb className="w-3 h-3" /> Bien vieillir

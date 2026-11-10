@@ -9,6 +9,7 @@ import StreakSaverModal from "@/components/StreakSaverModal";
 import OnboardingTour from "@/components/OnboardingTour";
 import LivreProgressCard from "@/components/LivreProgressCard";
 import { DailyTipCard } from "@/components/DailyTipCard";
+import { mascotSrc } from "@/lib/mascot";
 import { ArrowRight, Crown, Trophy, Target, Zap, Sparkles, Calendar, Flame, BookOpen } from "lucide-react";
 
 /**
@@ -313,7 +314,7 @@ export default function Dashboard() {
                 )}
                 <div className="relative flex items-start gap-4">
                   <div className="w-24 h-24 shrink-0 rounded-2xl overflow-hidden bg-cream border-2 border-cream-dark">
-                    <img src={`${BACKEND_URL}${cat.mascot_image}`} alt={cat.mascot_name} className="w-full h-full object-cover" />
+                    <img src={mascotSrc(cat.mascot_image, "sm")} alt={cat.mascot_name} className="w-full h-full object-cover" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <h3 className="font-display text-xl font-bold text-navy">{cat.title}</h3>

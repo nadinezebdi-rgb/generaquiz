@@ -1,5 +1,14 @@
 # Quiz d'Antan — SaaS pour seniors français
 
+## 2026-11-10 (soir) — Lucette · Conseil dans l'e-mail · Archive des conseils · 8 pages thèmes · Partage WhatsApp
+- **Mascotte renommée Lucienne → Lucette la Pétillante** partout (seed, prompts IA, rapport, front).
+- **E-mail Quiz du jour** (`daily_email.py`) : bloc « Le conseil de Lucette » (titre, conseil, geste du jour, lien vers la page du conseil, mention médecin). Image 160 px PNG (`static/mascots/sm/bien-vieillir.png`).
+- **Archive** `/conseils-bien-vieillir` + `/conseils-bien-vieillir/:dateKey` (`ConseilsArchive.jsx`) : tous les conseils, conseil mis en avant, titre/description SEO. API : `GET /api/tips/recent?limit≤366`, `GET /api/tips/{YYYY-MM-DD}` (+ `share_url`, `page_url` construits avec FRONTEND_URL).
+- **Partage WhatsApp** (`ShareTipButton.jsx`) : lien wa.me avec texte + `share_url` → `GET /api/share/conseil/{date}` (page HTML Open Graph : og:title/description/image 1200×630 `static/share/bien-vieillir-og.jpg`, canonical, redirection vers la page du conseil). Bouton sur DailyTipCard (+ lien « Tous les conseils ») et sur l'archive.
+- **8 pages thèmes** `/decouvrir/:categoryId` (`ThemeShowcase.jsx`) : `GET /api/categories/{id}/showcase` (public) = 6 questions **vérifiées** tirées par semaine ISO (déterministe), réponse + explication à révéler, relance EHPAD, maillage « Les autres thèmes ». Boutons « Découvrir » de la Landing → pages thèmes (`themePath`). sitemap + robots mis à jour.
+- **Perf images** : versions WebP `static/mascots/sm` (160 px) et `md` (640 px) + helper `lib/mascot.js` (pages publiques, Landing, Dashboard, carte conseil). `generate_mascots.py` crée ces variantes pour toute nouvelle mascotte.
+- Tests : testing_agent iteration_46 — backend 19/19, frontend OK desktop + mobile.
+
 ## 2026-11-10 (suite) — Remplir en 1 clic · Page /bien-vieillir · Conseil du jour IA · Rapport du matin
 - **Bandeau « X thèmes à compléter »** (`FillThemesBanner.jsx`, admin QA) : liste les thèmes < 140 (Bien vieillir en tête, barres de progression), bouton **Remplir à 140** (confirmation → `POST /admin/qa/auto-seed`) + bouton **Recevoir le rapport du matin maintenant**. L'ancien bouton auto-seed doublon a été retiré (RETAG global conservé).
 - **TOPUP étape 2a** : les questions déjà classées mais jamais vérifiées sont fact-checkées par Opus (refusée → slot libéré) → paliers 100 % vérifiés. Testé : 140 jouables / 140 vérifiées, 0 génération.

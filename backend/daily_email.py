@@ -41,7 +41,7 @@ def _build_tip_block(tip: dict | None) -> str:
           <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#EEF3E8;border:2px solid #C7D8BA;border-radius:18px;">
             <tr>
               <td width="84" style="padding:16px 0 16px 16px;vertical-align:top;">
-                <img src="{FRONTEND_URL}/api/static/mascots/bien-vieillir.png" width="68" height="68" alt="Lucette" style="border-radius:14px;display:block;border:2px solid #FFFFFF;">
+                <img src="{FRONTEND_URL}/api/static/mascots/sm/bien-vieillir.png" width="68" height="68" alt="Lucette" style="border-radius:14px;display:block;border:2px solid #FFFFFF;">
               </td>
               <td style="padding:16px;vertical-align:top;">
                 <div style="font-size:11px;font-weight:bold;letter-spacing:1px;text-transform:uppercase;color:#6A994E;">Le conseil de Lucette · {escape(tip.get('theme', ''))}</div>

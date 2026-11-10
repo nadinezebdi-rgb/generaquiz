@@ -4,7 +4,8 @@ import { motion } from "framer-motion";
 import { Play, Sparkles, MessageCircle, ArrowRight } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { api, BACKEND_URL } from "@/lib/api";
+import { api } from "@/lib/api";
+import { mascotSrc } from "@/lib/mascot";
 
 export const themePath = (id) =>
   id === "bien-vieillir" ? "/bien-vieillir" : id === "voyages-france" ? "/voyages-france" : `/decouvrir/${id}`;
@@ -105,7 +106,7 @@ export default function ThemeShowcase() {
           </motion.div>
           <motion.div initial={{ opacity: 0, scale: 0.92 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.7, delay: 0.15 }} className="relative">
             <div className="absolute -inset-4 rounded-full blur-3xl" style={{ backgroundColor: `${c.color}22` }} />
-            <img src={`${BACKEND_URL}${c.mascot_image}`} alt={`${c.mascot_name}, mascotte du thème ${c.title}`} data-testid="theme-mascot-image" className="relative w-full max-w-md mx-auto rounded-3xl shadow-2xl" />
+            <img src={mascotSrc(c.mascot_image, "md")} alt={`${c.mascot_name}, mascotte du thème ${c.title}`} data-testid="theme-mascot-image" className="relative w-full max-w-md mx-auto rounded-3xl shadow-2xl" />
             <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 bg-white rounded-full px-5 py-2 shadow-warm border-2 border-cream-dark whitespace-nowrap">
               <span className="font-display font-extrabold text-navy">{c.mascot_name}</span>
             </div>
@@ -145,7 +146,7 @@ export default function ThemeShowcase() {
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3" data-testid="theme-others">
             {others.map((o) => (
               <Link key={o.id} to={themePath(o.id)} data-testid={`theme-other-${o.id}`} className="group bg-white border-2 border-cream-dark rounded-2xl p-3 hover:border-terracotta transition-colors flex items-center gap-3">
-                <img src={`${BACKEND_URL}${o.mascot_image}`} alt="" className="w-12 h-12 rounded-xl object-cover bg-cream shrink-0" />
+                <img src={mascotSrc(o.mascot_image, "sm")} loading="lazy" alt="" className="w-12 h-12 rounded-xl object-cover bg-cream shrink-0" />
                 <span className="text-sm font-bold text-navy leading-tight">{o.title}</span>
               </Link>
             ))}

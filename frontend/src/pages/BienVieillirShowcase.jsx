@@ -5,7 +5,7 @@ import { Play, MessageCircle, Sparkles, HeartPulse, Moon, Apple, Brain, Footprin
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { DailyTipCard } from "@/components/DailyTipCard";
-import { BACKEND_URL } from "@/lib/api";
+import { mascotSrc } from "@/lib/mascot";
 
 const SAMPLES = [
   { q: "Combien de portions de fruits et légumes est-il recommandé de manger chaque jour ?", a: "5 par jour", Icon: Apple },
@@ -81,7 +81,7 @@ export default function BienVieillirShowcase() {
             >
               <div className="absolute -inset-4 bg-[#6A994E]/15 rounded-full blur-3xl" />
               <img
-                src={`${BACKEND_URL}/api/static/mascots/bien-vieillir.png`}
+                src={mascotSrc("/api/static/mascots/bien-vieillir.png", "md")}
                 alt="Lucette la Pétillante, mascotte du thème Bien vieillir"
                 className="relative w-full max-w-md mx-auto rounded-3xl shadow-2xl"
                 data-testid="bien-vieillir-lucienne-image"

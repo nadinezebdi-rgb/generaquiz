@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Lightbulb, ArrowRight } from "lucide-react";
-import { api, BACKEND_URL } from "@/lib/api";
+import { api } from "@/lib/api";
+import { mascotSrc } from "@/lib/mascot";
 import { ShareTipButton } from "@/components/ShareTipButton";
 
 export const fmtTipDate = (k) => {
@@ -34,7 +35,7 @@ export const DailyTipCard = ({ ctaTo = "/app/quiz/bien-vieillir", ctaLabel = "Te
       <div className="absolute -right-10 -bottom-10 w-48 h-48 rounded-full bg-[#6A994E]/15 pointer-events-none" />
       <div className="relative flex flex-col sm:flex-row gap-5 items-start">
         <img
-          src={`${BACKEND_URL}/api/static/mascots/bien-vieillir.png`}
+          src={mascotSrc("/api/static/mascots/bien-vieillir.png", "sm")}
           alt="Lucette la Pétillante"
           className="w-20 h-20 rounded-2xl border-2 border-white shadow-soft object-cover shrink-0 bg-cream"
         />

@@ -72,6 +72,18 @@ async def main():
             await generate_one(slug, prompt)
         except Exception as e:
             print(f"[{slug}] ERROR: {e}")
+    make_web_variants()
+
+
+def make_web_variants():
+    """Versions WebP légères pour le web : sm 160 px, md 640 px."""
+    from PIL import Image
+    for size, px in (("sm", 160), ("md", 640)):
+        (OUT_DIR / size).mkdir(exist_ok=True)
+        for slug, _ in MASCOTS:
+            src, dst = OUT_DIR / f"{slug}.png", OUT_DIR / size / f"{slug}.webp"
+            if src.exists() and not dst.exists():
+                Image.open(src).convert("RGB").resize((px, px), Image.LANCZOS).save(dst, "WEBP", quality=80)
 
 
 if __name__ == "__main__":

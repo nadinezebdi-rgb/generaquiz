@@ -14,6 +14,7 @@ import PrintedBookPricing from "@/components/PrintedBookPricing";
 import ProPricing from "@/components/ProPricing";
 import HeroPhoneDemo from "@/components/HeroPhoneDemo";
 import { themePath } from "@/pages/ThemeShowcase";
+import { mascotSrc } from "@/lib/mascot";
 import TestimonialsSection from "@/components/TestimonialsSection";
 import { api, BACKEND_URL } from "@/lib/api";
 import { PLANS, pricePresentation, annualDiscountBadge, fmt } from "@/config/pricing";
@@ -224,7 +225,8 @@ export default function Landing() {
                   <div className="relative">
                     <div className="aspect-square w-32 mx-auto rounded-3xl overflow-hidden bg-cream border-2 border-cream-dark mb-5">
                       <img
-                        src={`${BACKEND_URL}${cat.mascot_image}`}
+                        src={mascotSrc(cat.mascot_image, "md")}
+                        loading="lazy"
                         alt={cat.mascot_name}
                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                       />
