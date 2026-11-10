@@ -8,11 +8,13 @@ Matrice horaire (Europe/Paris) :
 
   Heure     Job                                     Cadence
   ─────     ───                                     ───────
+  02:30     Conseil du jour Bien vieillir (Claude)  chaque jour
   03:00     Régénération quiz Mistral               chaque jour
   03:30     Génération grille Mots Mêlés            chaque jour
   04:00     Génération charades Mistral             chaque jour
   04:30     Génération grille Mots Fléchés          chaque jour
   05:00     Auto-seed paliers (queue serialisée)    chaque jour
+  07:30     Rapport du matin aux admins             chaque jour
   09:00     E-mail « Quiz du jour »                 chaque jour
   10:00     E-mail J-7 renouvellement Premium       chaque jour
   20:00     Rappel « fin de saison » ligues         chaque dimanche
@@ -57,10 +59,13 @@ def start_scheduler() -> None:
     from charades_mistral import generate_nightly_charades
     from fleches_mistral import generate_nightly_fleches
     from topup_paliers_job import topup_all_categories_nightly
+    from daily_tips import generate_daily_tip
+    from morning_report import send_admin_morning_report
 
     _scheduler = AsyncIOScheduler(timezone="Europe/Paris")
 
     # -- Génération nocturne (03:00 → 04:30 Paris) ------------------------------
+    _schedule(_scheduler, generate_daily_tip,        hour=2,  minute=30, job_id="daily_tip_generate")
     _schedule(_scheduler, mistral_regen,             hour=3,  minute=0,  job_id="mistral_regenerate_all")
     _schedule(_scheduler, generate_one_grid_from_mistral, hour=3, minute=30, job_id="wordsearch_generate_nightly")
     _schedule(_scheduler, generate_nightly_charades, hour=4,  minute=0,  job_id="charades_generate_nightly")
@@ -68,6 +73,7 @@ def start_scheduler() -> None:
     _schedule(_scheduler, topup_all_categories_nightly, hour=5, minute=0, job_id="paliers_topup_nightly")
 
     # -- E-mails transactionnels (09:00 & 10:00 Paris) --------------------------
+    _schedule(_scheduler, send_admin_morning_report, hour=7,  minute=30, job_id="admin_morning_report")
     _schedule(_scheduler, send_morning_emails,       hour=9,  minute=0,  job_id="daily_quiz_email")
     _schedule(_scheduler, send_expiration_emails,    hour=10, minute=0,  job_id="premium_expiration_email_j7")
 
@@ -79,9 +85,9 @@ def start_scheduler() -> None:
 
     _scheduler.start()
     logger.info(
-        "[scheduler] démarré — 11 jobs actifs "
-        "(quiz 03:00 · wordsearch 03:30 · charades 04:00 · fléchés 04:30 · auto-seed paliers 05:00 · "
-        "email quotidien 09:00 · relance J-7 10:00 · rappel ligues dim 20:00 · rappel défi dim 19:00 · "
+        "[scheduler] démarré — 13 jobs actifs "
+        "(conseil du jour 02:30 · quiz 03:00 · wordsearch 03:30 · charades 04:00 · fléchés 04:30 · auto-seed paliers 05:00 · "
+        "rapport admin 07:30 · email quotidien 09:00 · relance J-7 10:00 · rappel ligues dim 20:00 · rappel défi dim 19:00 · "
         "clôture ligues lun 00:05 · défi hebdo palier lun 00:10, Europe/Paris)"
     )
 

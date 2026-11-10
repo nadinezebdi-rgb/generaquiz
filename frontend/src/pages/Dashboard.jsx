@@ -8,6 +8,7 @@ import Footer from "@/components/Footer";
 import StreakSaverModal from "@/components/StreakSaverModal";
 import OnboardingTour from "@/components/OnboardingTour";
 import LivreProgressCard from "@/components/LivreProgressCard";
+import { DailyTipCard } from "@/components/DailyTipCard";
 import { ArrowRight, Crown, Trophy, Target, Zap, Sparkles, Calendar, Flame, BookOpen } from "lucide-react";
 
 /**
@@ -123,6 +124,8 @@ export default function Dashboard() {
             </div>
           </div>
         </div>
+
+        <DailyTipCard />
 
         {/* Quiz du Jour widget with streak */}
         <div className="mb-10 bg-gradient-to-br from-bordeaux to-navy text-white rounded-[28px] p-6 md:p-8 border-4 border-mustard shadow-warm" data-testid="dashboard-daily-widget">

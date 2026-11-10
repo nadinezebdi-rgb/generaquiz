@@ -700,6 +700,16 @@ async def qa_rebalance_all(admin: dict = Depends(get_admin_user)) -> dict:
     return {"ok": True, "total_tagged": total_tagged, "categories": per_cat}
 
 
+@router.post("/morning-report/send")
+async def qa_morning_report_send(admin: dict = Depends(get_admin_user)) -> dict:
+    """Envoie immédiatement le rapport du matin aux admins (test / à la demande)."""
+    from morning_report import send_admin_morning_report
+    res = await send_admin_morning_report()
+    await record_audit(admin, action="qa.morning_report_send", target_type="system",
+                       meta={"sent": res.get("sent")})
+    return res
+
+
 @router.post("/auto-seed")
 async def qa_auto_seed(admin: dict = Depends(get_admin_user)) -> dict:
     """Déclenche l'auto-seed : lance un top-up pour chaque catégorie

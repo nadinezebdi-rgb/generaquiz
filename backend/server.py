@@ -51,6 +51,7 @@ from routers import admin_analytics as admin_analytics_router
 from routers import charades as charades_router
 from routers import mots_meles as mots_meles_router
 from routers import mots_fleches as mots_fleches_router
+from routers import tips as tips_router
 from routers.referral import generate_referral_code_for
 
 app = FastAPI(title="Quiz d'Antan API")
@@ -122,6 +123,7 @@ api.include_router(admin_analytics_router.router)
 api.include_router(charades_router.router)
 api.include_router(mots_meles_router.router)
 api.include_router(mots_fleches_router.router)
+api.include_router(tips_router.router)
 app.include_router(api)
 
 # CORS
@@ -372,6 +374,9 @@ async def startup():
 
     # Schedule all cron jobs (voir scheduler.py pour la matrice complète)
     start_scheduler()
+    # Conseil du jour : 1 seul appel IA léger si absent (pas de subprocess)
+    from daily_tips import generate_daily_tip
+    _asyncio.create_task(generate_daily_tip())
 
     # NOTE : l'auto-seed au startup a été DÉSACTIVÉ car il lançait 2 subprocess
     # Mistral+Opus en même temps que le boot → pic mémoire → OOM du pod prod

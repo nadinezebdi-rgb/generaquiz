@@ -30,7 +30,7 @@ export default function VoyagesShowcase() {
               </p>
               <div className="flex gap-3 flex-wrap">
                 <Link
-                  to="/quiz/voyages-france"
+                  to="/register?next=/app/quiz/voyages-france"
                   data-testid="voyages-cta-play"
                   className="inline-flex items-center gap-2 bg-terracotta text-white font-bold px-6 py-3 rounded-full hover:bg-terracotta-dark transition shadow-warm"
                 >
@@ -145,7 +145,7 @@ export default function VoyagesShowcase() {
           <p className="text-navy/70 text-lg mb-6">100 questions, 6 régions, des souvenirs plein la valise.</p>
           <div className="flex justify-center gap-3 flex-wrap">
             <Link
-              to="/quiz/voyages-france"
+              to="/register?next=/app/quiz/voyages-france"
               data-testid="voyages-cta-play-bottom"
               className="inline-flex items-center gap-2 bg-terracotta text-white font-bold px-6 py-3 rounded-full hover:bg-terracotta-dark transition shadow-warm"
             >

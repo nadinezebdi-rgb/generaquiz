@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { api, formatError } from "@/lib/api";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { FillThemesBanner } from "@/components/FillThemesBanner";
 import {
   ShieldCheck, Filter, Check, X, Wand2, Trash2, RefreshCcw, AlertTriangle, Loader2, ChevronLeft, Search, PlayCircle, CheckSquare, Square, Sparkles,
 } from "lucide-react";
@@ -301,6 +302,8 @@ export default function AdminQA() {
         <p className="text-navy/70 mb-8">
           Questions vérifiées automatiquement par Claude Opus 4.8. Les questions <strong>flagged</strong> sont automatiquement exclues du tirage.
         </p>
+
+        <FillThemesBanner summary={summary} onLaunched={() => { loadJobs(); loadQueue(); loadSummary(); }} />
 
         {/* Auto-seed : bouton global pour lancer un top-up sur toutes les catégories < 140 */}
         <div className="mb-6 flex items-center justify-between gap-3 flex-wrap bg-terracotta/5 border border-terracotta/25 rounded-2xl p-4">

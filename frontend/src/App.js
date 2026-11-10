@@ -43,6 +43,7 @@ import AtelierEntries from "@/pages/AtelierEntries";
 import MonLivre from "@/pages/MonLivre";
 import LivreCoop from "@/pages/LivreCoop";
 import VoyagesShowcase from "@/pages/VoyagesShowcase";
+import BienVieillirShowcase from "@/pages/BienVieillirShowcase";
 import EhpadDashboard from "@/pages/EhpadDashboard";
 import { EhpadNewSession, EhpadSessionView } from "@/pages/EhpadSession";
 import Charades from "@/pages/Charades";
@@ -147,6 +148,7 @@ export default function App() {
           <Route path="/confidentialite" element={<Confidentialite />} />
           <Route path="/ehpad" element={<Ehpad />} />
           <Route path="/voyages-france" element={<VoyagesShowcase />} />
+          <Route path="/bien-vieillir" element={<BienVieillirShowcase />} />
           <Route path="/livre/coop/:code" element={<LivreCoop />} />
           <Route
             path="/app/atelier"
