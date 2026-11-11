@@ -42,7 +42,7 @@ sys.path.insert(0, str(ROOT_DIR))
 
 from emergentintegrations.llm.chat import LlmChat, UserMessage  # noqa: E402
 from motor.motor_asyncio import AsyncIOMotorClient              # noqa: E402
-from qa_pipeline import JobCheckpoint                           # noqa: E402
+from qa_pipeline import JobCheckpoint, category_rules, fact_check_rules                           # noqa: E402
 
 MONGO_URL = os.environ["MONGO_URL"]
 DB_NAME = os.environ["DB_NAME"]
@@ -96,7 +96,7 @@ RÉPONSE MARQUÉE COMME CORRECTE : {chr(65 + q['correct_index'])}. {correct_answ
 
 EXPLICATION FOURNIE : {q.get('explanation', '(aucune)')}
 
-Vérifie et réponds en JSON."""
+Vérifie et réponds en JSON.{fact_check_rules(q.get('category_id'))}"""
     chat = LlmChat(
         api_key=EMERGENT_LLM_KEY,
         session_id=f"fc-{q['id']}",
@@ -147,7 +147,7 @@ async def generate_replacement(category: dict, avoid_texts: list[str]) -> dict[s
     """Génère UNE question de remplacement pour la catégorie donnée."""
     avoid_sample = "\n".join(f"- {t}" for t in avoid_texts[:40])
     prompt = f"""Catégorie : {category['title']}
-Description : {category.get('description', '')}
+Description : {category.get('description', '')}{category_rules(category['id'])}
 
 Génère UNE question à choix multiple (4 options, 1 correcte), factuellement irréprochable.
 
@@ -270,7 +270,7 @@ async def audit_category(category: dict, limit: int | None = None, cp: JobCheckp
                 await _ckpt(i)
                 continue
 
-            check = await fact_check_question({**new_q, "id": f"tmp-{i}"})
+            check = await fact_check_question({**new_q, "category_id": cat_id, "id": f"tmp-{i}"})
             if check["verdict"] == "correct" and check["confidence"] >= CONFIDENCE_THRESHOLD:
                 new_doc = {
                     "id": f"gen_{cat_id}_{uuid.uuid4().hex[:12]}",

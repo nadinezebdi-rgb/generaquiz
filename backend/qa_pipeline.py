@@ -93,3 +93,30 @@ class JobCheckpoint:
             {"$set": {"progress": self.progress, "checkpoint_at": time.time()}},
         )
         return r.matched_count == 1
+
+
+# Règles éditoriales propres à certaines catégories (génération + contrôle).
+CATEGORY_RULES = {
+    "bien-vieillir": (
+        "RÈGLES ÉDITORIALES « Bien vieillir » (impératives) : on parle uniquement de conseils, "
+        "d'habitudes de vie et de culture générale (alimentation, sommeil, activité physique douce, "
+        "lien social, jeux de mémoire, repères culturels sur l'âge et la longévité). "
+        "INTERDIT : toute allégation médicale — ne jamais écrire qu'une habitude prévient, réduit le risque, "
+        "soigne ou guérit une maladie ; aucun médicament, vaccin, dosage, diagnostic, symptôme ni nom de "
+        "maladie présenté comme évitable. Préférer « aide à se sentir en forme », « est conseillé pour garder "
+        "le moral », « favorise un bon sommeil »."
+    ),
+}
+
+
+def category_rules(category_id: str | None) -> str:
+    rule = CATEGORY_RULES.get(category_id or "")
+    return f"\n\n{rule}\n" if rule else ""
+
+
+def fact_check_rules(category_id: str | None) -> str:
+    if category_id not in CATEGORY_RULES:
+        return ""
+    return ("\n\nCONTRÔLE ÉDITORIAL : si la question, une option ou l'explication contient une allégation "
+            "médicale (prévention, réduction de risque, traitement ou guérison d'une maladie, médicament, "
+            "vaccin, dosage, diagnostic), réponds verdict \"wrong\" avec comment \"allégation médicale\".")

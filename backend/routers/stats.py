@@ -54,7 +54,7 @@ async def public_stats() -> dict:
     games_total = await db.attempts.count_documents({})
     games_total += await db.daily_attempts.count_documents({})
 
-    questions_total = await db.questions.count_documents({})
+    questions_total = await db.questions.count_documents({"quality": {"$ne": "flagged"}})
 
     streak_record_doc = await db.users.find(
         {"streak_best": {"$exists": True, "$gt": 0}},
@@ -65,14 +65,21 @@ async def public_stats() -> dict:
     # Distinct country codes (defaults to FR — countries are recorded at register
     # from the Accept-Language header). Falls back to 1 if no codes stored.
     countries = await db.users.distinct("country_code", {"country_code": {"$ne": None}})
-    countries_active = max(1, len(countries))
+    countries_active = len(countries)
+
+    from routers.livre import CHAPTERS
+    from routers.site_settings import get_stats_thresholds
+    thresholds = await get_stats_thresholds()
+    values = {"players_today": players_today, "games_today": games_today,
+              "questions_total": questions_total, "streak_record": streak_record,
+              "countries_active": countries_active}
+    # Un compteur n'est montré que s'il atteint son seuil (le catalogue est toujours réel)
+    visible = [k for k, v in values.items() if v >= thresholds.get(k, 1) and v > 0]
 
     return {
-        "players_today": players_today,
-        "games_today": games_today,
+        **values,
         "games_total": games_total,
-        "questions_total": questions_total,
-        "streak_record": streak_record,
-        "countries_active": countries_active,
+        "visible": visible,
+        "livre_chapters": len(CHAPTERS),
         "updated_at": now_utc.isoformat(),
     }

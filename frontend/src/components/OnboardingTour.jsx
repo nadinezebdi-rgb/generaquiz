@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { LIVRE_CHAPTERS } from "@/config/livre";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
 import { X, ArrowRight, Sparkles, BookOpen, TrendingUp, Sun } from "lucide-react";
@@ -36,7 +37,7 @@ const STEPS = [
     icon: BookOpen,
     color: "bg-bordeaux/15 border-bordeaux",
     title: "2️⃣ Mon Livre de Vie 📖",
-    subtitle: "Vos souvenirs guidés en 10 chapitres",
+    subtitle: `Vos souvenirs guidés en ${LIVRE_CHAPTERS} chapitres`,
     text: "Enfance, école, rencontres, voyages… Répondez à une question, un souvenir à la fois. Vous pouvez écrire, enregistrer votre voix, ou vous faire aider par un proche.",
     ctaLabel: "Suivant",
     linkTo: null,

@@ -17,6 +17,7 @@ import ChallengeNew from "@/pages/ChallengeNew";
 import ChallengeDetail from "@/pages/ChallengeDetail";
 import ChallengePlay from "@/pages/ChallengePlay";
 import AdminPromo from "@/pages/AdminPromo";
+import AdminTestimonials from "@/pages/AdminTestimonials";
 import Account from "@/pages/Account";
 import ForgotPassword from "@/pages/ForgotPassword";
 import ResetPassword from "@/pages/ResetPassword";
@@ -300,6 +301,14 @@ export default function App() {
             element={
               <AdminRoute>
                 <AdminHome />
+              </AdminRoute>
+            }
+          />
+          <Route
+            path="/app/admin/temoignages"
+            element={
+              <AdminRoute>
+                <AdminTestimonials />
               </AdminRoute>
             }
           />

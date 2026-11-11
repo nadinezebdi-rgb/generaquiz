@@ -53,6 +53,8 @@ from routers import mots_meles as mots_meles_router
 from routers import mots_fleches as mots_fleches_router
 from routers import tips as tips_router
 from routers import share as share_router
+from routers import testimonials as testimonials_router
+from routers import site_settings as site_settings_router
 from routers.referral import generate_referral_code_for
 
 app = FastAPI(title="Quiz d'Antan API")
@@ -126,6 +128,8 @@ api.include_router(mots_meles_router.router)
 api.include_router(mots_fleches_router.router)
 api.include_router(tips_router.router)
 api.include_router(share_router.router)
+api.include_router(testimonials_router.router)
+api.include_router(site_settings_router.router)
 app.include_router(api)
 
 # CORS
@@ -230,6 +234,18 @@ async def startup():
             if cat_qs:
                 await db.questions.insert_many([{**q} for q in cat_qs])
                 logger.info(f"[seed] catégorie '{cat['id']}' vide → {len(cat_qs)} questions seed insérées")
+
+    # Questions seed « Bien vieillir » réécrites (aucune allégation médicale) :
+    # on met à jour les anciennes versions et on les renvoie au contrôle IA.
+    from seed_data import BIEN_VIEILLIR_QUESTIONS
+    for q in BIEN_VIEILLIR_QUESTIONS:
+        r = await db.questions.update_one(
+            {"id": q["id"], "$or": [{"question": {"$ne": q["question"]}}, {"explanation": {"$ne": q["explanation"]}}]},
+            {"$set": {k: q[k] for k in ("question", "options", "correct_index", "explanation", "discussion_prompt") if k in q},
+             "$unset": {"quality": "", "fact_check": ""}},
+        )
+        if r.modified_count:
+            logger.info(f"[seed] question {q['id']} (bien-vieillir) mise à jour")
 
     # Enrichit les questions existantes avec des relances de conversation EHPAD
     from discussion_prompts import enrich_existing_questions

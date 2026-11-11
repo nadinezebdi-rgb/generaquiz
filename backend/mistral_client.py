@@ -21,7 +21,7 @@ from pydantic import BaseModel
 
 from core import db, logger
 from seed_data import CATEGORIES
-from qa_pipeline import UNTAGGED_OR
+from qa_pipeline import UNTAGGED_OR, category_rules
 
 MISTRAL_MODEL = os.environ.get("MISTRAL_MODEL", "mistral-small-latest")
 QUESTIONS_PER_CATEGORY = 100
@@ -62,7 +62,7 @@ def _build_prompt(category: dict, n: int, batch_idx: int) -> str:
     return f"""Tu es un expert en culture générale française qui conçoit des quiz pour un jeu familial intergénérationnel nommé "GénéraQuiz".
 
 **CATÉGORIE** : {category['title']}
-**DESCRIPTION** : {category['description']}
+**DESCRIPTION** : {category['description']}{category_rules(category['id'])}
 
 **MISSION** : Génère EXACTEMENT {n} nouvelles questions à choix multiples (QCM) en français pour cette catégorie.
 

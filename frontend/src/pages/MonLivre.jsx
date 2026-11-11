@@ -15,7 +15,7 @@ import {
  * Mon Livre de Vie — refonte de l'Atelier Mémoire.
  *
  * Expérience :
- *   1. Écran d'accueil : jauge de progression + 10 chapitres cliquables
+ *   1. Écran d'accueil : jauge de progression + 12 chapitres cliquables
  *   2. Vue chapitre : liste des prompts + entrées déjà écrites
  *   3. Modal de saisie : 3 modes (✍️ texte / 🎙️ audio / 👨‍👩‍👧 délégué) + photos
  *   4. Onglet Famille : questions reçues (inbox), envoyées, et envoi d'une nouvelle

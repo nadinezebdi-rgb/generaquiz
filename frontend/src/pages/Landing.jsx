@@ -24,6 +24,11 @@ const ICON_MAP = { tv: Film, music: Music, film: Film, phone: Phone, landmark: L
 export default function Landing() {
   const [categories, setCategories] = useState([]);
   const [packages, setPackages] = useState([]);
+  const [testimonials, setTestimonials] = useState([]);
+
+  useEffect(() => {
+    api.get("/testimonials").then((r) => setTestimonials(r.data)).catch(() => {});
+  }, []);
 
   useEffect(() => {
     api.get("/categories").then((r) => setCategories(r.data)).catch(() => {});
@@ -66,9 +71,11 @@ export default function Landing() {
                   <Star key={i} className="w-5 h-5 text-mustard-dark fill-mustard-dark" />
                 ))}
               </div>
-              <span className="text-sm font-bold text-navy/80">
-                Déjà adopté par des familles partout en France
-              </span>
+              {testimonials.length >= 3 && (
+                <span className="text-sm font-bold text-navy/80" data-testid="hero-adoption-line">
+                  Déjà adopté par des familles partout en France
+                </span>
+              )}
             </div>
 
             <div className="flex flex-col sm:flex-row gap-4">
@@ -118,7 +125,7 @@ export default function Landing() {
       </section>
 
       {/* ============ TESTIMONIALS ============ */}
-      <TestimonialsSection />
+      <TestimonialsSection items={testimonials} />
 
       {/* ============ DAILY QUIZ CTA ============ */}
       <section className="py-12 lg:py-16">
@@ -279,7 +286,7 @@ export default function Landing() {
             </p>
             <p className="mt-3 text-sm text-terracotta font-bold">
               <Sparkles className="w-3.5 h-3.5 inline mr-1" />
-              {annualDiscountBadge()} en formule annuelle
+              {annualDiscountBadge()}
             </p>
           </div>
 

@@ -43,7 +43,7 @@ from audit_and_regen_questions import (  # noqa: E402
 )
 from emergentintegrations.llm.chat import LlmChat, UserMessage  # noqa: E402
 from qa_pipeline import (  # noqa: E402
-    JobCheckpoint, PALIERS, UNTAGGED_OR, missing_slots, palier_distribution, pick_palier, retag_untagged,
+    JobCheckpoint, PALIERS, category_rules, UNTAGGED_OR, missing_slots, palier_distribution, pick_palier, retag_untagged,
 )
 from motor.motor_asyncio import AsyncIOMotorClient              # noqa: E402
 
@@ -73,7 +73,7 @@ async def generate_for_difficulty(category: dict, difficulty: int, avoid_texts: 
     hint = DIFFICULTY_HINTS[difficulty]
     avoid = "\n".join(f"- {t}" for t in avoid_texts[-40:])
     prompt = f"""Catégorie : {category['title']}
-Description : {category.get('description', '')}
+Description : {category.get('description', '')}{category_rules(category['id'])}
 
 NIVEAU DE DIFFICULTÉ demandé : {difficulty}/7
 Consigne : {hint}
@@ -243,7 +243,7 @@ async def topup_category(category: dict, cp: JobCheckpoint) -> dict:
                 new_q = await generate_for_difficulty(category, difficulty, existing_texts)
                 if not new_q:
                     continue
-                check = await fact_check_question({**new_q, "id": f"topup-tmp-{uuid.uuid4().hex[:8]}"})
+                check = await fact_check_question({**new_q, "category_id": cat_id, "id": f"topup-tmp-{uuid.uuid4().hex[:8]}"})
                 if check["verdict"] == "correct" and check["confidence"] >= CONFIDENCE_THRESHOLD:
                     await db.questions.insert_one(_verified_doc(cat_id, difficulty, new_q, check))
                     existing_texts.append(new_q["question"])

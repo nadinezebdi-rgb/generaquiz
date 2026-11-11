@@ -246,10 +246,9 @@ export function pricePresentation(plan, period /* 'monthly' | 'yearly' */) {
   };
 }
 
-/** % d'économie appliqué au toggle "Annuel" — calculé sur Famille. */
+/** Remise annuelle maximale réellement appliquée (mensuel × 12 vs annuel). */
 export function annualDiscountBadge() {
-  const famille = PLANS.find((p) => p.id === "famille");
-  const ref = famille.mensuel * 12;
-  const eco = ref - famille.annuel;
-  return `Économisez ${Math.round((eco / ref) * 100)} %`;
+  const pcts = PLANS.filter((p) => p.mensuel > 0 && p.annuel > 0)
+    .map((p) => Math.round(((p.mensuel * 12 - p.annuel) / (p.mensuel * 12)) * 100));
+  return `Jusqu'à −${Math.max(...pcts)} % en formule annuelle`;
 }
