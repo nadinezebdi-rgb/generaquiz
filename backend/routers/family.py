@@ -173,6 +173,8 @@ async def accept_invitation(token: str, user: dict = Depends(get_current_user)) 
         raise HTTPException(status_code=409, detail="Cette invitation a déjà été utilisée")
     if user.get("family_owner_id") and user["family_owner_id"] != inv["owner_id"]:
         raise HTTPException(status_code=409, detail="Vous faites déjà partie d'un autre espace famille")
+    if is_family_owner(user):
+        raise HTTPException(status_code=409, detail="Vous avez déjà votre propre espace famille")
     await db.family_proches.update_one({"id": inv["id"]}, {"$set": {
         "status": "accepted", "user_id": uid, "accepted_at": datetime.now(timezone.utc).isoformat()}})
     await db.users.update_one({"_id": user["_id"]}, {"$set": {"family_owner_id": inv["owner_id"]}})

@@ -12,7 +12,11 @@ export function useGiftOffers() {
 }
 
 export function formatCodeInput(raw) {
-  const s = (raw || "").toUpperCase().replace(/[^A-Z0-9]/g, "").replace(/^GQ/, "").slice(0, 8);
+  const up = (raw || "").toUpperCase();
+  let s = up.replace(/[^A-Z0-9]/g, "");
+  if (s === "G" || s === "GQ") return up.replace(/[^A-Z0-9-]/g, "");
+  if (s.startsWith("GQ")) s = s.slice(2);
+  s = s.slice(0, 8);
   return s.length > 4 ? `GQ-${s.slice(0, 4)}-${s.slice(4)}` : s ? `GQ-${s}` : "";
 }
 

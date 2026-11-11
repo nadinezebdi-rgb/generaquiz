@@ -8,6 +8,9 @@ import {
   User, Mail, Crown, Calendar, Lock, Loader2, Check, LogOut, Trash2, Save, ArrowRight, Bell, Flame, Gift, Copy, Award, Ticket,
 } from "lucide-react";
 
+const GIFT_CODE_RE = /^GQ-?[A-Z0-9]{4}-?[A-Z0-9]{4}$/;
+const TIER_LABEL = { solo: "Solo", club: "Solo", famille: "Famille", famille_v2: "Famille", heritage: "Héritage" };
+
 /** Section badges : trophées collectés par l'utilisateur (30 badges statiques
  *  dans `badges.py` — famille palier, streak, coop, ligue, referral, etc.). */
 function BadgesSection() {
@@ -199,6 +202,13 @@ export default function Account() {
     setRedeemingPromo(true);
     setPromoMsg(null);
     try {
+      if (GIFT_CODE_RE.test(code)) {
+        const { data } = await api.post("/gifts/redeem", { code });
+        setPromoMsg({ type: "success", text: `🎁 ${data.offer_label} activée` });
+        setPromoCode("");
+        if (refresh) refresh();
+        return;
+      }
       const { data } = await api.post("/promo/redeem", { code });
       setPromoMsg({
         type: "success",
@@ -292,8 +302,8 @@ export default function Account() {
           </h2>
           {isPremium ? (
             <div>
-              <div className="inline-flex items-center gap-2 bg-mustard text-navy font-bold px-4 py-2 rounded-full mb-4">
-                <Crown className="w-5 h-5" /> Premium actif
+              <div className="inline-flex items-center gap-2 bg-mustard text-navy font-bold px-4 py-2 rounded-full mb-4" data-testid="account-plan-name">
+                <Crown className="w-5 h-5" /> {TIER_LABEL[user.plan_tier] ? `Formule ${TIER_LABEL[user.plan_tier]}` : "Premium"} active
               </div>
               <div className="flex items-center gap-2 text-cream/90" data-testid="account-plan-expires">
                 <Calendar className="w-5 h-5" />
@@ -342,7 +352,7 @@ export default function Account() {
                 type="text"
                 value={promoCode}
                 onChange={(e) => setPromoCode(e.target.value.toUpperCase())}
-                placeholder="FAMILLE2026"
+                placeholder="Code promo ou GQ-XXXX-XXXX"
                 maxLength={40}
                 disabled={redeemingPromo}
                 className={`flex-1 px-4 py-3 text-base rounded-2xl border-2 uppercase tracking-wider min-h-[52px] ${

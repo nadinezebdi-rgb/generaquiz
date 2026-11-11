@@ -44,7 +44,10 @@ def normalize_code(raw: str) -> str:
 
 def _new_code() -> str:
     pick = lambda: "".join(secrets.choice(CODE_ALPHABET) for _ in range(4))  # noqa: E731
-    return f"GQ-{pick()}-{pick()}"
+    first = pick()
+    while first.startswith("GQ"):
+        first = pick()
+    return f"GQ-{first}-{pick()}"
 
 
 async def get_promo_settings() -> dict:
@@ -115,7 +118,7 @@ class GiftCheckout(BaseModel):
     buyer_name: str = Field(..., max_length=40)
     buyer_email: EmailStr
     message: Optional[str] = Field(None, max_length=240)
-    origin_url: str = Field(..., max_length=300)
+    origin_url: Optional[str] = Field(None, max_length=300)
 
     @field_validator("recipient_name", "buyer_name")
     @classmethod
@@ -135,7 +138,7 @@ async def gift_checkout(body: GiftCheckout, request: Request) -> dict:
     data = await current_offers()
     offer = next(o for o in data["offers"] if o["id"] == body.offer)
     theme = "noel" if data["promo"]["active"] else "classic"
-    origin = body.origin_url.rstrip("/")
+    origin = FRONTEND_URL.rstrip("/")
     webhook_url = f"{str(request.base_url).rstrip('/')}/api/webhook/stripe"
     stripe = StripeCheckout(api_key=STRIPE_API_KEY, webhook_url=webhook_url)
     package_id = OFFERS[body.offer]["package_id"]
@@ -184,7 +187,7 @@ async def gift_lookup(code: str) -> dict:
 @router.get("/gifts/{code}/carte.pdf")
 async def gift_pdf(code: str, k: str) -> Response:
     g = await db.gift_codes.find_one({"code": normalize_code(code)})
-    if not g or not secrets.compare_digest(g["pdf_key"], k):
+    if not g or g["status"] == "cancelled" or not secrets.compare_digest(g["pdf_key"], k):
         raise HTTPException(status_code=404, detail="Carte introuvable")
     return _pdf_response(g)
 
@@ -214,6 +217,7 @@ async def gift_redeem(body: GiftRedeem, user: dict = Depends(get_current_user)) 
         raise HTTPException(status_code=404, detail="Ce code cadeau est introuvable. Vérifiez les lettres et chiffres.")
     base = now
     tier = g["tier"]
+    keep_lifetime = is_premium_active(user) and not user.get("plan_expires_at")
     if is_premium_active(user):
         try:
             cur = datetime.fromisoformat(user["plan_expires_at"])
@@ -222,9 +226,10 @@ async def gift_redeem(body: GiftRedeem, user: dict = Depends(get_current_user)) 
             pass
         if TIER_RANK.get(user.get("plan_tier"), 0) > TIER_RANK[tier]:
             tier = user["plan_tier"]
-    expires = (base + timedelta(days=365)).isoformat()
+    expires = None if keep_lifetime else (base + timedelta(days=365)).isoformat()
     await db.users.update_one({"_id": user["_id"]}, {"$set": {
-        "plan": "premium", "plan_tier": tier, "plan_period": "yearly", "plan_expires_at": expires}})
+        "plan": "premium", "plan_tier": tier, "plan_period": user.get("plan_period") if keep_lifetime else "yearly",
+        "plan_expires_at": expires}})
     await db.gift_codes.update_one({"_id": g["_id"]}, {"$set": {"plan_expires_at": expires}})
     return {"ok": True, "offer": g["offer"], "offer_label": OFFERS[g["offer"]]["label"],
             "plan_tier": tier, "plan_expires_at": expires}

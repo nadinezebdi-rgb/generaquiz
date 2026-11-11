@@ -13,8 +13,9 @@ import { useGiftOffers } from "@/lib/gifts";
 const HERO_IMG = "https://images.unsplash.com/photo-1758612897055-3d17a4a1e8fb?crop=entropy&cs=srgb&fm=jpg&q=85&w=1200";
 const input = "w-full rounded-xl border-2 border-cream-dark bg-white px-4 py-3 text-navy text-base focus:border-navy outline-none";
 
-function Hero({ promo, famille }) {
-  const noel = promo?.active;
+function Hero({ promo, selected }) {
+  const noel = promo?.active && selected?.id === "famille";
+  const famille = selected;
   return (
     <section className={noel ? "bg-navy-dark text-cream" : "bg-cream/60 text-navy"} data-testid="offrir-hero">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-14 lg:py-20 grid lg:grid-cols-[1.1fr_1fr] gap-10 items-center">
@@ -26,7 +27,9 @@ function Hero({ promo, famille }) {
             Offrez une année de <span className={noel ? "text-mustard italic" : "text-terracotta italic"}>moments à partager</span>
           </h1>
           <p className={`text-base md:text-lg mb-6 max-w-xl ${noel ? "text-cream/80" : "text-navy/75"}`}>
-            Offre Famille — 1 bénéficiaire + 4 proches pour partager une année de jeux. Une carte à imprimer, un code à glisser sous le sapin.
+            {selected?.id === "solo"
+              ? "Offre Solo — une année complète de quiz et de souvenirs. Une carte à imprimer, un code à offrir."
+              : "Offre Famille — 1 bénéficiaire + 4 proches pour partager une année de jeux. Une carte à imprimer, un code à glisser sous le sapin."}
           </p>
           {famille && (
             <div className="flex items-baseline gap-3" data-testid="offrir-hero-price">
@@ -120,11 +123,11 @@ export default function Offrir() {
   const [params] = useSearchParams();
   const data = useGiftOffers();
   const [offer, setOffer] = useState(params.get("offre") === "solo" ? "solo" : "famille");
-  const famille = data?.offers.find((o) => o.id === "famille");
+  const selected = data?.offers.find((o) => o.id === offer);
   return (
     <div className="min-h-screen bg-bgmain">
       <Navbar />
-      <Hero promo={data?.promo} famille={famille} />
+      <Hero promo={data?.promo} selected={selected} />
       <main className="max-w-4xl mx-auto px-4 sm:px-6 py-14 grid gap-10 [&>*]:min-w-0" data-testid="offrir-page">
         <section>
           <h2 className="font-display text-2xl md:text-3xl font-extrabold text-navy mb-5">1. Choisissez le cadeau</h2>

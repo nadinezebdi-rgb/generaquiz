@@ -76,7 +76,7 @@ export default function Activer() {
           <div className="bg-white rounded-3xl border-4 border-mustard p-8 text-center shadow-warm" data-testid="activer-success">
             <PartyPopper className="w-16 h-16 text-terracotta mx-auto mb-4" />
             <h1 className="font-display text-3xl font-extrabold text-navy mb-2">Votre cadeau est activé !</h1>
-            <p className="text-navy/75 mb-6">{done.offer_label} jusqu&apos;au <strong>{fmtDate(done.plan_expires_at)}</strong>.</p>
+            <p className="text-navy/75 mb-6">{done.offer_label} {done.plan_expires_at ? <>jusqu&apos;au <strong>{fmtDate(done.plan_expires_at)}</strong></> : <>— votre accès à vie est conservé</>}.</p>
             {done.offer === "famille" && <p className="text-navy/75 mb-6">Invitez maintenant jusqu&apos;à 4 proches pour jouer ensemble.</p>}
             <button type="button" onClick={() => navigate(done.offer === "famille" ? "/app/famille" : "/app/dashboard")} data-testid="activer-continue"
               className="bg-navy text-cream font-bold px-8 py-4 rounded-full hover:bg-terracotta transition-colors">

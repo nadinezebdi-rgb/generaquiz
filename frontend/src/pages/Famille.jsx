@@ -58,11 +58,11 @@ function Leaderboard({ rows, me }) {
       <h2 className="font-display text-2xl font-extrabold text-navy mb-4 flex items-center gap-2"><Trophy className="w-6 h-6 text-mustard-dark" /> Classement familial <span className="text-sm font-sans font-normal text-navy/60">(30 derniers jours)</span></h2>
       <ol className="grid gap-2">
         {rows.map((r, i) => (
-          <li key={r.user_id} className={`flex items-center gap-3 rounded-2xl px-4 py-3 ${r.user_id === me ? "bg-mustard/30" : "bg-cream/60"}`} data-testid={`famille-rank-${i}`}>
+          <li key={r.user_id} className={`flex flex-wrap items-center gap-x-3 gap-y-1 rounded-2xl px-4 py-3 ${r.user_id === me ? "bg-mustard/30" : "bg-cream/60"}`} data-testid={`famille-rank-${i}`}>
             <span className="font-display text-2xl font-extrabold text-navy w-8">{i + 1}</span>
-            <span className="font-semibold text-navy flex-1">{r.name}</span>
-            <span className="text-sm text-navy/70">{r.games} parties · {r.accuracy} %</span>
-            <span className="font-bold text-bordeaux">{r.score} pts</span>
+            <span className="font-semibold text-navy flex-1 min-w-0 truncate">{r.name}</span>
+            <span className="font-bold text-bordeaux sm:order-last">{r.score} pts</span>
+            <span className="text-sm text-navy/70 w-full sm:w-auto pl-11 sm:pl-0">{r.games} parties · {r.accuracy} %</span>
           </li>
         ))}
       </ol>

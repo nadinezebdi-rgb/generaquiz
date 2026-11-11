@@ -43,7 +43,7 @@ function ManualGift({ onCreated }) {
   const set = (k) => (e) => setF({ ...f, [k]: e.target.value });
   const submit = async (e) => {
     e.preventDefault();
-    try { const { data } = await api.post("/admin/gifts", f); toast.success(`Code ${data.code} créé`); onCreated(); }
+    try { const { data } = await api.post("/admin/gifts", f); toast.success(`Code ${data.code} créé`); setF({ ...f, recipient_name: "", buyer_name: "", message: "" }); onCreated(); }
     catch (e2) { err(e2); }
   };
   return (
