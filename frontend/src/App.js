@@ -3,6 +3,7 @@ import { Toaster } from "sonner";
 import "@/App.css";
 
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
+import { VisitorProgressSync } from "@/components/VisitorProgressSync";
 import { SeniorModeProvider } from "@/contexts/SeniorModeContext";
 import Landing from "@/pages/Landing";
 import Login from "@/pages/Login";
@@ -138,6 +139,7 @@ export default function App() {
       <SeniorModeProvider>
         <BrowserRouter>
         <Toaster richColors position="top-right" />
+        <VisitorProgressSync />
         <Routes>
           <Route path="/" element={<Landing />} />
           <Route path="/login" element={<Login />} />

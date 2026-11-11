@@ -43,7 +43,9 @@ const TipArticle = ({ tip, featured }) => (
     </h2>
     <p className="text-navy/80 leading-relaxed mb-2">{tip.text}</p>
     <p className="text-sm text-navy mb-4"><b>Le geste du jour :</b> <i>{tip.action}</i></p>
-    <ShareTipButton tip={tip} testId={`tip-share-${tip.date_key}`} />
+    <div className="flex flex-wrap gap-3">
+      <ShareTipButton tip={tip} testId={`tip-share-${tip.date_key}`} />
+    </div>
     <TipQuiz tip={tip} />
   </motion.article>
 );

@@ -142,7 +142,7 @@ export default function ThemeShowcase() {
           </section>
         )}
 
-        <MiniQuiz categoryId={c.id} questions={data.mini_quiz} color={c.color} />
+        <MiniQuiz categoryId={c.id} title={c.title} questions={data.mini_quiz} color={c.color} />
 
         <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
           <h2 className="font-display text-2xl md:text-3xl font-extrabold text-navy mb-6">Les autres thèmes</h2>

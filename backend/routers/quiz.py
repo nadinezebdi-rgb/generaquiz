@@ -6,7 +6,7 @@ and recomputes the score. Client-declared scores are IGNORED — this
 plugs the cheating vector where the browser console could send
 `{score:999,total:999}` to auto-win in the leagues.
 """
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
@@ -34,7 +34,6 @@ async def list_categories():
 async def _weekly_pick(category_id: str, weeks_ago: int = 0) -> tuple[list[str], list[str]]:
     """Tirage déterministe de la semaine ISO : [0:6] exemples, [6:9] mini-quiz."""
     import random
-    from datetime import timedelta
     ids = sorted([d["id"] async for d in db.questions.find(
         {"category_id": category_id, "quality": "verified"}, {"_id": 0, "id": 1})])
     year, week, _ = (datetime.now(timezone.utc) - timedelta(weeks=weeks_ago)).isocalendar()
@@ -260,6 +259,49 @@ async def save_attempt(body: AttemptCreate, user: dict = Depends(get_current_use
         "referral_bonus_granted": bonus_granted,
         "awarded_badges": awarded_badges,
     }
+
+
+class MiniClaimAnswer(BaseModel):
+    question_id: str
+    choice: int = Field(..., ge=0, le=5)
+
+
+class MiniClaim(BaseModel):
+    category_id: str
+    answers: list[MiniClaimAnswer] = Field(..., min_length=1, max_length=3)
+
+
+@router.post("/mini-quiz/claim")
+async def claim_mini_quiz(body: MiniClaim, user: dict = Depends(get_current_user)):
+    """Rattache au nouveau compte le mini-quiz joué en visiteur. Score recalculé
+    côté serveur ; une seule fois par thème et par semaine ; pas d'XP de ligue."""
+    week_ids = {}
+    for weeks_ago in (0, 1):
+        for qid in (await _weekly_pick(body.category_id, weeks_ago))[1][6:9]:
+            week_ids.setdefault(qid, weeks_ago)
+    qids = [a.question_id for a in body.answers]
+    if len(set(qids)) != len(qids) or any(q not in week_ids for q in qids):
+        raise HTTPException(status_code=400, detail="Mini-quiz expiré ou invalide")
+    year, week, _ = (datetime.now(timezone.utc) - timedelta(weeks=week_ids[qids[0]])).isocalendar()
+    mini_week = f"{year}-W{week:02d}"
+    user_id = str(user["_id"])
+    if await db.attempts.find_one({"user_id": user_id, "source": "mini_quiz",
+                                   "category_id": body.category_id, "mini_week": mini_week}):
+        return {"ok": True, "already_claimed": True}
+    correct_map = {d["id"]: int(d["correct_index"]) async for d in db.questions.find(
+        {"id": {"$in": qids}}, {"_id": 0, "id": 1, "correct_index": 1})}
+    score = sum(1 for a in body.answers if correct_map.get(a.question_id) == a.choice)
+    total = len(body.answers)
+    await db.attempts.insert_one({
+        "user_id": user_id, "category_id": body.category_id, "score": score, "total": total,
+        "duration_seconds": 0, "source": "mini_quiz", "mini_week": mini_week,
+        "created_at": datetime.now(timezone.utc).isoformat(),
+    })
+    await record_category_mastery(user_id, body.category_id, score, total)
+    fresh_user = await db.users.find_one({"_id": user["_id"]}) or user
+    awarded_badges = await check_after_attempt(fresh_user, score, total)
+    return {"ok": True, "already_claimed": False, "score": score, "total": total,
+            "awarded_badges": awarded_badges}
 
 
 @router.get("/attempts")

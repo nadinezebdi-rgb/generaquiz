@@ -2,9 +2,9 @@ import { useState } from "react";
 import { CheckCircle2, XCircle, Loader2 } from "lucide-react";
 
 // Question QCM publique : la correction vient du serveur (onAnswer → {correct, correct_index, explanation}).
-export const QuickQuestion = ({ question, options, onAnswer, onDone, testId = "quick-question" }) => {
-  const [picked, setPicked] = useState(null);
-  const [result, setResult] = useState(null);
+export const QuickQuestion = ({ question, options, onAnswer, onDone, initial = null, testId = "quick-question" }) => {
+  const [picked, setPicked] = useState(initial?.picked ?? null);
+  const [result, setResult] = useState(initial);
   const [busy, setBusy] = useState(false);
 
   async function choose(i) {
@@ -14,7 +14,7 @@ export const QuickQuestion = ({ question, options, onAnswer, onDone, testId = "q
     try {
       const r = await onAnswer(i);
       setResult(r);
-      onDone?.(r);
+      onDone?.(r, i);
     } catch {
       setPicked(null);
     } finally {
