@@ -1,0 +1,41 @@
+{
+  "summary": "RETEST of iteration_50 fixes: ALL FIXED. Backend 17/17 pytest pass (new test_iteration51_gift_fixes.py 6 tests + iteration50 regression 11). Frontend: all requested flows verified via Playwright.",
+  "verified_fixes": [
+    "Free user proche: /app/famille -> famille-new-challenge -> /app/challenges/new shows form (no paywall), creates challenge -> /app/challenges/{token}. Unrelated free user sees 'Réservé aux abonnés et à leur famille'.",
+    "/activer: typing 'GQ-5EBA-NRL2' key by key (delay 80ms) gives the exact code; typing without prefix, lowercase with prefix, and paste all give the right code; lookup shows preview. 8 new codes checked, none start with 'GQ' in the first block.",
+    "Lifetime redeem: TEST_ user set (in DB) to premium solo with plan_expires_at null -> redeem famille: API plan_expires_at null, tier famille_v2, /auth/me expiry still null; /activer success shows 'votre accès à vie est conservé'.",
+    "PDF of a cancelled code -> 404 (was 200 before cancel).",
+    "Gift checkout with no origin_url -> 200; with evil origin_url -> 200, code uses server FRONTEND_URL (could not read success_url back from Stripe because of the emergent proxy key; checked in code).",
+    "A Famille owner accepting another family's invite -> 409, and stays owner; a free user can then accept the same invite (200).",
+    "FamilyAccessTable at 390px: stacked list (table display:none), no overflow, nothing clipped on /offrir and /app/famille (role none); at desktop it is a table.",
+    "/offrir?offre=solo: hero shows 'Offre Solo' text and 49 €, no family table; picking famille shows Famille text and 79 € plus the table.",
+    "/app/account: 'Formule Famille active' / 'Formule Solo active' (account-plan-name); GQ- code typed in lowercase into account-promo-input redeems it ('Offre Famille — 1 an activée', badge updates); entering it again -> 'déjà été activé'.",
+    "Admin create-code form clears the recipient and buyer names after creation; at 390px the /app/famille leaderboard rows are readable with no overflow.",
+    "Regression: /app/pricing has 3 cards (Gratuit / Solo 49 € / Famille 79 €, monthly 4,90 € / 7,90 €, no Héritage); /offrir submit redirects to checkout.stripe.com."
+  ],
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "Account.jsx abonnement card", "issue": "A lifetime user with plan_expires_at null shows 'Premium actif' in account-plan-expires instead of 'Accès à vie'. isLifetime is only true when the expiry year is after 2090; null expiry should also count as lifetime.", "selector": "[data-testid='account-plan-expires']", "priority": "LOW"}
+    ],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "/app/famille challenges list at 390px", "issues": ["'0 joueur' count wraps onto two lines next to the challenge title (cosmetic)."]}
+    ]
+  },
+  "test_report_links": ["/app/backend/tests/test_iteration51_gift_fixes.py", "/app/backend/tests/test_iteration50_gifts_family.py", "/app/backend/tests/it51_ui_prep.py", "/app/test_reports/pytest/it51.xml"],
+  "action_items": [
+    "LOW: Account.jsx — treat plan_expires_at null on a premium plan as lifetime ('Accès à vie').",
+    "INFO: the admin account admin@generaquiz.fr is plan_tier heritage with plan_expires_at 2036-06-07, not lifetime/null as test_credentials.md says (this was already the case before this run; this run did not redeem on admin). Fix the account data or the credentials doc."
+  ],
+  "critical_code_review_comments": [
+    "Account GIFT_CODE_RE does not accept codes with spaces (e.g. 'GQ U3VS K972'); those fall through to /promo/redeem. Consider removing non-alphanumerics before the regex test.",
+    "Offrir.jsx still sends origin_url (the server ignores it now). Harmless."
+  ],
+  "updated_files": ["/app/backend/tests/test_iteration51_gift_fixes.py", "/app/backend/tests/it51_ui_prep.py"],
+  "success_rate": {"backend": "100%", "frontend": "100% of requested fixes (1 low cosmetic issue)"},
+  "seed_data_creation": "TEST_ users test_it51_* / test_it51ui_* @example.com; admin gift codes for TEST_Mamie (unused ones cancelled). One TEST_ user (life) was set in Mongo to premium with null expiry to test the lifetime case. Gift promo is still DISABLED with default values.",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Run pytest tests/test_iteration51_gift_fixes.py tests/test_iteration50_gifts_family.py -p no:xdist -o addopts=''. Auth is cookie based: page.context.clear_cookies() logs out. it51_ui_prep.py prints the users and codes as JSON. The admin account is not lifetime (expires 2036)."
+}

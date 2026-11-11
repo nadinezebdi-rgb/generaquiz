@@ -228,7 +228,7 @@ export default function Account() {
 
   const nowTs = Date.now();
   const expiresDate = user.plan_expires_at ? new Date(user.plan_expires_at) : null;
-  const isLifetime = expiresDate && expiresDate.getFullYear() > 2090;
+  const isLifetime = !expiresDate || expiresDate.getFullYear() > 2090;
   const isExpired = expiresDate && !isLifetime && expiresDate.getTime() < nowTs;
   const isPremium = user.plan === "premium" && !isExpired;
 

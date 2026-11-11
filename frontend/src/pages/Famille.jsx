@@ -82,7 +82,7 @@ function Challenges({ items }) {
           {items.map((c) => (
             <li key={c.token}><Link to={`/defi/${c.token}`} className="flex items-center justify-between gap-3 rounded-2xl bg-cream/60 px-4 py-3 hover:bg-cream transition-colors" data-testid={`famille-challenge-${c.token}`}>
               <span className="text-navy"><strong>{c.category_title}</strong> · par {c.creator_name}</span>
-              <span className="text-sm text-navy/70">{c.participants} joueur{c.participants > 1 ? "s" : ""}</span>
+              <span className="text-sm text-navy/70 whitespace-nowrap shrink-0">{c.participants} joueur{c.participants > 1 ? "s" : ""}</span>
             </Link></li>
           ))}
         </ul>
