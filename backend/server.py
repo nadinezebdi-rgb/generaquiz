@@ -57,6 +57,7 @@ from routers import testimonials as testimonials_router
 from routers import site_settings as site_settings_router
 from routers import gifts as gifts_router
 from routers import family as family_router
+from routers import bien_vieillir as bien_vieillir_router
 from routers.referral import generate_referral_code_for
 
 app = FastAPI(title="Quiz d'Antan API")
@@ -101,6 +102,24 @@ async def admin_mistral_ping(user: dict = Depends(get_admin_user)):
     return await mistral_ping()
 
 
+@api.get("/admin/users")
+async def admin_list_users(user: dict = Depends(get_admin_user)):
+    """Admin-only: list registered users with email, name, signup date and email opt-in."""
+    users = []
+    projection = {"email": 1, "name": 1, "role": 1, "plan": 1, "created_at": 1, "daily_email_optin": 1}
+    cursor = db.users.find({}, projection).sort("created_at", -1)
+    async for u in cursor:
+        users.append({
+            "email": u.get("email"),
+            "name": u.get("name"),
+            "role": u.get("role", "user"),
+            "plan": u.get("plan", "free"),
+            "created_at": u.get("created_at"),
+            "daily_email_optin": u.get("daily_email_optin", True),
+        })
+    return {"count": len(users), "users": users}
+
+
 # Mount routers under /api
 api.include_router(auth_router.router)
 api.include_router(social_auth_router.router)
@@ -134,6 +153,7 @@ api.include_router(testimonials_router.router)
 api.include_router(site_settings_router.router)
 api.include_router(gifts_router.router)
 api.include_router(family_router.router)
+api.include_router(bien_vieillir_router.router)
 app.include_router(api)
 
 # CORS

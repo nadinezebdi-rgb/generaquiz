@@ -1,0 +1,49 @@
+{
+  "siteUrl": "https://generaquiz.fr",
+  "_comment_ogImage": "Laisser vide tant qu aucune image sociale n existe dans frontend/public. Renseigner une URL absolue (ex. https://generaquiz.fr/og-bien-vieillir.jpg) apres avoir depose le fichier : les balises og:image / twitter:image seront alors emises automatiquement.",
+  "defaultOgImage": "",
+  "hub": {
+    "path": "/bien-vieillir",
+    "slug": "",
+    "title": "Bien vieillir : mémoire, lien social et autonomie après 60 ans | GénéraQuiz",
+    "description": "Des repères concrets pour bien vieillir : stimuler sa mémoire, garder le lien, accompagner un proche. Cinq dossiers documentés et une routine hebdomadaire à suivre.",
+    "keywords": "bien vieillir, vieillissement, mémoire senior, lien social, autonomie, aidant familial"
+  },
+  "fiches": [
+    {
+      "path": "/bien-vieillir/stimulation-cognitive",
+      "slug": "stimulation-cognitive",
+      "title": "Stimulation cognitive après 60 ans : ce qui marche vraiment | GénéraQuiz",
+      "description": "Quelles activités entretiennent réellement le cerveau après 60 ans, à quelle fréquence, et ce que disent les études. Un guide clair, sans promesses excessives.",
+      "keywords": "stimulation cognitive, exercices cerveau senior, activités cognitives, prévention déclin cognitif"
+    },
+    {
+      "path": "/bien-vieillir/entretenir-sa-memoire",
+      "slug": "entretenir-sa-memoire",
+      "title": "Entretenir sa mémoire après 60 ans : méthodes et repères | GénéraQuiz",
+      "description": "Trous de mémoire normaux ou signes d'alerte, mémoire de travail, répétition espacée : comment entretenir sa mémoire au quotidien et quand consulter.",
+      "keywords": "entretenir sa mémoire, trous de mémoire, mémoire après 60 ans, exercices de mémoire senior"
+    },
+    {
+      "path": "/bien-vieillir/rompre-isolement",
+      "slug": "rompre-isolement",
+      "title": "Isolement des personnes âgées : comprendre et agir | GénéraQuiz",
+      "description": "L'isolement social pèse autant que des facteurs de risque physiques. Repérer les signes, connaître les dispositifs français et recréer du lien, concrètement.",
+      "keywords": "isolement personnes âgées, solitude senior, lien social, MONALISA, petits frères des pauvres"
+    },
+    {
+      "path": "/bien-vieillir/aidants-familiaux",
+      "slug": "aidants-familiaux",
+      "title": "Aidant familial : droits, aides et répit en France | GénéraQuiz",
+      "description": "Congé de proche aidant, AJPA, droit au répit, plateformes d'accompagnement : le guide des droits de l'aidant familial et des façons de tenir dans la durée.",
+      "keywords": "aidant familial, proche aidant, congé proche aidant, AJPA, droit au répit, épuisement aidant"
+    },
+    {
+      "path": "/bien-vieillir/activites-ehpad",
+      "slug": "activites-ehpad",
+      "title": "Activités en EHPAD : idées d'animation et cadre réglementaire | GénéraQuiz",
+      "description": "Construire un programme d'animation en EHPAD : formats qui fonctionnent, adaptation aux troubles cognitifs, projet d'animation et repères réglementaires.",
+      "keywords": "activités EHPAD, animation EHPAD, animateur EHPAD, projet d'animation, atelier mémoire EHPAD"
+    }
+  ]
+}
