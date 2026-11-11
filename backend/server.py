@@ -55,6 +55,8 @@ from routers import tips as tips_router
 from routers import share as share_router
 from routers import testimonials as testimonials_router
 from routers import site_settings as site_settings_router
+from routers import gifts as gifts_router
+from routers import family as family_router
 from routers.referral import generate_referral_code_for
 
 app = FastAPI(title="Quiz d'Antan API")
@@ -130,6 +132,8 @@ api.include_router(tips_router.router)
 api.include_router(share_router.router)
 api.include_router(testimonials_router.router)
 api.include_router(site_settings_router.router)
+api.include_router(gifts_router.router)
+api.include_router(family_router.router)
 app.include_router(api)
 
 # CORS
@@ -164,6 +168,9 @@ async def startup():
     await db.challenges.create_index("token", unique=True)
     await db.challenges.create_index([("creator_user_id", 1), ("created_at", -1)])
     await db.promo_codes.create_index("code", unique=True)
+    await gifts_router.ensure_gift_indexes()
+    await db.family_proches.create_index("token", unique=True)
+    await db.family_proches.create_index([("owner_id", 1), ("status", 1)])
 
     # -- QA jobs sweep — au startup, TOUS les jobs "running" sont zombies
     # (leur PID a été tué par le restart et peut avoir été réattribué). On

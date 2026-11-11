@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Check, Star, Sparkles, Gift, ChevronRight, Phone, Mail, Loader2 } from "lucide-react";
+import { Check, Gift, ChevronRight, Loader2, Users } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { PLANS, GIFTS, pricePresentation, annualDiscountBadge, fmt } from "@/config/pricing";
@@ -10,11 +10,12 @@ import PrintedBookPricing from "@/components/PrintedBookPricing";
 import { startCheckout } from "@/lib/checkout";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
+import { useGiftOffers } from "@/lib/gifts";
 
 /**
  * Pricing — Nouvelle grille tarifaire GénéraQuiz.
  *
- * 4 plans B2C (Découverte / Solo / Famille / Héritage) + section "Offrir"
+ * 3 plans B2C (Découverte / Solo / Famille) + section "Offrir"
  * (cadeaux) + Livre imprimé + Offre Pro. Toutes les valeurs viennent de
  * /config/pricing.js.
  */
@@ -24,8 +25,7 @@ export default function Pricing() {
   const annualBadge = annualDiscountBadge();
   const [searchParams, setSearchParams] = useSearchParams();
   const { user, loading } = useAuth();
-
-  function switchToYearly() { setPeriod("yearly"); }
+  const giftOffers = useGiftOffers();
 
   // Reprise du checkout après connexion / inscription : si un pkg est en attente
   // (URL ?pkg=... ou sessionStorage), on relance dès que l'utilisateur est
@@ -86,24 +86,23 @@ export default function Pricing() {
             className={`inline-flex items-center gap-2 px-5 py-2 rounded-full font-bold text-sm transition ${period === "yearly" ? "bg-navy text-cream" : "text-navy/60 hover:text-navy"}`}
           >
             Annuel
-            <span className="bg-terracotta text-white text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full">
-              {annualBadge.match(/−\d+ %/)?.[0]}
+            <span className="bg-terracotta text-white text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full whitespace-nowrap">
+              2 mois offerts
             </span>
           </button>
         </div>
 
         {/* PLANS */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
+        <div className="grid md:grid-cols-3 gap-5 mb-6 max-w-5xl mx-auto">
           {PLANS.map((plan) => (
-            <PlanCard key={plan.id} plan={plan} period={period} switchToYearly={switchToYearly} />
+            <PlanCard key={plan.id} plan={plan} period={period} />
           ))}
         </div>
 
-        {period === "yearly" && (
-          <p className="text-xs text-navy/50 text-center mb-14" data-testid="pricing-legal-annual">
-            Prix TTC. Abonnement annuel débité en une fois, renouvelable par tacite reconduction. Résiliable à tout moment.
-          </p>
-        )}
+        <p className="text-sm text-terracotta font-bold text-center mb-2" data-testid="pricing-annual-note">{annualBadge}</p>
+        <p className="text-xs text-navy/50 text-center mb-14" data-testid="pricing-legal">
+          Prix TTC. {period === "yearly" ? "Abonnement annuel débité en une fois, renouvelable par tacite reconduction." : "Abonnement mensuel sans engagement."} Résiliable à tout moment.
+        </p>
 
         {/* ============ SECTION OFFRIR ============ */}
         <section className="mt-14 mb-14" data-testid="offrir-section">
@@ -115,16 +114,16 @@ export default function Pricing() {
               Le plus beau cadeau à faire à ses <span className="text-terracotta italic">parents ou grands-parents</span>
             </h2>
             <p className="text-navy/70">
-              Un abonnement, un coffret, ou simplement leur Livre de Vie — à offrir pour un anniversaire, une fête ou pour Noël.
+              Une année de jeux à partager — à offrir pour un anniversaire, une fête ou pour Noël.
             </p>
           </div>
-          <div className="grid md:grid-cols-3 gap-4">
+          <div className="grid md:grid-cols-2 gap-4 max-w-3xl mx-auto">
             {GIFTS.map((g) => (
-              <GiftCard key={g.id} gift={g} />
+              <GiftCard key={g.id} gift={g} offer={giftOffers?.offers.find((o) => o.id === g.id)} />
             ))}
           </div>
           <p className="text-xs text-navy/50 text-center mt-4">
-            Chaque cadeau : destinataire, message personnalisé et choix de la date d&apos;envoi. Génération d&apos;un code cadeau à usage unique après paiement.
+            Après le paiement : une carte cadeau à imprimer avec un code à usage unique. L&apos;année commence le jour de l&apos;activation.
           </p>
         </section>
 
@@ -140,12 +139,11 @@ export default function Pricing() {
   );
 }
 
-function PlanCard({ plan, period, switchToYearly }) {
+function PlanCard({ plan, period }) {
   const pres = pricePresentation(plan, period);
-  const isFree = plan.mensuel === 0 && plan.annuel === 0;
   const [loading, setLoading] = useState(false);
-
   const packageId = plan.stripeIds?.[period] ?? null;
+  const featured = Boolean(plan.badge);
 
   async function handleCheckout() {
     if (loading) return;
@@ -156,60 +154,34 @@ function PlanCard({ plan, period, switchToYearly }) {
         setLoading(false);
       },
     });
-    // En cas de succès on est redirigé, sinon on remet loading à false via onError.
   }
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
       className={`relative bg-white rounded-3xl border-2 p-6 flex flex-col ${
-        plan.populaire ? "border-terracotta shadow-warm ring-4 ring-terracotta/15 scale-[1.02]" : "border-cream-dark"
+        featured ? "border-terracotta shadow-warm ring-4 ring-terracotta/15" : "border-cream-dark"
       }`}
       data-testid={`plan-card-${plan.id}`}
     >
-      {plan.populaire && (
-        <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-terracotta text-white text-[11px] font-extrabold uppercase tracking-widest px-3 py-1 rounded-full inline-flex items-center gap-1 shadow-warm">
-          <Star className="w-3 h-3 fill-current" /> Le plus populaire
+      {featured && (
+        <span className="absolute -top-3 left-1/2 -translate-x-1/2 whitespace-nowrap bg-terracotta text-white text-[11px] font-extrabold uppercase tracking-widest px-3 py-1 rounded-full inline-flex items-center gap-1 shadow-warm" data-testid={`plan-badge-${plan.id}`}>
+          <Users className="w-3 h-3" /> {plan.badge}
         </span>
       )}
 
       <h3 className="font-display text-2xl font-extrabold text-navy mb-1">{plan.nom}</h3>
-      <p className="text-sm text-navy/60 mb-4 min-h-[36px]">{plan.tagline}</p>
+      <p className="text-sm text-navy/60 mb-4">{plan.tagline}</p>
 
-      {/* Prix : ordre STRICT du brief */}
-      <div className="mb-4">
-        {period === "yearly" && pres.reference != null && pres.reference !== plan.annuel && (
-          <div className="text-sm text-navy/40 line-through" data-testid={`plan-ref-${plan.id}`}>
-            {fmt(pres.reference)}
-          </div>
-        )}
-        <div className="flex items-baseline gap-1">
-          <span className="font-display text-4xl font-extrabold text-bordeaux" data-testid={`plan-price-${plan.id}`}>
-            {pres.main}
-          </span>
-          {pres.suffix && <span className="text-sm text-navy/60">{pres.suffix}</span>}
-        </div>
-        {period === "yearly" && pres.monthlyEquivalent != null && (
-          <p className="text-xs text-navy/50 mt-1" data-testid={`plan-equiv-${plan.id}`}>
-            soit {fmt(pres.monthlyEquivalent)}/mois
-          </p>
-        )}
-        {period === "yearly" && pres.economie != null && pres.economie > 0 && (
-          <span
-            className="inline-flex items-center gap-1 bg-[#3D9970]/15 text-[#2A7350] font-bold px-2 py-0.5 rounded-full text-xs mt-2"
-            data-testid={`plan-eco-${plan.id}`}
-          >
-            <Sparkles className="w-3 h-3" /> Économisez {fmt(pres.economie)} (−{pres.pourcentage} %)
-          </span>
-        )}
-        {isFree && <p className="text-xs text-navy/50 mt-1">Sans carte bancaire · à vie</p>}
-        {pres.note && !isFree && (
-          <p className="text-xs text-mustard-dark mt-2 font-semibold">{pres.note}</p>
-        )}
+      <div className="flex items-baseline gap-1 mb-4">
+        <span className="font-display text-4xl font-extrabold text-bordeaux" data-testid={`plan-price-${plan.id}`}>
+          {pres.main}
+        </span>
+        {pres.suffix && <span className="text-sm text-navy/60">{pres.suffix}</span>}
       </div>
 
-      <p className="text-xs text-navy/50 mb-3 uppercase tracking-wider font-bold">
-        {plan.comptes} compte{plan.comptes > 1 ? "s" : ""}
+      <p className="text-xs text-navy/60 mb-3 uppercase tracking-wider font-bold" data-testid={`plan-access-${plan.id}`}>
+        {plan.acces}
       </p>
 
       <ul className="space-y-2 mb-5 flex-1">
@@ -221,70 +193,32 @@ function PlanCard({ plan, period, switchToYearly }) {
         ))}
       </ul>
 
-      {plan.argumentValue && period === "yearly" && (
-        <div className="bg-cream border border-cream-dark rounded-xl p-3 mb-4 text-xs text-navy/70" data-testid={`plan-argument-${plan.id}`}>
-          {plan.argumentValue}
-        </div>
-      )}
-
-      {pres.available ? (
-        plan.ctaTo ? (
-          <Link
-            to={plan.ctaTo}
-            data-testid={`plan-cta-${plan.id}`}
-            className="w-full inline-flex items-center justify-center gap-2 bg-terracotta text-white font-bold px-5 py-3 rounded-full hover:bg-terracotta-dark transition min-h-[52px]"
-          >
-            {plan.cta} <ChevronRight className="w-4 h-4" />
-          </Link>
-        ) : (
-          <button
-            type="button"
-            onClick={handleCheckout}
-            disabled={loading || !packageId}
-            data-testid={`plan-cta-${plan.id}`}
-            className={`w-full inline-flex items-center justify-center gap-2 font-bold px-5 py-3 rounded-full transition min-h-[52px] disabled:opacity-70 disabled:cursor-not-allowed ${
-              plan.populaire ? "bg-terracotta text-white hover:bg-terracotta-dark shadow-warm" : "bg-navy text-cream hover:bg-navy-dark"
-            }`}
-          >
-            {loading ? (
-              <>
-                <Loader2 className="w-4 h-4 animate-spin" /> Redirection…
-              </>
-            ) : (
-              <>
-                {plan.cta} <ChevronRight className="w-4 h-4" />
-              </>
-            )}
-          </button>
-        )
+      {plan.ctaTo ? (
+        <Link
+          to={plan.ctaTo}
+          data-testid={`plan-cta-${plan.id}`}
+          className="w-full inline-flex items-center justify-center gap-2 bg-terracotta text-white font-bold px-5 py-3 rounded-full hover:bg-terracotta-dark transition-colors min-h-[52px]"
+        >
+          {plan.cta} <ChevronRight className="w-4 h-4" />
+        </Link>
       ) : (
         <button
           type="button"
-          onClick={switchToYearly}
+          onClick={handleCheckout}
+          disabled={loading || !packageId}
           data-testid={`plan-cta-${plan.id}`}
-          className="w-full inline-flex items-center justify-center gap-2 bg-white border-2 border-navy text-navy font-bold px-5 py-3 rounded-full hover:bg-navy hover:text-cream transition min-h-[52px]"
+          className={`w-full inline-flex items-center justify-center gap-2 font-bold px-5 py-3 rounded-full transition-colors min-h-[52px] disabled:opacity-70 disabled:cursor-not-allowed ${
+            featured ? "bg-terracotta text-white hover:bg-terracotta-dark shadow-warm" : "bg-navy text-cream hover:bg-navy-dark"
+          }`}
         >
-          Passer en annuel <ChevronRight className="w-4 h-4" />
+          {loading ? <><Loader2 className="w-4 h-4 animate-spin" /> Redirection…</> : <>{plan.cta} <ChevronRight className="w-4 h-4" /></>}
         </button>
       )}
     </motion.div>
   );
 }
 
-function GiftCard({ gift }) {
-  const [loading, setLoading] = useState(false);
-
-  async function handleCheckout() {
-    if (loading) return;
-    setLoading(true);
-    await startCheckout(gift.stripeId, {
-      onError: (msg) => {
-        toast.error(msg || "Impossible d'ouvrir le paiement.");
-        setLoading(false);
-      },
-    });
-  }
-
+function GiftCard({ gift, offer }) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
@@ -293,34 +227,23 @@ function GiftCard({ gift }) {
       }`}
       data-testid={`gift-card-${gift.id}`}
     >
-      {gift.badge && (
-        <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-terracotta text-white text-[11px] font-extrabold uppercase tracking-widest px-3 py-1 rounded-full shadow-warm">
-          {gift.badge}
-        </span>
-      )}
       <Gift className="w-8 h-8 text-terracotta mb-3" />
       <h3 className="font-display text-xl font-extrabold text-navy mb-1">{gift.nom}</h3>
-      <div className="font-display text-3xl font-extrabold text-bordeaux mb-2">{fmt(gift.prix)}</div>
+      <div className="flex items-baseline gap-2 mb-2" data-testid={`gift-price-${gift.id}`}>
+        {offer?.regular_price && <span className="text-navy/50 line-through text-lg">{fmt(offer.regular_price, { integer: true })}</span>}
+        <span className="font-display text-3xl font-extrabold text-bordeaux">{offer ? fmt(offer.price, { integer: true }) : "…"}</span>
+        <span className="text-sm text-navy/60">pour 1 an</span>
+      </div>
       <p className="text-sm text-navy/70 mb-4 flex-1">{gift.description}</p>
-      <button
-        type="button"
-        onClick={handleCheckout}
-        disabled={loading || !gift.stripeId}
+      <Link
+        to={`/offrir?offre=${gift.id}`}
         data-testid={`gift-cta-${gift.id}`}
-        className={`w-full inline-flex items-center justify-center gap-2 font-bold px-5 py-3 rounded-full transition min-h-[52px] disabled:opacity-70 disabled:cursor-not-allowed ${
+        className={`w-full inline-flex items-center justify-center gap-2 font-bold px-5 py-3 rounded-full transition-colors min-h-[52px] ${
           gift.highlight ? "bg-terracotta text-white hover:bg-terracotta-dark" : "bg-navy text-cream hover:bg-navy-dark"
         }`}
       >
-        {loading ? (
-          <>
-            <Loader2 className="w-4 h-4 animate-spin" /> Redirection…
-          </>
-        ) : (
-          <>
-            <Gift className="w-4 h-4" /> Offrir maintenant
-          </>
-        )}
-      </button>
+        <Gift className="w-4 h-4" /> Offrir
+      </Link>
     </motion.div>
   );
 }

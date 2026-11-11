@@ -14,8 +14,11 @@ export default function CGV() {
       <section>
         <h2 className="font-display text-2xl font-bold text-navy mt-6 mb-3">2. Produits et services proposés</h2>
         <ul className="list-disc pl-6 space-y-2">
-          <li><strong>Premium Mensuel</strong> — 9,99 € / mois, accès illimité aux 30 questions par catégorie, défis famille illimités, lecture vocale, statistiques détaillées, sans publicité.</li>
-          <li><strong>Premium Annuel</strong> — 89,99 € / an, soit 7,49 € / mois (économie de 17 %).</li>
+          <li><strong>Découverte</strong> — gratuit, sans carte bancaire : 1 compte, quiz du jour et aperçu des activités.</li>
+          <li><strong>Solo</strong> — 4,90 € / mois ou 49 € / an : 1 accès personnel complet (quiz illimités, toutes catégories, progression, historique, Livre de Vie en PDF).</li>
+          <li><strong>Famille</strong> — 7,90 € / mois ou 79 € / an : tout Solo pour le bénéficiaire principal, plus 4 proches invités gratuitement aux quiz, défis et classements de l&apos;espace famille pendant toute la durée de l&apos;abonnement. Le catalogue complet et le Livre de Vie personnel des proches nécessitent leur propre abonnement.</li>
+          <li><strong>Cartes cadeau</strong> — Solo ou Famille pour 1 an, paiement unique. L&apos;année commence le jour de l&apos;activation du code.</li>
+          <li><strong>Livre de Vie imprimé</strong> — option séparée, 79,90 € l&apos;exemplaire, commandée lorsque le Livre de Vie est prêt.</li>
           <li><strong>Packs de crédits virtuels</strong> (uniquement sur l&apos;app mobile) — produits consommables permettant d&apos;acquérir des crédits utilisables pour les indices, le sauvetage de série, etc. Les crédits n&apos;ont aucune valeur monétaire réelle (voir CGU article 6).</li>
         </ul>
       </section>

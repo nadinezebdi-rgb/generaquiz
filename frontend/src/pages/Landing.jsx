@@ -273,7 +273,7 @@ export default function Landing() {
       {/* ============ PLATFORM (activities + word games) ============ */}
       <PlatformSection />
 
-      {/* ============ PRICING (aperçu Découverte / Solo / Famille / Héritage) ============ */}
+      {/* ============ PRICING (aperçu Découverte / Solo / Famille, prix annuels) ============ */}
       <section id="tarifs" className="py-20 lg:py-28">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-2xl mx-auto mb-10">
@@ -290,7 +290,7 @@ export default function Landing() {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
+          <div className="grid md:grid-cols-3 gap-5 mb-10 max-w-5xl mx-auto">
             {PLANS.map((p) => <LandingPlanCard key={p.id} plan={p} />)}
           </div>
 
@@ -316,67 +316,37 @@ export default function Landing() {
 }
 
 function LandingPlanCard({ plan }) {
-  // Aperçu depuis la Landing : vue annuelle (mise en avant de l'économie), CTA vers /app/pricing.
   const pres = pricePresentation(plan, "yearly");
-  const isFree = plan.mensuel === 0 && plan.annuel === 0;
-  const ctaTo = plan.ctaTo || "/app/pricing";
+  const featured = Boolean(plan.badge);
   return (
     <div
       data-testid={`landing-plan-${plan.id}`}
-      className={`relative bg-white rounded-3xl p-6 border-2 flex flex-col ${
-        plan.populaire
-          ? "border-terracotta shadow-warm ring-4 ring-terracotta/15 scale-[1.02]"
-          : "border-cream-dark"
-      }`}
+      className={`relative bg-white rounded-3xl p-6 border-2 flex flex-col ${featured ? "border-terracotta shadow-warm ring-4 ring-terracotta/15" : "border-cream-dark"}`}
     >
-      {plan.populaire && (
-        <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-terracotta text-white text-[11px] font-extrabold uppercase tracking-widest px-3 py-1 rounded-full inline-flex items-center gap-1 shadow-warm">
-          <Star className="w-3 h-3 fill-current" /> Le plus populaire
+      {featured && (
+        <span className="absolute -top-3 left-1/2 -translate-x-1/2 whitespace-nowrap bg-terracotta text-white text-[11px] font-extrabold uppercase tracking-widest px-3 py-1 rounded-full shadow-warm">
+          {plan.badge}
         </span>
       )}
       <h3 className="font-display text-2xl font-extrabold text-navy mb-1">{plan.nom}</h3>
-      <p className="text-sm text-navy/60 mb-4 min-h-[36px]">{plan.tagline}</p>
-
-      <div className="mb-4">
-        {pres.reference != null && pres.reference !== plan.annuel && (
-          <div className="text-sm text-navy/40 line-through">{fmt(pres.reference)}</div>
-        )}
-        <div className="flex items-baseline gap-1">
-          <span className="font-display text-4xl font-extrabold text-bordeaux">{pres.main}</span>
-          {pres.suffix && <span className="text-sm text-navy/60">{pres.suffix}</span>}
-        </div>
-        {pres.monthlyEquivalent != null && (
-          <p className="text-xs text-navy/50 mt-1">soit {fmt(pres.monthlyEquivalent)}/mois</p>
-        )}
-        {pres.economie != null && pres.economie > 0 && (
-          <span className="inline-flex items-center gap-1 bg-[#3D9970]/15 text-[#2A7350] font-bold px-2 py-0.5 rounded-full text-xs mt-2">
-            <Sparkles className="w-3 h-3" /> Économisez {fmt(pres.economie)} (−{pres.pourcentage} %)
-          </span>
-        )}
-        {isFree && <p className="text-xs text-navy/50 mt-1">Sans carte bancaire · à vie</p>}
+      <p className="text-sm text-navy/60 mb-4">{plan.tagline}</p>
+      <div className="flex items-baseline gap-1 mb-4">
+        <span className="font-display text-4xl font-extrabold text-bordeaux">{pres.main}</span>
+        {pres.suffix && <span className="text-sm text-navy/60">{pres.suffix}</span>}
       </div>
-
-      <p className="text-xs text-navy/50 mb-3 uppercase tracking-wider font-bold">
-        {plan.comptes} compte{plan.comptes > 1 ? "s" : ""}
-      </p>
-
+      <p className="text-xs text-navy/60 mb-3 uppercase tracking-wider font-bold">{plan.acces}</p>
       <ul className="space-y-2 mb-5 flex-1">
-        {plan.features.slice(0, 5).map((f) => (
+        {plan.features.slice(0, 4).map((f) => (
           <li key={f} className="flex items-start gap-2 text-sm text-navy/80">
             <Check className="w-4 h-4 mt-0.5 shrink-0 text-terracotta" strokeWidth={3} />
             <span>{f}</span>
           </li>
         ))}
       </ul>
-
       <Link
-        to={ctaTo}
+        to={plan.ctaTo || "/app/pricing"}
         data-testid={`landing-plan-cta-${plan.id}`}
-        className={`w-full inline-flex items-center justify-center gap-2 font-bold px-5 py-3 rounded-full transition min-h-[52px] ${
-          plan.populaire
-            ? "bg-terracotta text-white hover:bg-terracotta-dark shadow-warm"
-            : "bg-navy text-cream hover:bg-navy-dark"
-        }`}
+        className={`w-full inline-flex items-center justify-center gap-2 font-bold px-5 py-3 rounded-full transition-colors min-h-[52px] ${featured ? "bg-terracotta text-white hover:bg-terracotta-dark" : "bg-navy text-cream hover:bg-navy-dark"}`}
       >
         {plan.cta} <ArrowRight className="w-4 h-4" />
       </Link>

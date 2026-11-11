@@ -18,6 +18,12 @@ import ChallengeDetail from "@/pages/ChallengeDetail";
 import ChallengePlay from "@/pages/ChallengePlay";
 import AdminPromo from "@/pages/AdminPromo";
 import AdminTestimonials from "@/pages/AdminTestimonials";
+import AdminGifts from "@/pages/AdminGifts";
+import Offrir from "@/pages/Offrir";
+import OffrirMerci from "@/pages/OffrirMerci";
+import Activer from "@/pages/Activer";
+import Famille from "@/pages/Famille";
+import FamilleRejoindre from "@/pages/FamilleRejoindre";
 import Account from "@/pages/Account";
 import ForgotPassword from "@/pages/ForgotPassword";
 import ResetPassword from "@/pages/ResetPassword";
@@ -304,6 +310,26 @@ export default function App() {
               </AdminRoute>
             }
           />
+          <Route
+            path="/app/admin/cadeaux"
+            element={
+              <AdminRoute>
+                <AdminGifts />
+              </AdminRoute>
+            }
+          />
+          <Route
+            path="/app/famille"
+            element={
+              <ProtectedRoute>
+                <Famille />
+              </ProtectedRoute>
+            }
+          />
+          <Route path="/offrir" element={<Offrir />} />
+          <Route path="/offrir/merci" element={<OffrirMerci />} />
+          <Route path="/activer" element={<Activer />} />
+          <Route path="/famille/rejoindre/:token" element={<FamilleRejoindre />} />
           <Route
             path="/app/admin/temoignages"
             element={

@@ -321,6 +321,15 @@ export default function Account() {
             </div>
           )}
 
+          <div className="mt-5 flex flex-wrap gap-3" data-testid="account-family-links">
+            <Link to="/app/famille" data-testid="account-famille-link" className={`inline-flex items-center gap-2 font-bold px-4 py-2 rounded-full border-2 transition-colors ${isPremium ? "border-mustard/50 text-mustard hover:bg-mustard/10" : "border-navy text-navy hover:bg-navy hover:text-cream"}`}>
+              Mon espace famille <ArrowRight className="w-4 h-4" />
+            </Link>
+            <Link to="/activer" data-testid="account-activer-link" className={`inline-flex items-center gap-2 font-bold px-4 py-2 rounded-full border-2 transition-colors ${isPremium ? "border-mustard/50 text-mustard hover:bg-mustard/10" : "border-navy text-navy hover:bg-navy hover:text-cream"}`}>
+              Activer une carte cadeau (GQ-…) <ArrowRight className="w-4 h-4" />
+            </Link>
+          </div>
+
           {/* ============ Redeem code promo — dispo pour tous ============ */}
           <div className={`mt-5 pt-5 border-t ${isPremium ? "border-mustard/25" : "border-cream-dark"}`}>
             <label className={`block text-sm font-bold mb-2 flex items-center gap-2 ${isPremium ? "text-mustard" : "text-navy"}`}>

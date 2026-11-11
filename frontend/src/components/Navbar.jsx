@@ -23,6 +23,7 @@ export default function Navbar({ variant = "landing" }) {
               <a href="#categories" data-testid="nav-categories" className="px-2 py-2 text-base font-semibold text-navy hover:text-terracotta transition whitespace-nowrap">Catégories</a>
               <a href="#demo" data-testid="nav-demo" className="px-2 py-2 text-base font-semibold text-navy hover:text-terracotta transition whitespace-nowrap">Essai gratuit</a>
               <a href="#tarifs" data-testid="nav-pricing" className="px-2 py-2 text-base font-semibold text-navy hover:text-terracotta transition whitespace-nowrap">Tarifs</a>
+              <Link to="/offrir" data-testid="nav-offrir" className="px-2 py-2 text-base font-semibold text-terracotta hover:text-bordeaux transition whitespace-nowrap">Offrir</Link>
             </>
           )}
 
