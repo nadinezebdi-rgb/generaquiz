@@ -14,7 +14,7 @@ export default function SeniorModeToggle({ compact = false }) {
       aria-pressed={enabled}
       data-testid="senior-mode-toggle"
       title={enabled ? "Désactiver le mode senior" : "Activer le mode senior (grands caractères, contraste renforcé)"}
-      className={`inline-flex items-center gap-2 rounded-full border-2 transition font-bold ${
+      className={`inline-flex items-center gap-2 rounded-full border-2 transition font-bold whitespace-nowrap shrink-0 ${
         compact ? "px-2.5 py-1.5 text-xs" : "px-3 py-2 text-sm"
       } ${
         enabled

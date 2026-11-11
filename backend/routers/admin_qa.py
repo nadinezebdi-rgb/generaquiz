@@ -16,6 +16,8 @@ import asyncio
 import os
 import subprocess
 import sys
+import time
+import uuid
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Literal
@@ -23,7 +25,8 @@ from typing import Literal
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
 
-from core import db, get_admin_user, record_audit
+from core import db, get_admin_user, record_audit, logger
+from qa_pipeline import retag_untagged
 
 router = APIRouter(prefix="/admin/qa", tags=["admin-qa"])
 
@@ -315,6 +318,11 @@ _TIMEOUT_BY_KIND: dict[str, int] = {
 }
 _SUBPROCESS_TIMEOUT_SEC_DEFAULT = 15 * 60  # fallback si kind inconnu
 
+# Reprise auto (A3) : un job interrompu (timeout avec progression, restart,
+# OOM) est remis en file et repart de son checkpoint. Plafond de reprises.
+_MAX_RESUMES = 3
+_WATCHDOG_INTERVAL_SEC = 60
+
 
 def _pid_alive(pid: int | None) -> bool:
     """⚠️ NE PAS UTILISER pour tester la vivacité d'un job — voir `_reap_dead_jobs`
@@ -357,6 +365,44 @@ async def _heartbeat_loop(job_id: str, proc) -> None:
             return
 
 
+async def _resume_or_fail(job_id: str, reason: str, return_code: int,
+                          require_progress: bool = False) -> str:
+    """Job `running` interrompu → remis en `queued` (reprise depuis checkpoint)
+    tant que le plafond n'est pas atteint, sinon `failed`. Ne touche jamais un
+    état terminal. Retourne "resumed" | "failed" | "terminal"."""
+    job = await db.qa_jobs.find_one(
+        {"id": job_id, "status": "running"},
+        {"_id": 0, "resume_count": 1, "progress": 1, "segment_start_done": 1},
+    )
+    if not job:
+        return "terminal"
+    n = int(job.get("resume_count") or 0)
+    done = int((job.get("progress") or {}).get("done") or 0)
+    progressed = done > int(job.get("segment_start_done") or 0)
+    if n < _MAX_RESUMES and (progressed or not require_progress):
+        r = await db.qa_jobs.update_one(
+            {"id": job_id, "status": "running"},
+            {"$set": {"status": "queued", "resume_count": n + 1,
+                      "last_interruption": reason, "last_interruption_at": _now_iso()},
+             "$unset": {"pid": "", "last_heartbeat_at": "", "segment_id": ""}},
+        )
+        if r.modified_count:
+            logger.info(f"[qa-jobs] {job_id} interrompu ({reason}) → reprise {n + 1}/{_MAX_RESUMES}")
+            return "resumed"
+        return "terminal"
+    if n >= _MAX_RESUMES:
+        reason = f"{reason} — {n} reprise(s) épuisée(s)"
+    else:
+        reason = f"{reason} — aucune progression"
+    r = await db.qa_jobs.update_one(
+        {"id": job_id, "status": "running"},
+        {"$set": {"status": "failed", "return_code": return_code,
+                  "finished_at": _now_iso(), "error": reason},
+         "$unset": {"segment_id": ""}},
+    )
+    return "failed" if r.modified_count else "terminal"
+
+
 async def _reap_dead_jobs() -> int:
     """Passe en `failed` les jobs `running` dont le heartbeat est trop vieux.
 
@@ -370,7 +416,6 @@ async def _reap_dead_jobs() -> int:
       4. Aucun test de vivacité par PID nu — PID peu fiable en Kubernetes.
     """
     now = datetime.now(timezone.utc)
-    now_iso_s = now.isoformat()
     reaped = 0
     async for j in db.qa_jobs.find(
         {"status": "running"},
@@ -399,17 +444,9 @@ async def _reap_dead_jobs() -> int:
                 continue  # heartbeat récent → job vivant
             reason = f"heartbeat stale ({int(hb_age)}s ago)"
 
-        # 3) Update atomique — le filtre garantit qu'on ne touche pas un état terminal
-        r = await db.qa_jobs.update_one(
-            {"id": j["id"], "status": "running"},
-            {"$set": {
-                "status": "failed",
-                "return_code": -1,
-                "finished_at": now_iso_s,
-                "error": reason,
-            }},
-        )
-        reaped += r.modified_count
+        # 3) Reprise depuis checkpoint (ou failed si plafond atteint)
+        if await _resume_or_fail(j["id"], reason, -1) != "terminal":
+            reaped += 1
     return reaped
 
 
@@ -423,7 +460,6 @@ async def sweep_running_jobs_on_startup() -> int:
     l'ancienneté du heartbeat, filtre atomique `status=running`.
     """
     now = datetime.now(timezone.utc)
-    now_iso_s = now.isoformat()
     reaped = 0
     async for j in db.qa_jobs.find(
         {"status": "running"},
@@ -449,21 +485,25 @@ async def sweep_running_jobs_on_startup() -> int:
                 continue
             reason = f"startup sweep — heartbeat stale ({int(hb_age)}s)"
 
-        r = await db.qa_jobs.update_one(
-            {"id": j["id"], "status": "running"},
-            {"$set": {
-                "status": "failed",
-                "return_code": -1,
-                "finished_at": now_iso_s,
-                "error": reason,
-            }},
-        )
-        reaped += r.modified_count
+        if await _resume_or_fail(j["id"], reason, -1) != "terminal":
+            reaped += 1
 
     if reaped:
-        from core import logger
-        logger.info(f"[qa-jobs] startup sweep — {reaped} job(s) running stale → failed")
+        logger.info(f"[qa-jobs] startup sweep — {reaped} job(s) running stale → reprise/failed")
     return reaped
+
+
+async def qa_watchdog_loop() -> None:
+    """Toutes les 60 s : reprend les jobs au heartbeat mort et dépile la file.
+    Indispensable après un restart (plus aucun parent pour finaliser)."""
+    while True:
+        try:
+            await asyncio.sleep(_WATCHDOG_INTERVAL_SEC)
+            await _dequeue_next()
+        except asyncio.CancelledError:
+            return
+        except Exception as e:
+            logger.warning(f"[qa-watchdog] {type(e).__name__}: {e}")
 
 
 async def _count_running() -> int:
@@ -479,14 +519,31 @@ async def _run_qa_subprocess(job_id: str, category_id: str, script_path: Path, k
     Le timeout dur dépend du `kind` : topup=15 min, rerun=30 min (audit complet).
     """
     log_path = f"/tmp/qa_job_{job_id}.log"
-    env = os.environ.copy()
-    env["ONLY_CATEGORY"] = category_id
     timeout_sec = _TIMEOUT_BY_KIND.get(kind, _SUBPROCESS_TIMEOUT_SEC_DEFAULT)
+
+    # Nouveau segment : le subprocess n'écrit ses checkpoints que si le job
+    # porte encore SON segment_id (sinon il s'arrête : annulé / re-planifié).
+    job = await db.qa_jobs.find_one({"id": job_id}, {"_id": 0}) or {}
+    segment_id = uuid.uuid4().hex
+    audit_since = job.get("created_at")
+    if not audit_since:
+        try:
+            audit_since = datetime.fromisoformat(job["started_at"]).timestamp()
+        except (KeyError, ValueError, TypeError):
+            audit_since = time.time()
+    await db.qa_jobs.update_one(
+        {"id": job_id, "status": "running"},
+        {"$set": {"segment_id": segment_id,
+                  "segment_start_done": int((job.get("progress") or {}).get("done") or 0)}},
+    )
+    env = os.environ.copy()
+    env.update({"ONLY_CATEGORY": category_id, "QA_JOB_ID": job_id,
+                "QA_SEGMENT_ID": segment_id, "QA_AUDIT_SINCE": str(audit_since)})
 
     proc = None
     hb_task = None
     try:
-        with open(log_path, "w") as logf:
+        with open(log_path, "a") as logf:
             proc = await asyncio.create_subprocess_exec(
                 sys.executable, str(script_path),
                 cwd=str(_BACKEND_DIR),
@@ -509,18 +566,16 @@ async def _run_qa_subprocess(job_id: str, category_id: str, script_path: Path, k
                     await proc.wait()
                 except Exception:
                     pass
-                # Filtre `status=running` → n'écrase pas un état terminal
-                await db.qa_jobs.update_one(
-                    {"id": job_id, "status": "running"},
-                    {"$set": {
-                        "status": "failed",
-                        "return_code": -2,
-                        "log_path": log_path,
-                        "finished_at": _now_iso(),
-                        "error": f"timeout after {timeout_sec}s ({kind})",
-                    }},
-                )
+                # Reprise depuis checkpoint si ce segment a progressé, sinon failed
+                await db.qa_jobs.update_one({"id": job_id}, {"$set": {"log_path": log_path}})
+                await _resume_or_fail(job_id, f"timeout after {timeout_sec}s ({kind})", -2,
+                                      require_progress=True)
                 return
+        if rc < 0:
+            # Tué par un signal (OOM, restart…) hors annulation → reprise
+            await db.qa_jobs.update_one({"id": job_id}, {"$set": {"log_path": log_path}})
+            await _resume_or_fail(job_id, f"killed by signal {-rc}", rc)
+            return
         status = "done" if rc == 0 else "failed"
         # Update finalisation : filtre `status=running` (préserve terminal atomique)
         # + $unset error pour effacer tout marquage laissé par un reaper race'd
@@ -532,8 +587,9 @@ async def _run_qa_subprocess(job_id: str, category_id: str, script_path: Path, k
                 "finished_at": _now_iso(),
             },
         }
+        update_doc["$unset"] = {"segment_id": ""}
         if rc == 0:
-            update_doc["$unset"] = {"error": ""}  # succès : on efface les erreurs de race
+            update_doc["$unset"]["error"] = ""  # succès : on efface les erreurs de race
         await db.qa_jobs.update_one(
             {"id": job_id, "status": "running"},
             update_doc,
@@ -607,148 +663,51 @@ async def qa_topup(category_id: str, admin: dict = Depends(get_admin_user)) -> d
 # ============================================================================
 
 
-async def _palier_distribution(category_id: str) -> dict[int, int]:
-    """Compte des questions jouables (quality != flagged) par palier 1..7."""
-    pipeline = [
-        {"$match": {"category_id": category_id, "quality": {"$ne": "flagged"},
-                    "difficulty": {"$gte": 1, "$lte": 7}}},
-        {"$group": {"_id": "$difficulty", "n": {"$sum": 1}}},
-    ]
-    dist = {p: 0 for p in range(1, 8)}
-    async for d in db.questions.aggregate(pipeline):
-        dist[d["_id"]] = d["n"]
-    return dist
-
-
 @router.post("/rebalance/{category_id}")
 async def qa_rebalance(category_id: str, admin: dict = Depends(get_admin_user)) -> dict:
-    """RETAG sans IA — assigne les questions vérifiées `difficulty=null` (ou
-    hors 1..7) aux paliers déficitaires. Aucun appel LLM, purement DB.
-
-    Règle d'affectation (audit 21/08) : remplir le palier le plus vide en
-    premier (préférer palier haut 7 > 6 > 5… quand égalité), pour ne pas
-    déséquilibrer les paliers avancés.
-    """
+    """RETAG sans IA — assigne les questions jouables sans palier aux paliers
+    déficitaires (le plus vide d'abord, palier haut à égalité)."""
     cat = await db.categories.find_one({"id": category_id})
     if not cat:
         raise HTTPException(status_code=404, detail="Catégorie inconnue")
-
-    before = await _palier_distribution(category_id)
-
-    # Récupère les questions candidates au retag : jouables (quality != flagged),
-    # sans difficulty valide (absent, null, ou hors 1..7).
-    cursor = db.questions.find(
-        {
-            "category_id": category_id,
-            "quality": {"$ne": "flagged"},
-            "$or": [
-                {"difficulty": {"$exists": False}},
-                {"difficulty": None},
-                {"difficulty": {"$lt": 1}},
-                {"difficulty": {"$gt": 7}},
-            ],
-        },
-        {"id": 1, "_id": 0},
-    )
-    candidates = [q async for q in cursor]
-
-    # Pour chaque candidat, on assigne au palier le plus vide (priorité palier haut)
-    dist = dict(before)
-    TARGET = 20
-    tagged = 0
-    per_palier: dict[int, int] = {p: 0 for p in range(1, 8)}
-    for q in candidates:
-        # Sélectionner le palier le plus vide, préférence palier haut en cas d'égalité
-        # → key = (count, -palier) → min = plus vide + palier le plus élevé
-        best = min(range(1, 8), key=lambda p: (dist[p], -p))
-        if dist[best] >= TARGET:
-            break  # tous les paliers sont pleins
-        r = await db.questions.update_one(
-            {"id": q["id"]},
-            {"$set": {"difficulty": best}},
-        )
-        if r.modified_count:
-            dist[best] += 1
-            per_palier[best] += 1
-            tagged += 1
-
-    after = dict(dist)
-    still_missing = sum(max(0, TARGET - after[p]) for p in range(1, 8))
-    candidates_remaining = max(0, len(candidates) - tagged)
-
+    res = await retag_untagged(db, category_id, {"$ne": "flagged"})
     await record_audit(
         admin, action="qa.rebalance", target_type="category",
         target_id=category_id, target_label=cat.get("title"),
-        meta={"tagged": tagged, "still_missing": still_missing,
-              "per_palier": per_palier},
+        meta={"tagged": res["tagged"], "still_missing": res["still_missing_slots"],
+              "per_palier": res["per_palier_added"]},
     )
-
-    return {
-        "ok": True,
-        "category_id": category_id,
-        "category_title": cat.get("title"),
-        "candidates_found": len(candidates),
-        "tagged": tagged,
-        "candidates_remaining": candidates_remaining,
-        "still_missing_slots": still_missing,
-        "distribution_before": before,
-        "distribution_after": after,
-        "per_palier_added": per_palier,
-    }
+    return {"ok": True, "category_id": category_id, "category_title": cat.get("title"), **res}
 
 
 @router.post("/rebalance-all")
 async def qa_rebalance_all(admin: dict = Depends(get_admin_user)) -> dict:
-    """Rebalance sur les 9 catégories en une passe. Aucun appel IA."""
+    """Rebalance sur toutes les catégories en une passe. Aucun appel IA."""
     cats = await db.categories.find({}, {"id": 1, "title": 1, "_id": 0}).to_list(50)
-    total_tagged = 0
     per_cat = []
     for cat in cats:
-        # On appelle la logique interne (pas l'endpoint) pour éviter l'auth
-        # ré-vérifiée. Ici on est déjà admin.
-        before = await _palier_distribution(cat["id"])
-        cursor = db.questions.find(
-            {
-                "category_id": cat["id"],
-                "quality": {"$ne": "flagged"},
-                "$or": [
-                    {"difficulty": {"$exists": False}},
-                    {"difficulty": None},
-                    {"difficulty": {"$lt": 1}},
-                    {"difficulty": {"$gt": 7}},
-                ],
-            },
-            {"id": 1, "_id": 0},
-        )
-        candidates = [q async for q in cursor]
-        dist = dict(before)
-        tagged = 0
-        for q in candidates:
-            best = min(range(1, 8), key=lambda p: (dist[p], -p))
-            if dist[best] >= 20:
-                break
-            r = await db.questions.update_one(
-                {"id": q["id"]}, {"$set": {"difficulty": best}}
-            )
-            if r.modified_count:
-                dist[best] += 1
-                tagged += 1
-        after = dict(dist)
-        still_missing = sum(max(0, 20 - after[p]) for p in range(1, 8))
-        total_tagged += tagged
+        res = await retag_untagged(db, cat["id"], {"$ne": "flagged"})
         per_cat.append({
-            "category_id": cat["id"],
-            "category_title": cat["title"],
-            "tagged": tagged,
-            "still_missing_slots": still_missing,
-            "distribution_after": after,
+            "category_id": cat["id"], "category_title": cat["title"],
+            "tagged": res["tagged"], "still_missing_slots": res["still_missing_slots"],
+            "distribution_after": res["distribution_after"],
         })
-
+    total_tagged = sum(c["tagged"] for c in per_cat)
     await record_audit(
         admin, action="qa.rebalance_all", target_type="system",
         meta={"total_tagged": total_tagged, "categories": len(cats)},
     )
     return {"ok": True, "total_tagged": total_tagged, "categories": per_cat}
+
+
+@router.post("/morning-report/send")
+async def qa_morning_report_send(admin: dict = Depends(get_admin_user)) -> dict:
+    """Envoie immédiatement le rapport du matin aux admins (test / à la demande)."""
+    from morning_report import send_admin_morning_report
+    res = await send_admin_morning_report()
+    await record_audit(admin, action="qa.morning_report_send", target_type="system",
+                       meta={"sent": res.get("sent")})
+    return res
 
 
 @router.post("/auto-seed")
@@ -796,6 +755,8 @@ async def _launch_qa_job(category_id: str, admin: dict, kind: str,
         "kind": kind,
         "status": initial_status,
         "started_at": datetime.now(timezone.utc).isoformat(),
+        "created_at": time.time(),
+        "resume_count": 0,
         "started_by": admin.get("email"),
     }
     await db.qa_jobs.insert_one(job_doc)
@@ -917,7 +878,7 @@ async def qa_cancel_job(job_id: str, admin: dict = Depends(get_admin_user)) -> d
         "finished_at": now_iso,
         "return_code": -3,
         "error": "cancelled by admin",
-    }})
+    }, "$unset": {"segment_id": ""}})
     await record_audit(admin, action="qa.cancel", target_type="qa_job",
                        target_id=job_id, target_label=job.get("category_id"),
                        meta={"was": "running", "killed_pid": pid if killed else None})

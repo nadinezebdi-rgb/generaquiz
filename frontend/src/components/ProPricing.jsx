@@ -64,9 +64,6 @@ export default function ProPricing() {
             <p className="text-sm text-navy/60 mt-1" data-testid="pro-price-ttc">
               soit <strong>{fmt(PRO_RESIDENCE.prixTTC, { integer: true })} TTC</strong> — abonnement 12 mois
             </p>
-            <span className="inline-flex items-center gap-1 bg-[#3D9970]/15 text-[#2A7350] font-bold px-2 py-0.5 rounded-full text-xs mt-3">
-              <Users className="w-3 h-3" /> Utilisateurs illimités dans la résidence
-            </span>
           </div>
 
           <ul className="space-y-2 mb-5 flex-1">

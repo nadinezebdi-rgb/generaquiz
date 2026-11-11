@@ -259,6 +259,9 @@ async def delete_account(user: dict = Depends(get_current_user), response: Respo
     await db.users.delete_one({"_id": ObjectId(user_id)})
     await db.attempts.delete_many({"user_id": user_id})
     await db.challenges.delete_many({"creator_user_id": user_id})
+    for coll in ("daily_attempts", "user_paliers", "user_seen_questions", "league_scores",
+                 "league_memberships", "user_badges", "user_category_stats", "weekly_palier_scores"):
+        await db[coll].delete_many({"user_id": user_id})
     if response is not None:
         clear_auth_cookies(response)
     return {"ok": True}

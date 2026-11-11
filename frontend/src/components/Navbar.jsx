@@ -19,34 +19,35 @@ export default function Navbar({ variant = "landing" }) {
         <nav className="hidden min-[1400px]:flex items-center gap-1">
           {variant === "landing" && (
             <>
-              <Link to="/quiz-du-jour" data-testid="nav-daily" className="px-3 py-2 text-base font-semibold text-bordeaux hover:text-terracotta transition whitespace-nowrap">Quiz du Jour ✨</Link>
-              <a href="#categories" data-testid="nav-categories" className="px-3 py-2 text-base font-semibold text-navy hover:text-terracotta transition whitespace-nowrap">Catégories</a>
-              <a href="#demo" data-testid="nav-demo" className="px-3 py-2 text-base font-semibold text-navy hover:text-terracotta transition whitespace-nowrap">Essai gratuit</a>
-              <a href="#tarifs" data-testid="nav-pricing" className="px-3 py-2 text-base font-semibold text-navy hover:text-terracotta transition whitespace-nowrap">Tarifs</a>
-              <Link to="/bien-vieillir" data-testid="nav-bien-vieillir" className="px-3 py-2 text-base font-semibold text-navy hover:text-terracotta transition whitespace-nowrap">Bien vieillir</Link>
+              <Link to="/quiz-du-jour" data-testid="nav-daily" className="px-2 py-2 text-base font-semibold text-bordeaux hover:text-terracotta transition whitespace-nowrap">Quiz du Jour ✨</Link>
+              <a href="#categories" data-testid="nav-categories" className="px-2 py-2 text-base font-semibold text-navy hover:text-terracotta transition whitespace-nowrap">Catégories</a>
+              <a href="#demo" data-testid="nav-demo" className="px-2 py-2 text-base font-semibold text-navy hover:text-terracotta transition whitespace-nowrap">Essai gratuit</a>
+              <a href="#tarifs" data-testid="nav-pricing" className="px-2 py-2 text-base font-semibold text-navy hover:text-terracotta transition whitespace-nowrap">Tarifs</a>
+              <Link to="/offrir" data-testid="nav-offrir" className="px-2 py-2 text-base font-semibold text-terracotta hover:text-bordeaux transition whitespace-nowrap">Offrir</Link>
+              <Link to="/bien-vieillir" data-testid="nav-bien-vieillir" className="px-2 py-2 text-base font-semibold text-navy hover:text-terracotta transition whitespace-nowrap">Bien vieillir</Link>
             </>
           )}
 
           {user && user !== false ? (
             <>
               {variant !== "landing" && (
-                <Link to="/quiz-du-jour" data-testid="nav-daily-auth" className="px-3 py-2 text-base font-semibold text-bordeaux hover:text-terracotta transition whitespace-nowrap">Quiz du Jour ✨</Link>
+                <Link to="/quiz-du-jour" data-testid="nav-daily-auth" className="px-2 py-2 text-base font-semibold text-bordeaux hover:text-terracotta transition whitespace-nowrap">Quiz du Jour ✨</Link>
               )}
-              <Link to="/app/dashboard" data-testid="nav-dashboard" className="px-3 py-2 text-base font-semibold text-navy hover:text-terracotta transition whitespace-nowrap">Mes quiz</Link>
+              <Link to="/app/dashboard" data-testid="nav-dashboard" className="px-2 py-2 text-base font-semibold text-navy hover:text-terracotta transition whitespace-nowrap">Mes quiz</Link>
               <GamesDropdown />
-              <Link to="/app/leagues" data-testid="nav-leagues" className="px-3 py-2 text-base font-semibold text-navy hover:text-terracotta transition inline-flex items-center gap-1 whitespace-nowrap">
+              <Link to="/app/leagues" data-testid="nav-leagues" className="px-2 py-2 text-base font-semibold text-navy hover:text-terracotta transition inline-flex items-center gap-1 whitespace-nowrap">
                 <Trophy className="w-4 h-4" /> Ligues
               </Link>
-              <Link to="/app/progression" data-testid="nav-progression" className="px-3 py-2 text-base font-semibold text-navy hover:text-terracotta transition inline-flex items-center gap-1 whitespace-nowrap">
+              <Link to="/app/progression" data-testid="nav-progression" className="px-2 py-2 text-base font-semibold text-navy hover:text-terracotta transition inline-flex items-center gap-1 whitespace-nowrap">
                 <Zap className="w-4 h-4 text-terracotta" /> Niv {typeof user.level === "number" ? user.level : 1}
               </Link>
-              <Link to="/app/earn-credits" data-testid="nav-earn-credits" className="px-3 py-2 text-base font-semibold text-bordeaux hover:text-terracotta transition inline-flex items-center gap-1 whitespace-nowrap">
+              <Link to="/app/earn-credits" data-testid="nav-earn-credits" className="px-2 py-2 text-base font-semibold text-bordeaux hover:text-terracotta transition inline-flex items-center gap-1 whitespace-nowrap">
                 <Coins className="w-4 h-4" /> Crédits
                 {typeof user.credits === "number" && (
                   <span className="ml-1 inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full bg-mustard text-navy text-xs font-bold">{user.credits}</span>
                 )}
               </Link>
-              <Link to="/app/account" data-testid="nav-account" className="px-3 py-2 text-base font-semibold text-navy hover:text-terracotta transition whitespace-nowrap">Mon compte</Link>
+              <Link to="/app/account" data-testid="nav-account" className="px-2 py-2 text-base font-semibold text-navy hover:text-terracotta transition whitespace-nowrap">Mon compte</Link>
               {(user.role === "admin" || user.role === "superadmin") && <AdminDropdown />}
               <button
                 data-testid="nav-logout"
@@ -59,7 +60,7 @@ export default function Navbar({ variant = "landing" }) {
             </>
           ) : (
             <>
-              <Link to="/login" data-testid="nav-login" className="px-3 py-2 text-base font-semibold text-navy hover:text-terracotta transition whitespace-nowrap">Connexion</Link>
+              <Link to="/login" data-testid="nav-login" className="px-2 py-2 text-base font-semibold text-navy hover:text-terracotta transition whitespace-nowrap">Connexion</Link>
               <Link
                 to="/register"
                 data-testid="nav-register"

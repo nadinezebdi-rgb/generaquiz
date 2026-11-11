@@ -1,0 +1,49 @@
+{
+  "summary": "LOT 2 'Offrir GénéraQuiz' + new pricing tested end-to-end. Backend: 11/11 pytest pass (offers/promo toggle + validation, gift checkout -> Stripe URL, blank names 422, gift package rejected on /checkout/session, unpaid order status, admin code create/PDF/wrong-key 404/lookup normalisation/cancel, redeem famille_v2 +365d / 409 / 404 / extension from current expiry keeping higher tier, family space owner/proche/limits/402/accept/409 reuse/remove/quitter, challenges gate for proche vs outsider). Frontend: /app/pricing (3 cards, yearly default, monthly 4,90/7,90, badge, access lines, no strike/Héritage, gift cards w/ API prices + promo strike, printed book 79,90), landing #tarifs, /offrir (offer picker, family table only famille, validation, Stripe redirect, promo hero title+strike, 390px no overflow), /activer (preview, register/login links w/ next, login->submit->success with expiry, already-activated), /app/famille owner/proche/none, /famille/rejoindre accept flow, admin /app/admin/cadeaux via nav-admin-trigger -> nav-admin-gifts (stats, create, PDF, cancel, promo save), /app/account links all work. Found 1 HIGH integration bug (proche blocked by frontend paywall on /app/challenges/new) and 1 MEDIUM UX bug (code auto-format corrupts a code typed character-by-character including the 'GQ-' prefix). Gift promo left DISABLED with defaults (verified via API).",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {"endpoint": "POST /api/gifts/redeem", "issue": "Lifetime premium users without plan_expires_at (e.g. admin-type lifetime accounts) redeeming a gift get base=now and plan_expires_at=now+365 -> they LOSE lifetime access. Should skip setting expiry (or keep lifetime) when user has no plan_expires_at and is premium."},
+      {"endpoint": "GET /api/gifts/{code}/carte.pdf", "issue": "PDF still served for cancelled codes (no status check). Low risk (needs pdf_key) but a cancelled card can still be printed/shared."},
+      {"endpoint": "POST /api/gifts/checkout", "issue": "origin_url is not validated against allowed origins (success/cancel URL can point to any domain - open redirect after Stripe payment)."},
+      {"endpoint": "POST /api/famille/invitation/{token}/accept", "issue": "Invitation is not bound to the invited email (any logged-in user with link can accept) and a Famille owner can accept another family's invite (becomes owner + proche). Acceptable for MVP, flag for product decision."}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "Activer code input (lib/gifts.js formatCodeInput)", "issue": "Typing the printed code key-by-key 'GQ-U3VS-K972' yields 'GQ-GQU3-VSK9' (first 'G' is auto-prefixed to 'GQ-G', then the typed 'Q' is kept as code char). Lookup then returns 'introuvable'. Paste and typing without prefix work. Seniors will typically type the code exactly as printed. Fix: don't auto-prefix while the raw input is only 'G'/'GQ' (or strip a leading 'GQ' from the raw value before stripping non-alnum only when input already begins with 'GQ-'), or format on blur.", "selector": "[data-testid='activer-code-input']", "priority": "MEDIUM"}
+    ],
+    "integration_issues": [
+      {"flow": "Proche (free plan) launches a family challenge", "issue": "ChallengeNew.jsx line 21 gates on user.plan !== 'premium' and shows 'Réservé aux Premium'. Proches who joined a family (backend allows POST /api/challenges, verified 200) are blocked from 'Lancer un défi' (famille-new-challenge). Core promise of the new Famille model broken in UI. Fix: expose family access in /api/auth/me (e.g. has_family_access / family_owner_id) or call GET /api/famille in ChallengeNew and allow role owner/proche.", "affected_selectors": ["[data-testid='famille-new-challenge']", "/app/challenges/new"]}
+    ],
+    "design_issues": [
+      {"screen": "/offrir mobile 390px - FamilyAccessTable", "issues": ["Table 3rd column ('LES 4 PROCHES' / 'Abonnement personnel nécessaire') is clipped at the right edge inside its container (no page overflow, but text cut). Consider stacked card layout on mobile."]},
+      {"screen": "/app/admin/cadeaux promo form", "issues": ["Native browser date inputs (shown as mm/dd/yyyy) instead of shadcn calendar; inconsistent with French UI.", "Create-code form fields not cleared after successful creation."]},
+      {"screen": "/app/account", "issues": ["Subscription badge shows generic 'Premium actif' - plan name (Famille/Solo) not shown.", "Two similar fields: 'Ajouter un code cadeau' (promo code input, placeholder FAMILLE2026) rejects GQ- gift codes with 'Code invalide ou expiré' while a separate link 'Activer une carte cadeau (GQ-…)' exists - confusing; rename promo field to 'code promo' or route GQ- codes to /api/gifts/redeem."]},
+      {"screen": "/offrir?offre=solo", "issues": ["Hero always advertises Famille offer/price even when Solo is preselected (design choice, but may confuse)."]},
+      {"screen": "/app/famille mobile", "issues": ["Leaderboard row cramped at 390px ('0 parties · 0 %' wraps over 2 lines)."]}
+    ]
+  },
+  "test_report_links": ["/app/backend/tests/test_iteration50_gifts_family.py", "/app/backend/tests/it50_ui_prep.py", "/app/test_reports/pytest/pytest_it50.xml"],
+  "action_items": [
+    "HIGH: Allow family proches through ChallengeNew.jsx gate (currently user.plan !== 'premium' paywall) - expose family access flag in /api/auth/me or query /api/famille.",
+    "MEDIUM: Fix formatCodeInput so a code typed char-by-char including 'GQ-' is not corrupted.",
+    "Gift redeem must not downgrade lifetime premium users (no plan_expires_at) to a 1-year expiry.",
+    "Optional: block PDF for cancelled codes; validate origin_url; make FamilyAccessTable readable on 390px; clarify promo-code vs gift-code fields on /app/account."
+  ],
+  "critical_code_review_comments": [
+    "routers/gifts.py gift_redeem: `except (KeyError, TypeError, ValueError): pass` silently sets base=now for lifetime users -> lifetime lost.",
+    "routers/gifts.py gift_order_status reads tx before update; fulfil is idempotent via unique session_id index - OK.",
+    "routers/family.py OWNER_TIERS includes generic 'premium' tier, but promo-code (FAMILLE2026) redemptions only set plan='premium' without plan_tier, so promo users are NOT family owners - confirm intended.",
+    "ChallengeNew.jsx frontend gate out of sync with backend has_family_access gate.",
+    "PrintedBookPricing CTA is a mailto: link (no checkout) while legacy gift_livre package is now rejected by /checkout/session - confirm intended."
+  ],
+  "updated_files": ["/app/backend/tests/test_iteration50_gifts_family.py", "/app/backend/tests/it50_ui_prep.py"],
+  "success_rate": {"backend": "100% (11/11)", "frontend": "~90% (1 integration bug, 1 input-format bug)"},
+  "test_credentials": "admin@generaquiz.fr / pF44gVBfLdushm3NZ6dN (from /app/memory/test_credentials.md). TEST_ users created via register: test_it50ui_{act,owner,proche,nofam}_*@example.com / Test1234!",
+  "seed_data_creation": "Created TEST_ users and ~9 admin gift codes (recipient TEST_Mamie / TEST_UI_Recip); un-redeemed ones cancelled. Promo was temporarily enabled then reset to defaults (enabled:false, 2026-12-01..2026-12-24, 79/69) - verified.",
+  "retest_needed": true,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Run pytest tests/test_iteration50_gifts_family.py with -p no:xdist -o addopts=''. Admin dashboard shows onboarding-tour-overlay after login: click 'Passer la visite' before clicking nav-admin-trigger -> nav-admin-gifts. Retest: proche clicking famille-new-challenge should reach challenge creation; activer-code-input typing 'GQ-XXXX-XXXX' char-by-char.",
+  "rca of the issue": "Proche paywall: ChallengeNew.jsx checks only user.plan; user_to_public (/auth/me) doesn't expose family_owner_id/family access so the frontend can't know the user is a proche. Repro: owner redeems Famille code, invites proche, proche accepts, proche opens /app/famille -> 'Lancer un défi' -> 'Réservé aux Premium'. Code format: formatCodeInput('G') returns 'GQ-G'; next keystroke 'Q' -> raw 'GQ-GQ' -> strips leading GQ once -> 'GQ' kept as code chars -> 'GQ-GQ'."
+}

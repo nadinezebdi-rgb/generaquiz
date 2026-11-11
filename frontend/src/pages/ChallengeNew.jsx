@@ -13,19 +13,30 @@ export default function ChallengeNew() {
   const [num, setNum] = useState(5);
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState("");
+  const [familyRole, setFamilyRole] = useState(null);
 
   useEffect(() => {
     api.get("/categories").then((r) => setCategories(r.data)).catch(() => {});
   }, []);
 
-  if (user && user.plan !== "premium") {
+  useEffect(() => {
+    if (user && user.plan !== "premium") {
+      api.get("/famille").then((r) => setFamilyRole(r.data.role)).catch(() => setFamilyRole("none"));
+    }
+  }, [user]);
+
+  if (user && user.plan !== "premium" && familyRole === null) {
+    return <div className="min-h-screen paper-bg"><Navbar variant="app" /></div>;
+  }
+
+  if (user && user.plan !== "premium" && familyRole === "none") {
     return (
       <div className="min-h-screen paper-bg">
         <Navbar variant="app" />
         <main className="max-w-2xl mx-auto px-4 py-16 text-center">
           <Crown className="w-16 h-16 text-mustard mx-auto mb-4" strokeWidth={2} />
-          <h1 className="font-display text-3xl font-extrabold text-navy mb-3">Réservé aux Premium</h1>
-          <p className="text-navy/70 text-lg mb-7">Le mode Défi Famille est inclus dans l'abonnement Premium.</p>
+          <h1 className="font-display text-3xl font-extrabold text-navy mb-3">Réservé aux abonnés et à leur famille</h1>
+          <p className="text-navy/70 text-lg mb-7">Le Défi Famille est inclus dans Solo et Famille, et ouvert gratuitement aux proches invités dans un espace famille.</p>
           <Link to="/app/pricing" className="inline-flex items-center gap-2 bg-terracotta hover:bg-terracotta-dark text-white font-bold px-6 py-4 rounded-full shadow-warm">
             Voir les tarifs
           </Link>

@@ -1,0 +1,39 @@
+{
+  "summary": "Tested the 4 features in this batch, backend and frontend: mini-quiz claim after signup, WhatsApp challenge (OG page, banner, outcome), Facebook share buttons and Lucette streak (device and account). Backend: 18/19 pytest passed, 1 skipped (no leagues/me endpoint; league_scores checked directly in Mongo instead). The one failure is a streak-merge edge case. Frontend: all requested UI flows passed on desktop and mobile 390px, and every throwaway TEST_ user was deleted.",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {"endpoint": "POST /api/tips/streak/merge", "issue": "If the account has already answered today (e.g. count=1, last_date=today), merging a device streak from yesterday with a higher count (4) replaces the account state with last_date=yesterday (answered_today becomes false). The user can then POST /tips/streak/answer again today, so today counts twice (result: 5). Reproduced in test_merge_after_answer_today_no_double_count. Fix: when the account's last_date == today, never revert to an older last_date. If the account answered correctly today and the device streak is from yesterday and still alive, combine them as device.count + 1."},
+      {"endpoint": "POST /api/tips/streak/merge", "issue": "The device streak is trusted from the client: count/best up to 3660 with last_date=today and last_result=true are accepted without checking. This is acceptable for localStorage by design, but it lets anyone set a fake streak on their account. Fine unless streaks feed rewards or badges."},
+      {"endpoint": "POST /api/mini-quiz/claim", "issue": "mini_week is taken from the first question id only. A payload mixing this week's and last week's ids is accepted. The idempotency check uses find_one then insert_one with no unique index, so two simultaneous calls could insert two attempts. Low risk."}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [
+      {"flow": "Visitor mini-quiz claim", "issue": "takePendingMini() deletes gq_pending_mini before the claim request. If the request fails (network or 5xx), the score is lost. Remove the key only after success, or after a 400.", "affected_selectors": []}
+    ],
+    "design_issues": [
+      {"screen": "Mini-quiz challenge", "issues": ["Typing 'Mamie <b>Jeanne</b>' gives the name 'Mamie bJeanneb': symbols are stripped but the tag letters stay. Cosmetic.", "Only one pending visitor mini-quiz is kept: playing a second theme overwrites the first."]}
+    ]
+  },
+  "test_report_links": ["/app/backend/tests/test_iteration48_miniquiz_claim_defi_streak.py", "/app/test_reports/pytest/pytest_it48.xml"],
+  "action_items": [
+    "Fix /api/tips/streak/merge so an account that answered today is never reverted to an older last_date (stops today counting twice)",
+    "Optional: in VisitorProgressSync, remove gq_pending_mini only after a successful claim (or after a 400)",
+    "Optional: add a unique index on attempts (user_id, source, category_id, mini_week) for mini_quiz"
+  ],
+  "critical_code_review_comments": [
+    "tips.py streak_merge: take_device ignores whether the account already answered today (bug above).",
+    "visitorProgress.takePendingMini removes the key before the API call succeeds.",
+    "quiz.claim_mini_quiz: correctly recomputes the score on the server, adds no XP or league points, and records mastery and badges (first_quiz awarded, league_scores empty, xp_total 0 checked in Mongo).",
+    "share.py: name cleaned with regex and escaped, and the page is urlencoded before being put in the script with repr, so no XSS found."
+  ],
+  "updated_files": ["/app/backend/tests/test_iteration48_miniquiz_claim_defi_streak.py"],
+  "success_rate": {"backend": "95% (18/19, 1 skipped)", "frontend": "100%"},
+  "seed_data_creation": "Throwaway TEST_it48_* users were created and then deleted with DELETE /api/auth/account (0 left). The admin account was not touched.",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Today's tip is 2026-11-11; its quiz correct_index is 1. Confirmed working: visitor mini-quiz on chansons, then register via /register?next=/app/quiz/chansons gives the toast with the score, the pending key is removed and the attempt has source mini_quiz. Logged-in claim on cinema shows the toast 'Score ajouté à votre historique'. Challenge banner and all 3 outcomes (beat, tie, lose) work; score=9 shows no banner; the OG redirect lands on the page with the banner. Facebook hrefs are correct on the archive and on daily-tip-card. Anonymous streak works: wrong answer, reload keeps it answered, simulated 4 becomes 5, an expired streak restarts at 1. Logged-in UI streak updates from the server. No overflow at 390px. The only console errors are expected 401s on /api/auth/me for anonymous visitors.",
+  "rca of the issue": "streak_merge sets take_device = device_live and (not account_live or body.count > account.count). device_live accepts last_date=yesterday, so a higher yesterday count from the device overwrites an account that already answered today. streak_answer then sees last_date != today and counts today a second time. Repro: new user, POST /tips/streak/answer {choice:1}, then POST /tips/streak/merge {count:4,best:4,last_date:'2026-11-10',last_result:true}, then POST /tips/streak/answer {choice:1} gives count 5."
+}

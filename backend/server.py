@@ -51,6 +51,12 @@ from routers import admin_analytics as admin_analytics_router
 from routers import charades as charades_router
 from routers import mots_meles as mots_meles_router
 from routers import mots_fleches as mots_fleches_router
+from routers import tips as tips_router
+from routers import share as share_router
+from routers import testimonials as testimonials_router
+from routers import site_settings as site_settings_router
+from routers import gifts as gifts_router
+from routers import family as family_router
 from routers import bien_vieillir as bien_vieillir_router
 from routers.referral import generate_referral_code_for
 
@@ -141,6 +147,12 @@ api.include_router(admin_analytics_router.router)
 api.include_router(charades_router.router)
 api.include_router(mots_meles_router.router)
 api.include_router(mots_fleches_router.router)
+api.include_router(tips_router.router)
+api.include_router(share_router.router)
+api.include_router(testimonials_router.router)
+api.include_router(site_settings_router.router)
+api.include_router(gifts_router.router)
+api.include_router(family_router.router)
 api.include_router(bien_vieillir_router.router)
 app.include_router(api)
 
@@ -176,6 +188,9 @@ async def startup():
     await db.challenges.create_index("token", unique=True)
     await db.challenges.create_index([("creator_user_id", 1), ("created_at", -1)])
     await db.promo_codes.create_index("code", unique=True)
+    await gifts_router.ensure_gift_indexes()
+    await db.family_proches.create_index("token", unique=True)
+    await db.family_proches.create_index([("owner_id", 1), ("status", 1)])
 
     # -- QA jobs sweep — au startup, TOUS les jobs "running" sont zombies
     # (leur PID a été tué par le restart et peut avoir été réattribué). On
@@ -183,15 +198,23 @@ async def startup():
     from routers.admin_qa import (
         sweep_running_jobs_on_startup,
         _dequeue_next,
+        qa_watchdog_loop,
     )
     await sweep_running_jobs_on_startup()
     # Puis on dépile les jobs restés "queued" avant le restart — sinon ils
     # attendent indéfiniment qu'un running (qui n'existe plus) finisse.
     import asyncio as _asyncio
     _asyncio.create_task(_dequeue_next())
+    # Watchdog : reprend les jobs orphelins (heartbeat mort) depuis leur checkpoint
+    _asyncio.create_task(qa_watchdog_loop())
     await db.password_reset_tokens.create_index("token", unique=True)
     await db.password_reset_tokens.create_index("expires_at", expireAfterSeconds=0)
     await db.daily_attempts.create_index([("user_id", 1), ("date_key", 1)], unique=True)
+    await db.daily_quizzes.create_index("date_key", unique=True)
+    await db.attempts.create_index(
+        [("user_id", 1), ("source", 1), ("category_id", 1), ("mini_week", 1)],
+        unique=True, partialFilterExpression={"source": "mini_quiz"}, name="uniq_mini_quiz_claim",
+    )
     await db.daily_attempts.create_index([("date_key", 1), ("score", -1), ("duration_seconds", 1)])
     # Gamification indexes
     await db.credit_ledger.create_index([("user_id", 1), ("created_at", -1)])
@@ -238,6 +261,18 @@ async def startup():
             if cat_qs:
                 await db.questions.insert_many([{**q} for q in cat_qs])
                 logger.info(f"[seed] catégorie '{cat['id']}' vide → {len(cat_qs)} questions seed insérées")
+
+    # Questions seed « Bien vieillir » réécrites (aucune allégation médicale) :
+    # on met à jour les anciennes versions et on les renvoie au contrôle IA.
+    from seed_data import BIEN_VIEILLIR_QUESTIONS
+    for q in BIEN_VIEILLIR_QUESTIONS:
+        r = await db.questions.update_one(
+            {"id": q["id"], "$or": [{"question": {"$ne": q["question"]}}, {"explanation": {"$ne": q["explanation"]}}]},
+            {"$set": {k: q[k] for k in ("question", "options", "correct_index", "explanation", "discussion_prompt") if k in q},
+             "$unset": {"quality": "", "fact_check": ""}},
+        )
+        if r.modified_count:
+            logger.info(f"[seed] question {q['id']} (bien-vieillir) mise à jour")
 
     # Enrichit les questions existantes avec des relances de conversation EHPAD
     from discussion_prompts import enrich_existing_questions
@@ -388,6 +423,9 @@ async def startup():
 
     # Schedule all cron jobs (voir scheduler.py pour la matrice complète)
     start_scheduler()
+    # Conseil du jour : 1 seul appel IA léger si absent (pas de subprocess)
+    from daily_tips import daily_tip_job
+    _asyncio.create_task(daily_tip_job())
 
     # NOTE : l'auto-seed au startup a été DÉSACTIVÉ car il lançait 2 subprocess
     # Mistral+Opus en même temps que le boot → pic mémoire → OOM du pod prod

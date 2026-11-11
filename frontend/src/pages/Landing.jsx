@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
   Play, Users, Heart, Sparkles, Check, ArrowRight, Star,
-  Brain, Music, Film, Phone, Landmark, Utensils, Book,
+  Brain, Music, Film, Phone, Landmark, Utensils, Book, HeartPulse, Map as MapIcon,
 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -13,15 +13,22 @@ import HowItWorksSection from "@/components/HowItWorksSection";
 import PrintedBookPricing from "@/components/PrintedBookPricing";
 import ProPricing from "@/components/ProPricing";
 import HeroPhoneDemo from "@/components/HeroPhoneDemo";
+import { themePath } from "@/pages/ThemeShowcase";
+import { mascotSrc } from "@/lib/mascot";
 import TestimonialsSection from "@/components/TestimonialsSection";
 import { api, BACKEND_URL } from "@/lib/api";
 import { PLANS, pricePresentation, annualDiscountBadge, fmt } from "@/config/pricing";
 
-const ICON_MAP = { tv: Film, music: Music, film: Film, phone: Phone, landmark: Landmark, utensils: Utensils, sparkles: Sparkles, book: Book };
+const ICON_MAP = { tv: Film, music: Music, film: Film, phone: Phone, landmark: Landmark, utensils: Utensils, sparkles: Sparkles, book: Book, heart: HeartPulse, map: MapIcon };
 
 export default function Landing() {
   const [categories, setCategories] = useState([]);
   const [packages, setPackages] = useState([]);
+  const [testimonials, setTestimonials] = useState([]);
+
+  useEffect(() => {
+    api.get("/testimonials").then((r) => setTestimonials(r.data)).catch(() => {});
+  }, []);
 
   useEffect(() => {
     api.get("/categories").then((r) => setCategories(r.data)).catch(() => {});
@@ -58,16 +65,18 @@ export default function Landing() {
             </p>
 
             {/* Rating + social proof line */}
+            {testimonials.length >= 3 && (
             <div className="flex items-center gap-3 mb-8 flex-wrap" data-testid="hero-rating">
               <div className="flex items-center gap-0.5" aria-label="5 étoiles sur 5">
                 {Array.from({ length: 5 }).map((_, i) => (
                   <Star key={i} className="w-5 h-5 text-mustard-dark fill-mustard-dark" />
                 ))}
               </div>
-              <span className="text-sm font-bold text-navy/80">
-                Déjà adopté par des familles partout en France
-              </span>
+                <span className="text-sm font-bold text-navy/80" data-testid="hero-adoption-line">
+                  Déjà adopté par des familles partout en France
+                </span>
             </div>
+            )}
 
             <div className="flex flex-col sm:flex-row gap-4">
               <Link
@@ -116,7 +125,7 @@ export default function Landing() {
       </section>
 
       {/* ============ TESTIMONIALS ============ */}
-      <TestimonialsSection />
+      <TestimonialsSection items={testimonials} />
 
       {/* ============ DAILY QUIZ CTA ============ */}
       <section className="py-12 lg:py-16">
@@ -212,7 +221,7 @@ export default function Landing() {
                     className="absolute -top-12 -right-12 w-48 h-48 rounded-full opacity-15 group-hover:opacity-25 transition"
                     style={{ backgroundColor: cat.color }}
                   />
-                  {cat.id === "voyages-france" && (
+                  {cat.id === "bien-vieillir" && (
                     <span
                       data-testid={`category-badge-nouveau-${cat.id}`}
                       className="absolute top-3 right-3 z-10 inline-flex items-center gap-1 bg-terracotta text-white text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full shadow-warm"
@@ -223,7 +232,8 @@ export default function Landing() {
                   <div className="relative">
                     <div className="aspect-square w-32 mx-auto rounded-3xl overflow-hidden bg-cream border-2 border-cream-dark mb-5">
                       <img
-                        src={`${BACKEND_URL}${cat.mascot_image}`}
+                        src={mascotSrc(cat.mascot_image, "md")}
+                        loading="lazy"
                         alt={cat.mascot_name}
                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                       />
@@ -240,7 +250,8 @@ export default function Landing() {
                       </span>
                     </div>
                     <Link
-                      to="/register"
+                      to={themePath(cat.id)}
+                      data-testid={`category-discover-${cat.id}`}
                       className="mt-5 w-full inline-flex items-center justify-center gap-2 px-5 py-3 rounded-full bg-navy text-white font-bold hover:bg-terracotta transition"
                     >
                       Découvrir <ArrowRight className="w-4 h-4" />
@@ -262,7 +273,7 @@ export default function Landing() {
       {/* ============ PLATFORM (activities + word games) ============ */}
       <PlatformSection />
 
-      {/* ============ PRICING (aperçu Découverte / Solo / Famille / Héritage) ============ */}
+      {/* ============ PRICING (aperçu Découverte / Solo / Famille, prix annuels) ============ */}
       <section id="tarifs" className="py-20 lg:py-28">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-2xl mx-auto mb-10">
@@ -275,11 +286,11 @@ export default function Landing() {
             </p>
             <p className="mt-3 text-sm text-terracotta font-bold">
               <Sparkles className="w-3.5 h-3.5 inline mr-1" />
-              {annualDiscountBadge()} en formule annuelle
+              {annualDiscountBadge()}
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
+          <div className="grid md:grid-cols-3 gap-5 mb-10 max-w-5xl mx-auto">
             {PLANS.map((p) => <LandingPlanCard key={p.id} plan={p} />)}
           </div>
 
@@ -305,67 +316,37 @@ export default function Landing() {
 }
 
 function LandingPlanCard({ plan }) {
-  // Aperçu depuis la Landing : vue annuelle (mise en avant de l'économie), CTA vers /app/pricing.
   const pres = pricePresentation(plan, "yearly");
-  const isFree = plan.mensuel === 0 && plan.annuel === 0;
-  const ctaTo = plan.ctaTo || "/app/pricing";
+  const featured = Boolean(plan.badge);
   return (
     <div
       data-testid={`landing-plan-${plan.id}`}
-      className={`relative bg-white rounded-3xl p-6 border-2 flex flex-col ${
-        plan.populaire
-          ? "border-terracotta shadow-warm ring-4 ring-terracotta/15 scale-[1.02]"
-          : "border-cream-dark"
-      }`}
+      className={`relative bg-white rounded-3xl p-6 border-2 flex flex-col ${featured ? "border-terracotta shadow-warm ring-4 ring-terracotta/15" : "border-cream-dark"}`}
     >
-      {plan.populaire && (
-        <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-terracotta text-white text-[11px] font-extrabold uppercase tracking-widest px-3 py-1 rounded-full inline-flex items-center gap-1 shadow-warm">
-          <Star className="w-3 h-3 fill-current" /> Le plus populaire
+      {featured && (
+        <span className="absolute -top-3 left-1/2 -translate-x-1/2 whitespace-nowrap bg-terracotta text-white text-[11px] font-extrabold uppercase tracking-widest px-3 py-1 rounded-full shadow-warm">
+          {plan.badge}
         </span>
       )}
       <h3 className="font-display text-2xl font-extrabold text-navy mb-1">{plan.nom}</h3>
-      <p className="text-sm text-navy/60 mb-4 min-h-[36px]">{plan.tagline}</p>
-
-      <div className="mb-4">
-        {pres.reference != null && pres.reference !== plan.annuel && (
-          <div className="text-sm text-navy/40 line-through">{fmt(pres.reference)}</div>
-        )}
-        <div className="flex items-baseline gap-1">
-          <span className="font-display text-4xl font-extrabold text-bordeaux">{pres.main}</span>
-          {pres.suffix && <span className="text-sm text-navy/60">{pres.suffix}</span>}
-        </div>
-        {pres.monthlyEquivalent != null && (
-          <p className="text-xs text-navy/50 mt-1">soit {fmt(pres.monthlyEquivalent)}/mois</p>
-        )}
-        {pres.economie != null && pres.economie > 0 && (
-          <span className="inline-flex items-center gap-1 bg-[#3D9970]/15 text-[#2A7350] font-bold px-2 py-0.5 rounded-full text-xs mt-2">
-            <Sparkles className="w-3 h-3" /> Économisez {fmt(pres.economie)} (−{pres.pourcentage} %)
-          </span>
-        )}
-        {isFree && <p className="text-xs text-navy/50 mt-1">Sans carte bancaire · à vie</p>}
+      <p className="text-sm text-navy/60 mb-4">{plan.tagline}</p>
+      <div className="flex items-baseline gap-1 mb-4">
+        <span className="font-display text-4xl font-extrabold text-bordeaux">{pres.main}</span>
+        {pres.suffix && <span className="text-sm text-navy/60">{pres.suffix}</span>}
       </div>
-
-      <p className="text-xs text-navy/50 mb-3 uppercase tracking-wider font-bold">
-        {plan.comptes} compte{plan.comptes > 1 ? "s" : ""}
-      </p>
-
+      <p className="text-xs text-navy/60 mb-3 uppercase tracking-wider font-bold">{plan.acces}</p>
       <ul className="space-y-2 mb-5 flex-1">
-        {plan.features.slice(0, 5).map((f) => (
+        {plan.features.slice(0, 4).map((f) => (
           <li key={f} className="flex items-start gap-2 text-sm text-navy/80">
             <Check className="w-4 h-4 mt-0.5 shrink-0 text-terracotta" strokeWidth={3} />
             <span>{f}</span>
           </li>
         ))}
       </ul>
-
       <Link
-        to={ctaTo}
+        to={plan.ctaTo || "/app/pricing"}
         data-testid={`landing-plan-cta-${plan.id}`}
-        className={`w-full inline-flex items-center justify-center gap-2 font-bold px-5 py-3 rounded-full transition min-h-[52px] ${
-          plan.populaire
-            ? "bg-terracotta text-white hover:bg-terracotta-dark shadow-warm"
-            : "bg-navy text-cream hover:bg-navy-dark"
-        }`}
+        className={`w-full inline-flex items-center justify-center gap-2 font-bold px-5 py-3 rounded-full transition-colors min-h-[52px] ${featured ? "bg-terracotta text-white hover:bg-terracotta-dark" : "bg-navy text-cream hover:bg-navy-dark"}`}
       >
         {plan.cta} <ArrowRight className="w-4 h-4" />
       </Link>

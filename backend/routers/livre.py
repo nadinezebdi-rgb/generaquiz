@@ -451,6 +451,7 @@ _CATEGORY_TO_CHAPTER: dict[str, str] = {
     "histoire-france": "evenements",
     "annees-50-60": "adolescence",
     "objets-antan": "enfance",
+    "bien-vieillir": "transmission",
 }
 
 
@@ -836,6 +837,7 @@ QUIZ_MEMORY_MAP: dict[str, dict] = {
     "sport":            {"chapter_id": "passions",    "prompt_hint": "Un moment de sport dont vous êtes fier(ère) ?"},
     "geographie":       {"chapter_id": "voyages",     "prompt_hint": "Une destination qui vous a émerveillé(e) ?"},
     "voyages-france":   {"chapter_id": "voyages",     "prompt_hint": "Où passiez-vous vos vacances quand vous étiez jeune ?"},
+    "bien-vieillir":    {"chapter_id": "transmission", "prompt_hint": "Quel est votre secret pour garder la forme et le moral ?"},
     "histoire":         {"chapter_id": "evenements", "prompt_hint": "Un événement historique que vous avez vécu — racontez."},
     "litterature":      {"chapter_id": "passions",    "prompt_hint": "Un livre qui vous a marqué(e) ?"},
     "sciences":         {"chapter_id": "ecole",       "prompt_hint": "Une matière ou expérience qui vous a fasciné(e) à l'école ?"},

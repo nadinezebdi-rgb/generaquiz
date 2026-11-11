@@ -6,9 +6,11 @@ and recomputes the score. Client-declared scores are IGNORED — this
 plugs the cheating vector where the browser console could send
 `{score:999,total:999}` to auto-win in the leagues.
 """
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 from fastapi import APIRouter, Depends, HTTPException
+from pydantic import BaseModel, Field
+from pymongo.errors import DuplicateKeyError
 
 from core import db, get_current_user, AttemptCreate, is_premium_active
 from routers.referral import grant_referral_bonus_if_eligible
@@ -20,7 +22,70 @@ router = APIRouter(tags=["quiz"])
 
 @router.get("/categories")
 async def list_categories():
-    return await db.categories.find({}, {"_id": 0}).to_list(100)
+    cats = await db.categories.find({}, {"_id": 0}).to_list(100)
+    counts = {d["_id"]: d["n"] async for d in db.questions.aggregate([
+        {"$match": {"quality": {"$ne": "flagged"}}},
+        {"$group": {"_id": "$category_id", "n": {"$sum": 1}}},
+    ])}
+    for c in cats:
+        c["count"] = counts.get(c["id"], 0)
+    return cats
+
+
+async def _weekly_pick(category_id: str, weeks_ago: int = 0) -> tuple[list[str], list[str]]:
+    """Tirage déterministe de la semaine ISO : [0:6] exemples, [6:9] mini-quiz."""
+    import random
+    ids = sorted([d["id"] async for d in db.questions.find(
+        {"category_id": category_id, "quality": "verified"}, {"_id": 0, "id": 1})])
+    year, week, _ = (datetime.now(timezone.utc) - timedelta(weeks=weeks_ago)).isocalendar()
+    return ids, random.Random(f"{category_id}-{year}-{week}").sample(ids, min(9, len(ids)))
+
+
+@router.get("/categories/{category_id}/showcase")
+async def category_showcase(category_id: str):
+    """Page publique d'un thème : 6 questions vérifiées, renouvelées chaque semaine."""
+    cat = await db.categories.find_one({"id": category_id}, {"_id": 0})
+    if not cat:
+        raise HTTPException(status_code=404, detail="Catégorie introuvable")
+    ids, picked = await _weekly_pick(category_id)
+    docs = {q["id"]: q async for q in db.questions.find(
+        {"id": {"$in": picked}},
+        {"_id": 0, "id": 1, "question": 1, "options": 1, "correct_index": 1,
+         "explanation": 1, "discussion_prompt": 1, "difficulty": 1},
+    )}
+    shown = sorted((docs[i] for i in picked[:6] if i in docs), key=lambda q: (q.get("difficulty") or 9, q["id"]))
+    samples = [{"question": q["question"], "answer": q["options"][q["correct_index"]],
+                "explanation": q.get("explanation", ""), "discussion_prompt": q.get("discussion_prompt")}
+               for q in shown]
+    # Mini-quiz : 3 autres questions, sans la bonne réponse (vérifiée côté serveur)
+    mini = sorted((docs[i] for i in picked[6:9] if i in docs), key=lambda q: q.get("difficulty") or 9)
+    mini_quiz = [{"id": q["id"], "question": q["question"], "options": q["options"]} for q in mini]
+    others = await db.categories.find(
+        {"id": {"$ne": category_id}}, {"_id": 0, "id": 1, "title": 1, "mascot_image": 1, "color": 1}
+    ).to_list(50)
+    return {"category": {**cat, "count": len(ids)}, "samples": samples, "mini_quiz": mini_quiz, "others": others}
+
+
+class MiniQuizAnswer(BaseModel):
+    question_id: str
+    choice: int = Field(..., ge=0, le=5)
+
+
+@router.post("/categories/{category_id}/mini-quiz/answer")
+async def mini_quiz_answer(category_id: str, body: MiniQuizAnswer):
+    """Correction publique, limitée aux 3 questions du mini-quiz de la semaine
+    (ou de la précédente, pour une page ouverte avant lundi)."""
+    allowed = set((await _weekly_pick(category_id))[1][6:9]) | set((await _weekly_pick(category_id, 1))[1][6:9])
+    if body.question_id not in allowed:
+        raise HTTPException(status_code=404, detail="Question introuvable")
+    q = await db.questions.find_one(
+        {"id": body.question_id, "category_id": category_id, "quality": "verified"},
+        {"_id": 0, "correct_index": 1, "explanation": 1},
+    )
+    if not q:
+        raise HTTPException(status_code=404, detail="Question introuvable")
+    return {"correct": body.choice == q["correct_index"], "correct_index": q["correct_index"],
+            "explanation": q.get("explanation", "")}
 
 
 @router.get("/categories/{category_id}/questions")
@@ -195,6 +260,53 @@ async def save_attempt(body: AttemptCreate, user: dict = Depends(get_current_use
         "referral_bonus_granted": bonus_granted,
         "awarded_badges": awarded_badges,
     }
+
+
+class MiniClaimAnswer(BaseModel):
+    question_id: str
+    choice: int = Field(..., ge=0, le=5)
+
+
+class MiniClaim(BaseModel):
+    category_id: str
+    answers: list[MiniClaimAnswer] = Field(..., min_length=1, max_length=3)
+
+
+@router.post("/mini-quiz/claim")
+async def claim_mini_quiz(body: MiniClaim, user: dict = Depends(get_current_user)):
+    """Rattache au nouveau compte le mini-quiz joué en visiteur. Score recalculé
+    côté serveur ; une seule fois par thème et par semaine ; pas d'XP de ligue."""
+    week_ids = {}
+    for weeks_ago in (0, 1):
+        for qid in (await _weekly_pick(body.category_id, weeks_ago))[1][6:9]:
+            week_ids.setdefault(qid, weeks_ago)
+    qids = [a.question_id for a in body.answers]
+    if len(set(qids)) != len(qids) or any(q not in week_ids for q in qids) \
+            or len({week_ids[q] for q in qids}) != 1:
+        raise HTTPException(status_code=400, detail="Mini-quiz expiré ou invalide")
+    year, week, _ = (datetime.now(timezone.utc) - timedelta(weeks=week_ids[qids[0]])).isocalendar()
+    mini_week = f"{year}-W{week:02d}"
+    user_id = str(user["_id"])
+    if await db.attempts.find_one({"user_id": user_id, "source": "mini_quiz",
+                                   "category_id": body.category_id, "mini_week": mini_week}):
+        return {"ok": True, "already_claimed": True}
+    correct_map = {d["id"]: int(d["correct_index"]) async for d in db.questions.find(
+        {"id": {"$in": qids}}, {"_id": 0, "id": 1, "correct_index": 1})}
+    score = sum(1 for a in body.answers if correct_map.get(a.question_id) == a.choice)
+    total = len(body.answers)
+    try:
+        await db.attempts.insert_one({
+            "user_id": user_id, "category_id": body.category_id, "score": score, "total": total,
+            "duration_seconds": 0, "source": "mini_quiz", "mini_week": mini_week,
+            "created_at": datetime.now(timezone.utc).isoformat(),
+        })
+    except DuplicateKeyError:
+        return {"ok": True, "already_claimed": True}
+    await record_category_mastery(user_id, body.category_id, score, total)
+    fresh_user = await db.users.find_one({"_id": user["_id"]}) or user
+    awarded_badges = await check_after_attempt(fresh_user, score, total)
+    return {"ok": True, "already_claimed": False, "score": score, "total": total,
+            "awarded_badges": awarded_badges}
 
 
 @router.get("/attempts")

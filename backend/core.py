@@ -69,33 +69,36 @@ LEAGUE_RELEGATE = 3  # bottom 3 relegate
 
 PACKAGES = {
     # ============ NOUVELLE GRILLE (2026) ============
-    # -- Solo : 1 compte, replace Club Mémoire --
-    "solo_monthly":    {"amount": 6.99,  "currency": "eur", "label": "Solo — Mensuel",
+    # -- Solo : 1 accès personnel complet --
+    "solo_monthly":    {"amount": 4.90,  "currency": "eur", "label": "Solo — Mensuel",
                         "tier": "solo",    "period": "monthly",
-                        "description": "Quiz illimités, Livre de Vie PDF, −20 % sur le livre imprimé"},
-    "solo_yearly":     {"amount": 69.00, "currency": "eur", "label": "Solo — Annuel",
+                        "description": "Quiz illimités, toutes catégories, Livre de Vie PDF"},
+    "solo_yearly":     {"amount": 49.00, "currency": "eur", "label": "Solo — Annuel",
                         "tier": "solo",    "period": "yearly",
-                        "description": "12 mois — économisez 14,88 €"},
-    # -- Famille : 6 comptes + classement familial --
-    "famille_v2_monthly": {"amount": 9.99, "currency": "eur", "label": "Famille — Mensuel",
+                        "description": "12 mois — 2 mois offerts"},
+    # -- Famille : bénéficiaire complet + 4 proches dans l'espace famille --
+    "famille_v2_monthly": {"amount": 7.90, "currency": "eur", "label": "Famille — Mensuel",
                         "tier": "famille_v2", "period": "monthly",
-                        "description": "6 comptes, défis coopératifs, Score Mémoire 5 axes"},
-    "famille_v2_yearly":  {"amount": 99.00,"currency": "eur", "label": "Famille — Annuel",
+                        "description": "Tout Solo + 4 proches invités aux quiz, défis et classements familiaux"},
+    "famille_v2_yearly":  {"amount": 79.00,"currency": "eur", "label": "Famille — Annuel",
                         "tier": "famille_v2", "period": "yearly",
-                        "description": "12 mois — économisez 20,88 €"},
-    # -- Héritage : abonnement annuel + 1 livre imprimé/an --
+                        "description": "12 mois — 2 mois offerts"},
+    # -- Héritage : plus vendu (abonnés existants conservés) --
     "heritage_yearly": {"amount": 159.00,"currency": "eur", "label": "Héritage — Annuel",
-                        "tier": "heritage", "period": "yearly",
-                        "description": "Tout Famille + 1 Livre de Vie imprimé offert chaque année + support prioritaire"},
-    # -- Cadeaux (paiements uniques) --
-    "gift_famille":    {"amount": 99.00, "currency": "eur", "label": "Carte cadeau Famille",
+                        "tier": "heritage", "period": "yearly", "legacy": True,
+                        "description": "Ancienne formule (grandfathering)"},
+    # -- Cadeaux (paiements uniques, montant fixé par routers/gifts.py) --
+    "gift_famille":    {"amount": 79.00, "currency": "eur", "label": "Carte cadeau Famille",
                         "tier": "gift", "period": "one_time",
-                        "description": "1 an Famille — code envoyé par e-mail"},
+                        "description": "1 an Famille — carte PDF à imprimer"},
+    "gift_solo":       {"amount": 49.00, "currency": "eur", "label": "Carte cadeau Solo",
+                        "tier": "gift", "period": "one_time",
+                        "description": "1 an Solo — carte PDF à imprimer"},
     "gift_heritage":   {"amount": 159.00,"currency": "eur", "label": "Coffret Héritage",
-                        "tier": "gift", "period": "one_time",
-                        "description": "1 an Famille + le Livre de Vie imprimé"},
+                        "tier": "gift", "period": "one_time", "legacy": True,
+                        "description": "Ancien coffret"},
     "gift_livre":      {"amount": 79.90, "currency": "eur", "label": "Livre de Vie imprimé",
-                        "tier": "gift", "period": "one_time",
+                        "tier": "gift", "period": "one_time", "legacy": True,
                         "description": "1 Livre imprimé A5 — sans abonnement"},
     # ============ ANCIENS PLANS (grandfathering — conservés) ============
     # Les abonnés existants gardent l'accès à ces packages, non affichés en front

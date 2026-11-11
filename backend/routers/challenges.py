@@ -27,8 +27,9 @@ def _public_challenge(doc: dict, include_correct: bool = False) -> dict:
 
 @router.post("")
 async def create_challenge(body: ChallengeCreate, user: dict = Depends(get_current_user)):
-    if not is_premium_active(user):
-        raise HTTPException(status_code=402, detail="Le Défi Famille est réservé aux membres Premium")
+    from routers.family import has_family_access
+    if not is_premium_active(user) and not await has_family_access(user):
+        raise HTTPException(status_code=402, detail="Le Défi Famille est réservé aux abonnés et à leurs proches invités")
     cat = await db.categories.find_one({"id": body.category_id}, {"_id": 0})
     if not cat:
         raise HTTPException(status_code=404, detail="Catégorie introuvable")

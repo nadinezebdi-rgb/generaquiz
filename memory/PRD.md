@@ -1,5 +1,75 @@
 # Quiz d'Antan — SaaS pour seniors français
 
+## 2026-11-11 — LOT 2 : Offrir GénéraQuiz + nouvel espace famille + nouvelle grille (terminé)
+- **Grille** (`config/pricing.js`, `core.PACKAGES`) : Découverte gratuit · Solo 4,90 €/mois ou 49 €/an · Famille 7,90 €/mois ou 79 €/an (annuel = 10 mensualités → « 2 mois offerts »). Héritage retiré des tableaux (packages `legacy`, abonnés conservés). Un seul prix affiché selon le toggle, plus de prix barré ni d'équivalent mensuel, badge « Pour jouer ensemble ». Livre imprimé = option séparée 79,90 € l'exemplaire (`PrintedBookPricing`, tarif à confirmer après devis impression). CGV mises à jour.
+- **Espace famille** (`routers/family.py`, `/api/famille`, collection `family_proches`) : tout abonné Famille/Héritage = bénéficiaire ; invite jusqu'à 4 proches (e-mail Resend + lien `/famille/rejoindre/:token`). Les proches (`users.family_owner_id`) ont quiz/défis du groupe + classement familial (30 j) gratuitement ; catalogue et Livre de Vie restent payants. Gate `POST /api/challenges` = premium OU accès famille. Pages `/app/famille`, `/famille/rejoindre/:token`.
+- **Cartes cadeau** (`routers/gifts.py`, `gift_card_pdf.py`, collection `gift_codes`) : Famille et Solo 1 an, paiement Stripe invité (`/api/gifts/checkout`), code `GQ-XXXX-XXXX` créé au paiement (webhook ou `/api/gifts/order/{session}`), carte PDF A4 avec QR (`/api/gifts/{code}/carte.pdf?k=`). Activation `/activer` (ou champ code du compte) : 1 an à partir de l'activation, prolonge un abonnement en cours, garde le palier supérieur, conserve un accès à vie.
+- **Promo saisonnière** : `site_settings.gift_promo` (activée, dates, prix normal/promo de la carte Famille ; défauts 79 € / 69 €, désactivée) réglable dans `/app/admin/cadeaux` (aussi liste, stats, codes offerts, annulation, PDF). Visuel Noël sur la page et la carte quand la promo est active.
+- Tests : iteration_50 (backend 11/11) + iteration_51 (17/17, tous correctifs frontend validés).
+
+## 2026-11-11 — LOT 1 : corrections de la page d'accueil (terminé)
+- Témoignages pilotés depuis l'admin : collection `testimonials` (text, first_name, age_role, location, profile SENIOR/FAMILLE/EHPAD, published), `GET /api/testimonials` (public, publiés), CRUD `/api/admin/testimonials`. Page admin `/app/admin/temoignages` (menu Admin → Accueil). Section masquée si 0 publié ; étoiles + « Déjà adopté… » seulement à partir de 3.
+- « En chiffres » : seuils réglables (`site_settings` clé `public_stats_thresholds`, défauts 20 / 50 / 3 pays / série 7) via `GET|PUT /api/admin/site-settings/stats` ; `/api/stats/public` renvoie `visible` + `livre_chapters` ; « Questions au catalogue » = questions non signalées ; < 3 compteurs → bloc masqué. Joueurs du jour calculés depuis minuit heure de Paris.
+- Textes : Mots Fléchés « 5 grilles faciles pour se mettre en jambes » ; doublon Résidence supprimé ; remise annuelle calculée → « Jusqu'à −18 % en formule annuelle » (toggle tarifs : « −18 % ») ; Livre de Vie = 12 chapitres partout (`config/livre.js`).
+- Bien vieillir : règles éditoriales sans allégation médicale (`qa_pipeline.CATEGORY_RULES`) injectées dans les prompts Mistral / top-up / regen et dans le fact-check Opus (allégation → « wrong ») ; questions seed bv6/bv11/bv19 réécrites (migration au démarrage, renvoyées au contrôle). Génération à lancer EN PRODUCTION (« Remplir à 140 »), choix utilisateur.
+- Tests : iteration_49 — backend 10/10, frontend OK ; retours corrigés (espaces vides refusés, étoiles masquées, cartes centrées, libellé court du toggle, bouton Confort + sans retour à la ligne).
+- À venir : LOT 2 (Offrir GénéraQuiz) puis LOT 3 (nouvelles pour les aidants) — plan de fichiers validé par l'utilisateur ; choix : code cadeau = 1 an de la formule, e-mail aux proches dimanche 10 h.
+
+## 2026-11-11 — Score gardé à l'inscription · Défi WhatsApp · Facebook · Série de Lucette
+- **Score du mini-quiz gardé** : visiteur → `localStorage gq_pending_mini` (liste, un par thème, 8 j) ; `VisitorProgressSync` (monté dans App) rattache dès qu'un compte est connecté via `POST /api/mini-quiz/claim` (auth) : score recalculé serveur, ids obligatoirement du mini-quiz de cette semaine ou de la précédente (même semaine pour les 3), une fois par thème/semaine (index unique partiel `uniq_mini_quiz_claim`), attempt `source: "mini_quiz"` + maîtrise + badges, **pas d'XP/ligue**. Clé retirée seulement après succès ou 400. Utilisateur connecté → rattachement immédiat.
+- **Défi entre proches** : écran de score → prénom + « Envoyer sur WhatsApp » (lien `/api/share/defi/{cat}?n=&s=`). `GET /api/share/defi/{cat}` = page OG (image `static/share/defi-{cat}.jpg` 1200×630 générée pour les 10 thèmes, prénom nettoyé) → redirige vers la page thème `?defi=&score=#mini-quiz` : bandeau « X a fait N/3 — à vous de faire mieux ! » + verdict final (bat / égalité / revanche).
+- **Facebook** : bouton « Partager sur Facebook » (sharer.php + share_url OG) à côté de WhatsApp (carte du conseil, archive).
+- **Série de Lucette** : question du jour seulement (date Paris). Appareil : `gq_tip_streak` (count, best, last_date, last_result, réponses 14 j → question restée répondue au rechargement). Compte : `users.tip_streak` ; `GET /api/tips/streak/me`, `POST /api/tips/streak/answer {choice}` (vérifié serveur, 1×/jour), `POST /api/tips/streak/merge` à la connexion (jamais de retour en arrière si le compte a déjà répondu aujourd'hui ; série d'hier de l'appareil + bonne réponse du jour = +1). Badge « N jours de suite · record » + message « revenez demain ».
+- Tests : testing_agent iteration_48 — backend 18/19 (+1 skip), frontend OK ; corrigés : double comptage au merge, semaines mélangées, course au rattachement, perte du score si erreur réseau, balises dans le prénom, un seul mini-quiz en attente.
+
+## 2026-11-10 (nuit) — Question sous le conseil · Mini-quiz des pages thèmes · Filtres de l'archive
+- **Question du conseil** : `daily_tips.write_tip_quiz` (Sonnet écrit un QCM lié au conseil, Opus vérifie, options mélangées) ; stockée dans `daily_tips.quiz` ; `backfill_tip_quizzes` (max 2 essais par conseil, champ `quiz_attempts`) ; cron 02:30 = `daily_tip_job` (conseil + rattrapage), aussi au boot. API publique : quiz sans la réponse ; `POST /api/tips/{date}/answer {choice}` → correct, correct_index, explanation. UI `TipQuiz` (+ `QuickQuestion` réutilisable) sur la carte du conseil (sans 2ᵉ bouton) et sur l'archive (« Continuer avec un compte » / « Continuer avec le quiz Bien vieillir » si connecté).
+- **Mini-quiz de la semaine** : `_weekly_pick` (tirage déterministe par semaine ISO : 6 exemples + 3 mini-quiz distincts) ; `showcase.mini_quiz` sans réponses ; `POST /api/categories/{id}/mini-quiz/answer` limité aux 3 questions de la semaine (ou de la précédente) → pas d'aspiration de la banque. UI `MiniQuiz`/`ThemeMiniQuiz` : progression, explication, score /3, « Continuer avec un compte » ; sur `/decouvrir/:id`, `/bien-vieillir`, `/voyages-france` (masqué si aucune question vérifiée).
+- **Filtres de l'archive** : « Tous » + 7 thèmes avec compteurs (hors conseil mis en avant), message vide adapté.
+- Tests : testing_agent iteration_47 — backend 18/18, frontend OK ; retours corrigés (fuite de réponses, compteurs, doublon de bouton, puce « Moral & bien-être »).
+
+## 2026-11-10 (soir) — Lucette · Conseil dans l'e-mail · Archive des conseils · 8 pages thèmes · Partage WhatsApp
+- **Mascotte renommée Lucienne → Lucette la Pétillante** partout (seed, prompts IA, rapport, front).
+- **E-mail Quiz du jour** (`daily_email.py`) : bloc « Le conseil de Lucette » (titre, conseil, geste du jour, lien vers la page du conseil, mention médecin). Image 160 px PNG (`static/mascots/sm/bien-vieillir.png`).
+- **Archive** `/conseils-bien-vieillir` + `/conseils-bien-vieillir/:dateKey` (`ConseilsArchive.jsx`) : tous les conseils, conseil mis en avant, titre/description SEO. API : `GET /api/tips/recent?limit≤366`, `GET /api/tips/{YYYY-MM-DD}` (+ `share_url`, `page_url` construits avec FRONTEND_URL).
+- **Partage WhatsApp** (`ShareTipButton.jsx`) : lien wa.me avec texte + `share_url` → `GET /api/share/conseil/{date}` (page HTML Open Graph : og:title/description/image 1200×630 `static/share/bien-vieillir-og.jpg`, canonical, redirection vers la page du conseil). Bouton sur DailyTipCard (+ lien « Tous les conseils ») et sur l'archive.
+- **8 pages thèmes** `/decouvrir/:categoryId` (`ThemeShowcase.jsx`) : `GET /api/categories/{id}/showcase` (public) = 6 questions **vérifiées** tirées par semaine ISO (déterministe), réponse + explication à révéler, relance EHPAD, maillage « Les autres thèmes ». Boutons « Découvrir » de la Landing → pages thèmes (`themePath`). sitemap + robots mis à jour.
+- **Perf images** : versions WebP `static/mascots/sm` (160 px) et `md` (640 px) + helper `lib/mascot.js` (pages publiques, Landing, Dashboard, carte conseil). `generate_mascots.py` crée ces variantes pour toute nouvelle mascotte.
+- Tests : testing_agent iteration_46 — backend 19/19, frontend OK desktop + mobile.
+
+## 2026-11-10 (suite) — Remplir en 1 clic · Page /bien-vieillir · Conseil du jour IA · Rapport du matin
+- **Bandeau « X thèmes à compléter »** (`FillThemesBanner.jsx`, admin QA) : liste les thèmes < 140 (Bien vieillir en tête, barres de progression), bouton **Remplir à 140** (confirmation → `POST /admin/qa/auto-seed`) + bouton **Recevoir le rapport du matin maintenant**. L'ancien bouton auto-seed doublon a été retiré (RETAG global conservé).
+- **TOPUP étape 2a** : les questions déjà classées mais jamais vérifiées sont fact-checkées par Opus (refusée → slot libéré) → paliers 100 % vérifiés. Testé : 140 jouables / 140 vérifiées, 0 génération.
+- **Page publique `/bien-vieillir`** (`BienVieillirShowcase.jsx`) : hero Lucienne, 6 questions à révéler, conseil du jour, relances EHPAD, CTA `/register?next=/app/quiz/bien-vieillir`, title + meta description SEO, ajoutée au `sitemap.xml`. Liens cassés `/quiz/voyages-france` corrigés.
+- **Conseil du jour** (`daily_tips.py`, `routers/tips.py`) : Claude Sonnet 4.6 écrit (thème tournant : alimentation, activité, sommeil, mémoire, lien social, prévention, moral), Claude Opus 4.8 relit (exactitude, prudence, pas de médicament) ; 3 essais, cooldown 30 min ; collection `daily_tips`. Cron 02:30 + génération au boot si absent. `GET /api/tips/today` (public, fallback dernier conseil), `GET /api/tips/recent`. Carte `DailyTipCard` sur le Dashboard (tous les comptes) et la page publique, CTA vers le quiz.
+- **Rapport du matin** (`morning_report.py`) : cron 07:30 Paris, envoi Resend à ADMIN_EMAIL + tous les users admin/superadmin. Contenu : questions ajoutées, tâches reprises, échecs, tableau des jobs 24 h (progression, retag/stock/IA, reprises, note), stock jouable par thème, régénération Mistral, conseil du jour. `POST /api/admin/qa/morning-report/send` (admin) pour un envoi immédiat.
+- Divers : navbar admin qui débordait à 1920 px corrigée, date du conseil en français correct, texte « six personnages » retiré.
+- Tests : testing_agent iteration_45 OK (tout fonctionne), retours mineurs corrigés ; `manual_qa_resume_check.py` 7/7.
+
+## 2026-11-10 — Thème « Bien vieillir » + fin de l'audit pipeline QA (A3, B2-3, C)
+### Thème Bien vieillir (10ᵉ catégorie)
+- `seed_data.py` : catégorie `bien-vieillir` (icône heart, #6A994E, mascotte **Lucienne la Pétillante** générée Nano Banana → `static/mascots/bien-vieillir.png`) + 21 questions seed (3 par palier 1..7, helper `QB`, 7 discussion_prompts). Force-seed au boot si catégorie vide.
+- Livre : `bien-vieillir → transmission` (mapping chapitre + memory trigger « Quel est votre secret pour garder la forme et le moral ? »).
+- Badge « Nouveau » déplacé de Voyages vers Bien vieillir (Landing + Dashboard). `ICON_MAP` Landing : heart/map.
+- `GET /api/categories` : `count` = vrai nombre de questions jouables (plus de « 100 » figé).
+- **En prod** : republier, puis `/app/admin/qa` → « Compléter » sur Bien vieillir (ou attendre l'auto-seed 05:00).
+### A3 — Checkpoint & reprise auto
+- `qa_pipeline.py` : `retag_untagged`, `palier_distribution`, `JobCheckpoint` (progress {phase, done, total} écrit après chaque unité de travail, filtré par `segment_id` → un orphelin/annulé s'arrête seul, exit 3).
+- `admin_qa.py` : `_resume_or_fail` — timeout AVEC progression, kill par signal (OOM/restart) ou heartbeat mort → job remis `queued` (`resume_count`, max 3 reprises) et repart du checkpoint ; sinon `failed`. `qa_watchdog_loop` (60 s) lancé au startup. Logs en append. `created_at` stable → le RERUN saute les questions déjà vérifiées depuis le début du job.
+- UI QueueRow : badge « reprise n/3 » + ligne « phase · checkpoint X / Y ».
+### B2-3 — Hiérarchie TOPUP
+- `topup_paliers.py` : 1) RETAG vérifiées sans palier (0 IA) → 2) fact-check Opus du backlog non vérifié sans palier → 3) génération IA seulement pour les slots restants. IDs `uuid4`.
+### C — Moteur
+- `mistral_client.py` : garde-fou 80 % ; ne remplace QUE le pool brut (non vérifié ET sans palier) — vérifiées/taguées préservées, IDs stables ; IDs `m_{cat}_{uuid}` ; `max_tokens=8000`.
+- `daily.py` : quiz du jour persisté dans `daily_quizzes` (index unique date_key), exclut les flagged.
+- Exclusion vues 30 j : déjà en place dans `GET /categories/{id}/questions`.
+### Correctifs issus du test (iteration_44)
+- Palier start : n'enregistre plus un tirage incomplet (< 20) → plus de 409 bloquant après top-up.
+- QuizPlayer : flag `ignore` (double fetch StrictMode).
+- Suppression de compte : purge daily_attempts, user_paliers, user_seen_questions, ligues, badges, stats, weekly scores.
+### Tests
+- `backend/tests/manual_qa_resume_check.py` : 7/7 PASS (reprise, plafond, terminal intouchable, superseded, RETAG 0 IA, orphelin exit 3). Backlog fact-check testé (2 Opus → 140/140, 0 génération). Mistral guard mocké PASS. testing_agent iteration_44 : backend 17/17, frontend OK.
+
 ## 2026-02-24 (soir) — Timeouts QA différenciés par kind
 - **Contexte** : screenshot prod du 24/08 montrait 2 jobs RERUN (Objets d'antan, Histoire de France) en échec avec message `timeout (>15 min)`. Diagnostic : Mistral+Opus tournaient correctement, mais l'audit complet de 200+ questions sur ces grosses catégories dépassait le hard timeout unique de 15 min.
 - **Fix** `admin_qa.py` :
@@ -93,7 +163,7 @@ Audit chirurgical de l'utilisateur : 1 796 questions en base pour 1 260 slots (s
   - Bandeau mustard **"X question(s) vérifiée(s) sans palier — retag gratuit dispo"** avec mini-bouton **RETAG** par catégorie concernée, visible uniquement si `untagged_playable > 0`.
 - **Test** : 20 questions untagged simulées sur annees-50-60 (10) + cuisine-terroir (10) → rebalance-all retag exactement 20 questions, 0 impact sur les autres, priorité paliers hauts respectée.
 
-### Reste à faire (audit)
+### Reste à faire (audit) — ✅ TOUT FAIT le 2026-11-10 (voir entrée en tête)
 - **A3** : checkpoint DB (progression après chaque unité de travail) + reprise auto au boot pour les jobs killed pendant leur run. Actuellement, un job long (11 min pour rerun) tué par redémarrage est perdu.
 - **B1 étape 2** : automate le fact-check du backlog `unchecked` (515 questions non vérifiées) avant de proposer de générer de l'IA.
 - **B1 étape 3 chaîne** : COMPLÉTER À 140 doit enchaîner RETAG → QA-backlog → GENERATE et n'appeler l'IA qu'en dernier recours.

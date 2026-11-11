@@ -3,6 +3,7 @@ import { Toaster } from "sonner";
 import "@/App.css";
 
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
+import { VisitorProgressSync } from "@/components/VisitorProgressSync";
 import { SeniorModeProvider } from "@/contexts/SeniorModeContext";
 import Landing from "@/pages/Landing";
 import Login from "@/pages/Login";
@@ -16,6 +17,13 @@ import ChallengeNew from "@/pages/ChallengeNew";
 import ChallengeDetail from "@/pages/ChallengeDetail";
 import ChallengePlay from "@/pages/ChallengePlay";
 import AdminPromo from "@/pages/AdminPromo";
+import AdminTestimonials from "@/pages/AdminTestimonials";
+import AdminGifts from "@/pages/AdminGifts";
+import Offrir from "@/pages/Offrir";
+import OffrirMerci from "@/pages/OffrirMerci";
+import Activer from "@/pages/Activer";
+import Famille from "@/pages/Famille";
+import FamilleRejoindre from "@/pages/FamilleRejoindre";
 import AdminUsers from "@/pages/AdminUsers";
 import Account from "@/pages/Account";
 import ForgotPassword from "@/pages/ForgotPassword";
@@ -43,6 +51,9 @@ import AtelierEntries from "@/pages/AtelierEntries";
 import MonLivre from "@/pages/MonLivre";
 import LivreCoop from "@/pages/LivreCoop";
 import VoyagesShowcase from "@/pages/VoyagesShowcase";
+import BienVieillirShowcase from "@/pages/BienVieillirShowcase";
+import ConseilsArchive from "@/pages/ConseilsArchive";
+import ThemeShowcase from "@/pages/ThemeShowcase";
 import EhpadDashboard from "@/pages/EhpadDashboard";
 import { EhpadNewSession, EhpadSessionView } from "@/pages/EhpadSession";
 import Charades from "@/pages/Charades";
@@ -137,6 +148,7 @@ export default function App() {
       <SeniorModeProvider>
         <BrowserRouter>
         <Toaster richColors position="top-right" />
+        <VisitorProgressSync />
         <Routes>
           <Route path="/" element={<Landing />} />
           <Route path="/login" element={<Login />} />
@@ -151,6 +163,10 @@ export default function App() {
           <Route path="/voyages-france" element={<VoyagesShowcase />} />
           <Route path="/bien-vieillir" element={<BienVieillir />} />
           <Route path="/bien-vieillir/:slug" element={<FicheBienVieillir />} />
+          <Route path="/quiz-bien-vieillir" element={<BienVieillirShowcase />} />
+          <Route path="/conseils-bien-vieillir" element={<ConseilsArchive />} />
+          <Route path="/conseils-bien-vieillir/:dateKey" element={<ConseilsArchive />} />
+          <Route path="/decouvrir/:categoryId" element={<ThemeShowcase />} />
           <Route path="/livre/coop/:code" element={<LivreCoop />} />
           <Route
             path="/app/atelier"
@@ -295,6 +311,34 @@ export default function App() {
             element={
               <AdminRoute>
                 <AdminHome />
+              </AdminRoute>
+            }
+          />
+          <Route
+            path="/app/admin/cadeaux"
+            element={
+              <AdminRoute>
+                <AdminGifts />
+              </AdminRoute>
+            }
+          />
+          <Route
+            path="/app/famille"
+            element={
+              <ProtectedRoute>
+                <Famille />
+              </ProtectedRoute>
+            }
+          />
+          <Route path="/offrir" element={<Offrir />} />
+          <Route path="/offrir/merci" element={<OffrirMerci />} />
+          <Route path="/activer" element={<Activer />} />
+          <Route path="/famille/rejoindre/:token" element={<FamilleRejoindre />} />
+          <Route
+            path="/app/admin/temoignages"
+            element={
+              <AdminRoute>
+                <AdminTestimonials />
               </AdminRoute>
             }
           />

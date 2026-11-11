@@ -23,6 +23,10 @@ export default function StatsSection() {
     { key: "countries_active", label: "Pays / régions actifs", icon: Globe2, color: "text-terracotta", suffix: "" },
   ];
 
+  const shown = stats ? items.filter((it) => (stats.visible || []).includes(it.key)) : [];
+  // Moins de 3 compteurs significatifs → pas de bloc « En chiffres »
+  if (shown.length < 3) return null;
+
   return (
     <section id="stats" className="py-16 lg:py-20 cream-bg relative" data-testid="landing-stats-section">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -38,8 +42,8 @@ export default function StatsSection() {
           </p>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-6">
-          {items.map((it, idx) => (
+        <div className={`grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 ${shown.length >= 5 ? "lg:grid-cols-5" : shown.length === 4 ? "lg:grid-cols-4" : ""}`}>
+          {shown.map((it, idx) => (
             <StatCard
               key={it.key}
               icon={it.icon}

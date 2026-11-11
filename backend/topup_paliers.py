@@ -26,6 +26,7 @@ import os
 import re
 import sys
 import time
+import uuid
 from pathlib import Path
 from typing import Any
 
@@ -41,6 +42,9 @@ from audit_and_regen_questions import (  # noqa: E402
     fact_check_question, CONFIDENCE_THRESHOLD, FACT_CHECK_MODEL, GEN_MODEL,
 )
 from emergentintegrations.llm.chat import LlmChat, UserMessage  # noqa: E402
+from qa_pipeline import (  # noqa: E402
+    JobCheckpoint, PALIERS, category_rules, UNTAGGED_OR, missing_slots, palier_distribution, pick_palier, retag_untagged,
+)
 from motor.motor_asyncio import AsyncIOMotorClient              # noqa: E402
 
 MONGO_URL = os.environ["MONGO_URL"]
@@ -69,7 +73,7 @@ async def generate_for_difficulty(category: dict, difficulty: int, avoid_texts: 
     hint = DIFFICULTY_HINTS[difficulty]
     avoid = "\n".join(f"- {t}" for t in avoid_texts[-40:])
     prompt = f"""Catégorie : {category['title']}
-Description : {category.get('description', '')}
+Description : {category.get('description', '')}{category_rules(category['id'])}
 
 NIVEAU DE DIFFICULTÉ demandé : {difficulty}/7
 Consigne : {hint}
@@ -114,80 +118,150 @@ Format JSON STRICT, rien d'autre :
     }
 
 
-async def topup_category(category: dict) -> dict:
+class Superseded(Exception):
+    """Le job a été annulé ou re-planifié : ce segment doit s'arrêter."""
+
+
+async def _ckpt(cp: JobCheckpoint, **fields) -> None:
+    if not await cp.save(**fields):
+        raise Superseded()
+
+
+def _verified_doc(cat_id: str, difficulty: int, q: dict, check: dict) -> dict:
+    return {
+        "id": f"topup_{cat_id}_d{difficulty}_{uuid.uuid4().hex[:12]}",
+        "category_id": cat_id,
+        "difficulty": difficulty,
+        "question": q["question"],
+        "options": q["options"],
+        "correct_index": q["correct_index"],
+        "explanation": q["explanation"],
+        "quality": "verified",
+        "fact_check": {
+            "verdict": check["verdict"],
+            "confidence": check["confidence"],
+            "comment": check["comment"],
+            "correction": None,
+            "checked_at": time.time(),
+            "checker_model": FACT_CHECK_MODEL[1],
+            "generated_by": GEN_MODEL[1],
+            "topup": True,
+        },
+    }
+
+
+async def topup_category(category: dict, cp: JobCheckpoint) -> dict:
+    """Hiérarchie stricte (audit B) : 1) RETAG vérifiées  2) fact-check du
+    backlog non vérifié  3) génération IA en dernier recours."""
     cat_id = category["id"]
     print(f"\n=== Top-up: {cat_id} ({category['title']}) ===")
+    prev = await cp.load()
+    done_before = int(prev.get("done", 0))
 
-    # Comptage actuel par palier — on ne compte QUE les questions verified
-    # (les flagged ne sont pas jouables donc ne comptent pas dans les 20).
-    counts_per_palier: dict[int, int] = {d: 0 for d in range(1, 8)}
-    existing_texts: list[str] = []
-    async for q in db.questions.find(
-        {"category_id": cat_id, "quality": {"$ne": "flagged"}},
-        {"_id": 0, "difficulty": 1, "question": 1},
-    ):
-        d = q.get("difficulty")
-        if isinstance(d, int) and 1 <= d <= 7:
-            counts_per_palier[d] = counts_per_palier.get(d, 0) + 1
-        existing_texts.append(q["question"])
+    dist = await palier_distribution(db, cat_id)
+    total = missing_slots(dist, TARGET_PER_PALIER)
+    print(f"  Distribution {dist} → {total} slot(s) manquant(s)")
+    report = {"category_id": cat_id, "retagged": 0, "backlog_checked": 0,
+              "backlog_verified": 0, "generated": {}, "failed": {}}
+    base = {"done": done_before, "total": done_before + total}
+    await _ckpt(cp, phase="retag", **base)
 
-    print(f"  Palier   | current | target | missing")
-    for d in range(1, 8):
-        cur = counts_per_palier[d]
-        missing = max(0, TARGET_PER_PALIER - cur)
-        print(f"    {d}      | {cur:>7} | {TARGET_PER_PALIER:>6} | {missing:>7}")
+    # 1) RETAG des vérifiées sans palier — 0 IA
+    rt = await retag_untagged(db, cat_id, "verified", TARGET_PER_PALIER)
+    report["retagged"] = rt["tagged"]
+    dist = rt["distribution_after"]
+    filled = rt["tagged"]
+    print(f"  [1/3] RETAG : {rt['tagged']} question(s) vérifiée(s) taguée(s)")
+    await _ckpt(cp, phase="backlog", done=done_before + filled, retagged=rt["tagged"])
 
-    report = {"category_id": cat_id, "generated": {}, "failed": {}}
+    # 2a) Fact-check des questions déjà classées mais jamais vérifiées (Opus seul) :
+    #     garantit des paliers 100 % vérifiés ; une refusée libère son slot.
+    tagged_unchecked = await db.questions.find(
+        {"category_id": cat_id, "quality": {"$nin": ["verified", "flagged"]},
+         "difficulty": {"$gte": 1, "$lte": 7}},
+        {"_id": 0},
+    ).to_list(1000)
+    if tagged_unchecked:
+        print(f"  [2/3] Vérification de {len(tagged_unchecked)} question(s) classée(s) non vérifiée(s)")
+    for q in tagged_unchecked:
+        check = await fact_check_question(q)
+        ok = check["verdict"] == "correct" and check["confidence"] >= CONFIDENCE_THRESHOLD
+        await db.questions.update_one({"id": q["id"]}, {"$set": {
+            "quality": "verified" if ok else "flagged",
+            "fact_check": {**{k: check[k] for k in ("verdict", "confidence", "comment", "correction")},
+                           "checked_at": time.time(), "checker_model": FACT_CHECK_MODEL[1]},
+        }})
+        if not ok:
+            dist[q["difficulty"]] -= 1
+        report["backlog_checked"] += 1
+        print(f"    {'✅' if ok else '⚠'} classée ({check['verdict']}/{check['confidence']}) {q['question'][:50]}")
+        await _ckpt(cp, backlog_checked=report["backlog_checked"],
+                    total=done_before + filled + missing_slots(dist, TARGET_PER_PALIER))
 
-    for difficulty in range(1, 8):
-        missing = max(0, TARGET_PER_PALIER - counts_per_palier[difficulty])
+    # 2b) Fact-check du backlog non vérifié et sans palier (Opus seul, pas de génération)
+    if missing_slots(dist, TARGET_PER_PALIER) > 0:
+        backlog = await db.questions.find(
+            {"category_id": cat_id, "quality": {"$nin": ["verified", "flagged"]},
+             "$or": UNTAGGED_OR},
+            {"_id": 0},
+        ).to_list(1000)
+        print(f"  [2/3] Backlog non vérifié : {len(backlog)} candidate(s)")
+        for q in backlog:
+            target = pick_palier(dist, TARGET_PER_PALIER)
+            if target is None:
+                break
+            check = await fact_check_question(q)
+            ok = check["verdict"] == "correct" and check["confidence"] >= CONFIDENCE_THRESHOLD
+            update = {"quality": "verified" if ok else "flagged", "fact_check": {
+                **{k: check[k] for k in ("verdict", "confidence", "comment", "correction")},
+                "checked_at": time.time(), "checker_model": FACT_CHECK_MODEL[1],
+            }}
+            if ok:
+                update["difficulty"] = target
+                dist[target] += 1
+                filled += 1
+                report["backlog_verified"] += 1
+            await db.questions.update_one({"id": q["id"]}, {"$set": update})
+            report["backlog_checked"] += 1
+            print(f"    {'✅' if ok else '⚠'} backlog ({check['verdict']}/{check['confidence']}) {q['question'][:50]}")
+            await _ckpt(cp, done=done_before + filled, backlog_checked=report["backlog_checked"],
+                        backlog_verified=report["backlog_verified"])
+
+    # 3) Génération IA — uniquement pour les slots encore vides
+    await _ckpt(cp, phase="generate")
+    existing_texts = [q["question"] async for q in db.questions.find(
+        {"category_id": cat_id, "quality": {"$ne": "flagged"}}, {"_id": 0, "question": 1})]
+    for difficulty in PALIERS:
+        missing = max(0, TARGET_PER_PALIER - dist[difficulty])
         if missing == 0:
             continue
-        print(f"\n  → Palier {difficulty} : génération de {missing} questions")
-        generated = 0
-        failed = 0
+        print(f"\n  [3/3] Palier {difficulty} : génération IA de {missing} question(s)")
+        generated = failed = 0
         for i in range(missing):
             success = False
             for attempt in range(MAX_ATTEMPTS):
                 new_q = await generate_for_difficulty(category, difficulty, existing_texts)
                 if not new_q:
                     continue
-                check = await fact_check_question({**new_q, "id": f"topup-tmp-{i}"})
+                check = await fact_check_question({**new_q, "category_id": cat_id, "id": f"topup-tmp-{uuid.uuid4().hex[:8]}"})
                 if check["verdict"] == "correct" and check["confidence"] >= CONFIDENCE_THRESHOLD:
-                    doc = {
-                        "id": f"topup_{cat_id}_d{difficulty}_{int(time.time()*1000)}_{i}",
-                        "category_id": cat_id,
-                        "difficulty": difficulty,
-                        "question": new_q["question"],
-                        "options": new_q["options"],
-                        "correct_index": new_q["correct_index"],
-                        "explanation": new_q["explanation"],
-                        "quality": "verified",
-                        "fact_check": {
-                            "verdict": check["verdict"],
-                            "confidence": check["confidence"],
-                            "comment": check["comment"],
-                            "correction": None,
-                            "checked_at": time.time(),
-                            "checker_model": FACT_CHECK_MODEL[1],
-                            "generated_by": GEN_MODEL[1],
-                            "topup": True,
-                        },
-                    }
-                    await db.questions.insert_one(doc)
+                    await db.questions.insert_one(_verified_doc(cat_id, difficulty, new_q, check))
                     existing_texts.append(new_q["question"])
                     generated += 1
+                    filled += 1
                     success = True
                     print(f"    [{i+1}/{missing}] ✅ (confidence {check['confidence']}, tentative {attempt+1})")
                     break
-                else:
-                    print(f"    [{i+1}/{missing}] ⚠ refus factcheck ({check['verdict']}/{check['confidence']}) tentative {attempt+1}")
+                print(f"    [{i+1}/{missing}] ⚠ refus factcheck ({check['verdict']}/{check['confidence']}) tentative {attempt+1}")
             if not success:
                 failed += 1
                 print(f"    [{i+1}/{missing}] ❌ abandon après {MAX_ATTEMPTS} tentatives")
+            await _ckpt(cp, done=done_before + filled,
+                        generated=int(cp.progress.get("generated", 0)) + (1 if success else 0))
         report["generated"][difficulty] = generated
         report["failed"][difficulty] = failed
 
+    await _ckpt(cp, phase="done", done=done_before + filled)
     out = Path(f"/tmp/topup_report_{cat_id}.json")
     out.write_text(json.dumps(report, ensure_ascii=False, indent=2))
     print(f"\n  Rapport : {out}")
@@ -203,12 +277,18 @@ async def main():
         print(f"Aucune catégorie trouvée (only={only})")
         return
 
+    cp = JobCheckpoint(db)
     all_reports = []
-    for cat in cats:
-        rep = await topup_category(cat)
-        all_reports.append(rep)
+    try:
+        for cat in cats:
+            all_reports.append(await topup_category(cat, cp))
+    except Superseded:
+        print("Job annulé ou re-planifié — arrêt propre de ce segment.")
+        sys.exit(3)
 
     total_gen = sum(sum(r["generated"].values()) for r in all_reports)
+    print(f"  RETAG (0 IA)       : {sum(r['retagged'] for r in all_reports)}")
+    print(f"  Backlog vérifié    : {sum(r['backlog_verified'] for r in all_reports)}")
     total_fail = sum(sum(r["failed"].values()) for r in all_reports)
     print(f"\n\n===== SYNTHÈSE ({len(cats)} catégorie(s)) =====")
     print(f"  Questions générées : {total_gen}")

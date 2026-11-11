@@ -10,6 +10,8 @@ Allow: /quiz-du-jour
 Allow: /ehpad
 Allow: /voyages-france
 Allow: /bien-vieillir
+Allow: /conseils-bien-vieillir
+Allow: /decouvrir/
 Allow: /cgu
 Allow: /cgv
 Allow: /confidentialite

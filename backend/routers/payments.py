@@ -23,6 +23,8 @@ async def create_checkout(body: CheckoutCreate, request: Request, user: dict = D
     if body.package_id not in PACKAGES:
         raise HTTPException(status_code=400, detail="Forfait invalide")
     pkg = PACKAGES[body.package_id]
+    if pkg.get("tier") == "gift":
+        raise HTTPException(status_code=400, detail="Les cartes cadeau s'achètent depuis la page Offrir")
     host_url = str(request.base_url)
     webhook_url = f"{host_url.rstrip('/')}/api/webhook/stripe"
     stripe_checkout = StripeCheckout(api_key=STRIPE_API_KEY, webhook_url=webhook_url)
@@ -54,7 +56,7 @@ async def get_checkout_status(session_id: str, request: Request, user: dict = De
     tx = await db.payment_transactions.find_one({"session_id": session_id})
     if not tx:
         raise HTTPException(status_code=404, detail="Transaction introuvable")
-    if tx["payment_status"] != "paid" and status.payment_status == "paid":
+    if tx["payment_status"] != "paid" and status.payment_status == "paid" and not tx.get("gift"):
         package_id = tx.get("package_id", "premium_monthly")
         pkg = PACKAGES.get(package_id, {})
         tier = pkg.get("tier", "premium")  # "club" | "famille" | "premium"
@@ -86,7 +88,12 @@ async def stripe_webhook(request: Request):
         return {"ok": False}
     if evt.payment_status == "paid":
         tx = await db.payment_transactions.find_one({"session_id": evt.session_id})
-        if tx and tx["payment_status"] != "paid":
+        if tx and tx.get("gift"):
+            from routers.gifts import fulfill_gift_transaction
+            await fulfill_gift_transaction(tx)
+            await db.payment_transactions.update_one({"session_id": evt.session_id},
+                                                      {"$set": {"payment_status": "paid", "status": "complete"}})
+        elif tx and tx["payment_status"] != "paid":
             package_id = tx.get("package_id", "premium_monthly")
             pkg = PACKAGES.get(package_id, {})
             tier = pkg.get("tier", "premium")

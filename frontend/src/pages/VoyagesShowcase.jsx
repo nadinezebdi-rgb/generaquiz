@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { ThemeMiniQuiz } from "@/components/MiniQuiz";
 import { MapPin, MessageCircle, Sparkles, ArrowRight, Play, Building2, Heart } from "lucide-react";
 
 /**
@@ -30,7 +31,7 @@ export default function VoyagesShowcase() {
               </p>
               <div className="flex gap-3 flex-wrap">
                 <Link
-                  to="/quiz/voyages-france"
+                  to="/register?next=/app/quiz/voyages-france"
                   data-testid="voyages-cta-play"
                   className="inline-flex items-center gap-2 bg-terracotta text-white font-bold px-6 py-3 rounded-full hover:bg-terracotta-dark transition shadow-warm"
                 >
@@ -102,6 +103,8 @@ export default function VoyagesShowcase() {
         </section>
 
         {/* ============ EHPAD : DECLENCHEUR DE CONVERSATION ============ */}
+        <ThemeMiniQuiz categoryId="voyages-france" color="#0EA5E9" />
+
         <section className="py-16 bg-gradient-to-br from-terracotta/10 to-mustard/20">
           <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid md:grid-cols-2 gap-10 items-center">
@@ -145,7 +148,7 @@ export default function VoyagesShowcase() {
           <p className="text-navy/70 text-lg mb-6">100 questions, 6 régions, des souvenirs plein la valise.</p>
           <div className="flex justify-center gap-3 flex-wrap">
             <Link
-              to="/quiz/voyages-france"
+              to="/register?next=/app/quiz/voyages-france"
               data-testid="voyages-cta-play-bottom"
               className="inline-flex items-center gap-2 bg-terracotta text-white font-bold px-6 py-3 rounded-full hover:bg-terracotta-dark transition shadow-warm"
             >

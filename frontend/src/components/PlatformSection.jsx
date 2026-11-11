@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { LIVRE_CHAPTERS } from "@/config/livre";
 import { motion } from "framer-motion";
 import { Brain, BookOpen, ChefHat, Camera, PenLine, MessageCircle, Search, ArrowRight, Sparkles, Clock, Check } from "lucide-react";
 
@@ -22,7 +23,7 @@ const QUIZ_ACTIVITIES = [
   {
     key: "livre-vie",
     title: "Mon Livre de Vie",
-    desc: "10 chapitres, texte + audio + coop famille — votre histoire, à votre rythme.",
+    desc: `${LIVRE_CHAPTERS} chapitres, texte + audio + coop famille — votre histoire, à votre rythme.`,
     icon: BookOpen,
     href: "/app/livre",
     tag: { label: "En ligne", cls: "bg-[#3D9970]/20 text-[#2A7350]" },
@@ -58,7 +59,7 @@ const WORD_GAMES = [
     href: "/app/mots-meles",
     tag: { label: "Nouveau", cls: "bg-mustard text-navy" },
   },
-  { key: "mots-croises", title: "Mots Fléchés", desc: "5 grilles 5×5 hand-authored — MVP interactif.", icon: PenLine,
+  { key: "mots-croises", title: "Mots Fléchés", desc: "5 grilles faciles pour se mettre en jambes.", icon: PenLine,
     href: "/app/mots-fleches", tag: { label: "Nouveau", cls: "bg-mustard text-navy" } },
 ];
 

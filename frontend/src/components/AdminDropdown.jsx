@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { ChevronDown, Shield, BarChart3, Tag, Flag, LayoutDashboard, ClipboardCheck, Users, History } from "lucide-react";
+import { ChevronDown, Shield, BarChart3, Tag, Flag, LayoutDashboard, ClipboardCheck, Users, History, Quote, Gift } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 
 /**
@@ -13,6 +13,8 @@ const BASE_LINKS = [
   { to: "/app/admin",           icon: LayoutDashboard, label: "Administration", desc: "Tableau de bord admin",         testid: "nav-admin-home" },
   { to: "/app/admin/analytics", icon: BarChart3,       label: "Analytics",      desc: "MAU, MRR, top catégories",      testid: "nav-admin-analytics" },
   { to: "/app/admin/promo",     icon: Tag,             label: "Promos",         desc: "Codes promo Stripe",            testid: "nav-admin-promo" },
+  { to: "/app/admin/temoignages", icon: Quote,         label: "Accueil",        desc: "Témoignages et compteurs",      testid: "nav-admin-testimonials" },
+  { to: "/app/admin/cadeaux",   icon: Gift,            label: "Cartes cadeau",  desc: "Ventes, codes et promo de Noël", testid: "nav-admin-gifts" },
   { to: "/app/admin/reports",   icon: Flag,            label: "Signalements",   desc: "Questions signalées à modérer", testid: "nav-admin-reports" },
   { to: "/app/admin/qa",        icon: ClipboardCheck,  label: "Qualité IA",     desc: "Questions vérifiées par Opus",  testid: "nav-admin-qa" },
   { to: "/app/admin/users",     icon: Users,           label: "Utilisateurs",   desc: "Rôles et comptes",              testid: "nav-admin-users" },

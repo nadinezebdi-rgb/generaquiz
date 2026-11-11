@@ -37,6 +37,8 @@ MASCOTS = [
      "A modern colorful cartoon caricature portrait of a wise distinguished French man in his early 70s, neatly trimmed grey beard, round reading glasses on his nose, a tweed jacket with elbow patches over a sweater vest, holding an open hardback book and a pipe (not lit). A small globe and a telescope visible nearby suggesting curiosity about the world. Bright cartoon palette: deep teal jacket, mustard sweater vest, terracotta book, cream background and skin. Big expressive eyes, warm thoughtful smile, exaggerated friendly features. Solid cream background (#F4F1DE), centered, square framing, no text, no watermark."),
     ("voyages-france",
      "A modern colorful cartoon caricature portrait of Jeanne la Voyageuse, a joyful French woman in her early 70s with white curly hair pinned back, wearing a light travel coat, a red silk scarf and a straw sun hat with a small tricolor ribbon. She carries a vintage tan leather suitcase covered with regional stickers of France (Mont-Saint-Michel, Provence lavender, Alsace, Bretagne) and holds a folded paper map of France in her hand. Around her: small icons of a lavender sprig, a baguette, the Eiffel Tower, a lighthouse. Bright cartoon palette: terracotta scarf, navy blue coat trim, mustard suitcase details, cream background. Big expressive twinkling eyes, warm inviting smile, exaggerated friendly features. Solid cream background (#F4F1DE), centered character, square framing, no text, no watermark."),
+    ("bien-vieillir",
+     "A modern colorful cartoon caricature portrait of Lucette la Pétillante, an energetic smiling French woman in her early 70s with short silver hair and a sage green headband, wearing a sage green and cream retro tracksuit and white sneakers. She holds a Nordic walking pole in one hand and a shiny red apple in the other, a small crossword booklet tucked under her arm. Around her: small icons of a heart, a glass of water, a sprig of herbs and a crescent moon. Bright cartoon palette: sage green (#6A994E), terracotta accents, mustard details, cream background. Big expressive twinkling eyes, warm confident smile, exaggerated friendly features. Solid cream background (#F4F1DE), centered character, square framing, no text, no watermark."),
 ]
 
 
@@ -70,6 +72,18 @@ async def main():
             await generate_one(slug, prompt)
         except Exception as e:
             print(f"[{slug}] ERROR: {e}")
+    make_web_variants()
+
+
+def make_web_variants():
+    """Versions WebP légères pour le web : sm 160 px, md 640 px."""
+    from PIL import Image
+    for size, px in (("sm", 160), ("md", 640)):
+        (OUT_DIR / size).mkdir(exist_ok=True)
+        for slug, _ in MASCOTS:
+            src, dst = OUT_DIR / f"{slug}.png", OUT_DIR / size / f"{slug}.webp"
+            if src.exists() and not dst.exists():
+                Image.open(src).convert("RGB").resize((px, px), Image.LANCZOS).save(dst, "WEBP", quality=80)
 
 
 if __name__ == "__main__":

@@ -1,0 +1,37 @@
+{
+  "summary": "Tested daily tip API (public), morning report endpoint (auth + one real send via UI), QA fill banner, public /bien-vieillir SEO page (desktop + 390px mobile), register?next redirect, free+admin dashboard tip card, /voyages-france CTA fix, sitemap, and regression (10 dashboard categories, Bien vieillir quiz play, iteration44 suite 17/17). Everything requested works. Only minor/UX remarks.",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {"endpoint": "POST /api/admin/qa/morning-report/send", "issue": "If RESEND_API_KEY is missing, the response is {sent:0, reason} with no recipients/subject/summary, so the response shape changes. The frontend handles it through data.reason."},
+      {"endpoint": "morning_report.build_report", "issue": "Per-theme stock counts questions that are not flagged with difficulty 1-7. It does not count verified ones. Bien vieillir has 0 verified and 21 unchecked, but the report and banner both show it as 21/140, while the feature says '140 checked questions'. Make the wording or metric consistent."}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "DailyTipCard", "issues": ["CSS 'capitalize' on the date makes the French month uppercase ('Mardi 10 Novembre'). French should be 'mardi 10 novembre' (or capitalise only the first letter).", "The disclaimer text is 11px at navy/50, which is low contrast for a senior audience."]},
+      {"screen": "Admin QA", "issues": ["'Remplir à 140' (FillThemesBanner) and the existing 'Auto-seed toutes les catégories manquantes' button both call POST /admin/qa/auto-seed, so the action is duplicated in the UI.", "'Remplir à 140' starts paid AI jobs with no confirmation dialog. Add a confirm step.", "Admin navbar at 1920px is crowded: the 'Confort +' button is clipped at the right edge (probably pre-existing)."]},
+      {"screen": "Dashboard hero", "issues": ["The text still says 'nos six personnages caricaturés' but there are 10 categories (pre-existing)."]}
+    ]
+  },
+  "test_report_links": ["/app/backend/tests/test_iteration45_tips_report.py", "/app/backend/tests/test_iteration44_bien_vieillir.py", "/app/test_reports/pytest/iteration45.xml"],
+  "action_items": [
+    "Optional: add a confirm dialog before 'Remplir à 140' (paid jobs), or remove the duplicate auto-seed button",
+    "Optional: fix the French date capitalisation in DailyTipCard",
+    "Optional: align the banner/report 'playable' metric with 'checked/verified' wording",
+    "Optional: check that Register ?next= is a relative path (starts with '/' and not '//') to avoid open-redirect-style misuse"
+  ],
+  "critical_code_review_comments": [
+    "Register.jsx passes the 'next' query param straight to navigate() without validation. Restrict it to internal paths that start with '/' and not '//'.",
+    "tips.py /today starts asyncio.create_task(generate_daily_tip) whenever today's tip is missing. A lock and a 30-minute cooldown limit this, but the task reference is not kept (it could be garbage-collected) and exceptions are not logged.",
+    "daily_tips._last_attempt cooldown is kept in process memory, so it resets on every hot reload or restart, and each restart can trigger new paid LLM calls on the first /tips/today request on a day with no tip."
+  ],
+  "updated_files": ["/app/backend/tests/test_iteration45_tips_report.py"],
+  "success_rate": {"backend": "100% (9/9 new + 17/17 regression)", "frontend": "100%"},
+  "seed_data_creation": "Created 2 TEST_ free users (test_xxxxxxxx@example.com): one via pytest, one via the UI signup flow. Both were deleted via DELETE /api/auth/account (200). The morning report email was sent exactly once (to admin@generaquiz.fr and nadine.zebdi@gmail.com). admin-qa-fill-all-btn was NOT clicked.",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Today's tip exists (2026-11-10, theme sommeil). Bien vieillir has 21 questions (missing_for_full_parcours=119); 9 themes are incomplete, and only cinema is complete. Do not click admin-qa-fill-all-btn. Onboarding tour 'Passer la visite' may appear on the dashboard. Dashboard category testids are dashboard-category-{id}."
+}

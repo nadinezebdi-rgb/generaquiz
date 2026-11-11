@@ -8,6 +8,8 @@ import Footer from "@/components/Footer";
 import StreakSaverModal from "@/components/StreakSaverModal";
 import OnboardingTour from "@/components/OnboardingTour";
 import LivreProgressCard from "@/components/LivreProgressCard";
+import { DailyTipCard } from "@/components/DailyTipCard";
+import { mascotSrc } from "@/lib/mascot";
 import { ArrowRight, Crown, Trophy, Target, Zap, Sparkles, Calendar, Flame, BookOpen } from "lucide-react";
 
 /**
@@ -89,7 +91,7 @@ export default function Dashboard() {
                 Prêt(e) pour un nouveau quiz ?
               </h1>
               <p className="text-cream/80 text-lg max-w-xl mb-5">
-                Choisissez une catégorie ci-dessous et laissez-vous guider par nos six personnages caricaturés.
+                Choisissez une catégorie ci-dessous et laissez-vous guider par nos personnages caricaturés.
               </p>
               {!isPremium && (
                 <Link
@@ -123,6 +125,8 @@ export default function Dashboard() {
             </div>
           </div>
         </div>
+
+        <DailyTipCard />
 
         {/* Quiz du Jour widget with streak */}
         <div className="mb-10 bg-gradient-to-br from-bordeaux to-navy text-white rounded-[28px] p-6 md:p-8 border-4 border-mustard shadow-warm" data-testid="dashboard-daily-widget">
@@ -300,7 +304,7 @@ export default function Dashboard() {
                   className="absolute -top-12 -right-12 w-48 h-48 rounded-full opacity-15 group-hover:opacity-30 transition"
                   style={{ backgroundColor: cat.color }}
                 />
-                {cat.id === "voyages-france" && (
+                {cat.id === "bien-vieillir" && (
                   <span
                     data-testid={`dashboard-badge-nouveau-${cat.id}`}
                     className="absolute top-3 right-3 z-10 inline-flex items-center gap-1 bg-terracotta text-white text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full shadow-warm"
@@ -310,7 +314,7 @@ export default function Dashboard() {
                 )}
                 <div className="relative flex items-start gap-4">
                   <div className="w-24 h-24 shrink-0 rounded-2xl overflow-hidden bg-cream border-2 border-cream-dark">
-                    <img src={`${BACKEND_URL}${cat.mascot_image}`} alt={cat.mascot_name} className="w-full h-full object-cover" />
+                    <img src={mascotSrc(cat.mascot_image, "sm")} alt={cat.mascot_name} className="w-full h-full object-cover" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <h3 className="font-display text-xl font-bold text-navy">{cat.title}</h3>

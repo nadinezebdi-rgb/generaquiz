@@ -4,11 +4,8 @@
  * ⚠️ AUCUN prix ne doit être écrit en dur dans les composants JSX. Tout dérive
  * de ce fichier via les helpers plus bas.
  *
- * Migration en cours (Stripe backend inchangé pour l'instant, une itération
- * séparée créera les vrais price IDs). Anciens plans → nouveaux :
- *   club_memoire  → solo
- *   famille       → famille (prix ajusté)
- *   premium       → heritage (annuel uniquement)
+ * 3 formules : Découverte / Solo / Famille. Héritage n'est plus vendu (abonnés
+ * existants conservés côté backend). Le livre imprimé est une option séparée.
  */
 
 export const PLANS = [
@@ -18,15 +15,13 @@ export const PLANS = [
     tagline: "Pour découvrir GénéraQuiz",
     mensuel: 0,
     annuel: 0,
-    comptes: 1,
-    populaire: false,
-    annuelUniquement: false,
+    acces: "1 compte",
+    badge: null,
     stripeIds: { monthly: null, yearly: null },
     features: [
-      "Quiz du Jour complet",
-      "3 catégories en illimité",
-      "Historique 30 jours",
-      "3 badges de démarrage",
+      "Quiz du jour",
+      "Aperçu des activités",
+      "Sans carte bancaire",
     ],
     cta: "Commencer gratuitement",
     ctaTo: "/register",
@@ -35,62 +30,36 @@ export const PLANS = [
     id: "solo",
     nom: "Solo",
     tagline: "Pour jouer seul, à votre rythme",
-    mensuel: 6.99,
-    annuel: 69,
-    comptes: 1,
-    populaire: false,
-    annuelUniquement: false,
-    stripeIds: { monthly: "solo_monthly", yearly: "solo_yearly" },    features: [
-      "Quiz illimités toutes catégories",
-      "Progression et badges",
-      "Historique complet",
-      "Streaks et Ligues hebdomadaires",
+    mensuel: 4.9,
+    annuel: 49,
+    acces: "1 accès personnel complet",
+    badge: null,
+    stripeIds: { monthly: "solo_monthly", yearly: "solo_yearly" },
+    features: [
+      "Quiz illimités",
+      "Toutes les catégories",
+      "Progression et historique",
       "Livre de Vie en PDF",
-      "−20 % sur le livre imprimé",
     ],
     cta: "Choisir Solo",
   },
   {
     id: "famille",
     nom: "Famille",
-    tagline: "Pour partager en famille",
-    mensuel: 9.99,
-    annuel: 99,
-    comptes: 6,
-    populaire: true,
-    annuelUniquement: false,
+    tagline: "Pour jouer ensemble",
+    mensuel: 7.9,
+    annuel: 79,
+    acces: "Accès complet + espace famille",
+    badge: "Pour jouer ensemble",
     stripeIds: { monthly: "famille_v2_monthly", yearly: "famille_v2_yearly" },
     features: [
-      "Tout Solo, pour 6 personnes",
-      "Classement familial privé",
-      "Défis coopératifs illimités",
-      "Quiz privés entre proches",
-      "Notifications famille",
-      "Score Mémoire 5 axes",
-      "−25 % sur le livre imprimé",
+      "Tout Solo pour le bénéficiaire principal",
+      "4 proches invités dans l'espace famille, sans supplément",
+      "Quiz, défis et classements familiaux sans limite de parties",
+      "Pendant toute la durée de l'abonnement",
+      "Chaque proche peut prendre Solo pour son propre catalogue et Livre de Vie",
     ],
     cta: "Choisir Famille",
-  },
-  {
-    id: "heritage",
-    nom: "Héritage",
-    tagline: "L'abonnement + un livre imprimé chaque année",
-    mensuel: null,
-    annuel: 159,
-    comptes: 6,
-    populaire: false,
-    annuelUniquement: true,
-    stripeIds: { monthly: null, yearly: "heritage_yearly" },
-    features: [
-      "Tout Famille",
-      "1 Livre de Vie imprimé offert chaque année",
-      "Quiz exclusifs en avant-première",
-      "Support prioritaire + téléphone",
-      "Accès anticipé aux nouveautés",
-    ],
-    cta: "Choisir Héritage",
-    argumentValue:
-      "Famille (99 €) + un livre imprimé (79,90 €) = 178,90 € séparément. Vous économisez 19,90 € — et le livre revient chaque année.",
   },
 ];
 
@@ -99,47 +68,32 @@ export const PLANS = [
 // -----------------------------------------------------------------------------
 export const GIFTS = [
   {
-    id: "carte_famille",
+    id: "famille",
     nom: "Carte cadeau Famille",
-    prix: 99,
-    description: "1 an Famille, code envoyé par e-mail ou à imprimer.",
-    badge: null,
-    stripeId: "gift_famille",
-  },
-  {
-    id: "coffret_heritage",
-    nom: "Coffret Héritage",
-    prix: 159,
-    description: "1 an d'abonnement + le Livre de Vie imprimé.",
-    badge: "Notre coffret cadeau",
+    description: "1 bénéficiaire + 4 proches pour partager une année de jeux.",
     highlight: true,
-    stripeId: "gift_heritage",
   },
   {
-    id: "livre_seul",
-    nom: "Le livre seul",
-    prix: 79.9,
-    description: "Un Livre de Vie imprimé, sans abonnement.",
-    badge: null,
-    stripeId: "gift_livre",
+    id: "solo",
+    nom: "Carte cadeau Solo",
+    description: "Une année complète de quiz et de souvenirs pour une personne.",
   },
 ];
 
-// -----------------------------------------------------------------------------
-// LIVRE imprimé (SKUs indépendants de l'abonnement)
-// -----------------------------------------------------------------------------
-export const PRINTED_BOOKS = [
-  { id: "livre_1", nom: "1 livre", prix: 79.9, prixParLivre: 79.9, economie: 0, features: ["Format A5 (15 × 21 cm)", "Jusqu'à 130 pages", "Couverture rigide couleur"] },
-  { id: "livre_2", nom: "2 livres", prix: 129.9, prixParLivre: 64.95, economie: 29.9, highlight: true, badge: "Le plus choisi", features: ["Idéal pour offrir", "Impression identique aux 2 exemplaires", "Livraison groupée"] },
-  { id: "livre_3", nom: "3 livres", prix: 179.9, prixParLivre: 59.97, economie: 59.8, features: ["Pour toute la famille", "Petit-enfant, enfant, conjoint", "Frais de port offerts"] },
+// Accès de chacun dans l'offre Famille (affiché avant l'achat)
+export const FAMILY_ACCESS = [
+  { label: "Quiz et défis du groupe familial", owner: "Inclus", proches: "Inclus toute l'année" },
+  { label: "Classement familial et résultats partagés", owner: "Inclus", proches: "Inclus" },
+  { label: "Tout le catalogue pour jouer seul", owner: "Inclus", proches: "Abonnement personnel nécessaire" },
+  { label: "Créer son propre Livre de Vie et télécharger son PDF", owner: "Inclus", proches: "Abonnement personnel nécessaire" },
 ];
 
-// Remise abonné sur le livre imprimé
-export const BOOK_DISCOUNT_BY_TIER = {
-  decouverte: 0,
-  solo: 0.20,
-  famille: 0.25,
-  heritage: 1.0,   // inclus dans la formule (1 livre/an offert)
+// -----------------------------------------------------------------------------
+// LIVRE imprimé — option séparée, commandée quand le Livre de Vie est prêt
+// -----------------------------------------------------------------------------
+export const PRINTED_BOOK = {
+  prix: 79.9,
+  features: ["Format A5 (15 × 21 cm)", "Jusqu'à 130 pages", "Couverture rigide couleur", "Vous validez la maquette avant impression"],
 };
 
 // -----------------------------------------------------------------------------
@@ -207,49 +161,15 @@ export function fmt(amount, { integer = false } = {}) {
   return formatter.format(amount);
 }
 
-/** Calcule les données d'affichage pour un plan donné.
- *  Renvoie tout ce qu'il faut au JSX, jamais recalculé côté composant.
- */
+/** Un seul prix affiché selon la période choisie. */
 export function pricePresentation(plan, period /* 'monthly' | 'yearly' */) {
-  const monthly = plan.mensuel;
-  const yearly = plan.annuel;
-
-  if (period === "monthly") {
-    if (monthly === 0) return { main: "0 €", suffix: "/mois", note: "à vie", available: true };
-    if (monthly == null) {
-      // Héritage en mode mensuel : non disponible
-      return {
-        main: fmt(yearly),
-        suffix: "/an",
-        note: "Disponible en annuel uniquement",
-        available: false,
-        switchToYearly: true,
-      };
-    }
-    return { main: fmt(monthly), suffix: "/mois", note: null, available: true };
-  }
-
-  // period === "yearly"
-  if (yearly === 0) return { main: "0 €", suffix: "/an", note: "à vie", available: true };
-  const reference = monthly != null ? +(monthly * 12).toFixed(2) : null;
-  const economie = reference != null ? +(reference - yearly).toFixed(2) : null;
-  const pourcentage = reference && reference > 0 ? Math.round((economie / reference) * 100) : null;
-  const parMois = +(yearly / 12).toFixed(2);
-  return {
-    main: fmt(yearly),
-    suffix: "/an",
-    monthlyEquivalent: parMois, // "soit X,XX €/mois"
-    reference,                  // prix barré
-    economie,                   // "Économisez X,XX €"
-    pourcentage,                // -18%
-    available: true,
-  };
+  const amount = period === "monthly" ? plan.mensuel : plan.annuel;
+  return { main: amount === 0 ? "Gratuit" : fmt(amount, { integer: true }), suffix: amount === 0 ? null : period === "monthly" ? "/mois" : "/an" };
 }
 
-/** % d'économie appliqué au toggle "Annuel" — calculé sur Famille. */
+/** L'annuel = 10 mensualités : « 2 mois offerts ». */
 export function annualDiscountBadge() {
-  const famille = PLANS.find((p) => p.id === "famille");
-  const ref = famille.mensuel * 12;
-  const eco = ref - famille.annuel;
-  return `Économisez ${Math.round((eco / ref) * 100)} %`;
+  const paid = PLANS.filter((p) => p.mensuel > 0);
+  const months = Math.min(...paid.map((p) => Math.round(12 - p.annuel / p.mensuel)));
+  return `${months} mois offerts avec l'abonnement annuel`;
 }
