@@ -4,7 +4,7 @@ from datetime import datetime, timezone
 from typing import Literal
 
 from fastapi import APIRouter, Depends, HTTPException
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 from core import db, get_admin_user, record_audit
 
@@ -14,6 +14,7 @@ PUBLIC = {"_id": 0, "id": 1, "text": 1, "first_name": 1, "age_role": 1, "locatio
 
 
 class TestimonialIn(BaseModel):
+    model_config = ConfigDict(str_strip_whitespace=True)
     text: str = Field(..., min_length=5, max_length=600)
     first_name: str = Field(..., min_length=1, max_length=40)
     age_role: str = Field("", max_length=60)

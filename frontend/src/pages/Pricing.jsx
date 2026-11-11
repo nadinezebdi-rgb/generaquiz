@@ -87,7 +87,7 @@ export default function Pricing() {
           >
             Annuel
             <span className="bg-terracotta text-white text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full">
-              {annualBadge}
+              {annualBadge.match(/−\d+ %/)?.[0]}
             </span>
           </button>
         </div>

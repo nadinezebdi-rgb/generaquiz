@@ -42,7 +42,8 @@ async def public_stats() -> dict:
     async for d in db.daily_attempts.find({"date_key": today}, {"user_id": 1, "_id": 0}):
         daily_player_ids.add(d["user_id"])
     async for a in db.attempts.find(
-        {"created_at": {"$gte": today + "T00:00:00"}},
+        {"created_at": {"$gte": datetime.now(PARIS_TZ).replace(hour=0, minute=0, second=0, microsecond=0)
+                        .astimezone(timezone.utc).isoformat()}},
         {"user_id": 1, "_id": 0},
     ):
         daily_player_ids.add(a["user_id"])

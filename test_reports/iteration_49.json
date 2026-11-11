@@ -1,0 +1,36 @@
+{
+  "summary": "LOT 1 homepage fixes tested end-to-end (backend pytest 10/10 + Playwright UI). Testimonials admin CRUD/toggle/edit/delete via UI works; landing shows section only when published, correct tags, adoption line only at >=3. Thresholds card GET/PUT works; with thresholds 0 the landing stats block shows exactly the >0 counters (games_today, questions_total=1125, streak_record, countries_active); with defaults the block is hidden (only questions_total visible). questions_total == DB count of non-flagged questions (1125). livre_chapters=12. Text checks all pass (Mots Fléchés, 12 chapitres on landing/games dropdown/onboarding step 2, −18 % banner on landing and /app/pricing, Résidence feature once). Admin dropdown entry, Confort + toggle (landing & admin), mobile 390 no horizontal overflow all OK. bv6/bv11/bv19 rewritten in DB, no vaccin/Alzheimer/prévenir left in bien-vieillir. Cleanup done: 0 testimonials remain, thresholds restored to 20/50/3/7.",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {"endpoint": "POST/PUT /api/admin/testimonials", "issue": "text/first_name not stripped: '     ' (5 spaces) passes min_length=5; whitespace-only first_name accepted"},
+      {"endpoint": "GET /api/stats/public", "issue": "players_today compares Paris-date string 'YYYY-MM-DDT00:00:00' against UTC ISO created_at -> up to 1-2h skew around midnight (pre-existing)"}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "Landing hero", "issues": ["5-star rating row still displayed even with 0 testimonials — same unsubstantiated social-proof concern LOT 1 is removing; consider hiding with the adoption line"]},
+      {"screen": "Landing testimonials", "issues": ["With 1 or 2 published testimonials cards are left-aligned in a 3-col grid (empty space right); consider centering"]},
+      {"screen": "/app/pricing mobile 390px", "issues": ["'Jusqu'à −18 % en formule annuelle' badge inside the Annuel toggle wraps on 2 lines (10px uppercase) — consider shorter label like '−18 %' in the toggle"]},
+      {"screen": "Navbar desktop logged-in admin", "issues": ["Crowded: 'Confort +' button text wraps to 2 lines and tagline wraps"]}
+    ]
+  },
+  "test_report_links": ["/app/backend/tests/test_iteration49_testimonials_stats.py", "/app/test_reports/pytest/pytest_iter49.xml"],
+  "action_items": [
+    "Optional: strip/validate whitespace in TestimonialIn",
+    "Optional: hide hero 5-star row when < 3 testimonials; center testimonial grid when < 3 items; shorten annual badge in pricing toggle on mobile"
+  ],
+  "critical_code_review_comments": [
+    "testimonials.py: add str strip validator (pydantic constr strip_whitespace) for text/first_name",
+    "stats.py: _today_key uses Europe/Paris but attempts.created_at is UTC — use Paris midnight converted to UTC ISO",
+    "AdminTestimonials togglePublish sends full row (incl. id/created_at) — fine since pydantic ignores extras, but relies on that"
+  ],
+  "updated_files": ["/app/backend/tests/test_iteration49_testimonials_stats.py"],
+  "success_rate": {"backend": "100%", "frontend": "100%"},
+  "seed_data_creation": "Created 3 TEST_UI testimonials + 1 TEST_ API testimonial and a TEST_it49 user; all testimonials deleted (collection back to 0). Thresholds set to 0 then restored to 20/50/3/7 (site_settings doc now exists with defaults).",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Admin tour (onboarding) appears on login; close via onboarding-tour-close. Pricing route is /app/pricing (no /tarifs route in App.js). Badge text is CSS-uppercased, use textContent not inner_text. Testimonials collection was empty before testing."
+}

@@ -25,7 +25,7 @@ export default function TestimonialsSection({ items = [] }) {
           </p>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-5">
+        <div className={`grid gap-5 ${items.length >= 3 ? "md:grid-cols-3" : items.length === 2 ? "md:grid-cols-2 max-w-4xl mx-auto" : "max-w-xl mx-auto"}`}>
           {items.map((it, idx) => {
             const t = {
               quote: it.text,
