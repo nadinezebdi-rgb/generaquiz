@@ -47,12 +47,19 @@ export function adoptAccountStreak(server) {
   return loadStreak();
 }
 
+// Un mini-quiz en attente par thème ; retiré seulement après rattachement réussi (ou refus 400).
 export function savePendingMini(categoryId, answers) {
-  localStorage.setItem(PENDING_MINI_KEY, JSON.stringify({ category_id: categoryId, answers, at: Date.now() }));
+  const all = (read(PENDING_MINI_KEY) || []).filter?.((p) => p.category_id !== categoryId) || [];
+  localStorage.setItem(PENDING_MINI_KEY, JSON.stringify([...all, { category_id: categoryId, answers, at: Date.now() }]));
 }
 
-export function takePendingMini() {
-  const p = read(PENDING_MINI_KEY);
-  localStorage.removeItem(PENDING_MINI_KEY);
-  return p && Date.now() - p.at < MINI_TTL_MS ? p : null;
+export function listPendingMini() {
+  const all = read(PENDING_MINI_KEY);
+  return Array.isArray(all) ? all.filter((p) => Date.now() - p.at < MINI_TTL_MS) : [];
+}
+
+export function dropPendingMini(categoryId) {
+  const left = listPendingMini().filter((p) => p.category_id !== categoryId);
+  if (left.length) localStorage.setItem(PENDING_MINI_KEY, JSON.stringify(left));
+  else localStorage.removeItem(PENDING_MINI_KEY);
 }

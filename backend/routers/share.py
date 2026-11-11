@@ -38,7 +38,8 @@ def _og_page(title: str, desc: str, page: str, image: str, og_type: str = "websi
 
 
 def clean_name(name: str) -> str:
-    return re.sub(r"[^\w\s'\-]", "", name or "", flags=re.UNICODE).strip()[:24]
+    name = re.sub(r"<[^>]*>", "", name or "")
+    return re.sub(r"[^\w\s'\-]", "", name, flags=re.UNICODE).strip()[:24]
 
 
 @router.get("/conseil/{date_key}", response_class=HTMLResponse)

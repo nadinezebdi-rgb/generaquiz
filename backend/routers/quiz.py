@@ -10,6 +10,7 @@ from datetime import datetime, timedelta, timezone
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
+from pymongo.errors import DuplicateKeyError
 
 from core import db, get_current_user, AttemptCreate, is_premium_active
 from routers.referral import grant_referral_bonus_if_eligible
@@ -280,7 +281,8 @@ async def claim_mini_quiz(body: MiniClaim, user: dict = Depends(get_current_user
         for qid in (await _weekly_pick(body.category_id, weeks_ago))[1][6:9]:
             week_ids.setdefault(qid, weeks_ago)
     qids = [a.question_id for a in body.answers]
-    if len(set(qids)) != len(qids) or any(q not in week_ids for q in qids):
+    if len(set(qids)) != len(qids) or any(q not in week_ids for q in qids) \
+            or len({week_ids[q] for q in qids}) != 1:
         raise HTTPException(status_code=400, detail="Mini-quiz expiré ou invalide")
     year, week, _ = (datetime.now(timezone.utc) - timedelta(weeks=week_ids[qids[0]])).isocalendar()
     mini_week = f"{year}-W{week:02d}"
@@ -292,11 +294,14 @@ async def claim_mini_quiz(body: MiniClaim, user: dict = Depends(get_current_user
         {"id": {"$in": qids}}, {"_id": 0, "id": 1, "correct_index": 1})}
     score = sum(1 for a in body.answers if correct_map.get(a.question_id) == a.choice)
     total = len(body.answers)
-    await db.attempts.insert_one({
-        "user_id": user_id, "category_id": body.category_id, "score": score, "total": total,
-        "duration_seconds": 0, "source": "mini_quiz", "mini_week": mini_week,
-        "created_at": datetime.now(timezone.utc).isoformat(),
-    })
+    try:
+        await db.attempts.insert_one({
+            "user_id": user_id, "category_id": body.category_id, "score": score, "total": total,
+            "duration_seconds": 0, "source": "mini_quiz", "mini_week": mini_week,
+            "created_at": datetime.now(timezone.utc).isoformat(),
+        })
+    except DuplicateKeyError:
+        return {"ok": True, "already_claimed": True}
     await record_category_mastery(user_id, body.category_id, score, total)
     fresh_user = await db.users.find_one({"_id": user["_id"]}) or user
     awarded_badges = await check_after_attempt(fresh_user, score, total)

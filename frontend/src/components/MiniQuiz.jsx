@@ -10,7 +10,7 @@ import { savePendingMini } from "@/lib/visitorProgress";
 const VERDICT = ["On révise ensemble ?", "Un bon début !", "Très joli score !", "Sans faute, bravo !"];
 const NAME_KEY = "gq_defi_name";
 
-const cleanName = (n) => (n || "").replace(/[^\p{L}\s'-]/gu, "").trim().slice(0, 24);
+const cleanName = (n) => (n || "").replace(/<[^>]*>/g, "").replace(/[^\p{L}\s'-]/gu, "").trim().slice(0, 24);
 
 export const ThemeMiniQuiz = ({ categoryId, color }) => {
   const [data, setData] = useState(null);

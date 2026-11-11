@@ -97,9 +97,15 @@ async def streak_merge(body: StreakMerge, user: dict = Depends(get_current_user)
     if body.last_date > key:
         raise HTTPException(status_code=400, detail="Date invalide")
     device_live = body.last_date in (key, _yesterday(key)) and body.last_result
-    account_live = st.get("last_date") in (key, _yesterday(key)) and st.get("last_result")
-    take_device = device_live and (not account_live or body.count > int(st.get("count") or 0))
-    new = dict(body.model_dump()) if take_device else dict(st)
+    if st.get("last_date") == key:
+        # Le compte a déjà répondu aujourd'hui : jamais de retour en arrière (pas de double comptage)
+        new = dict(st)
+        if st.get("last_result") and body.last_date == _yesterday(key) and body.last_result:
+            new["count"] = max(int(st.get("count") or 0), body.count + 1)
+    else:
+        account_live = st.get("last_date") == _yesterday(key) and st.get("last_result")
+        take_device = device_live and (not account_live or body.count > int(st.get("count") or 0))
+        new = dict(body.model_dump()) if take_device else dict(st)
     new["best"] = max(int(st.get("best") or 0), body.best, int(new.get("count") or 0))
     if new != st:
         await db.users.update_one({"_id": user["_id"]}, {"$set": {"tip_streak": new}})

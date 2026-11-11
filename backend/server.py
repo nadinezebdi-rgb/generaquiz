@@ -180,6 +180,10 @@ async def startup():
     await db.password_reset_tokens.create_index("expires_at", expireAfterSeconds=0)
     await db.daily_attempts.create_index([("user_id", 1), ("date_key", 1)], unique=True)
     await db.daily_quizzes.create_index("date_key", unique=True)
+    await db.attempts.create_index(
+        [("user_id", 1), ("source", 1), ("category_id", 1), ("mini_week", 1)],
+        unique=True, partialFilterExpression={"source": "mini_quiz"}, name="uniq_mini_quiz_claim",
+    )
     await db.daily_attempts.create_index([("date_key", 1), ("score", -1), ("duration_seconds", 1)])
     # Gamification indexes
     await db.credit_ledger.create_index([("user_id", 1), ("created_at", -1)])
