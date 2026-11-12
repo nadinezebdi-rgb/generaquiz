@@ -311,7 +311,8 @@ async def backfill_legacy_palier_attempts() -> int:
         if await db.palier_attempts.find_one(k):
             continue
         await db.palier_attempts.insert_one({**k, "score": int(row.get("best_score", 0)), "total": PALIER_SIZE,
-                                             "legacy": True, "created_at": row.get("last_played_at")})
+                                             "legacy": True, "created_at": row.get("last_played_at") or row.get("completed_at")
+                                             or datetime.now(timezone.utc).isoformat()})
         n += 1
     await db.site_settings.update_one({"key": "migration_palier_attempts_v1"},
                                       {"$set": {"key": "migration_palier_attempts_v1", "value": {"inserted": n}}},

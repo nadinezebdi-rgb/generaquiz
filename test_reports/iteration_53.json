@@ -1,0 +1,36 @@
+{
+  "summary": "Tested the GénéraQuiz palier per-question validation (A), the B2 stock display and the C stats/mastery merge. Backend: the new suite test_iteration53_palier_feedback.py passes 7/7. /start leaks no answer keys and shuffles the options. /answer locks the first answer, rejects a bad index or a foreign question, and returns 400 after submit. A second submit returns 400. /submit ignores answers sent by the client and counts unanswered questions as wrong (5 answered -> 15 mistakes with your_answer=null). A replay after failure gets the same 20 question ids. A 20/20 run unlocks palier 2, palier 3 stays 403, overview best_score and attempts are right, and the leaderboard includes the player. /stats and /progression/me combine classic and palier attempts. cuisine-terroir stock is 19 and bien-vieillir is below 20, and /start there returns 409. The one-time backfill ran (marker 'migration_palier_attempts_v1' inserted=6); the admin's cinema paliers 6 and 7 now have legacy attempts and their user_paliers rows are unchanged. Frontend: a full 20-question palier played in the UI behaves correctly: the number of '✅ Bonne réponse !' equals the final score (6/20), and there are 14 parcours-mistake items. Feedback, the right answer, the explanation and aria-live=polite all show, and options are disabled after validation. Précédente rereads a validated question with its feedback; options stay disabled and there is no Valider button. Abandon confirms and returns to the overview. B2 works: a normal user sees parcours-soon-1 and no stock badge on cuisine-terroir and bien-vieillir; the admin sees '⚠ stock 19/20' plus Bientôt disponible. C works in the UI: after 1 classic quiz (5 questions, free plan) and 1 palier, the dashboard shows 2 quizzes, 4 correct, 16%, and the progression card reads '4 / 25 · 2 quiz'. Dashboard at 390px in Confort+: the Jouer and Parcours buttons are not clipped and there is no horizontal overflow. Landing: with /api/categories slowed by 3 s, no universe or Bientôt card rendered before load.",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {"endpoint": "DELETE /api/auth/account", "issue": "Does not delete the new palier_attempts collection (routers/auth.py line 258 list). Deleted accounts leave orphan rows: 10 currently in preview, created by test users. GDPR / data-hygiene gap. Add 'palier_attempts' to the cleanup list."},
+      {"endpoint": "backfill_legacy_palier_attempts", "issue": "Legacy rows can have created_at=None (admin cinema palier 6) because last_played_at was missing. Harmless for the aggregates, but any later sort or filter on created_at will treat them oddly. Consider falling back to completed_at or now."}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "Parcours play, mobile 390 in Confort+", "issues": ["The explanation box is nested inside 3 padded containers (card p-6, feedback p-5, explanation p-4), so the text column is about 200px wide and a long explanation needs a lot of scrolling before 'Question suivante' is reachable. Consider less padding on mobile or scrolling the next button into view after validation."]},
+      {"screen": "Navbar for admin at 1920px", "issues": ["Pre-existing: with the extra 'Admin' menu, the 'Confort +' chip is cut off at the right edge of the header."]}
+    ]
+  },
+  "test_report_links": ["/app/backend/tests/test_iteration53_palier_feedback.py", "/app/test_reports/pytest/pytest_it53.xml"],
+  "action_items": [
+    "Add 'palier_attempts' to the DELETE /api/auth/account cleanup list in routers/auth.py",
+    "Optional: give legacy palier_attempts a non-null created_at fallback",
+    "Optional: tighten the padding of the mobile palier feedback / auto-scroll to the next button",
+    "Stale test: tests/test_iteration22_secure_progression.py::test_catalog_15_badges expects 15 badges, but there are now 22. Update the expectation."
+  ],
+  "critical_code_review_comments": [
+    "palier_answer has no 1..7 palier bounds check and does not check the category of question_id against category_id. It is safe in practice because question_id must be in the stored run's question_ids.",
+    "palier_submit skips questions deleted mid-run (no mistake entry), but total is still 20, so mistakes + score can be < 20 in that rare case.",
+    "The frontend keeps the run only in React state: a page refresh mid-palier loses it, and the next /start resets run_answers. This is acceptable, but players get no warning."
+  ],
+  "updated_files": ["/app/backend/tests/test_iteration53_palier_feedback.py"],
+  "success_rate": {"backend": "100% (7/7 new tests; iteration52 suite passes; 1 stale badge-count test in iteration22)", "frontend": "100% of requested flows"},
+  "seed_data_creation": "Only TEST users (test_it53_*, test_it53ui_*), all deleted via DELETE /api/auth/account. Their palier_attempts rows remain as orphans because of the bug above. No seed, admin or category data was modified.",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Free users get 5 classic questions per quiz. The new palier tests read correct answers read-only from Mongo (test_database) to pass paliers. Admin role is 'superadmin'. Onboarding key: generaquiz_onboarding_v1='seen'. Confort+ key: gq_senior_mode='1'. No QA top-up or generation jobs were triggered."
+}

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
 import { Check, ChevronLeft, ChevronRight, Loader2, X } from "lucide-react";
@@ -29,9 +29,11 @@ function OptionButton({ label, text, state, disabled, onClick, testid }) {
 }
 
 function Feedback({ fb }) {
+  const ref = useRef(null);
+  useEffect(() => { ref.current?.scrollIntoView?.({ behavior: "smooth", block: "nearest" }); }, []);
   return (
-    <div aria-live="polite" data-testid="parcours-feedback"
-      className={`rounded-2xl p-5 mt-5 border-2 ${fb.correct ? "bg-[#3D9970]/10 border-[#3D9970]/40" : "bg-[#D9534F]/10 border-[#D9534F]/40"}`}>
+    <div ref={ref} aria-live="polite" data-testid="parcours-feedback"
+      className={`rounded-2xl p-4 sm:p-5 mt-5 border-2 ${fb.correct ? "bg-[#3D9970]/10 border-[#3D9970]/40" : "bg-[#D9534F]/10 border-[#D9534F]/40"}`}>
       <p className="font-display text-2xl font-bold text-navy" data-testid="parcours-feedback-verdict">
         {fb.correct ? "✅ Bonne réponse !" : "❌ Pas tout à fait."}
       </p>
@@ -41,7 +43,7 @@ function Feedback({ fb }) {
         </p>
       )}
       {fb.explanation && (
-        <p className="text-navy/80 text-lg leading-relaxed mt-3 bg-white/70 rounded-xl p-4" data-testid="parcours-feedback-explanation">
+        <p className="text-navy/80 text-lg leading-relaxed mt-3 bg-white/70 rounded-xl p-3 sm:p-4" data-testid="parcours-feedback-explanation">
           {fb.explanation}
         </p>
       )}
@@ -103,7 +105,7 @@ export function PlayView({ state, setState, categoryId, onSubmit, onAbandon }) {
       </div>
 
       <motion.div key={q.id} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}
-        className="bg-white rounded-3xl border-2 border-cream-dark p-6 sm:p-8 mb-4" data-testid="parcours-question">
+        className="bg-white rounded-3xl border-2 border-cream-dark p-4 sm:p-8 mb-4" data-testid="parcours-question">
         <h2 className="font-display text-2xl font-extrabold text-navy mb-6">{q.question}</h2>
         <div className="grid gap-3">
           {q.options.map((opt, i) => (
