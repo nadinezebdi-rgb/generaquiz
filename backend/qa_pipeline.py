@@ -98,13 +98,13 @@ class JobCheckpoint:
 # Règles éditoriales propres à certaines catégories (génération + contrôle).
 CATEGORY_RULES = {
     "bien-vieillir": (
-        "RÈGLES ÉDITORIALES « Bien vieillir » (impératives) : on parle uniquement de conseils, "
-        "d'habitudes de vie et de culture générale (alimentation, sommeil, activité physique douce, "
-        "lien social, jeux de mémoire, repères culturels sur l'âge et la longévité). "
-        "INTERDIT : toute allégation médicale — ne jamais écrire qu'une habitude prévient, réduit le risque, "
-        "soigne ou guérit une maladie ; aucun médicament, vaccin, dosage, diagnostic, symptôme ni nom de "
-        "maladie présenté comme évitable. Préférer « aide à se sentir en forme », « est conseillé pour garder "
-        "le moral », « favorise un bon sommeil »."
+        "RÈGLES ÉDITORIALES « Bien vieillir » (impératives) : thèmes autorisés uniquement — santé au quotidien, "
+        "mémoire, alimentation, sommeil, activité physique douce, lien social — sous forme de conseils généraux, "
+        "consensuels, d'habitudes de vie et de culture générale. "
+        "INTERDIT : tout diagnostic, tout nom de médicament, vaccin, posologie ou dosage, toute promesse de "
+        "guérison ; ne jamais écrire qu'une habitude prévient, réduit le risque, soigne ou guérit une maladie ; "
+        "aucun symptôme ni nom de maladie présenté comme évitable. Préférer « aide à se sentir en forme », "
+        "« est conseillé pour garder le moral », « favorise un bon sommeil »."
     ),
 }
 

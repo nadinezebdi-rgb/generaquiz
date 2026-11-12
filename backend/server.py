@@ -215,6 +215,11 @@ async def startup():
     await db.user_badges.create_index([("user_id", 1), ("badge_id", 1)], unique=True)
     # Category mastery — one row per (user, category)
     await db.user_category_stats.create_index([("user_id", 1), ("category_id", 1)], unique=True)
+    await db.palier_attempts.create_index([("user_id", 1), ("category_id", 1), ("palier", 1)])
+    from routers.palier import backfill_legacy_palier_attempts
+    logger.info(f"[palier] tentatives historiques reconstituées : {await backfill_legacy_palier_attempts()}")
+    from routers.admin_qa import one_shot_prod_topup
+    await one_shot_prod_topup("bien-vieillir", "topup_bien_vieillir_2026_11")
 
     # Seed categories (always refresh metadata: title/description/mascot/count/group/sort_order)
     for cat in CATEGORIES:

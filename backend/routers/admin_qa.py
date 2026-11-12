@@ -774,6 +774,29 @@ async def _launch_qa_job(category_id: str, admin: dict, kind: str,
             "running_count": running_count, "max_concurrent": _MAX_CONCURRENT_QA_JOBS}
 
 
+def is_preview_env() -> bool:
+    from core import FRONTEND_URL
+    return "preview.emergentagent.com" in (FRONTEND_URL or "") or "localhost" in (FRONTEND_URL or "")
+
+
+PROD_ONLY_TOPUP = {"bien-vieillir"}  # génération IA coûteuse : jamais en aperçu
+
+
+async def one_shot_prod_topup(category_id: str, marker: str) -> None:
+    """Lance UNE fois (marqueur en base) le top-up d'une catégorie, en production uniquement."""
+    from core import logger
+    if is_preview_env() or await db.site_settings.find_one({"key": marker}):
+        return
+    await db.site_settings.update_one({"key": marker}, {"$set": {"key": marker, "value": {
+        "launched_at": datetime.now(timezone.utc).isoformat()}}}, upsert=True)
+    try:
+        res = await _launch_qa_job(category_id, {"email": "system@startup", "role": "admin"}, "topup",
+                                   _TOPUP_SCRIPT, action_label="qa.startup_topup")
+        logger.info(f"[startup-topup] {category_id}: job {res['job']['id']} {res['job']['status']}")
+    except HTTPException as e:
+        logger.info(f"[startup-topup] {category_id}: {e.detail}")
+
+
 async def auto_seed_understocked_categories() -> dict:
     """Détecte les catégories sous-approvisionnées (< 140 questions jouables)
     et lance automatiquement un top-up pour chacune.
@@ -799,6 +822,9 @@ async def auto_seed_understocked_categories() -> dict:
 
     for cat in cats:
         cat_id = cat["id"]
+        if cat_id in PROD_ONLY_TOPUP and is_preview_env():
+            skipped += 1
+            continue
         playable = await db.questions.count_documents({
             "category_id": cat_id,
             "difficulty": {"$gte": 1, "$lte": 7},

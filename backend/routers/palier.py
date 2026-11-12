@@ -12,11 +12,12 @@ Endpoints :
   POST /api/palier/categories/{category_id}/{n}/start       → 20 questions
   POST /api/palier/categories/{category_id}/{n}/submit      → scoring + unlock
 """
+import random
 from datetime import datetime, timezone
 from typing import Literal
 
 from fastapi import APIRouter, Depends, HTTPException
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from core import db, get_current_user
 from badges import check_after_palier
@@ -35,7 +36,16 @@ class PalierAnswer(BaseModel):
 
 
 class PalierSubmit(BaseModel):
-    answers: list[PalierAnswer]
+    answers: list[PalierAnswer] = []  # ignoré : le score vient des réponses validées via /answer
+
+
+class PalierAnswerBody(BaseModel):
+    question_id: str
+    answer: int = Field(..., ge=0, le=9)
+
+
+# Jamais envoyés au navigateur avant validation de la réponse
+PUBLIC_Q_PROJECTION = {"_id": 0, "id": 1, "category_id": 1, "question": 1, "options": 1, "difficulty": 1}
 
 
 PALIER_LABELS = {
@@ -124,7 +134,7 @@ async def palier_start(category_id: str, palier: int, user: dict = Depends(get_c
     if question_ids and not completed and len(question_ids) >= PALIER_SIZE:
         # Rejeu → mêmes questions
         qs = await db.questions.find(
-            {"id": {"$in": question_ids}}, {"_id": 0, "fact_check": 0}
+            {"id": {"$in": question_ids}}, PUBLIC_Q_PROJECTION
         ).to_list(PALIER_SIZE)
         qs.sort(key=lambda q: question_ids.index(q["id"]))
     else:
@@ -133,11 +143,19 @@ async def palier_start(category_id: str, palier: int, user: dict = Depends(get_c
             {"$match": {"category_id": category_id, "difficulty": palier,
                         "quality": {"$ne": "flagged"}}},
             {"$sample": {"size": PALIER_SIZE}},
-            {"$project": {"_id": 0, "fact_check": 0}},
+            {"$project": PUBLIC_Q_PROJECTION},
         ]
         qs = await db.questions.aggregate(pipeline).to_list(PALIER_SIZE)
         question_ids = [q["id"] for q in qs]
-    if len(qs) >= PALIER_SIZE and not (doc and doc.get("question_ids") == question_ids):
+    # Ordre des propositions mélangé à chaque partie (sinon la bonne réponse est souvent « A »)
+    run_perm = {}
+    for q in qs:
+        perm = list(range(len(q["options"])))
+        random.shuffle(perm)
+        run_perm[q["id"]] = perm
+        q["options"] = [q["options"][i] for i in perm]
+    if len(qs) >= PALIER_SIZE:
+        # Ouvre une nouvelle partie : les réponses validées repartent de zéro
         await db.user_paliers.update_one(
             {"user_id": user_id, "category_id": category_id, "palier": palier},
             {"$set": {
@@ -146,6 +164,9 @@ async def palier_start(category_id: str, palier: int, user: dict = Depends(get_c
                 "palier": palier,
                 "question_ids": question_ids,
                 "last_started_at": datetime.now(timezone.utc).isoformat(),
+                "run_open": True,
+                "run_answers": {},
+                "run_perm": run_perm,
             }},
             upsert=True,
         )
@@ -167,30 +188,70 @@ async def palier_start(category_id: str, palier: int, user: dict = Depends(get_c
     }
 
 
+@router.post("/categories/{category_id}/{palier}/answer")
+async def palier_answer(category_id: str, palier: int, body: PalierAnswerBody,
+                        user: dict = Depends(get_current_user)) -> dict:
+    """Valide UNE réponse de la partie ouverte. Verrouillée : un second appel renvoie le résultat enregistré."""
+    key = {"user_id": str(user["_id"]), "category_id": category_id, "palier": palier}
+    doc = await db.user_paliers.find_one(key)
+    if not doc or not doc.get("run_open") or body.question_id not in (doc.get("question_ids") or []):
+        raise HTTPException(status_code=400, detail="Aucune partie en cours pour cette question")
+    q = await db.questions.find_one({"id": body.question_id},
+                                    {"_id": 0, "options": 1, "correct_index": 1, "explanation": 1})
+    if not q:
+        raise HTTPException(status_code=404, detail="Question introuvable")
+    if body.answer >= len(q["options"]):
+        raise HTTPException(status_code=400, detail="Réponse invalide")
+    perm = (doc.get("run_perm") or {}).get(body.question_id) or list(range(len(q["options"])))
+    field = f"run_answers.{body.question_id}"  # stocké en index d'origine
+    await db.user_paliers.update_one({**key, "run_open": True, field: {"$exists": False}},
+                                     {"$set": {field: perm[body.answer]}})
+    fresh = await db.user_paliers.find_one(key, {"run_answers": 1})
+    stored = (fresh.get("run_answers") or {}).get(body.question_id)
+    if stored is None:
+        raise HTTPException(status_code=400, detail="Aucune partie en cours pour cette question")
+    ci = int(q["correct_index"])
+    return {"answer": perm.index(stored), "correct": stored == ci, "correct_index": perm.index(ci),
+            "correct_answer": q["options"][ci], "explanation": (q.get("explanation") or "").strip()}
+
+
 @router.post("/categories/{category_id}/{palier}/submit")
 async def palier_submit(category_id: str, palier: int, body: PalierSubmit,
                         user: dict = Depends(get_current_user)) -> dict:
-    """Server-authoritative scoring — le client ne peut PAS mentir sur son score."""
+    """Score calculé à partir des réponses validées côté serveur (sans réponse = faux)."""
     if palier < 1 or palier > TOTAL_PALIERS:
         raise HTTPException(status_code=400, detail="Palier invalide")
 
     user_id = str(user["_id"])
-    doc = await _get_user_palier(user_id, category_id, palier)
+    doc = await db.user_paliers.find_one_and_update(
+        {"user_id": user_id, "category_id": category_id, "palier": palier, "run_open": True},
+        {"$set": {"run_open": False}},
+    )
     expected_ids = (doc or {}).get("question_ids") or []
     if not expected_ids:
         raise HTTPException(status_code=400, detail="Palier non démarré")
-
-    submitted_ids = [a.question_id for a in body.answers]
-    if set(submitted_ids) != set(expected_ids):
-        raise HTTPException(status_code=400, detail="Les questions ne correspondent pas au palier démarré")
+    run_answers = doc.get("run_answers") or {}
 
     qs = await db.questions.find(
         {"id": {"$in": expected_ids}},
-        {"_id": 0, "id": 1, "correct_index": 1},
+        {"_id": 0, "id": 1, "question": 1, "options": 1, "correct_index": 1, "explanation": 1},
     ).to_list(len(expected_ids))
-    correct_map = {q["id"]: int(q["correct_index"]) for q in qs}
+    by_id = {q["id"]: q for q in qs}
 
-    score = sum(1 for a in body.answers if correct_map.get(a.question_id) == a.answer_index)
+    score, mistakes = 0, []
+    for qid in expected_ids:
+        q = by_id.get(qid)
+        if not q:
+            continue
+        ci, given = int(q["correct_index"]), run_answers.get(qid)
+        if given == ci:
+            score += 1
+            continue
+        mistakes.append({
+            "question_id": qid, "question": q["question"],
+            "your_answer": q["options"][given] if given is not None and given < len(q["options"]) else None,
+            "correct_answer": q["options"][ci], "explanation": (q.get("explanation") or "").strip(),
+        })
     passed = score >= PASS_THRESHOLD
 
     prev_best = int((doc or {}).get("best_score", 0))
@@ -212,6 +273,11 @@ async def palier_submit(category_id: str, palier: int, body: PalierSubmit,
         {"user_id": user_id, "category_id": category_id, "palier": palier},
         {"$set": update, "$inc": {"attempts": 1}},
     )
+    # Détail de chaque tentative (maîtrise + statistiques)
+    await db.palier_attempts.insert_one({
+        "user_id": user_id, "category_id": category_id, "palier": palier,
+        "score": score, "total": PALIER_SIZE, "legacy": False, "created_at": now_iso,
+    })
 
     # Défi Hebdo Palier — enregistre le score si cette tentative matche le défi courant
     matched_weekly = await record_weekly_score(user_id, category_id, palier, score)
@@ -225,12 +291,32 @@ async def palier_submit(category_id: str, palier: int, body: PalierSubmit,
         "score": score,
         "total": PALIER_SIZE,
         "passed": passed,
+        "pass_threshold": PASS_THRESHOLD,
         "best_score": new_best,
         "completed": new_completed,
         "next_palier_unlocked": next_unlocked,
         "next_palier": palier + 1 if next_unlocked else None,
         "awarded_badges": awarded,
+        "mistakes": mistakes,
     }
+
+
+async def backfill_legacy_palier_attempts() -> int:
+    """Une fois : 1 tentative au meilleur score pour chaque palier joué avant le suivi détaillé."""
+    if await db.site_settings.find_one({"key": "migration_palier_attempts_v1"}):
+        return 0
+    n = 0
+    async for row in db.user_paliers.find({"attempts": {"$gt": 0}}):
+        k = {"user_id": row["user_id"], "category_id": row["category_id"], "palier": row["palier"]}
+        if await db.palier_attempts.find_one(k):
+            continue
+        await db.palier_attempts.insert_one({**k, "score": int(row.get("best_score", 0)), "total": PALIER_SIZE,
+                                             "legacy": True, "created_at": row.get("last_played_at")})
+        n += 1
+    await db.site_settings.update_one({"key": "migration_palier_attempts_v1"},
+                                      {"$set": {"key": "migration_palier_attempts_v1", "value": {"inserted": n}}},
+                                      upsert=True)
+    return n
 
 
 @router.get("/leaderboard/{category_id}")

@@ -167,7 +167,10 @@ async def gift_order_status(session_id: str, request: Request) -> dict:
         raise HTTPException(status_code=404, detail="Commande introuvable")
     if tx["payment_status"] != "paid":
         webhook_url = f"{str(request.base_url).rstrip('/')}/api/webhook/stripe"
-        st = await StripeCheckout(api_key=STRIPE_API_KEY, webhook_url=webhook_url).get_checkout_status(session_id)
+        try:
+            st = await StripeCheckout(api_key=STRIPE_API_KEY, webhook_url=webhook_url).get_checkout_status(session_id)
+        except Exception:
+            raise HTTPException(status_code=404, detail="Session de paiement introuvable")
         await db.payment_transactions.update_one({"session_id": session_id},
                                                   {"$set": {"payment_status": st.payment_status, "status": st.status}})
         if st.payment_status != "paid":

@@ -329,11 +329,11 @@ export default function Dashboard() {
                     <p className="text-navy/80 text-base line-clamp-2">{cat.description}</p>
                   </div>
                 </div>
-                <div className="relative mt-5 flex items-center justify-between gap-2">
+                <div className="relative mt-5 flex flex-wrap items-center justify-between gap-2">
                   <span className="text-xs font-bold uppercase tracking-wider text-navy/60">
                     {cat.count} questions
                   </span>
-                  <div className="flex gap-2">
+                  <div className="flex flex-wrap gap-2">
                     <Link
                       to={`/app/parcours/${cat.id}`}
                       data-testid={`dashboard-parcours-${cat.id}`}

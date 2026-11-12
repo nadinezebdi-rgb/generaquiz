@@ -1,0 +1,39 @@
+{
+  "summary": "Tested the category rename and universes regrouping on both backend and frontend. Backend: 22/22 pytest pass. /api/categories returns the 10 ids with the new titles, correct group/sort_order, the exact expected counts and no 'soon' entries. All 10 palier overviews return 7 paliers. The admin's cinema progress (paliers 6+7, 20/20) is intact, and user_paliers still holds 2 rows before and after. The cinema leaderboard still lists Admin. Leaderboards and questions for culture-40-ans and chansons respond 200. The weekly challenge and its history show the new titles because the startup sync updated category_title. Frontend: the landing page has the 3 universes in order. Par époque reads [culture-70-ans, Bientôt Années 80, culture-40-ans, Bientôt 2010]. Intemporels has 5 cards in the right order. Nostalgie is one card with total 401 and 3 links to /decouvrir/{objets-antan,annees-50-60,chansons}, and those pages load. The Découvrir links are unchanged. The new section title and paragraph are present. Over 6 reloads, the hero demo and #demo questions always came from the 4-question list and were never the same; answering shows feedback and the explanation. On the dashboard, the 3 universes and the card order inside each are correct. The Bientôt cards are DIVs that are not inside a link and have no buttons; clicking one does not navigate. Play buttons for culture-40-ans and chansons start the quiz with 4 options. All 10 parcours pages show 7 paliers. Text scan: no 'Génération 40/70' or 'Neuf univers' on landing, dashboard, parcours, progression, quiz du jour, challenges, challenges/new, coop/new or leagues. Mobile 360/390 with and without Confort+: no page-level horizontal overflow on landing or dashboard. One pre-existing layout bug: on the dashboard with Confort+ on at 360px, the 'Jouer' button is clipped.",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {"endpoint": "/api/palier/leaderboard/{id}, /api/palier/categories/{id} (embedded category)", "issue": "The embedded category.count is the stale stored seed value (e.g. cinema 100), while /api/categories shows the live count (142). Pre-existing, not a regression."},
+      {"endpoint": "db.qa_jobs (admin QA history)", "issue": "8 historical qa_jobs documents still contain 'Génération ...' text. Admin-only and out of scope, but the startup title sync does not cover this collection."}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "Dashboard category card footer (Confort+ mode, 360px)", "issue": "The 'Jouer' button overflows to the right of the card (card right=340, play button right=427) and is clipped by overflow-hidden, so only 'J' is visible. Pre-existing footer markup, but it fails test item 10 for Confort+ on mobile. Fix: let the footer row wrap (flex-wrap) or stack the count above the buttons when senior-mode is on or below the sm breakpoint.", "selector": "[data-testid='dashboard-play-*']", "priority": "MEDIUM"}
+    ],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "Landing 'Choisissez votre thème' while categories load", "issues": ["Before /api/categories resolves, Par époque shows only the 2 Bientôt cards, and the Nostalgie card shows '0 questions' with no links (brief flash). Consider hiding the universes or showing skeletons until categories load."]},
+      {"screen": "/app/parcours/* at 1920px (logged in)", "issues": ["The navbar shows both the public links (Catégories/Essai gratuit/Tarifs/Offrir) and the app links, and the 'Confort +' toggle is cut off at the right edge. Pre-existing, unrelated to this change."]}
+    ]
+  },
+  "test_report_links": ["/app/backend/tests/test_iteration52_category_universes.py", "/app/test_reports/pytest/it52.xml"],
+  "action_items": [
+    "Fix the clipped 'Jouer' button on dashboard category cards in Confort+ mode at 360px (wrap or stack the footer row).",
+    "Optional: show skeletons or hide the landing universes until categories load, to avoid the '0 questions' Nostalgie flash.",
+    "Optional: include qa_jobs in the title sync, or leave it as is (admin history)."
+  ],
+  "critical_code_review_comments": [
+    "demoQuestions.js picks the two questions at module load, so they are random per full page load but stay the same on SPA navigation back to '/'. This matches the spec ('per page load').",
+    "The 'Années 80' demo uses Sophie (culture-40-ans mascot) and 'Aujourd'hui' uses Jeanne la Voyageuse (voyages-france). Acceptable, but the mascot/category pairing is a bit arbitrary.",
+    "The startup sync with update_many on challenges/coop_challenges/weekly_palier_challenges.category_title is idempotent (filter $ne title) and only touches display titles; ids are unchanged.",
+    "groupCategories falls back to 'intemporels' for an unknown or missing group, as specified; Bientôt items stay frontend-only."
+  ],
+  "updated_files": ["/app/backend/tests/test_iteration52_category_universes.py"],
+  "success_rate": {"backend": "100%", "frontend": "95% (1 pre-existing Confort+ mobile clipping issue)"},
+  "test_credentials": "admin@generaquiz.fr / pF44gVBfLdushm3NZ6dN (from /app/memory/test_credentials.md); bcrypt $2b$, httpOnly cookies, and CORS with an explicit origin plus credentials were verified",
+  "seed_data_creation": "None. No questions or progression data created or modified (the quizzes were started but not submitted).",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Onboarding tour localStorage key: generaquiz_onboarding_v1='seen'. Confort+ key: gq_senior_mode='1'. In preview, the admin's user_paliers = 2 rows (cinema paliers 6 and 7). Palier API: /api/palier/categories/{id}, /api/palier/leaderboard/{id}, /api/palier/weekly(/history)."
+}

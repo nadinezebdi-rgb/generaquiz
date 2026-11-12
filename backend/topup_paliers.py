@@ -79,6 +79,7 @@ NIVEAU DE DIFFICULTÉ demandé : {difficulty}/7
 Consigne : {hint}
 
 Génère UNE question à choix multiple (4 options, 1 seule correcte), factuellement irréprochable, adaptée à ce niveau.
+Le champ "explanation" est OBLIGATOIRE : 1 à 2 phrases simples qui expliquent la bonne réponse.
 
 Ne reproduis PAS les questions suivantes (ni leur paraphrase) :
 {avoid}
@@ -110,6 +111,8 @@ Format JSON STRICT, rien d'autre :
     idx = d.get("correct_index")
     if not isinstance(idx, int) or not (0 <= idx <= 3):
         return None
+    if not (d.get("explanation") or "").strip() or len({str(o).strip().lower() for o in d["options"]}) != 4:
+        return None  # explication obligatoire, 4 propositions distinctes
     return {
         "question": d["question"].strip(),
         "options": [str(o) for o in d["options"]],

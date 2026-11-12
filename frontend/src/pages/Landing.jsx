@@ -206,7 +206,7 @@ export default function Landing() {
             </p>
           </div>
 
-          {groupCategories(categories).map((universe) => (
+          {categories.length > 0 && groupCategories(categories).map((universe) => (
             <div key={universe.id} className="mb-12 last:mb-0" data-testid={`landing-universe-${universe.id}`}>
               <h3 className="font-display text-2xl sm:text-3xl font-bold text-navy mb-6" data-testid={`landing-universe-title-${universe.id}`}>{universe.title}</h3>
               {universe.id === "nostalgie" ? (
