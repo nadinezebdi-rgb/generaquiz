@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Check, X, Flame, Trophy, Sparkles } from "lucide-react";
 import { BACKEND_URL } from "@/lib/api";
+import { HERO_DEMO_QUESTION } from "@/lib/demoQuestions";
 
 /**
  * HeroPhoneDemo — animated mockup showing the app's core loop
@@ -11,14 +12,7 @@ import { BACKEND_URL } from "@/lib/api";
  * The visitor sees the value prop happen in front of them.
  */
 const SCRIPT = [
-  {
-    mascot: "chansons.png",
-    category: "Chansons françaises",
-    mascotName: "Yvette la Chanteuse",
-    question: "Qui a chanté « La Vie en rose » en 1945 ?",
-    options: ["Charles Trenet", "Édith Piaf", "Brassens", "Brel"],
-    correct: 1,
-  },
+  HERO_DEMO_QUESTION,
   {
     mascot: "cinema.png",
     category: "Cinéma français",

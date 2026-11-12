@@ -216,9 +216,13 @@ async def startup():
     # Category mastery — one row per (user, category)
     await db.user_category_stats.create_index([("user_id", 1), ("category_id", 1)], unique=True)
 
-    # Seed categories (always refresh metadata: title/description/mascot/count)
+    # Seed categories (always refresh metadata: title/description/mascot/count/group/sort_order)
     for cat in CATEGORIES:
         await db.categories.update_one({"id": cat["id"]}, {"$set": cat}, upsert=True)
+        # Titres recopiés dans les défis : alignés sur le titre courant (affichage uniquement)
+        for coll in (db.challenges, db.coop_challenges, db.weekly_palier_challenges):
+            await coll.update_many({"category_id": cat["id"], "category_title": {"$ne": cat["title"]}},
+                                   {"$set": {"category_title": cat["title"]}})
 
     # Seed questions ONLY if the pool is empty (first boot or after manual flush).
     # Mistral regenerates the full pool nightly at 03:00 Paris — we don't want
