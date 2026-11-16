@@ -25,6 +25,7 @@ juste sur l'horaire prévu, le job passe quand même dans l'heure suivante.
 """
 from __future__ import annotations
 
+from datetime import datetime
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
 
@@ -61,6 +62,7 @@ def start_scheduler() -> None:
     from topup_paliers_job import topup_all_categories_nightly
     from daily_tips import daily_tip_job
     from morning_report import send_admin_morning_report
+    from routers.gifts import close_expired_christmas_checkouts, retry_pending_gift_pdfs
 
     _scheduler = AsyncIOScheduler(timezone="Europe/Paris")
 
@@ -82,6 +84,13 @@ def start_scheduler() -> None:
     _schedule(_scheduler, settle_finished_week,      day_of_week="mon", hour=0,  minute=5, job_id="leagues_weekly_settle")
     _schedule(_scheduler, pick_weekly_challenge,     day_of_week="mon", hour=0,  minute=10, job_id="weekly_palier_pick")
     _schedule(_scheduler, send_weekly_challenge_reminders, day_of_week="sun", hour=19, minute=0, job_id="weekly_palier_reminder")
+
+    _scheduler.add_job(close_expired_christmas_checkouts, "interval", minutes=5,
+                       id="christmas_gift_checkout_closure", replace_existing=True,
+                       next_run_time=datetime.now(_scheduler.timezone), max_instances=1)
+    _scheduler.add_job(retry_pending_gift_pdfs, "interval", minutes=2,
+                       id="gift_pdf_retry", replace_existing=True,
+                       next_run_time=datetime.now(_scheduler.timezone), max_instances=1)
 
     _scheduler.start()
     logger.info(

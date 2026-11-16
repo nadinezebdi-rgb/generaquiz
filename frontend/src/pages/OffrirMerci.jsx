@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import Navbar from "@/components/Navbar";
 import { api, BACKEND_URL } from "@/lib/api";
 
-const MAX_TRIES = 8;
+const MAX_TRIES = 40;
 
 function GiftReady({ gift, pdfUrl }) {
   const copy = () => navigator.clipboard?.writeText(gift.code).then(() => toast.success("Code copié"));
@@ -21,7 +21,7 @@ function GiftReady({ gift, pdfUrl }) {
       <div>
         <a href={`${BACKEND_URL}${pdfUrl}`} target="_blank" rel="noreferrer" data-testid="gift-pdf-download"
           className="inline-flex items-center gap-2 bg-terracotta hover:bg-terracotta-dark text-white font-bold text-lg px-8 py-4 rounded-full transition-colors">
-          <Download className="w-5 h-5" /> Télécharger la carte à imprimer
+          <Download className="w-5 h-5" /> Télécharger ma carte cadeau
         </a>
       </div>
       <p className="text-sm text-cream/60 mt-6">Gardez ce lien : la carte reste téléchargeable depuis cette page. L&apos;année démarre le jour où {gift.recipient_name} active le code.</p>
@@ -32,16 +32,18 @@ function GiftReady({ gift, pdfUrl }) {
 export default function OffrirMerci() {
   const [params] = useSearchParams();
   const sessionId = params.get("session_id");
-  const [state, setState] = useState({ status: sessionId ? "checking" : "error" });
+  const accessToken = new URLSearchParams(window.location.hash.slice(1)).get("access");
+  const [state, setState] = useState({ status: sessionId && accessToken ? "checking" : "error" });
 
   useEffect(() => {
-    if (!sessionId) return undefined;
+    if (!sessionId || !accessToken) return undefined;
     let stop = false;
     const poll = async (n) => {
       if (stop) return;
       try {
-        const { data } = await api.get(`/gifts/order/${sessionId}`);
-        if (data.payment_status === "paid") return setState({ status: "paid", ...data });
+        const { data } = await api.get(`/gifts/order/${sessionId}`, { params: { access_token: accessToken } });
+        if (data.payment_status === "paid" && data.pdf_status === "ready") return setState({ status: "paid", ...data });
+        if (data.payment_status === "paid") setState({ status: "preparing", ...data });
         if (data.status === "expired") return setState({ status: "expired" });
       } catch { /* on réessaie */ }
       if (n >= MAX_TRIES) return setState({ status: "error" });
@@ -49,7 +51,7 @@ export default function OffrirMerci() {
     };
     poll(0);
     return () => { stop = true; };
-  }, [sessionId]);
+  }, [sessionId, accessToken]);
 
   return (
     <div className="min-h-screen paper-bg">
@@ -59,6 +61,12 @@ export default function OffrirMerci() {
           <div data-testid="gift-checking">
             <Loader2 className="w-14 h-14 text-terracotta mx-auto mb-5 animate-spin" />
             <h1 className="font-display text-3xl font-extrabold text-navy">Vérification du paiement…</h1>
+          </div>
+        )}
+        {state.status === "preparing" && (
+          <div data-testid="gift-pdf-preparing" className="text-center">
+            <Loader2 className="w-14 h-14 text-terracotta mx-auto mb-5 animate-spin" />
+            <h1 className="font-display text-3xl font-extrabold text-navy">Paiement confirmé, préparation de votre carte cadeau…</h1>
           </div>
         )}
         {state.status === "paid" && <GiftReady gift={state.gift} pdfUrl={state.pdf_url} />}

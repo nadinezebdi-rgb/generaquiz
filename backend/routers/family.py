@@ -19,7 +19,12 @@ from core import db, logger, FRONTEND_URL, RESEND_API_KEY, SENDER_EMAIL, get_cur
 router = APIRouter(prefix="/famille", tags=["famille"])
 
 MAX_PROCHES = 4
-OWNER_TIERS = {"famille", "famille_v2", "heritage", "premium"}
+NOEL_TIER = "famille_noel"
+OWNER_TIERS = {"famille", "famille_v2", NOEL_TIER, "heritage", "premium"}
+
+
+def max_proches(owner: dict) -> int:
+    return 3 if owner.get("plan_tier") == NOEL_TIER else MAX_PROCHES
 
 
 def is_family_owner(u: dict) -> bool:
@@ -82,6 +87,7 @@ async def _leaderboard(member_ids: list[str]) -> list[dict]:
 
 async def _space(owner: dict, me: dict, role: str) -> dict:
     owner_id = str(owner["_id"])
+    proche_limit = max_proches(owner)
     invites = await db.family_proches.find({"owner_id": owner_id, "status": {"$in": ["invited", "accepted"]}},
                                            {"_id": 0}).sort("invited_at", 1).to_list(MAX_PROCHES)
     accepted = [i["user_id"] for i in invites if i["status"] == "accepted" and i.get("user_id")]
@@ -90,7 +96,7 @@ async def _space(owner: dict, me: dict, role: str) -> dict:
                                           {"_id": 0, "token": 1, "creator_name": 1, "category_title": 1,
                                            "participants": 1, "created_at": 1}).sort("created_at", -1).to_list(10)
     return {
-        "role": role, "owner_name": owner.get("name"), "max_proches": MAX_PROCHES,
+        "role": role, "owner_name": owner.get("name"), "max_proches": proche_limit,
         "proches": [_invite_public(i) if role == "owner" else {"name": i.get("name"), "status": i["status"]}
                     for i in invites],
         "leaderboard": await _leaderboard(member_ids),
@@ -125,12 +131,13 @@ async def invite_proche(body: ProcheInvite, user: dict = Depends(get_current_use
     email = body.email.lower()
     if email == user["email"].lower():
         raise HTTPException(status_code=400, detail="Vous êtes déjà le bénéficiaire de cet espace")
+    limit = max_proches(user)
     active = await db.family_proches.find({"owner_id": owner_id, "status": {"$in": ["invited", "accepted"]}},
-                                          {"email": 1}).to_list(MAX_PROCHES + 1)
+                                          {"email": 1}).to_list(limit + 1)
     if any(a["email"] == email for a in active):
         raise HTTPException(status_code=400, detail="Cette personne est déjà invitée")
-    if len(active) >= MAX_PROCHES:
-        raise HTTPException(status_code=400, detail=f"Votre espace famille compte déjà {MAX_PROCHES} proches")
+    if len(active) >= limit:
+        raise HTTPException(status_code=400, detail=f"Votre espace famille compte déjà {limit} proches")
     doc = {"id": str(uuid.uuid4()), "owner_id": owner_id, "name": body.name.strip(), "email": email,
            "status": "invited", "token": secrets.token_urlsafe(18), "user_id": None,
            "invited_at": datetime.now(timezone.utc).isoformat(), "accepted_at": None}

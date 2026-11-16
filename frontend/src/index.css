@@ -89,6 +89,19 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
   animation: marquee 35s linear infinite;
 }
 
+.christmas-marquee-track {
+  animation: marquee 24s linear infinite;
+}
+
+[data-testid="landing-christmas-banner"]:hover .christmas-marquee-track,
+[data-testid="landing-christmas-banner"]:focus-visible .christmas-marquee-track {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .christmas-marquee-track { animation: none; }
+}
+
 /* Float animation for mascots */
 @keyframes float {
   0%, 100% { transform: translateY(0px) rotate(-1deg); }

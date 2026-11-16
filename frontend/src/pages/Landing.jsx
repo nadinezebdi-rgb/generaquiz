@@ -21,6 +21,7 @@ import { BLOCK_DEMO_QUESTION } from "@/lib/demoQuestions";
 import TestimonialsSection from "@/components/TestimonialsSection";
 import { api, BACKEND_URL } from "@/lib/api";
 import { PLANS, pricePresentation, annualDiscountBadge, fmt } from "@/config/pricing";
+import { useGiftOffers } from "@/lib/gifts";
 
 const ICON_MAP = { tv: Film, music: Music, film: Film, phone: Phone, landmark: Landmark, utensils: Utensils, sparkles: Sparkles, book: Book, heart: HeartPulse, map: MapIcon };
 
@@ -28,6 +29,8 @@ export default function Landing() {
   const [categories, setCategories] = useState([]);
   const [packages, setPackages] = useState([]);
   const [testimonials, setTestimonials] = useState([]);
+  const giftOffers = useGiftOffers();
+  const christmasFamily = giftOffers?.offers?.find((offer) => offer.id === "famille");
 
   useEffect(() => {
     api.get("/testimonials").then((r) => setTestimonials(r.data)).catch(() => {});
@@ -41,6 +44,27 @@ export default function Landing() {
   return (
     <div className="paper-bg min-h-screen">
       <Navbar variant="landing" />
+      {giftOffers?.promo?.active && (
+        <Link
+          to="/offrir?offre=famille"
+          aria-label={`Offre de Noël : carte cadeau Famille à ${fmt(christmasFamily?.price || 69, { integer: true })}, découvrir`}
+          data-testid="landing-christmas-banner"
+          className="block overflow-hidden border-y-2 border-mustard-dark bg-bordeaux py-3 text-cream hover:bg-navy-dark focus-visible:bg-navy-dark"
+        >
+          <div className="christmas-marquee-track inline-flex min-w-max items-center whitespace-nowrap font-display text-lg font-bold sm:text-xl" aria-hidden="true">
+            {[0, 1].map((copy) => (
+              <span key={copy} className="px-6 sm:px-10">
+                ✦ Offre de Noël · {fmt(christmasFamily?.price || 69, { integer: true })} · Possibilité de jouer avec 3 membres au quiz pendant 1 an · Carte personnalisée femme ou homme · Jusqu&apos;au 24 décembre · Découvrir <span aria-hidden="true">→</span>
+              </span>
+            ))}
+          </div>
+        </Link>
+      )}
+      {giftOffers?.promo?.closed && (
+        <p className="border-y-2 border-bordeaux bg-cream px-4 py-3 text-center font-bold text-bordeaux" role="status">
+          L’offre de Noël est terminée
+        </p>
+      )}
 
       {/* ============ HERO ============ */}
       <section className="relative overflow-hidden">

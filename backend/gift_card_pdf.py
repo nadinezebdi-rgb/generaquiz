@@ -14,6 +14,7 @@ GOLD = HexColor("#F2CC8F")
 GOLD_DARK = HexColor("#E5B96A")
 CREAM = HexColor("#F4F1DE")
 WHITE = HexColor("#FFFFFF")
+CHRISTMAS_RED = HexColor("#B52B3A")
 
 OFFER_TEXT = {
     "famille": {
@@ -60,8 +61,8 @@ def build_gift_pdf(gift: dict, activate_url: str) -> bytes:
     buf = io.BytesIO()
     c = canvas.Canvas(buf, pagesize=(w, h))
     c.setTitle(f"Carte cadeau GénéraQuiz — {gift['code']}")
-    noel = gift.get("theme") == "noel"
-    offer = OFFER_TEXT[gift["offer"]]
+    noel = gift.get("theme") == "noel" or str(gift.get("theme", "")).startswith("noel_")
+    offer = OFFER_TEXT["solo"] if noel or gift["offer"] == "noel" else OFFER_TEXT[gift["offer"]]
 
     c.setFillColor(NAVY)
     c.rect(0, 0, w, h, stroke=0, fill=1)
@@ -74,6 +75,81 @@ def build_gift_pdf(gift: dict, activate_url: str) -> bytes:
     c.roundRect(32, 32, w - 64, h - 64, 14, stroke=1, fill=0)
 
     left = 70
+    if noel:
+        c.setFillColor(GOLD)
+        c.setFont("Helvetica-Bold", 12)
+        c.drawString(left, h - 62, "GÉNÉRAQUIZ")
+
+        banner_y = h - 158
+        c.setFillColor(CHRISTMAS_RED)
+        c.roundRect(55, banner_y, w - 110, 76, 12, stroke=0, fill=1)
+        c.setFillColor(WHITE)
+        c.setFont("Helvetica-Bold", 11)
+        c.drawString(left, banner_y + 52, "CARTE CADEAU")
+        c.setFont("Times-Bold", 30)
+        c.drawString(left, banner_y + 17, "Joyeux Noël !")
+
+        y = banner_y - 32
+        c.setFillColor(GOLD)
+        c.setFont("Helvetica-Bold", 14)
+        c.drawString(left, y, f"Pour {gift.get('recipient_name') or 'vous'}")
+        y -= 22
+        if gift.get("buyer_name"):
+            c.setFillColor(CREAM)
+            c.setFont("Helvetica", 11)
+            c.drawString(left, y, f"De la part de {gift['buyer_name']}")
+            y -= 20
+        if gift.get("message"):
+            c.setFillColor(WHITE)
+            c.setFont("Times-Italic", 12)
+            for line in simpleSplit(f"« {gift['message']} »", "Times-Italic", 12, 430)[:5]:
+                c.drawString(left, y, line)
+                y -= 16
+
+        y -= 8
+        c.setFillColor(CREAM)
+        c.setFont("Helvetica-Bold", 12)
+        for line in simpleSplit("1 accès personnel complet pendant 1 an", "Helvetica-Bold", 12, 430):
+            c.drawString(left, y, line)
+            y -= 17
+
+        rx, box_w = w - 300, 230
+        c.setFillColor(GOLD)
+        c.roundRect(rx, h - 245, box_w, 82, 12, stroke=0, fill=1)
+        c.setFillColor(NAVY)
+        c.setFont("Helvetica-Bold", 10)
+        c.drawCentredString(rx + box_w / 2, h - 188, "VOTRE CODE CADEAU")
+        c.setFont("Courier-Bold", 12)
+        code_parts = gift["code"].split("-")
+        code_lines = ["-".join(code_parts[:3]), "-".join(code_parts[3:])]
+        c.drawCentredString(rx + box_w / 2, h - 218, code_lines[0])
+        if code_lines[1]:
+            c.drawCentredString(rx + box_w / 2, h - 234, code_lines[1])
+
+        qr_size = 116
+        qr_x = rx + (box_w - qr_size) / 2
+        qr_y = h - 390
+        c.setFillColor(WHITE)
+        c.roundRect(qr_x - 8, qr_y - 8, qr_size + 16, qr_size + 16, 10, stroke=0, fill=1)
+        c.drawImage(_qr_image(activate_url), qr_x, qr_y, qr_size, qr_size)
+        c.setFillColor(CREAM)
+        c.setFont("Helvetica", 9)
+        c.drawCentredString(rx + box_w / 2, qr_y - 22, "À utiliser sur generaquiz.fr")
+
+        c.setFillColor(GOLD_DARK)
+        c.setFont("Helvetica-Bold", 10)
+        c.drawString(left, 88, "Valable 1 an à partir de l'activation")
+        c.setFillColor(CREAM)
+        c.setFont("Helvetica", 9)
+        site = activate_url.split("?")[0].replace("https://", "").replace("http://", "")
+        c.drawString(left, 70, f"À utiliser sur {site}")
+        c.setFillColor(GOLD)
+        c.setFont("Times-Italic", 13)
+        c.drawString(left, 48, "Un cadeau pour jouer et partager de beaux moments.")
+        c.showPage()
+        c.save()
+        return buf.getvalue()
+
     c.setFillColor(GOLD)
     c.setFont("Helvetica-Bold", 13)
     c.drawString(left, h - 80, "GÉNÉRAQUIZ  ·  LE JEU QUI RAPPROCHE LES GÉNÉRATIONS")
