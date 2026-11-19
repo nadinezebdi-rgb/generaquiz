@@ -18,10 +18,10 @@ WHITE = HexColor("#FFFFFF")
 OFFER_TEXT = {
     "famille": {
         "title": "Offre Famille",
-        "tagline": "1 bénéficiaire + 4 proches pour partager une année de jeux",
+        "tagline": "1 bénéficiaire + 3 proches pour partager une année de jeux",
         "lines": [
             "Le bénéficiaire : tout GénéraQuiz pendant 1 an, Livre de Vie et son PDF compris",
-            "4 proches invités : quiz et défis du groupe familial, toute l'année",
+            "3 proches invités : quiz et défis du groupe familial, toute l'année",
             "Classement familial et résultats partagés pour tous",
         ],
     },

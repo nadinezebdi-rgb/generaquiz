@@ -54,7 +54,7 @@ export const PLANS = [
     stripeIds: { monthly: "famille_v2_monthly", yearly: "famille_v2_yearly" },
     features: [
       "Tout Solo pour le bénéficiaire principal",
-      "4 proches invités dans l'espace famille, sans supplément",
+      "3 proches invités dans l'espace famille, sans supplément",
       "Quiz, défis et classements familiaux sans limite de parties",
       "Pendant toute la durée de l'abonnement",
       "Chaque proche peut prendre Solo pour son propre catalogue et Livre de Vie",
@@ -70,7 +70,7 @@ export const GIFTS = [
   {
     id: "famille",
     nom: "Carte cadeau Famille",
-    description: "1 bénéficiaire + 4 proches pour partager une année de jeux.",
+    description: "1 bénéficiaire + 3 proches pour partager une année de jeux.",
     highlight: true,
   },
   {
