@@ -76,10 +76,10 @@ PACKAGES = {
     "solo_yearly":     {"amount": 49.00, "currency": "eur", "label": "Solo — Annuel",
                         "tier": "solo",    "period": "yearly",
                         "description": "12 mois — 2 mois offerts"},
-    # -- Famille : bénéficiaire complet + 4 proches dans l'espace famille --
+    # -- Famille : bénéficiaire complet + 3 proches dans l'espace famille --
     "famille_v2_monthly": {"amount": 7.90, "currency": "eur", "label": "Famille — Mensuel",
                         "tier": "famille_v2", "period": "monthly",
-                        "description": "Tout Solo + 4 proches invités aux quiz, défis et classements familiaux"},
+                        "description": "Tout Solo + 3 proches invités aux quiz, défis et classements familiaux"},
     "famille_v2_yearly":  {"amount": 79.00,"currency": "eur", "label": "Famille — Annuel",
                         "tier": "famille_v2", "period": "yearly",
                         "description": "12 mois — 2 mois offerts"},

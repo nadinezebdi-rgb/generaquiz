@@ -15,6 +15,7 @@ from emergentintegrations.payments.stripe.checkout import StripeCheckout, Checko
 from core import (db, logger, STRIPE_API_KEY, FRONTEND_URL, get_current_user, get_admin_user,
                   record_audit, rate_limit, is_premium_active)
 from gift_card_pdf import build_gift_pdf
+from routers.family import family_subscription_fields
 
 router = APIRouter(tags=["gifts"])
 
@@ -229,7 +230,7 @@ async def gift_redeem(body: GiftRedeem, user: dict = Depends(get_current_user)) 
     expires = None if keep_lifetime else (base + timedelta(days=365)).isoformat()
     await db.users.update_one({"_id": user["_id"]}, {"$set": {
         "plan": "premium", "plan_tier": tier, "plan_period": user.get("plan_period") if keep_lifetime else "yearly",
-        "plan_expires_at": expires}})
+        "plan_expires_at": expires, **family_subscription_fields(user, tier)}})
     await db.gift_codes.update_one({"_id": g["_id"]}, {"$set": {"plan_expires_at": expires}})
     return {"ok": True, "offer": g["offer"], "offer_label": OFFERS[g["offer"]]["label"],
             "plan_tier": tier, "plan_expires_at": expires}

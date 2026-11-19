@@ -1,5 +1,11 @@
 # Quiz d'Antan — SaaS pour seniors français
 
+## 2026-11-19 — Offre Famille et visuel cadeau de Noël
+- Offre actuelle : 1 bénéficiaire + 3 proches, 79 €/an (mensuel inchangé à 7,90 €). Textes du site, CGV et PDF cadeau alignés.
+- Les nouveaux abonnements Famille et activations cadeau enregistrent `users.family_max_proches = 3`. Les anciens bénéficiaires sans ce champ conservent 4 places, y compris au renouvellement ; aucun proche existant n'est supprimé ni masqué.
+- `/offrir` utilise `/images/carte-cadeau-noel.webp` (visuel Mamie fourni), au ratio 3:2 avec chargement prioritaire et mention explicite de carte d'exemple.
+- Prix particuliers inchangés : ancienne formule Famille à 79,99 €/an ; promotion cadeau configurable à 69 € (désactivée par défaut).
+
 ## 2026-11-11 — LOT 2 : Offrir GénéraQuiz + nouvel espace famille + nouvelle grille (terminé)
 - **Grille** (`config/pricing.js`, `core.PACKAGES`) : Découverte gratuit · Solo 4,90 €/mois ou 49 €/an · Famille 7,90 €/mois ou 79 €/an (annuel = 10 mensualités → « 2 mois offerts »). Héritage retiré des tableaux (packages `legacy`, abonnés conservés). Un seul prix affiché selon le toggle, plus de prix barré ni d'équivalent mensuel, badge « Pour jouer ensemble ». Livre imprimé = option séparée 79,90 € l'exemplaire (`PrintedBookPricing`, tarif à confirmer après devis impression). CGV mises à jour.
 - **Espace famille** (`routers/family.py`, `/api/famille`, collection `family_proches`) : tout abonné Famille/Héritage = bénéficiaire ; invite jusqu'à 4 proches (e-mail Resend + lien `/famille/rejoindre/:token`). Les proches (`users.family_owner_id`) ont quiz/défis du groupe + classement familial (30 j) gratuitement ; catalogue et Livre de Vie restent payants. Gate `POST /api/challenges` = premium OU accès famille. Pages `/app/famille`, `/famille/rejoindre/:token`.

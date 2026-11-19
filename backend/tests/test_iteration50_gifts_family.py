@@ -171,11 +171,11 @@ class TestRedeemFamily:
 
         # family space
         sp = owner.get(f"{BASE_URL}/api/famille").json()
-        assert sp["role"] == "owner" and sp["max_proches"] == 4
+        assert sp["role"] == "owner" and sp["max_proches"] == 3
         assert owner.post(f"{BASE_URL}/api/famille/proches",
                           json={"name": "Me", "email": owner.email}).status_code == 400
         invites = []
-        for i in range(4):
+        for i in range(3):
             r = owner.post(f"{BASE_URL}/api/famille/proches",
                            json={"name": f"TEST_P{i}", "email": f"test_it50_p{i}_{uuid.uuid4().hex[:4]}@example.com"})
             assert r.status_code == 200, r.text
@@ -183,7 +183,7 @@ class TestRedeemFamily:
         assert owner.post(f"{BASE_URL}/api/famille/proches",
                           json={"name": "dup", "email": invites[0]["email"]}).status_code == 400
         assert owner.post(f"{BASE_URL}/api/famille/proches",
-                          json={"name": "5th", "email": "test_it50_fifth@example.com"}).status_code == 400
+                          json={"name": "4th", "email": "test_it50_fourth@example.com"}).status_code == 400
 
         token = invites[0]["link"].rsplit("/", 1)[1]
         info = requests.get(f"{BASE_URL}/api/famille/invitation/{token}")
