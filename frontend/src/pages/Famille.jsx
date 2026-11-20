@@ -94,9 +94,12 @@ function Challenges({ items }) {
 
 function ShareProgress({ space, reload }) {
   const owner = space.role === "owner";
+  const [busy, setBusy] = useState(false);
   const toggle = async (enabled) => {
-    try { await api.put("/famille/partage", { enabled }); toast.success(enabled ? "Partage activé" : "Partage désactivé"); reload(); }
+    setBusy(true);
+    try { await api.put("/famille/partage", { enabled }); toast.success(enabled ? "Partage activé" : "Partage désactivé"); await reload(); }
     catch (e) { err(e); }
+    finally { setBusy(false); }
   };
   return (
     <section className="bg-white rounded-3xl border-2 border-cream-dark p-6 flex flex-wrap items-start gap-4" data-testid="famille-share">
@@ -105,7 +108,7 @@ function ShareProgress({ space, reload }) {
         <h2 className="font-display text-2xl font-extrabold text-navy mb-1">Nouvelles du dimanche</h2>
         <p className="text-navy/70 text-sm" data-testid="famille-share-text">
           {owner
-            ? "Chaque dimanche, vos proches reçoivent un petit mot sur votre semaine de jeu et une idée de sujet pour vous appeler. Si vous ne jouez pas pendant 3 jours, ils sont prévenus une fois."
+            ? `${space.share_progress ? "Chaque dimanche, vos proches reçoivent" : "Activez le partage pour que, chaque dimanche, vos proches reçoivent"} un petit mot sur votre semaine de jeu et une idée de sujet pour vous appeler. Si vous ne jouez pas pendant 3 jours, ils sont prévenus une fois.`
             : space.share_progress
               ? `${space.owner_name} partage sa semaine de jeu avec vous : vous recevez un e-mail chaque dimanche et une alerte après 3 jours sans jouer.`
               : `${space.owner_name} n'a pas activé le partage de ses progrès.`}
@@ -114,7 +117,7 @@ function ShareProgress({ space, reload }) {
       {owner && (
         <label className="flex items-center gap-3 font-semibold text-navy">
           {space.share_progress ? "Activé" : "Désactivé"}
-          <Switch checked={space.share_progress} onCheckedChange={toggle} data-testid="famille-share-toggle" />
+          <Switch checked={space.share_progress} onCheckedChange={toggle} disabled={busy} data-testid="famille-share-toggle" />
         </label>
       )}
     </section>

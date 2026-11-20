@@ -97,9 +97,9 @@ def start_scheduler() -> None:
 
     _scheduler.start()
     logger.info(
-        "[scheduler] démarré — 13 jobs actifs "
+        "[scheduler] démarré — 15 jobs actifs "
         "(conseil du jour 02:30 · quiz 03:00 · wordsearch 03:30 · charades 04:00 · fléchés 04:30 · auto-seed paliers 05:00 · "
-        "rapport admin 07:30 · email quotidien 09:00 · relance J-7 10:00 · rappel ligues dim 20:00 · rappel défi dim 19:00 · "
+        "rapport admin 07:30 · email quotidien 09:00 · relance J-7 10:00 · alerte inactivité famille 11:00 · rapport famille dim 10:00 · rappel ligues dim 20:00 · rappel défi dim 19:00 · "
         "clôture ligues lun 00:05 · défi hebdo palier lun 00:10, Europe/Paris)"
     )
 

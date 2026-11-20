@@ -9,6 +9,7 @@ import resend
 from bson import ObjectId
 
 from core import db, logger, FRONTEND_URL, RESEND_API_KEY, SENDER_EMAIL
+from routers.family import is_family_owner
 
 INACTIVITY_DAYS = 3
 ACTIVITY_COLLECTIONS = ("attempts", "daily_attempts", "palier_attempts")
@@ -38,12 +39,13 @@ async def last_activity(user_id: str) -> str | None:
 
 
 async def _topic_idea(category_ids: list[str]) -> str:
-    match = {"discussion_prompt": {"$nin": [None, ""]}, "quality": {"$ne": "flagged"}}
-    if category_ids:
-        match["category_id"] = {"$in": category_ids}
-    docs = await db.questions.aggregate([{"$match": match}, {"$sample": {"size": 1}},
-                                         {"$project": {"_id": 0, "discussion_prompt": 1}}]).to_list(1)
-    return docs[0]["discussion_prompt"] if docs else "Quel est votre plus beau souvenir de vacances ?"
+    base = {"discussion_prompt": {"$nin": [None, ""]}, "quality": {"$ne": "flagged"}}
+    for match in ([{**base, "category_id": {"$in": category_ids}}] if category_ids else []) + [base]:
+        docs = await db.questions.aggregate([{"$match": match}, {"$sample": {"size": 1}},
+                                             {"$project": {"_id": 0, "discussion_prompt": 1}}]).to_list(1)
+        if docs:
+            return docs[0]["discussion_prompt"]
+    return "Quel est votre plus beau souvenir de vacances ?"
 
 
 def _html(title: str, body: str, topic: str) -> str:
@@ -71,6 +73,8 @@ async def _send(to: str, subject: str, html: str) -> bool:
 
 async def _sharing_owners():
     async for owner in db.users.find({"family_share_progress": True}):
+        if not is_family_owner(owner):
+            continue
         recipients = await _recipients(str(owner["_id"]))
         if recipients:
             yield owner, recipients
@@ -119,8 +123,12 @@ async def send_inactivity_alerts() -> dict:
         topic = await _topic_idea([])
         html = _html(f"{name} n'a pas joué depuis {days} jours",
                      f"<p>Rien d'inquiétant sans doute, mais c'est l'occasion de prendre des nouvelles.</p>", topic)
+        ok = 0
         for r in recipients:
-            sent += await _send(r["email"], f"Des nouvelles de {owner.get('name') or 'votre proche'} ?", html)
+            ok += await _send(r["email"], f"Des nouvelles de {owner.get('name') or 'votre proche'} ?", html)
+        sent += ok
+        if not ok:
+            continue  # réessai au prochain passage
         await db.users.update_one({"_id": owner["_id"]}, {"$set": {"family_inactivity_alert_for": last}})
         alerted += 1
     logger.info(f"[family-report] alertes d'inactivité : {sent} e-mail(s) pour {alerted} bénéficiaire(s)")

@@ -1,0 +1,39 @@
+{
+  "summary": "LOT 3 (weekly family report + inactivity alert + share toggle) tested end-to-end. Backend: 16/16 pytest pass (share toggle owner/proche/non-owner, GET /famille share_progress, admin-only reports, weekly owners count excludes sharing-off and invited-only owners, inactivity alert once per absence across attempts/daily_attempts/palier_attempts and family_share_since fallback, no re-alert on 2nd call, active owner not alerted, curated palier start=20 questions for the 3 categories, /categories count=140). build_weekly_report called directly: days/games/escaping/html OK. Frontend: owner toggle -> toast 'Partage activé'/'Partage désactivé', persists after reload; proche sees correct ON/OFF text and no toggle. Backend starts cleanly (curated sync + _safe_index logs OK, no crash). All test users/activity cleaned up.",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {"endpoint": "family_report._topic_idea", "issue": "Curated questions have no discussion_prompt (annees-80: 0/140, annees-2010: 0/140, bien-vieillir: 8/239). Owner playing only those categories always gets the hard-coded fallback 'Quel est votre plus beau souvenir de vacances ?' instead of a real prompt. Verified via build_weekly_report with annees-80/annees-2010 activity. Fix: if category-filtered $sample is empty, retry without category filter (and/or add discussion_prompt to curated JSON)."},
+      {"endpoint": "family_report.send_inactivity_alerts", "issue": "family_inactivity_alert_for marker is set even when every send fails (sent=0, e.g. Resend error), so the alert is lost for good for that absence period. Consider setting marker only if at least one email sent."},
+      {"endpoint": "family_report._sharing_owners", "issue": "Does not check is_family_owner(owner): an owner whose premium/famille plan expired but kept family_share_progress=True still triggers reports/alerts to proches. Add is_family_owner filter."},
+      {"endpoint": "data/curated_questions/bien-vieillir.json", "issue": "Contains 239 questions (paliers 1:20, 2:20, 3:22, 4:42, 5:48, 6:47, 7:40), not 140 as stated; GET /api/categories still reports count=140 for bien-vieillir while DB has 239. Check whether the extra items are intended or whether the category count is stale."},
+      {"endpoint": "scheduler startup log", "issue": "Log still says '13 jobs actifs' and the listing omits the new family_inactivity_alert (11:00) and family_weekly_report_sunday (dim 10:00) jobs; cosmetic but misleading."},
+      {"endpoint": "family_report loops", "issue": "No per-owner try/except: one malformed created_at (e.g. naive datetime string or datetime object) would raise and abort the whole batch for all owners. Current data is all tz-aware ISO strings, so this is not a problem today."}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "/app/famille owner - Nouvelles du dimanche", "issues": ["When the toggle is OFF the owner text still says 'Chaque dimanche, vos proches reçoivent...' as if it were active. Consider a different wording for OFF ('Activez pour que vos proches reçoivent...').", "Switch is not disabled while the PUT request runs, so a fast double-click can send two requests (minor)."]}
+    ]
+  },
+  "test_report_links": ["/app/backend/tests/test_iteration55_family_reports.py", "/app/test_reports/pytest/pytest_iter55.xml"],
+  "action_items": [
+    "Topic fallback: when no discussion_prompt exists for the played categories, sample from all categories (curated annees-80/2010 have none)",
+    "Only set family_inactivity_alert_for when at least one email was actually sent",
+    "Filter _sharing_owners with is_family_owner (expired owners)",
+    "Check bien-vieillir curated JSON size (239 vs 140) and category count",
+    "Update the scheduler startup log line to include the 2 new family jobs"
+  ],
+  "critical_code_review_comments": [
+    "family_report: days are counted on the UTC date (created_at[:10]), not Europe/Paris; late-evening games may count on the wrong day (minor)",
+    "_recipients is capped with to_list(10); fine for 3-4 proches"
+  ],
+  "updated_files": ["/app/backend/tests/test_iteration55_family_reports.py"],
+  "success_rate": {"backend": "100% (16/16)", "frontend": "100%"},
+  "seed_data_creation": "Temporary TEST_ owners/proches (@example.com) plus TEST activity docs were created and then deleted by id. Nothing is left over (checked: 0 test users, 0 sharing owners, 0 TEST activity).",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "The test file builds owners by registering, then sets plan=premium, plan_tier=famille_v2, plan_expires_at=+30d in Mongo. Proches use @example.com, so Resend rejects them ('[family-report] échec' in the logs); this is expected. Admin reports run over ALL sharing owners in the DB. Before this run there were 0 sharing owners."
+}

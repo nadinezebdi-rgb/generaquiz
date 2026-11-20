@@ -1958,3 +1958,8 @@ Les routes `/bulk/*` étaient interceptées par `/{qid}/approve|flag|apply-corre
 - Remplacement des one_shot_prod_topup par la synchro curated.
 - Mascotte Nathalie la Fluo régénérée (2 bras).
 - Restant : LOT 3 (rapport hebdo aidants / alertes inactivité), EHPAD superviseur, CRM B2B.
+
+## 2026-11-20 — LOT 3 : nouvelles du dimanche (DONE, testé iteration_55)
+- `backend/family_report.py` : rapport hebdo (dim 10:00) aux proches ayant REJOINT l'espace + alerte d'inactivité (3 jours, une seule fois par absence, réessai si aucun e-mail parti). Contenu : jours joués / parties de la semaine + idée de sujet d'appel (discussion_prompt).
+- Opt-in du bénéficiaire : `PUT /api/famille/partage` (users.family_share_progress, family_share_since), carte « Nouvelles du dimanche » dans /app/famille. Déclenchement admin : `POST /api/famille/admin/rapports/{hebdo|inactivite}`.
+- Republication lancée (correctif index + 420 questions).
