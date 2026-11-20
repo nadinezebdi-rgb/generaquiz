@@ -1,0 +1,39 @@
+{
+  "summary": "Super promo de Noël + real Stripe recurring subscriptions. Backend: 20/20 new tests pass (summary endpoint exact text, 400 for solo_yearly/famille_v2_yearly/legacy/gift during promo, checkout 401 unauth / 400 without accept_terms / 200 Stripe url for 4 packages, status endpoint, cancel 400 without sub, unit tests for post-deadline rule + promo checkout kwargs: mode=subscription, 69€ yearly recurring + 49€ one-time, trial_end ≈ +365d). Frontend: landing #tarifs desktop+390px (Annuel default, banner, pill/price/savings/renewal texts exact, monthly 6,90 €/mois + Sans engagement, note, see-all button, Famille badge + first features, no line-through / % in plan cards, no horizontal overflow). Date spoofed to 2027-01-01 via add_init_script: banner '2 mois offerts avec l'abonnement annuel', 69 €/an / 99 €/an, savings 13,80/19,80, no Noël/super promo/pour 12 mois in #tarifs, toggle badge '2 mois offerts', see-all text switches; /app/pricing same (only 'Noël' left is the unchanged gift-section sentence). /app/pricing recap dialog: exact Solo/Famille promo text + monthly texts, checkbox unchecked, pay btn disabled until checked, labels Payer 49 € / 79 € / 6,90 € / 9,90 €. FULL E2E PAYMENT DONE: fresh user, Solo promo, hosted Stripe checkout with 4242 card -> /app/success -> status paid (amount_total 4900) -> user plan premium, plan_tier solo, plan_period yearly, plan_auto_renew true, plan_renews_at +1 year, renewal 69, stripe_subscription_id + customer stored; /app/account shows 'Renouvellement automatique le 20 novembre 2027 : 69 € pour 12 mois', one-click cancel -> account-plan-cancelled 'Abonnement résilié : accès jusqu'au 20 novembre 2027, aucun nouveau prélèvement.', button disappears, second cancel idempotent. Regression: /offrir, /contact, /app/pricing load with no page errors.",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {"endpoint": "subscription.create_checkout_session (promo)", "issue": "Stripe hosted page uses trial wording because of trial_end: header 'Essayez GénéraQuiz Solo — annuel', line 'GénéraQuiz Solo — annuel : 364 jours gratuits', button 'Payer et démarrer l’essai'. Confusing for a paid 49 € offer and shows 364 days instead of 12 mois. Consider subscription_data.billing_cycle_anchor=+12 months with proration_behavior='none' (no trial label) or at least clearer product names/description."},
+      {"endpoint": "subscription.activate_from_session", "issue": "Transaction is flagged paid before user/pkg validation, and if Session.retrieve fails stripe_subscription_id stays None; in production cancel_subscription would then only cancel locally while Stripe keeps billing. Should retry retrieve / refuse local-only cancel when not SIMULATED."}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "Copy consistency", "issues": ["Recap text, Stripe custom_text, landing-promo-note and pricing-annual-note say '12 mois ... à compter de votre première connexion' while user choice says 12 months start at purchase (backend sets plan_started_at = purchase time). Text matches the briefing's exact wording, so just confirm with user — not modified."]},
+      {"screen": "/app/success", "issues": ["Generic 'Bienvenue chez Premium !' – could mention Solo/Famille and renewal date (minor)."]},
+      {"screen": "/app/pricing legal line", "issues": ["pricing-legal hardcodes fmt(69)/fmt(99) instead of PLANS values (violates single source of truth in pricing.js)."]}
+    ]
+  },
+  "test_report_links": ["/app/backend/tests/test_iteration56_noel_subscription.py", "/app/backend/tests/test_iteration56_promo_deadline_unit.py", "/app/test_reports/pytest/pytest_iter56.xml"],
+  "action_items": [
+    "Decide whether to remove Stripe 'essai / 364 jours gratuits' wording on hosted checkout for promo (billing_cycle_anchor approach)",
+    "Harden activate_from_session / cancel_subscription when stripe_subscription_id is missing in production",
+    "Confirm '12 mois à compter de votre première connexion' wording vs 'start at purchase' choice",
+    "Replace hardcoded 69/99 in Pricing.jsx pricing-legal with PLANS values",
+    "Update stale regression tests: test_pricing_sprintb.py (old packages), test_iteration50/51 gift tests (buyer_full_name now required, new 38-char code format, regular checkout now needs accept_terms), test_iteration55 inactivity tests fail because Resend rejects example.com and alert marker is only saved when an e-mail is sent (not caused by this feature)"
+  ],
+  "critical_code_review_comments": [
+    "promo deadline correctly enforced server-side (PROMO_END 2026-12-31 23:59:59 Europe/Paris) and front (+01:00) — consistent",
+    "No crossed prices / % in plan cards; savings computed only vs monthly",
+    "Cancel in preview is simulated (SIMULATED flag) as declared; Stripe test subscription sub_... created by E2E test remains active in Stripe sandbox (cannot be cancelled with shared key)",
+    "Account.jsx is 650 lines — close to the 700-line limit"
+  ],
+  "updated_files": ["/app/backend/tests/test_iteration56_noel_subscription.py", "/app/backend/tests/test_iteration56_promo_deadline_unit.py"],
+  "success_rate": {"backend": "100% (20/20 new tests)", "frontend": "100% of requested flows"},
+  "seed_data_creation": "Created test_noel_*@example.com (pytest, deleted via /api/auth/account) and test_noelui_d18b19@example.com (E2E paid Solo promo); both users and their 8 payment_transactions deleted by id/exact email. No seed/admin data modified.",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Stripe hosted checkout is automatable: card inputs live in a js.stripe.com elements-inner iframe (autocomplete cc-number/cc-exp/cc-csc, placeholders 'Prénom et nom', 'Code postal' in same frame), submit 'Payer et démarrer l’essai'. Date simulation via add_init_script Date subclass works for frontend; backend still in promo, so after-promo CTAs return 400 (expected). Env clock is 2026-11-20."
+}

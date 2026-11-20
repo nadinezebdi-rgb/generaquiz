@@ -7,7 +7,7 @@ import { api, formatError } from "@/lib/api";
  *   conservant le package à reprendre après connexion.
  * - Sinon on récupère `url` renvoyé par le backend et on redirige.
  */
-export async function startCheckout(packageId, { onError } = {}) {
+export async function startCheckout(packageId, { onError, acceptTerms = false } = {}) {
   if (!packageId) {
     onError?.("Ce forfait n'est pas encore disponible.");
     return;
@@ -16,6 +16,7 @@ export async function startCheckout(packageId, { onError } = {}) {
     const { data } = await api.post("/checkout/session", {
       package_id: packageId,
       origin_url: window.location.origin,
+      accept_terms: acceptTerms,
     });
     if (data?.url) {
       window.location.href = data.url;

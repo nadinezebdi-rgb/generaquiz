@@ -36,7 +36,8 @@ export default function Footer() {
             <li><Link to="/cgu" data-testid="footer-cgu" className="hover:text-mustard">Conditions d&apos;utilisation</Link></li>
             <li><Link to="/cgv" data-testid="footer-cgv" className="hover:text-mustard">Conditions de vente</Link></li>
             <li><Link to="/confidentialite" data-testid="footer-confidentialite" className="hover:text-mustard">Confidentialité (RGPD)</Link></li>
-            <li><a href="mailto:contact@generaquiz.fr" className="hover:text-mustard">contact@generaquiz.fr</a></li>
+            <li><Link to="/contact" data-testid="footer-contact" className="hover:text-mustard font-semibold">Nous écrire</Link></li>
+            <li><a href="mailto:contact.generaquiz@gmail.com" data-testid="footer-email" className="hover:text-mustard">contact.generaquiz@gmail.com</a></li>
           </ul>
         </div>
       </div>

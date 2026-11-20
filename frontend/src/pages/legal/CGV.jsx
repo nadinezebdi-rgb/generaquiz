@@ -7,7 +7,7 @@ export default function CGV() {
         <h2 className="font-display text-2xl font-bold text-navy mt-6 mb-3">1. Identification du vendeur</h2>
         <p>
           GénéraQuiz est édité par sa créatrice indépendante, joignable à
-          <a href="mailto:contact@generaquiz.fr" className="text-terracotta underline ml-1">contact@generaquiz.fr</a>.
+          <a href="mailto:contact.generaquiz@gmail.com" className="text-terracotta underline ml-1">contact.generaquiz@gmail.com</a>.
         </p>
       </section>
 
@@ -15,8 +15,8 @@ export default function CGV() {
         <h2 className="font-display text-2xl font-bold text-navy mt-6 mb-3">2. Produits et services proposés</h2>
         <ul className="list-disc pl-6 space-y-2">
           <li><strong>Découverte</strong> — gratuit, sans carte bancaire : 1 compte, quiz du jour et aperçu des activités.</li>
-          <li><strong>Solo</strong> — 4,90 € / mois ou 49 € / an : 1 accès personnel complet (quiz illimités, toutes catégories, progression, historique, Livre de Vie en PDF).</li>
-          <li><strong>Famille</strong> — 7,90 € / mois ou 79 € / an : tout Solo pour le bénéficiaire principal, plus 3 proches invités gratuitement aux quiz, défis et classements de l&apos;espace famille pendant toute la durée de l&apos;abonnement. Le catalogue complet et le Livre de Vie personnel des proches nécessitent leur propre abonnement.</li>
+          <li><strong>Solo</strong> — 6,90 € / mois sans engagement, ou 69 € / an (super promo de Noël : 49 € pour 12 mois pour toute souscription jusqu&apos;au 31 décembre 2026, puis renouvellement à 69 € / an) : 1 accès personnel complet (quiz illimités, toutes catégories, progression, historique, Livre de Vie en PDF).</li>
+          <li><strong>Famille</strong> — 9,90 € / mois sans engagement, ou 99 € / an (super promo de Noël : 79 € pour 12 mois jusqu&apos;au 31 décembre 2026, puis renouvellement à 99 € / an) : tout Solo pour le bénéficiaire principal, plus 3 proches invités gratuitement aux quiz, défis et classements de l&apos;espace famille pendant toute la durée de l&apos;abonnement. Le catalogue complet et le Livre de Vie personnel des proches nécessitent leur propre abonnement.</li>
           <li><strong>Cartes cadeau</strong> — Solo ou Famille pour 1 an, paiement unique. L&apos;année commence le jour de l&apos;activation du code.</li>
           <li><strong>Livre de Vie imprimé</strong> — option séparée, 79,90 € l&apos;exemplaire, commandée lorsque le Livre de Vie est prêt.</li>
           <li><strong>Packs de crédits virtuels</strong> (uniquement sur l&apos;app mobile) — produits consommables permettant d&apos;acquérir des crédits utilisables pour les indices, le sauvetage de série, etc. Les crédits n&apos;ont aucune valeur monétaire réelle (voir CGU article 6).</li>
@@ -80,7 +80,7 @@ export default function CGV() {
           Les demandes de remboursement doivent être adressées :
         </p>
         <ul className="list-disc pl-6 space-y-2">
-          <li><strong>Web</strong> : à <a href="mailto:contact@generaquiz.fr" className="text-terracotta underline">contact@generaquiz.fr</a></li>
+          <li><strong>Web</strong> : à <a href="mailto:contact.generaquiz@gmail.com" className="text-terracotta underline">contact.generaquiz@gmail.com</a></li>
           <li><strong>iOS</strong> : via la procédure Apple (<a href="https://reportaproblem.apple.com" className="text-terracotta underline" target="_blank" rel="noreferrer">reportaproblem.apple.com</a>)</li>
           <li><strong>Android</strong> : via la procédure Google (<a href="https://support.google.com/googleplay" className="text-terracotta underline" target="_blank" rel="noreferrer">support.google.com/googleplay</a>)</li>
         </ul>
@@ -90,7 +90,7 @@ export default function CGV() {
         <h2 className="font-display text-2xl font-bold text-navy mt-6 mb-3">8. Service client</h2>
         <p>
           Pour toute question, le service client répond par email à
-          <a href="mailto:contact@generaquiz.fr" className="text-terracotta underline ml-1">contact@generaquiz.fr</a>
+          <a href="mailto:contact.generaquiz@gmail.com" className="text-terracotta underline ml-1">contact.generaquiz@gmail.com</a>
           sous 48 heures ouvrées.
         </p>
       </section>

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
 import { api, formatError } from "@/lib/api";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -98,6 +99,11 @@ function BadgesSection() {
 export default function Account() {
   const { user, refresh, logout } = useAuth();
   const navigate = useNavigate();
+  useEffect(() => {
+    if (window.location.hash !== "#abonnement") return;
+    const t = setTimeout(() => document.getElementById("abonnement")?.scrollIntoView({ behavior: "smooth" }), 300);
+    return () => clearTimeout(t);
+  }, []);
 
   const [name, setName] = useState(user?.name || "");
   const [email, setEmail] = useState(user?.email || "");
@@ -296,7 +302,7 @@ export default function Account() {
         </div>
 
         {/* ============ ABONNEMENT CARD ============ */}
-        <div className={`rounded-[28px] p-6 md:p-8 mb-6 border-2 ${isPremium ? "bg-navy text-white border-mustard" : "bg-white border-cream-dark"}`}>
+        <div id="abonnement" className={`scroll-mt-24 rounded-[28px] p-6 md:p-8 mb-6 border-2 ${isPremium ? "bg-navy text-white border-mustard" : "bg-white border-cream-dark"}`}>
           <h2 className={`font-display text-2xl font-bold mb-5 flex items-center gap-2 ${isPremium ? "text-mustard" : "text-navy"}`}>
             <Crown className="w-6 h-6" /> Mon abonnement
           </h2>
@@ -307,7 +313,9 @@ export default function Account() {
               </div>
               <div className="flex items-center gap-2 text-cream/90" data-testid="account-plan-expires">
                 <Calendar className="w-5 h-5" />
-                {isLifetime ? (
+                {user.plan_auto_renew ? (
+                  <RenewalInfo user={user} />
+                ) : isLifetime ? (
                   <span>Accès <strong className="text-mustard">à vie</strong></span>
                 ) : expiresDate ? (
                   <span>Expire le {expiresDate.toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}</span>
@@ -315,6 +323,7 @@ export default function Account() {
                   <span>Premium actif</span>
                 )}
               </div>
+              {user.plan_auto_renew && !user.plan_cancel_at_period_end && <CancelSubscription />}
             </div>
           ) : (
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -606,5 +615,36 @@ export default function Account() {
 
       <Footer />
     </div>
+  );
+}
+
+const frDate = (iso) => new Date(iso).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" });
+
+function RenewalInfo({ user }) {
+  if (user.plan_cancel_at_period_end) {
+    return <span data-testid="account-plan-cancelled">Abonnement résilié : accès jusqu&apos;au <strong className="text-mustard">{frDate(user.plan_renews_at)}</strong>, aucun nouveau prélèvement.</span>;
+  }
+  const amount = new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR", minimumFractionDigits: Number.isInteger(user.plan_renewal_amount) ? 0 : 2 }).format(user.plan_renewal_amount || 0);
+  return (
+    <span data-testid="account-plan-renewal">
+      Renouvellement automatique le <strong className="text-mustard">{frDate(user.plan_renews_at)}</strong> : {amount}{user.plan_period === "monthly" ? " (puis chaque mois)" : " pour 12 mois"}
+    </span>
+  );
+}
+
+function CancelSubscription() {
+  const { refresh } = useAuth();
+  const [busy, setBusy] = useState(false);
+  const cancel = async () => {
+    setBusy(true);
+    try { await api.post("/subscription/cancel"); toast.success("Abonnement résilié. Vous gardez l'accès jusqu'à la fin de la période payée."); await refresh?.(); }
+    catch (e) { toast.error(formatError(e.response?.data?.detail)); }
+    finally { setBusy(false); }
+  };
+  return (
+    <button type="button" onClick={cancel} disabled={busy} data-testid="account-cancel-subscription"
+      className="mt-5 inline-flex items-center gap-2 border-2 border-cream/60 text-cream font-bold px-5 py-2.5 rounded-full hover:bg-cream/10 transition-colors disabled:opacity-60">
+      {busy && <Loader2 className="w-4 h-4 animate-spin" />} Résilier mon abonnement
+    </button>
   );
 }

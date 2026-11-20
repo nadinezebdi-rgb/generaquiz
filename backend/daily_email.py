@@ -270,6 +270,7 @@ async def send_expiration_emails() -> dict:
 
     cursor = db.users.find({
         "plan": "premium",
+        "plan_auto_renew": {"$ne": True},
         "plan_expires_at": {"$gte": window_start_iso, "$lt": window_end_iso},
     })
     async for user in cursor:

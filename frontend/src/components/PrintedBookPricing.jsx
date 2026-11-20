@@ -32,7 +32,7 @@ export default function PrintedBookPricing() {
           <div className="font-display text-4xl font-extrabold text-bordeaux" data-testid="printed-book-price">{fmt(PRINTED_BOOK.prix)}</div>
           <p className="text-sm text-navy/60 mb-4">l&apos;exemplaire, TTC</p>
           <a
-            href={`mailto:contact@generaquiz.fr?subject=${encodeURIComponent("Commande Livre de Vie imprimé")}`}
+            href={`mailto:contact.generaquiz@gmail.com?subject=${encodeURIComponent("Commande Livre de Vie imprimé")}`}
             data-testid="printed-book-cta"
             className="inline-flex items-center justify-center gap-2 bg-navy text-cream font-bold px-6 py-3 rounded-full hover:bg-terracotta transition-colors min-h-[52px]"
           >

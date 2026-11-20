@@ -74,7 +74,7 @@ export default function OffrirMerci() {
           <div className="bg-white border-2 border-cream-dark rounded-3xl p-8" data-testid="gift-error">
             <AlertCircle className="w-12 h-12 text-bordeaux mx-auto mb-3" />
             <h1 className="font-display text-2xl font-extrabold text-navy mb-2">Paiement non confirmé</h1>
-            <p className="text-navy/70 mb-5">Si vous avez été débité, écrivez-nous à contact@generaquiz.fr avec votre e-mail : nous vous renverrons la carte.</p>
+            <p className="text-navy/70 mb-5">Si vous avez été débité, écrivez-nous à contact.generaquiz@gmail.com avec votre e-mail : nous vous renverrons la carte.</p>
             <Link to="/offrir" className="inline-flex bg-navy text-cream font-bold px-6 py-3 rounded-full" data-testid="gift-error-back">Retour à la page Offrir</Link>
           </div>
         )}

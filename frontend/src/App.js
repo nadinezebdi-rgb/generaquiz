@@ -30,6 +30,7 @@ import ForgotPassword from "@/pages/ForgotPassword";
 import ResetPassword from "@/pages/ResetPassword";
 import DailyQuiz from "@/pages/DailyQuiz";
 import CGU from "@/pages/legal/CGU";
+import Contact from "@/pages/Contact";
 import CGV from "@/pages/legal/CGV";
 import Confidentialite from "@/pages/legal/Confidentialite";
 import AdminReports from "@/pages/AdminReports";
@@ -157,6 +158,7 @@ export default function App() {
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/quiz-du-jour" element={<DailyQuiz />} />
           <Route path="/cgu" element={<CGU />} />
+          <Route path="/contact" element={<Contact />} />
           <Route path="/cgv" element={<CGV />} />
           <Route path="/confidentialite" element={<Confidentialite />} />
           <Route path="/ehpad" element={<Ehpad />} />

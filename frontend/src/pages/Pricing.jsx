@@ -1,15 +1,14 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
-import { Check, Gift, ChevronRight, Loader2, Users } from "lucide-react";
+import { motion } from "framer-motion";
+import { Check, Gift, ChevronRight, Users } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { PLANS, GIFTS, pricePresentation, annualDiscountBadge, fmt } from "@/config/pricing";
+import { PLANS, GIFTS, fmt, isChristmasPromo, packageFor } from "@/config/pricing";
+import { PeriodToggle, PromoHeader, PlanPrice, CheckoutRecap } from "@/components/pricing/Offer";
 import ProPricing from "@/components/ProPricing";
 import PrintedBookPricing from "@/components/PrintedBookPricing";
-import { startCheckout } from "@/lib/checkout";
 import { useAuth } from "@/contexts/AuthContext";
-import { toast } from "sonner";
 import { useGiftOffers } from "@/lib/gifts";
 
 /**
@@ -21,9 +20,11 @@ import { useGiftOffers } from "@/lib/gifts";
  */
 
 export default function Pricing() {
-  const [period, setPeriod] = useState("yearly"); // 'monthly' | 'yearly'
-  const annualBadge = annualDiscountBadge();
   const [searchParams, setSearchParams] = useSearchParams();
+  const [period, setPeriod] = useState(searchParams.get("periode") === "monthly" ? "monthly" : "yearly");
+  const promo = isChristmasPromo();
+  const [recapPkg, setRecapPkg] = useState(null);
+  const closeRecap = useCallback(() => setRecapPkg(null), []);
   const { user, loading } = useAuth();
   const giftOffers = useGiftOffers();
 
@@ -46,9 +47,7 @@ export default function Pricing() {
       next.delete("pkg");
       setSearchParams(next, { replace: true });
     }
-    startCheckout(pending, {
-      onError: (msg) => toast.error(msg || "Impossible d'ouvrir le paiement."),
-    });
+    setRecapPkg(pending); // le récapitulatif s'affiche toujours avant la saisie de la carte
   }, [user, loading, searchParams, setSearchParams]);
 
   return (
@@ -64,45 +63,29 @@ export default function Pricing() {
           <h1 className="font-display text-4xl sm:text-5xl font-extrabold mb-3" data-testid="pricing-h1">
             Choisissez ce qui <span className="text-terracotta italic">vous ressemble</span>
           </h1>
-          <p className="text-lg text-navy/70">
-            Sans engagement · Résiliable à tout moment · Support en français
-          </p>
+          <PromoHeader promo={promo} />
         </div>
 
-        {/* TOGGLE Mensuel / Annuel */}
-        <div className="flex items-center justify-center gap-3 mb-10" data-testid="pricing-toggle">
-          <button
-            type="button"
-            onClick={() => setPeriod("monthly")}
-            data-testid="pricing-toggle-monthly"
-            className={`px-5 py-2 rounded-full font-bold text-sm transition ${period === "monthly" ? "bg-navy text-cream" : "text-navy/60 hover:text-navy"}`}
-          >
-            Mensuel
-          </button>
-          <button
-            type="button"
-            onClick={() => setPeriod("yearly")}
-            data-testid="pricing-toggle-yearly"
-            className={`inline-flex items-center gap-2 px-5 py-2 rounded-full font-bold text-sm transition ${period === "yearly" ? "bg-navy text-cream" : "text-navy/60 hover:text-navy"}`}
-          >
-            Annuel
-            <span className="bg-terracotta text-white text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full whitespace-nowrap">
-              2 mois offerts
-            </span>
-          </button>
-        </div>
+        <PeriodToggle period={period} setPeriod={setPeriod} promo={promo} />
 
         {/* PLANS */}
         <div className="grid md:grid-cols-3 gap-5 mb-6 max-w-5xl mx-auto">
           {PLANS.map((plan) => (
-            <PlanCard key={plan.id} plan={plan} period={period} />
+            <PlanCard key={plan.id} plan={plan} period={period} promo={promo} onChoose={setRecapPkg} />
           ))}
         </div>
 
-        <p className="text-sm text-terracotta font-bold text-center mb-2" data-testid="pricing-annual-note">{annualBadge}</p>
-        <p className="text-xs text-navy/50 text-center mb-14" data-testid="pricing-legal">
-          Prix TTC. {period === "yearly" ? "Abonnement annuel débité en une fois, renouvelable par tacite reconduction." : "Abonnement mensuel sans engagement."} Résiliable à tout moment.
+        {promo && (
+          <p className="text-base text-navy font-bold text-center mb-2" data-testid="pricing-annual-note">
+            Promo annuelle : les 12 mois commencent à la première connexion. Idéal à offrir pour Noël 🎁
+          </p>
+        )}
+        <p className="text-sm text-navy text-center mb-14" data-testid="pricing-legal">
+          Prix TTC. {period === "yearly"
+            ? `Abonnement annuel débité en une fois, renouvelé automatiquement chaque année à ${PLANS.filter((p) => p.annuel).map((p) => `${fmt(p.annuel, { integer: true })} (${p.nom})`).join(" ou ")}, rappel par e-mail 30 jours avant.`
+            : "Abonnement mensuel sans engagement."} Résiliable à tout moment en un clic.
         </p>
+        <CheckoutRecap packageId={recapPkg} onClose={closeRecap} />
 
         {/* ============ SECTION OFFRIR ============ */}
         <section className="mt-14 mb-14" data-testid="offrir-section">
@@ -139,22 +122,9 @@ export default function Pricing() {
   );
 }
 
-function PlanCard({ plan, period }) {
-  const pres = pricePresentation(plan, period);
-  const [loading, setLoading] = useState(false);
-  const packageId = plan.stripeIds?.[period] ?? null;
+function PlanCard({ plan, period, promo, onChoose }) {
+  const packageId = packageFor(plan, period, promo);
   const featured = Boolean(plan.badge);
-
-  async function handleCheckout() {
-    if (loading) return;
-    setLoading(true);
-    await startCheckout(packageId, {
-      onError: (msg) => {
-        toast.error(msg || "Impossible d'ouvrir le paiement.");
-        setLoading(false);
-      },
-    });
-  }
 
   return (
     <motion.div
@@ -173,12 +143,7 @@ function PlanCard({ plan, period }) {
       <h3 className="font-display text-2xl font-extrabold text-navy mb-1">{plan.nom}</h3>
       <p className="text-sm text-navy/60 mb-4">{plan.tagline}</p>
 
-      <div className="flex items-baseline gap-1 mb-4">
-        <span className="font-display text-4xl font-extrabold text-bordeaux" data-testid={`plan-price-${plan.id}`}>
-          {pres.main}
-        </span>
-        {pres.suffix && <span className="text-sm text-navy/60">{pres.suffix}</span>}
-      </div>
+      <PlanPrice plan={plan} period={period} promo={promo} />
 
       <p className="text-xs text-navy/60 mb-3 uppercase tracking-wider font-bold" data-testid={`plan-access-${plan.id}`}>
         {plan.acces}
@@ -204,14 +169,14 @@ function PlanCard({ plan, period }) {
       ) : (
         <button
           type="button"
-          onClick={handleCheckout}
-          disabled={loading || !packageId}
+          onClick={() => onChoose(packageId)}
+          disabled={!packageId}
           data-testid={`plan-cta-${plan.id}`}
           className={`w-full inline-flex items-center justify-center gap-2 font-bold px-5 py-3 rounded-full transition-colors min-h-[52px] disabled:opacity-70 disabled:cursor-not-allowed ${
             featured ? "bg-terracotta text-white hover:bg-terracotta-dark shadow-warm" : "bg-navy text-cream hover:bg-navy-dark"
           }`}
         >
-          {loading ? <><Loader2 className="w-4 h-4 animate-spin" /> Redirection…</> : <>{plan.cta} <ChevronRight className="w-4 h-4" /></>}
+          {plan.cta} <ChevronRight className="w-4 h-4" />
         </button>
       )}
     </motion.div>

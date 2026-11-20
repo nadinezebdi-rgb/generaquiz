@@ -52,8 +52,14 @@ if "@generaquiz.fr" not in SENDER_EMAIL:
     )
     SENDER_EMAIL = "GénéraQuiz <contact@generaquiz.fr>"
 
+CONTACT_EMAIL = "contact.generaquiz@gmail.com"
+
 if RESEND_API_KEY:
     resend.api_key = RESEND_API_KEY
+
+# Les réponses des destinataires arrivent sur l'adresse de contact (l'expéditeur reste sur le domaine vérifié).
+_resend_send = resend.Emails.send
+resend.Emails.send = lambda params, *a, **kw: _resend_send({"reply_to": CONTACT_EMAIL, **params}, *a, **kw)
 
 LIFETIME_DAYS = 36500
 
@@ -81,19 +87,25 @@ LEAGUE_RELEGATE = 3  # bottom 3 relegate
 PACKAGES = {
     # ============ NOUVELLE GRILLE (2026) ============
     # -- Solo : 1 accès personnel complet --
-    "solo_monthly":    {"amount": 4.90,  "currency": "eur", "label": "Solo — Mensuel",
+    "solo_monthly":    {"amount": 6.90,  "renew_amount": 6.90, "currency": "eur", "label": "Solo — Mensuel",
                         "tier": "solo",    "period": "monthly",
                         "description": "Quiz illimités, toutes catégories, Livre de Vie PDF"},
-    "solo_yearly":     {"amount": 49.00, "currency": "eur", "label": "Solo — Annuel",
+    "solo_yearly":     {"amount": 69.00, "renew_amount": 69.00, "currency": "eur", "label": "Solo — Annuel",
                         "tier": "solo",    "period": "yearly",
-                        "description": "12 mois — 2 mois offerts"},
+                        "description": "12 mois — 2 mois offerts par rapport au mensuel"},
+    "solo_yearly_noel": {"amount": 49.00, "renew_amount": 69.00, "currency": "eur",
+                        "label": "Super promo de Noël Solo", "tier": "solo", "period": "yearly", "promo": True,
+                        "description": "49 € pour 12 mois, puis 69 €/an"},
     # -- Famille : bénéficiaire complet + 3 proches dans l'espace famille --
-    "famille_v2_monthly": {"amount": 7.90, "currency": "eur", "label": "Famille — Mensuel",
+    "famille_v2_monthly": {"amount": 9.90, "renew_amount": 9.90, "currency": "eur", "label": "Famille — Mensuel",
                         "tier": "famille_v2", "period": "monthly",
                         "description": "Tout Solo + 3 proches invités aux quiz, défis et classements familiaux"},
-    "famille_v2_yearly":  {"amount": 79.00,"currency": "eur", "label": "Famille — Annuel",
+    "famille_v2_yearly":  {"amount": 99.00, "renew_amount": 99.00, "currency": "eur", "label": "Famille — Annuel",
                         "tier": "famille_v2", "period": "yearly",
-                        "description": "12 mois — 2 mois offerts"},
+                        "description": "12 mois — 2 mois offerts par rapport au mensuel"},
+    "famille_v2_yearly_noel": {"amount": 79.00, "renew_amount": 99.00, "currency": "eur",
+                        "label": "Super promo de Noël Famille", "tier": "famille_v2", "period": "yearly", "promo": True,
+                        "description": "79 € pour 12 mois, puis 99 €/an"},
     # -- Héritage : plus vendu (abonnés existants conservés) --
     "heritage_yearly": {"amount": 159.00,"currency": "eur", "label": "Héritage — Annuel",
                         "tier": "heritage", "period": "yearly", "legacy": True,
@@ -247,6 +259,9 @@ def user_to_public(u: dict) -> dict:
             "plan_expires_at": plan_expires_at, "created_at": u.get("created_at"),
             "plan_tier": u.get("plan_tier"),          # "club" | "famille" | "premium" | None
             "plan_period": u.get("plan_period"),      # "monthly" | "yearly" | None
+            "plan_renews_at": u.get("plan_renews_at"), "plan_auto_renew": bool(u.get("plan_auto_renew")),
+            "plan_cancel_at_period_end": bool(u.get("plan_cancel_at_period_end")),
+            "plan_renewal_amount": u.get("plan_renewal_amount"), "plan_package_id": u.get("plan_package_id"),
             "streak_current": int(u.get("streak_current") or 0),
             "streak_best": int(u.get("streak_best") or 0),
             "streak_last_date": u.get("streak_last_date"),
@@ -412,6 +427,7 @@ class AttemptCreate(BaseModel):
 class CheckoutCreate(BaseModel):
     package_id: str
     origin_url: str
+    accept_terms: bool = False
 
 
 class ChallengeCreate(BaseModel):

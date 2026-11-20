@@ -1963,3 +1963,17 @@ Les routes `/bulk/*` étaient interceptées par `/{qid}/approve|flag|apply-corre
 - `backend/family_report.py` : rapport hebdo (dim 10:00) aux proches ayant REJOINT l'espace + alerte d'inactivité (3 jours, une seule fois par absence, réessai si aucun e-mail parti). Contenu : jours joués / parties de la semaine + idée de sujet d'appel (discussion_prompt).
 - Opt-in du bénéficiaire : `PUT /api/famille/partage` (users.family_share_progress, family_share_since), carte « Nouvelles du dimanche » dans /app/famille. Déclenchement admin : `POST /api/famille/admin/rapports/{hebdo|inactivite}`.
 - Republication lancée (correctif index + 420 questions).
+
+## 2026-11-20 — Adresse de contact
+- Adresse affichée partout (pied de page, CGU/CGV/RGPD, EHPAD, tarifs Pro, livre imprimé, merci cadeau) : contact.generaquiz@gmail.com. Tous les e-mails Resend ont reply_to = CONTACT_EMAIL (core.py) ; l'expéditeur reste @generaquiz.fr (domaine vérifié).
+
+## 2026-11-20 — Contact + félicitations dans le rapport
+- Page publique `/contact` (lien « Nous écrire » dans le pied de page) → `POST /api/contact` (5/h par IP, piège à robots, stocké dans contact_messages), e-mail vers CONTACT_EMAIL avec reply_to = visiteur + accusé de réception.
+- Rapport du dimanche : bloc « De quoi le féliciter » (meilleur palier réussi ≥14/20 par catégorie dans la semaine + badges gagnés).
+
+## 2026-11-20 — Super promo de Noël + vrais abonnements récurrents (testé iteration_56, E2E carte 4242 OK)
+- Tarifs : Solo 6,90 €/mois · Famille 9,90 €/mois ; annuel promo 49 € / 79 € pour 12 mois jusqu'au 31/12/2026 23:59 Paris (renouvellement 69 € / 99 €/an) ; à partir du 01/01/2027 annuel 69 € / 99 €/an. Jamais de prix barré vs 69/99.
+- Front : `config/pricing.js` (PROMO_END, isChristmasPromo, offerPresentation, packageFor), `components/pricing/Offer.jsx` (PeriodToggle, PromoHeader, PlanPrice, CheckoutRecap). #tarifs (Landing) + /app/pricing ; récap avant paiement, case non cochée, bouton « Payer X € ». Mon compte : renouvellement + « Résilier mon abonnement » en un clic.
+- Back : `subscription.py` — Checkout mode=subscription (promo = ligne unique 49/79 € + annuel 69/99 € avec trial_end +12 mois), blocage serveur après la date limite, accept_terms obligatoire, activation idempotente + e-mails (confirmation, activation 12 mois, rappel J-30), synchro renouvellements 06:00, rappel J-30 10:15. users: plan_renews_at, plan_auto_renew, plan_cancel_at_period_end, stripe_subscription_id, first_login_at.
+- Aperçu : la clé Stripe de test partagée ne gère que les sessions Checkout → résiliation et synchro SIMULÉES en aperçu ; réelles en production (clé live).
+- Cartes cadeaux (/offrir) inchangées. 12 mois démarrent à l'achat (choix utilisateur).
