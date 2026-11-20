@@ -1,8 +1,8 @@
 """Payments router: Stripe checkout + webhook + packages."""
-from datetime import datetime, timezone, timedelta
+import asyncio
+from datetime import datetime, timezone
 
 import stripe
-from bson import ObjectId
 from fastapi import APIRouter, Depends, HTTPException, Request
 
 from emergentintegrations.payments.stripe.checkout import (
@@ -13,7 +13,6 @@ from core import (
     db, logger, STRIPE_API_KEY, STRIPE_WEBHOOK_SECRET, PACKAGES, get_current_user, CheckoutCreate,
     GIFT_STRIPE_TEST_WEBHOOK_SECRET, GIFT_STRIPE_LIVE_WEBHOOK_SECRET,
 )
-from routers.family import family_subscription_fields
 
 router = APIRouter(tags=["payments"])
 
@@ -23,64 +22,53 @@ async def list_packages():
     return [{"id": pid, **pkg} for pid, pkg in PACKAGES.items()]
 
 
+@router.get("/pricing/summary/{package_id}")
+async def pricing_summary(package_id: str):
+    from subscription import check_package_sellable, summary_text
+    pkg = check_package_sellable(package_id)
+    return {"package_id": package_id, "amount": pkg["amount"], "renew_amount": pkg["renew_amount"],
+            "period": pkg["period"], "promo": bool(pkg.get("promo")), "summary": summary_text(pkg)}
+
+
 @router.post("/checkout/session")
-async def create_checkout(body: CheckoutCreate, request: Request, user: dict = Depends(get_current_user)):
-    if body.package_id not in PACKAGES:
-        raise HTTPException(status_code=400, detail="Forfait invalide")
-    pkg = PACKAGES[body.package_id]
-    if pkg.get("tier") == "gift":
-        raise HTTPException(status_code=400, detail="Les cartes cadeau s'achètent depuis la page Offrir")
-    host_url = str(request.base_url)
-    webhook_url = f"{host_url.rstrip('/')}/api/webhook/stripe"
-    stripe_checkout = StripeCheckout(api_key=STRIPE_API_KEY, webhook_url=webhook_url)
-    origin = body.origin_url.rstrip("/")
-    success_url = f"{origin}/app/success?session_id={{CHECKOUT_SESSION_ID}}"
-    cancel_url = f"{origin}/app/pricing"
-    session = await stripe_checkout.create_checkout_session(CheckoutSessionRequest(
-        amount=float(pkg["amount"]), currency=pkg["currency"],
-        success_url=success_url, cancel_url=cancel_url,
-        metadata={"user_id": str(user["_id"]), "user_email": user["email"], "package_id": body.package_id},
-    ))
+async def create_checkout(body: CheckoutCreate, user: dict = Depends(get_current_user)):
+    from subscription import check_package_sellable, create_checkout_session
+    pkg = check_package_sellable(body.package_id)
+    if not body.accept_terms:
+        raise HTTPException(status_code=400, detail="Merci d'accepter les conditions et le renouvellement avant de payer")
+    try:
+        session = await asyncio.to_thread(create_checkout_session, pkg, body.package_id, user, body.origin_url.rstrip("/"))
+    except Exception as e:
+        logger.error(f"[checkout] session Stripe impossible : {e}")
+        raise HTTPException(status_code=502, detail="Le paiement n'a pas pu s'ouvrir. Réessayez dans un instant.")
     await db.payment_transactions.insert_one({
-        "session_id": session.session_id, "user_id": str(user["_id"]),
+        "session_id": session["id"], "user_id": str(user["_id"]),
         "user_email": user["email"], "package_id": body.package_id,
-        "amount": float(pkg["amount"]), "currency": pkg["currency"],
-        "metadata": {"package_id": body.package_id},
+        "amount": float(pkg["amount"]), "currency": pkg["currency"], "mode": "subscription",
+        "metadata": {"package_id": body.package_id, "accepted_terms_at": datetime.now(timezone.utc).isoformat()},
         "payment_status": "initiated", "status": "open",
         "created_at": datetime.now(timezone.utc).isoformat(),
     })
-    return {"url": session.url, "session_id": session.session_id}
+    return {"url": session["url"], "session_id": session["id"]}
 
 
 @router.get("/checkout/status/{session_id}")
-async def get_checkout_status(session_id: str, request: Request, user: dict = Depends(get_current_user)):
-    host_url = str(request.base_url)
-    webhook_url = f"{host_url.rstrip('/')}/api/webhook/stripe"
-    stripe_checkout = StripeCheckout(api_key=STRIPE_API_KEY, webhook_url=webhook_url)
-    status = await stripe_checkout.get_checkout_status(session_id)
-    tx = await db.payment_transactions.find_one({"session_id": session_id})
+async def get_checkout_status(session_id: str, user: dict = Depends(get_current_user)):
+    from subscription import _stripe, activate_from_session
+    tx = await db.payment_transactions.find_one({"session_id": session_id, "user_id": str(user["_id"])})
     if not tx:
         raise HTTPException(status_code=404, detail="Transaction introuvable")
-    if tx["payment_status"] != "paid" and status.payment_status == "paid" and not tx.get("gift"):
-        package_id = tx.get("package_id", "premium_monthly")
-        pkg = PACKAGES.get(package_id, {})
-        tier = pkg.get("tier", "premium")  # "club" | "famille" | "premium"
-        days = 365 if pkg.get("period") == "yearly" else 30
-        expires = (datetime.now(timezone.utc) + timedelta(days=days)).isoformat()
-        # Legacy `plan` kept as "premium" for backward compat with existing gates;
-        # `plan_tier` is the authoritative value for the new 3-tier gating.
-        subscriber = await db.users.find_one({"_id": ObjectId(tx["user_id"])})
-        if not subscriber:
-            raise HTTPException(status_code=404, detail="Bénéficiaire introuvable")
-        await db.users.update_one({"_id": ObjectId(tx["user_id"])},
-                                  {"$set": {"plan": "premium", "plan_tier": tier,
-                                            "plan_period": pkg.get("period", "monthly"),
-                                            "plan_expires_at": expires,
-                                            **family_subscription_fields(subscriber, tier)}})
-    await db.payment_transactions.update_one({"session_id": session_id},
-                                              {"$set": {"payment_status": status.payment_status, "status": status.status}})
-    return {"session_id": session_id, "payment_status": status.payment_status,
-            "status": status.status, "amount_total": status.amount_total, "currency": status.currency}
+    if tx["payment_status"] != "paid":
+        sess = await asyncio.to_thread(_stripe().checkout.Session.retrieve, session_id)
+        if sess.get("status") == "complete" and sess.get("payment_status") in ("paid", "no_payment_required"):
+            await activate_from_session(session_id)
+        else:
+            await db.payment_transactions.update_one({"session_id": session_id},
+                                                      {"$set": {"payment_status": sess.get("payment_status"),
+                                                                "status": sess.get("status")}})
+    tx = await db.payment_transactions.find_one({"session_id": session_id})
+    return {"session_id": session_id, "payment_status": tx["payment_status"], "status": tx["status"],
+            "amount_total": round(tx["amount"] * 100), "currency": tx["currency"]}
 
 
 @router.post("/webhook/stripe")
@@ -130,19 +118,6 @@ async def stripe_webhook(request: Request):
             await db.payment_transactions.update_one({"session_id": evt.session_id},
                                                       {"$set": {"payment_status": "paid", "status": "complete"}})
         elif tx and tx["payment_status"] != "paid":
-            package_id = tx.get("package_id", "premium_monthly")
-            pkg = PACKAGES.get(package_id, {})
-            tier = pkg.get("tier", "premium")
-            days = 365 if pkg.get("period") == "yearly" else 30
-            expires = (datetime.now(timezone.utc) + timedelta(days=days)).isoformat()
-            subscriber = await db.users.find_one({"_id": ObjectId(tx["user_id"])})
-            if not subscriber:
-                raise HTTPException(status_code=404, detail="Bénéficiaire introuvable")
-            await db.users.update_one({"_id": ObjectId(tx["user_id"])},
-                                      {"$set": {"plan": "premium", "plan_tier": tier,
-                                                "plan_period": pkg.get("period", "monthly"),
-                                                "plan_expires_at": expires,
-                                                **family_subscription_fields(subscriber, tier)}})
-            await db.payment_transactions.update_one({"session_id": evt.session_id},
-                                                      {"$set": {"payment_status": "paid", "status": "complete"}})
+            from subscription import activate_from_session
+            await activate_from_session(evt.session_id)
     return {"ok": True}

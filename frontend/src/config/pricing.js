@@ -30,16 +30,17 @@ export const PLANS = [
     id: "solo",
     nom: "Solo",
     tagline: "Pour jouer seul, à votre rythme",
-    mensuel: 4.9,
-    annuel: 49,
+    mensuel: 6.9,
+    annuel: 69,
+    annuelNoel: 49,
     acces: "1 accès personnel complet",
     badge: null,
-    stripeIds: { monthly: "solo_monthly", yearly: "solo_yearly" },
+    stripeIds: { monthly: "solo_monthly", yearly: "solo_yearly", yearlyNoel: "solo_yearly_noel" },
     features: [
+      "Livre de Vie en PDF",
       "Quiz illimités",
       "Toutes les catégories",
       "Progression et historique",
-      "Livre de Vie en PDF",
     ],
     cta: "Choisir Solo",
   },
@@ -47,12 +48,14 @@ export const PLANS = [
     id: "famille",
     nom: "Famille",
     tagline: "Pour jouer ensemble",
-    mensuel: 7.9,
-    annuel: 79,
+    mensuel: 9.9,
+    annuel: 99,
+    annuelNoel: 79,
     acces: "Accès complet + espace famille",
     badge: "Pour jouer ensemble",
-    stripeIds: { monthly: "famille_v2_monthly", yearly: "famille_v2_yearly" },
+    stripeIds: { monthly: "famille_v2_monthly", yearly: "famille_v2_yearly", yearlyNoel: "famille_v2_yearly_noel" },
     features: [
+      "Jusqu'à 4 personnes : 1 bénéficiaire + 3 proches",
       "Tout Solo pour le bénéficiaire principal",
       "3 proches invités dans l'espace famille, sans supplément",
       "Quiz, défis et classements familiaux sans limite de parties",
@@ -161,14 +164,53 @@ export function fmt(amount, { integer = false } = {}) {
   return formatter.format(amount);
 }
 
+// -----------------------------------------------------------------------------
+// SUPER PROMO DE NOËL — date fixe, identique pour tous (le serveur applique la même règle)
+// -----------------------------------------------------------------------------
+export const PROMO_END = new Date("2026-12-31T23:59:59+01:00");
+export const isChristmasPromo = (now = new Date()) => now.getTime() <= PROMO_END.getTime();
+
+/** package_id backend selon la période et la promo en cours. */
+export function packageFor(plan, period, promo) {
+  if (period === "monthly") return plan.stripeIds?.monthly ?? null;
+  return (promo ? plan.stripeIds?.yearlyNoel : plan.stripeIds?.yearly) ?? null;
+}
+
+/** Comparaison autorisée uniquement avec le mensuel réellement vendu (jamais avec 69 € / 99 €). */
+function monthsOffered(plan, annual) {
+  const saving = Math.round((plan.mensuel * 12 - annual) * 100) / 100;
+  const months = saving / plan.mensuel;
+  const whole = Math.floor(months);
+  return { saving, label: `${months - whole > 0.1 ? "Plus de " : ""}${whole} mois offerts` };
+}
+
+/** Bloc prix d'une carte : pastille, prix principal, économie, renouvellement. */
+export function offerPresentation(plan, period, promo) {
+  if (!plan.mensuel) return { main: "Gratuit" };
+  if (period === "monthly") return { main: fmt(plan.mensuel), unit: "/mois", savings: "Sans engagement" };
+  if (promo) {
+    const { saving, label } = monthsOffered(plan, plan.annuelNoel);
+    return {
+      pill: "Super promo Noël",
+      main: fmt(plan.annuelNoel, { integer: true }), unit: " pour 12 mois",
+      savings: `${label} par rapport au mensuel (${fmt(saving)} d'économie)`,
+      renewal: `puis ${fmt(plan.annuel, { integer: true })}/an · résiliable à tout moment`,
+    };
+  }
+  const { saving, label } = monthsOffered(plan, plan.annuel);
+  return { main: fmt(plan.annuel, { integer: true }), unit: "/an", savings: `${label} par rapport au mensuel (${fmt(saving)} d'économie)` };
+}
+
+/** Un seul prix affiché selon la période choisie. */
 /** Un seul prix affiché selon la période choisie. */
 export function pricePresentation(plan, period /* 'monthly' | 'yearly' */) {
   const amount = period === "monthly" ? plan.mensuel : plan.annuel;
   return { main: amount === 0 ? "Gratuit" : fmt(amount, { integer: true }), suffix: amount === 0 ? null : period === "monthly" ? "/mois" : "/an" };
 }
 
-/** L'annuel = 10 mensualités : « 2 mois offerts ». */
-export function annualDiscountBadge() {
+/** Bandeau au-dessus des cartes. */
+export function annualDiscountBadge(promo = false) {
+  if (promo) return "🎄 SUPER PROMO DE NOËL : jusqu'à 4 mois offerts sur l'abonnement annuel, jusqu'au 31 décembre 2026";
   const paid = PLANS.filter((p) => p.mensuel > 0);
   const months = Math.min(...paid.map((p) => Math.round(12 - p.annuel / p.mensuel)));
   return `${months} mois offerts avec l'abonnement annuel`;

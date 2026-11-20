@@ -151,6 +151,8 @@ async def login(body: LoginRequest, response: Response):
     user = await db.users.find_one({"email": email})
     if not user or not verify_password(body.password, user["password_hash"]):
         raise HTTPException(status_code=401, detail="Email ou mot de passe incorrect")
+    if not user.get("first_login_at"):
+        await db.users.update_one({"_id": user["_id"]}, {"$set": {"first_login_at": datetime.now(timezone.utc).isoformat()}})
     access = create_access_token(str(user["_id"]), email)
     refresh = create_refresh_token(str(user["_id"]))
     set_auth_cookies(response, access, refresh)

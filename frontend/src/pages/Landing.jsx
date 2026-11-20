@@ -20,7 +20,8 @@ import { SoonCategoryCard } from "@/components/SoonCategoryCard";
 import { BLOCK_DEMO_QUESTION } from "@/lib/demoQuestions";
 import TestimonialsSection from "@/components/TestimonialsSection";
 import { api, BACKEND_URL } from "@/lib/api";
-import { PLANS, pricePresentation, annualDiscountBadge, fmt } from "@/config/pricing";
+import { PLANS, fmt, isChristmasPromo } from "@/config/pricing";
+import { PeriodToggle, PromoHeader, PlanPrice } from "@/components/pricing/Offer";
 import { useGiftOffers } from "@/lib/gifts";
 
 const ICON_MAP = { tv: Film, music: Music, film: Film, phone: Phone, landmark: Landmark, utensils: Utensils, sparkles: Sparkles, book: Book, heart: HeartPulse, map: MapIcon };
@@ -30,6 +31,8 @@ export default function Landing() {
   const [packages, setPackages] = useState([]);
   const [testimonials, setTestimonials] = useState([]);
   const giftOffers = useGiftOffers();
+  const [period, setPeriod] = useState("yearly");
+  const promo = isChristmasPromo();
   const christmasFamily = giftOffers?.offers?.find((offer) => offer.id === "famille");
 
   useEffect(() => {
@@ -264,26 +267,28 @@ export default function Landing() {
             <h2 className="font-display text-4xl sm:text-5xl font-extrabold text-navy mb-3">
               Choisissez ce qui <span className="text-terracotta italic">vous ressemble</span>
             </h2>
-            <p className="text-lg text-navy/70">
-              Sans engagement · Résiliable à tout moment · Support en français
-            </p>
-            <p className="mt-3 text-sm text-terracotta font-bold">
-              <Sparkles className="w-3.5 h-3.5 inline mr-1" />
-              {annualDiscountBadge()}
-            </p>
+            <PromoHeader promo={promo} testPrefix="landing" />
           </div>
 
-          <div className="grid md:grid-cols-3 gap-5 mb-10 max-w-5xl mx-auto">
-            {PLANS.map((p) => <LandingPlanCard key={p.id} plan={p} />)}
+          <PeriodToggle period={period} setPeriod={setPeriod} promo={promo} testPrefix="landing" />
+
+          <div className="grid md:grid-cols-3 gap-5 mb-6 max-w-5xl mx-auto">
+            {PLANS.map((p) => <LandingPlanCard key={p.id} plan={p} period={period} promo={promo} />)}
           </div>
+
+          {promo && (
+            <p className="text-center text-base font-bold text-navy mb-6" data-testid="landing-promo-note">
+              Promo annuelle : les 12 mois commencent à la première connexion. Idéal à offrir pour Noël 🎁
+            </p>
+          )}
 
           <div className="text-center mb-14">
             <Link
               to="/app/pricing"
               data-testid="landing-see-all-pricing"
-              className="inline-flex items-center gap-2 bg-navy text-cream font-bold px-6 py-3 rounded-full hover:bg-navy-dark transition"
+              className="inline-flex items-center gap-2 bg-navy text-cream font-bold px-6 py-3 rounded-full hover:bg-navy-dark transition text-center"
             >
-              Voir tous les tarifs, cadeaux & livre imprimé <ArrowRight className="w-4 h-4" />
+              {promo ? "Offrir GénéraQuiz pour Noël, voir tous les tarifs et le livre imprimé" : "Voir tous les tarifs, cadeaux & livre imprimé"} <ArrowRight className="w-4 h-4 shrink-0" />
             </Link>
           </div>
 
@@ -298,8 +303,7 @@ export default function Landing() {
   );
 }
 
-function LandingPlanCard({ plan }) {
-  const pres = pricePresentation(plan, "yearly");
+function LandingPlanCard({ plan, period, promo }) {
   const featured = Boolean(plan.badge);
   return (
     <div
@@ -313,10 +317,7 @@ function LandingPlanCard({ plan }) {
       )}
       <h3 className="font-display text-2xl font-extrabold text-navy mb-1">{plan.nom}</h3>
       <p className="text-sm text-navy/60 mb-4">{plan.tagline}</p>
-      <div className="flex items-baseline gap-1 mb-4">
-        <span className="font-display text-4xl font-extrabold text-bordeaux">{pres.main}</span>
-        {pres.suffix && <span className="text-sm text-navy/60">{pres.suffix}</span>}
-      </div>
+      <PlanPrice plan={plan} period={period} promo={promo} />
       <p className="text-xs text-navy/60 mb-3 uppercase tracking-wider font-bold">{plan.acces}</p>
       <ul className="space-y-2 mb-5 flex-1">
         {plan.features.slice(0, 4).map((f) => (
@@ -327,7 +328,7 @@ function LandingPlanCard({ plan }) {
         ))}
       </ul>
       <Link
-        to={plan.ctaTo || "/app/pricing"}
+        to={plan.ctaTo || `/app/pricing?periode=${period}`}
         data-testid={`landing-plan-cta-${plan.id}`}
         className={`w-full inline-flex items-center justify-center gap-2 font-bold px-5 py-3 rounded-full transition-colors min-h-[52px] ${featured ? "bg-terracotta text-white hover:bg-terracotta-dark" : "bg-navy text-cream hover:bg-navy-dark"}`}
       >
