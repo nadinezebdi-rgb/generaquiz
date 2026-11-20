@@ -1,5 +1,12 @@
 # Quiz d'Antan — SaaS pour seniors français
 
+## 2026-11-20 — Fusion GitHub main + cartes cadeau en aperçu + quiz par habitude
+- Fusion de `nadinezebdi-rgb/generaquiz@main` (Bien vieillir éditorial, routine hebdo, capacité famille 3 proches / 4 anciens, visuel cadeau). `/api/admin/users` GitHub renommé `/api/admin/users-export` (évitait d'écraser la liste admin).
+- `ensure_gift_indexes` : remplace les index non-sparse (cause des 3 déploiements échoués) — à republier.
+- Aperçu : `GIFT_CODE_ENCRYPTION_KEY` ajoutée dans backend/.env (aperçu seulement, ABSENTE des secrets production) ; activation cadeau sans transaction si MongoDB autonome (code 20).
+- Routine Bien vieillir : bouton « Jouer au quiz express » par habitude → `GET /api/bien-vieillir/habits/{id}/quiz` (questions Bien vieillir par mots-clés, complété à 3 min.) + `POST .../quiz/answer`. Composant `components/bien-vieillir/HabitQuiz.jsx`.
+- Production vérifiée (lecture seule) : Bien vieillir 20 questions × 7 paliers, job top-up terminé 121/121 ; migration paliers 15 tentatives reconstituées.
+
 ## 2026-11-19 — Offre Famille et visuel cadeau de Noël
 - Offre actuelle : 1 bénéficiaire + 3 proches, 79 €/an (mensuel inchangé à 7,90 €). Textes du site, CGV et PDF cadeau alignés.
 - Les nouveaux abonnements Famille et activations cadeau enregistrent `users.family_max_proches = 3`. Les anciens bénéficiaires sans ce champ conservent 4 places, y compris au renouvellement ; aucun proche existant n'est supprimé ni masqué.

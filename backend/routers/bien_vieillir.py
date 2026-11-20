@@ -183,3 +183,67 @@ async def put_routine(
         "updatedAt": now,
         "streak": compute_streak(merged),
     }
+
+
+# ---------------------------------------------------------------- mini-quiz par habitude
+# Questions de la catégorie « bien-vieillir » choisies par mots-clés (question + explication).
+HABIT_QUIZ_KEYWORDS: dict[str, list[str]] = {
+    "marche": ["marche", "activité physique", "sport", "bouger", "minutes", "cœur", "articulation",
+               "vélo", "natation", "pas par jour", "endurance"],
+    "equilibre": ["équilibre", "chute", "muscl", "renforcement", "sarcopénie", "os ", "osseu",
+                  "gym", "yoga", "tai-chi", "souplesse"],
+    "memoire": ["mémoire", "cerveau", "hippocampe", "cognitiv", "neurone", "mots croisés", "jeu de",
+                "lecture", "apprendre", "concentration", "lettres"],
+    "lien": ["social", "ami", "famille", "conversation", "solitude", "isolement", "bénévol",
+             "association", "petits-enfants", "lien", "retraités"],
+    "sortie": ["soleil", "vitamine d", "sortir", "promenade", "jardin", "plein air", "lumière",
+               "nature", "zones bleues", "dehors"],
+    "sommeil": ["sommeil", "dormir", "nuit", "mélatonine", "sieste", "insomnie", "repos", "réveil"],
+}
+HABIT_QUIZ_SIZE = 5
+HABIT_QUIZ_MIN = 3
+
+
+def _habit_regex(habit_id: str) -> dict:
+    pattern = "|".join(re.escape(k) for k in HABIT_QUIZ_KEYWORDS[habit_id])
+    return {"$regex": pattern, "$options": "i"}
+
+
+@router.get("/habits/{habit_id}/quiz")
+async def habit_quiz(habit_id: str) -> dict[str, Any]:
+    """Mini-quiz public lié à une habitude (sans bonne réponse : correction via /answer)."""
+    if habit_id not in HABIT_QUIZ_KEYWORDS:
+        raise HTTPException(status_code=404, detail="Habitude inconnue")
+    base = {"category_id": "bien-vieillir", "quality": {"$ne": "flagged"}}
+    rx = _habit_regex(habit_id)
+    proj = {"$project": {"_id": 0, "id": 1, "question": 1, "options": 1}}
+    themed = await db.questions.aggregate([
+        {"$match": {**base, "$or": [{"question": rx}, {"explanation": rx}]}},
+        {"$sample": {"size": HABIT_QUIZ_SIZE}}, proj,
+    ]).to_list(HABIT_QUIZ_SIZE)
+    if len(themed) < HABIT_QUIZ_MIN:  # stock thématique trop faible : complété par d'autres questions Bien vieillir
+        extra = await db.questions.aggregate([
+            {"$match": {**base, "id": {"$nin": [q["id"] for q in themed]}}},
+            {"$sample": {"size": HABIT_QUIZ_MIN - len(themed)}}, proj,
+        ]).to_list(HABIT_QUIZ_MIN)
+        themed += extra
+    habit = next(h for h in HABITS if h["id"] == habit_id)
+    return {"habit": habit, "questions": themed}
+
+
+class HabitQuizAnswer(BaseModel):
+    question_id: str
+    choice: int = Field(..., ge=0, le=5)
+
+
+@router.post("/habits/{habit_id}/quiz/answer")
+async def habit_quiz_answer(habit_id: str, body: HabitQuizAnswer) -> dict[str, Any]:
+    if habit_id not in HABIT_QUIZ_KEYWORDS:
+        raise HTTPException(status_code=404, detail="Habitude inconnue")
+    q = await db.questions.find_one({"id": body.question_id, "category_id": "bien-vieillir"},
+                                    {"_id": 0, "options": 1, "correct_index": 1, "explanation": 1})
+    if not q:
+        raise HTTPException(status_code=404, detail="Question introuvable")
+    ci = int(q["correct_index"])
+    return {"correct": body.choice == ci, "correct_index": ci, "correct_answer": q["options"][ci],
+            "explanation": (q.get("explanation") or "").strip()}

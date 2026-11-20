@@ -19,7 +19,7 @@ from fastapi.responses import JSONResponse
 from pydantic import BaseModel, EmailStr, Field, field_validator, model_validator
 from cryptography.fernet import Fernet
 from motor.motor_asyncio import AsyncIOMotorGridFSBucket
-from pymongo.errors import DuplicateKeyError
+from pymongo.errors import DuplicateKeyError, OperationFailure
 from pymongo import ReturnDocument
 import resend
 
@@ -766,59 +766,67 @@ async def gift_redeem(body: GiftRedeem, user: dict = Depends(get_current_user)) 
     normalized = normalize_code(code)
     if not normalized:
         raise HTTPException(status_code=404, detail="Ce code cadeau est introuvable. Vérifiez les lettres et chiffres.")
-    tier = None
-    expires = None
     user_id = user["_id"]
+
+    async def _activate(session):
+        g = await db.gift_codes.find_one_and_update(
+            {"status": {"$in": ["available", "active"]}, "$or": [
+                {"code_hash": _hash_code(normalized)}, {"code": normalized},
+            ]},
+            {"$set": {"status": "activated", "activated_at": now,
+                      "beneficiary_id": str(user_id), "beneficiary_email": user["email"]}},
+            return_document=ReturnDocument.BEFORE, session=session,
+        )
+        if not g:
+            exists = await db.gift_codes.find_one(
+                {"$or": [{"code_hash": _hash_code(normalized)}, {"code": normalized}]},
+                {"status": 1}, session=session,
+            )
+            if exists and exists["status"] in {"activated", "redeemed"}:
+                raise HTTPException(status_code=409, detail="Ce code cadeau a déjà été activé.")
+            raise HTTPException(status_code=404, detail="Ce code cadeau est introuvable. Vérifiez les lettres et chiffres.")
+        current = await db.users.find_one({"_id": user_id}, session=session)
+        if not current:
+            raise HTTPException(status_code=401, detail="Connectez-vous pour activer ce cadeau")
+        tier = g["tier"]
+        current_active = is_premium_active(current)
+        keep_lifetime = current_active and not current.get("plan_expires_at")
+        base = now
+        if current_active:
+            try:
+                current_expiry = datetime.fromisoformat(current["plan_expires_at"])
+                base = max(now, current_expiry if current_expiry.tzinfo else current_expiry.replace(tzinfo=timezone.utc))
+            except (KeyError, TypeError, ValueError):
+                pass
+            current_tier = current.get("plan_tier")
+            if (TIER_RANK.get(current_tier, 0) > TIER_RANK[tier]
+                    or (tier == NOEL_TIER and current_tier in {"famille", "famille_v2", "heritage", "premium"})):
+                tier = current_tier
+            elif current_tier == NOEL_TIER and tier == "famille_v2":
+                tier = "famille_v2"
+        try:
+            expires = None if keep_lifetime else base.replace(year=base.year + 1)
+        except ValueError:
+            expires = base.replace(year=base.year + 1, day=28)
+        expires_value = expires.isoformat() if expires else None
+        await db.users.update_one({"_id": user_id}, {"$set": {
+            "plan": "premium", "plan_tier": tier,
+            "plan_period": current.get("plan_period") if keep_lifetime else "yearly",
+            "plan_expires_at": expires_value, **family_subscription_fields(current, tier)}}, session=session)
+        await db.gift_codes.update_one({"_id": g["_id"]}, {"$set": {
+            "plan_expires_at": expires, "activation_order_id": str(g.get("order_id") or "")}},
+            session=session)
+        return g, tier, expires, family_subscription_fields(current, tier).get("family_max_proches")
+
     try:
-        async with await client.start_session() as session:
-            async with session.start_transaction():
-                g = await db.gift_codes.find_one_and_update(
-                    {"status": {"$in": ["available", "active"]}, "$or": [
-                        {"code_hash": _hash_code(normalized)}, {"code": normalized},
-                    ]},
-                    {"$set": {"status": "activated", "activated_at": now,
-                              "beneficiary_id": str(user_id), "beneficiary_email": user["email"]}},
-                    return_document=ReturnDocument.BEFORE, session=session,
-                )
-                if not g:
-                    exists = await db.gift_codes.find_one(
-                        {"$or": [{"code_hash": _hash_code(normalized)}, {"code": normalized}]},
-                        {"status": 1}, session=session,
-                    )
-                    if exists and exists["status"] in {"activated", "redeemed"}:
-                        raise HTTPException(status_code=409, detail="Ce code cadeau a déjà été activé.")
-                    raise HTTPException(status_code=404, detail="Ce code cadeau est introuvable. Vérifiez les lettres et chiffres.")
-                current = await db.users.find_one({"_id": user_id}, session=session)
-                if not current:
-                    raise HTTPException(status_code=401, detail="Connectez-vous pour activer ce cadeau")
-                tier = g["tier"]
-                current_active = is_premium_active(current)
-                keep_lifetime = current_active and not current.get("plan_expires_at")
-                base = now
-                if current_active:
-                    try:
-                        current_expiry = datetime.fromisoformat(current["plan_expires_at"])
-                        base = max(now, current_expiry if current_expiry.tzinfo else current_expiry.replace(tzinfo=timezone.utc))
-                    except (KeyError, TypeError, ValueError):
-                        pass
-                    current_tier = current.get("plan_tier")
-                    if (TIER_RANK.get(current_tier, 0) > TIER_RANK[tier]
-                            or (tier == NOEL_TIER and current_tier in {"famille", "famille_v2", "heritage", "premium"})):
-                        tier = current_tier
-                    elif current_tier == NOEL_TIER and tier == "famille_v2":
-                        tier = "famille_v2"
-                try:
-                    expires = None if keep_lifetime else base.replace(year=base.year + 1)
-                except ValueError:
-                    expires = base.replace(year=base.year + 1, day=28)
-                expires_value = expires.isoformat() if expires else None
-                await db.users.update_one({"_id": user_id}, {"$set": {
-                    "plan": "premium", "plan_tier": tier,
-                    "plan_period": current.get("plan_period") if keep_lifetime else "yearly",
-                    "plan_expires_at": expires_value, **family_subscription_fields(current, tier)}}, session=session)
-                await db.gift_codes.update_one({"_id": g["_id"]}, {"$set": {
-                    "plan_expires_at": expires, "activation_order_id": str(g.get("order_id") or "")}},
-                    session=session)
+        try:
+            async with await client.start_session() as session:
+                async with session.start_transaction():
+                    g, tier, expires, capacity = await _activate(session)
+        except OperationFailure as exc:
+            if exc.code != 20:  # 20 = MongoDB autonome (aperçu) : pas de transactions
+                raise
+            g, tier, expires, capacity = await _activate(None)
     except HTTPException:
         raise
     except Exception as exc:
@@ -826,7 +834,7 @@ async def gift_redeem(body: GiftRedeem, user: dict = Depends(get_current_user)) 
         raise HTTPException(status_code=503, detail="Activation temporairement indisponible") from exc
     return {"ok": True, "offer": g["offer"], "offer_label": OFFERS[g["offer"]]["label"],
             "plan_tier": tier, "plan_expires_at": expires.isoformat() if expires else None,
-            "max_proches": 3 if tier == NOEL_TIER else 4}
+            "max_proches": capacity or (3 if tier == NOEL_TIER else 4)}
 
 
 # ------------------------------------------------------------------ admin

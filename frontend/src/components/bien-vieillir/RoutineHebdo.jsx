@@ -9,6 +9,7 @@
 import { Check, Flame, RotateCcw, Info } from "lucide-react";
 import { HABITS, WEEK_VALID_THRESHOLD } from "@/content/routineHebdo";
 import useWeeklyRoutine from "@/hooks/useWeeklyRoutine";
+import { HabitQuizButton } from "@/components/bien-vieillir/HabitQuiz";
 
 function StreakBadge({ streak }) {
   if (streak < 1) return null;
@@ -132,6 +133,7 @@ export default function RoutineHebdo() {
                   <span className="mt-0.5 block text-sm leading-relaxed text-navy/60">{habit.help}</span>
                 </span>
               </label>
+              <HabitQuizButton habit={habit} />
             </li>
           );
         })}
