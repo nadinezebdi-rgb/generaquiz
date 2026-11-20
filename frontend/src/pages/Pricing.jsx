@@ -82,7 +82,7 @@ export default function Pricing() {
         )}
         <p className="text-sm text-navy text-center mb-14" data-testid="pricing-legal">
           Prix TTC. {period === "yearly"
-            ? `Abonnement annuel débité en une fois, renouvelé automatiquement chaque année à ${fmt(69, { integer: true })} (Solo) ou ${fmt(99, { integer: true })} (Famille), rappel par e-mail 30 jours avant.`
+            ? `Abonnement annuel débité en une fois, renouvelé automatiquement chaque année à ${PLANS.filter((p) => p.annuel).map((p) => `${fmt(p.annuel, { integer: true })} (${p.nom})`).join(" ou ")}, rappel par e-mail 30 jours avant.`
             : "Abonnement mensuel sans engagement."} Résiliable à tout moment en un clic.
         </p>
         <CheckoutRecap packageId={recapPkg} onClose={closeRecap} />

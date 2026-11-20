@@ -83,9 +83,13 @@ def create_checkout_session(pkg: dict, package_id: str, user: dict, origin: str)
                   custom_text={"submit": {"message": summary_text(pkg)[:1000]}})
     if pkg.get("promo"):
         # 49 € / 79 € encaissés aujourd'hui, l'abonnement annuel normal ne démarre qu'au bout de 12 mois.
-        first_renewal = datetime.now(timezone.utc) + relativedelta(years=1)
+        first_renewal = datetime.now(timezone.utc) + relativedelta(years=1) + timedelta(hours=2)
+        recurring["price_data"]["product_data"] = {
+            "name": f"GénéraQuiz {name} annuel — {eur(pkg['renew_amount'])}/an à partir du {fr_date(first_renewal)}",
+            "description": f"Prélevé seulement à partir du {fr_date(first_renewal)}, résiliable avant à tout moment."}
         kwargs["line_items"] = [recurring, {"price_data": {"currency": "eur", "unit_amount": round(pkg["amount"] * 100),
-                                                           "product_data": {"name": f"Super promo de Noël {name} — 12 mois"}},
+                                                           "product_data": {"name": f"Super promo de Noël {name} — 12 mois",
+                                                                            "description": f"{eur(pkg['amount'])} payés aujourd'hui pour 12 mois d'accès"}},
                                             "quantity": 1}]
         kwargs["subscription_data"] = {"trial_end": int(first_renewal.timestamp()),
                                        "metadata": {"user_id": str(user["_id"]), "package_id": package_id}}
@@ -97,22 +101,24 @@ def create_checkout_session(pkg: dict, package_id: str, user: dict, origin: str)
 
 async def activate_from_session(session_id: str) -> None:
     """Idempotent : active l'abonnement une seule fois, puis envoie les e-mails."""
-    tx = await db.payment_transactions.find_one_and_update(
-        {"session_id": session_id, "payment_status": {"$ne": "paid"}, "gift": {"$ne": True}},
-        {"$set": {"payment_status": "paid", "status": "complete"}})
-    if not tx:
+    tx = await db.payment_transactions.find_one({"session_id": session_id, "gift": {"$ne": True}})
+    if not tx or tx.get("payment_status") == "paid":
         return
     pkg = PACKAGES.get(tx.get("package_id"), {})
     user = await db.users.find_one({"_id": ObjectId(tx["user_id"])})
     if not user or not pkg:
         logger.error(f"[subscription] activation impossible pour {session_id}")
         return
-    sub_id = customer_id = None
-    try:
-        sess = await asyncio.to_thread(_stripe().checkout.Session.retrieve, session_id)
-        sub_id, customer_id = sess.get("subscription"), sess.get("customer")
-    except Exception as e:
-        logger.warning(f"[subscription] session {session_id} non relue : {e}")
+    sess = await asyncio.to_thread(_stripe().checkout.Session.retrieve, session_id)  # erreur → réessai au prochain appel
+    sub_id, customer_id = sess.get("subscription"), sess.get("customer")
+    if not sub_id and not SIMULATED:
+        logger.error(f"[subscription] session {session_id} sans abonnement Stripe")
+        return
+    claimed = await db.payment_transactions.update_one(
+        {"session_id": session_id, "payment_status": {"$ne": "paid"}},
+        {"$set": {"payment_status": "paid", "status": "complete", "stripe_subscription_id": sub_id}})
+    if not claimed.modified_count:
+        return
     start = datetime.now(timezone.utc)
     renews_at = start + (relativedelta(months=1) if pkg["period"] == "monthly" else relativedelta(years=1))
     await db.users.update_one({"_id": user["_id"]}, {"$set": {
@@ -135,7 +141,9 @@ async def cancel_subscription(user: dict) -> dict:
     if user.get("plan_cancel_at_period_end"):
         return {"cancelled": True, "access_until": user.get("plan_renews_at")}
     sub_id = user.get("stripe_subscription_id")
-    if sub_id and not SIMULATED:
+    if not SIMULATED and not sub_id:
+        raise HTTPException(status_code=409, detail="Abonnement introuvable chez notre prestataire de paiement : écrivez-nous via la page Contact, nous le résilions aussitôt.")
+    if not SIMULATED:
         try:
             await asyncio.to_thread(_stripe().Subscription.modify, sub_id, cancel_at_period_end=True)
         except Exception as e:
