@@ -17,7 +17,7 @@ export default function CGU() {
         <h2 className="font-display text-2xl font-bold text-navy mt-6 mb-3">2. Éditeur</h2>
         <p>
           GénéraQuiz est édité par sa créatrice indépendante. Pour toute question, contactez :
-          <a href="mailto:contact@generaquiz.fr" className="text-terracotta underline ml-1">contact@generaquiz.fr</a>.
+          <a href="mailto:contact.generaquiz@gmail.com" className="text-terracotta underline ml-1">contact.generaquiz@gmail.com</a>.
         </p>
       </section>
 

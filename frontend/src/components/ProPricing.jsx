@@ -10,8 +10,8 @@ import { PRO_RESIDENCE, PRO_RESEAU, PRO_STEPS, PRO_TYPES, fmt } from "@/config/p
  */
 export default function ProPricing() {
   const contactSubject = encodeURIComponent("Devis GénéraQuiz Pro - " + PRO_RESIDENCE.nom);
-  const contactHref = `mailto:contact@generaquiz.fr?subject=${contactSubject}`;
-  const contactReseauHref = `mailto:contact@generaquiz.fr?subject=${encodeURIComponent("Devis GénéraQuiz Pro - Formule Réseau")}`;
+  const contactHref = `mailto:contact.generaquiz@gmail.com?subject=${contactSubject}`;
+  const contactReseauHref = `mailto:contact.generaquiz@gmail.com?subject=${encodeURIComponent("Devis GénéraQuiz Pro - Formule Réseau")}`;
   const essaiHref = "/register";
 
   return (

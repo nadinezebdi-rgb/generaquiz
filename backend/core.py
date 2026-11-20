@@ -52,8 +52,14 @@ if "@generaquiz.fr" not in SENDER_EMAIL:
     )
     SENDER_EMAIL = "GénéraQuiz <contact@generaquiz.fr>"
 
+CONTACT_EMAIL = "contact.generaquiz@gmail.com"
+
 if RESEND_API_KEY:
     resend.api_key = RESEND_API_KEY
+
+# Les réponses des destinataires arrivent sur l'adresse de contact (l'expéditeur reste sur le domaine vérifié).
+_resend_send = resend.Emails.send
+resend.Emails.send = lambda params, *a, **kw: _resend_send({"reply_to": CONTACT_EMAIL, **params}, *a, **kw)
 
 LIFETIME_DAYS = 36500
 

@@ -15,7 +15,7 @@ export default function Confidentialite() {
         <h2 className="font-display text-2xl font-bold text-navy mt-6 mb-3">1. Responsable du traitement</h2>
         <p>
           GénéraQuiz — créatrice indépendante, joignable à
-          <a href="mailto:contact@generaquiz.fr" className="text-terracotta underline ml-1">contact@generaquiz.fr</a>.
+          <a href="mailto:contact.generaquiz@gmail.com" className="text-terracotta underline ml-1">contact.generaquiz@gmail.com</a>.
         </p>
       </section>
 
@@ -62,7 +62,7 @@ export default function Confidentialite() {
           <li><strong>Droit de rectification</strong> : modifier vos données depuis votre <strong>compte utilisateur</strong>.</li>
           <li><strong>Droit à l&apos;effacement</strong> : <em>« droit à l&apos;oubli »</em>, en cliquant sur <strong>Supprimer mon compte</strong> dans <strong>Mon compte → Zone de danger</strong>.</li>
           <li><strong>Droit à la portabilité</strong> : export de vos données sur demande à
-            <a href="mailto:contact@generaquiz.fr" className="text-terracotta underline ml-1">contact@generaquiz.fr</a>.</li>
+            <a href="mailto:contact.generaquiz@gmail.com" className="text-terracotta underline ml-1">contact.generaquiz@gmail.com</a>.</li>
           <li><strong>Droit d&apos;opposition</strong> au traitement à des fins marketing : désactivable depuis votre compte.</li>
           <li><strong>Droit de réclamation</strong> auprès de la CNIL :
             <a href="https://www.cnil.fr/fr/plaintes" className="text-terracotta underline ml-1" target="_blank" rel="noreferrer">cnil.fr/plaintes</a>.</li>
@@ -115,7 +115,7 @@ export default function Confidentialite() {
         <h2 className="font-display text-2xl font-bold text-navy mt-6 mb-3">10. Contact</h2>
         <p>
           Pour toute question relative à vos données personnelles :
-          <a href="mailto:contact@generaquiz.fr" className="text-terracotta underline ml-1">contact@generaquiz.fr</a>.
+          <a href="mailto:contact.generaquiz@gmail.com" className="text-terracotta underline ml-1">contact.generaquiz@gmail.com</a>.
           Nous nous engageons à répondre sous 30 jours.
         </p>
       </section>

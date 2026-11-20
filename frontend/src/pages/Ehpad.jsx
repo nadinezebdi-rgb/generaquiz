@@ -199,7 +199,7 @@ export default function Ehpad() {
             </p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <a
-                href="mailto:contact@generaquiz.fr?subject=Demande%20d%C3%A9mo%20EHPAD&body=Bonjour%2C%0AJe%20suis%20animateur%2Fdirecteur%20d%27EHPAD%20et%20je%20souhaite%20une%20d%C3%A9mo%20de%20GeneraQuiz.%0A%0ANom%20de%20l%27%C3%A9tablissement%20%3A%0ANombre%20de%20r%C3%A9sidents%20%3A%0AT%C3%A9l%C3%A9phone%20%3A%0A"
+                href="mailto:contact.generaquiz@gmail.com?subject=Demande%20d%C3%A9mo%20EHPAD&body=Bonjour%2C%0AJe%20suis%20animateur%2Fdirecteur%20d%27EHPAD%20et%20je%20souhaite%20une%20d%C3%A9mo%20de%20GeneraQuiz.%0A%0ANom%20de%20l%27%C3%A9tablissement%20%3A%0ANombre%20de%20r%C3%A9sidents%20%3A%0AT%C3%A9l%C3%A9phone%20%3A%0A"
                 data-testid="ehpad-cta-mail"
                 className="inline-flex items-center justify-center gap-2 bg-mustard text-navy hover:bg-mustard-dark font-bold px-6 py-4 rounded-full shadow-warm transition"
               >

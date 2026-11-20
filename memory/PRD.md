@@ -1963,3 +1963,6 @@ Les routes `/bulk/*` étaient interceptées par `/{qid}/approve|flag|apply-corre
 - `backend/family_report.py` : rapport hebdo (dim 10:00) aux proches ayant REJOINT l'espace + alerte d'inactivité (3 jours, une seule fois par absence, réessai si aucun e-mail parti). Contenu : jours joués / parties de la semaine + idée de sujet d'appel (discussion_prompt).
 - Opt-in du bénéficiaire : `PUT /api/famille/partage` (users.family_share_progress, family_share_since), carte « Nouvelles du dimanche » dans /app/famille. Déclenchement admin : `POST /api/famille/admin/rapports/{hebdo|inactivite}`.
 - Republication lancée (correctif index + 420 questions).
+
+## 2026-11-20 — Adresse de contact
+- Adresse affichée partout (pied de page, CGU/CGV/RGPD, EHPAD, tarifs Pro, livre imprimé, merci cadeau) : contact.generaquiz@gmail.com. Tous les e-mails Resend ont reply_to = CONTACT_EMAIL (core.py) ; l'expéditeur reste @generaquiz.fr (domaine vérifié).

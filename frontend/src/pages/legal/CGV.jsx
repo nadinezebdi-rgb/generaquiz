@@ -7,7 +7,7 @@ export default function CGV() {
         <h2 className="font-display text-2xl font-bold text-navy mt-6 mb-3">1. Identification du vendeur</h2>
         <p>
           GénéraQuiz est édité par sa créatrice indépendante, joignable à
-          <a href="mailto:contact@generaquiz.fr" className="text-terracotta underline ml-1">contact@generaquiz.fr</a>.
+          <a href="mailto:contact.generaquiz@gmail.com" className="text-terracotta underline ml-1">contact.generaquiz@gmail.com</a>.
         </p>
       </section>
 
@@ -80,7 +80,7 @@ export default function CGV() {
           Les demandes de remboursement doivent être adressées :
         </p>
         <ul className="list-disc pl-6 space-y-2">
-          <li><strong>Web</strong> : à <a href="mailto:contact@generaquiz.fr" className="text-terracotta underline">contact@generaquiz.fr</a></li>
+          <li><strong>Web</strong> : à <a href="mailto:contact.generaquiz@gmail.com" className="text-terracotta underline">contact.generaquiz@gmail.com</a></li>
           <li><strong>iOS</strong> : via la procédure Apple (<a href="https://reportaproblem.apple.com" className="text-terracotta underline" target="_blank" rel="noreferrer">reportaproblem.apple.com</a>)</li>
           <li><strong>Android</strong> : via la procédure Google (<a href="https://support.google.com/googleplay" className="text-terracotta underline" target="_blank" rel="noreferrer">support.google.com/googleplay</a>)</li>
         </ul>
@@ -90,7 +90,7 @@ export default function CGV() {
         <h2 className="font-display text-2xl font-bold text-navy mt-6 mb-3">8. Service client</h2>
         <p>
           Pour toute question, le service client répond par email à
-          <a href="mailto:contact@generaquiz.fr" className="text-terracotta underline ml-1">contact@generaquiz.fr</a>
+          <a href="mailto:contact.generaquiz@gmail.com" className="text-terracotta underline ml-1">contact.generaquiz@gmail.com</a>
           sous 48 heures ouvrées.
         </p>
       </section>
