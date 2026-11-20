@@ -63,6 +63,10 @@ async def category_showcase(category_id: str):
     others = await db.categories.find(
         {"id": {"$ne": category_id}}, {"_id": 0, "id": 1, "title": 1, "mascot_image": 1, "color": 1}
     ).to_list(50)
+    playable = {d["_id"] async for d in db.questions.aggregate([
+        {"$match": {"quality": "verified"}}, {"$group": {"_id": "$category_id", "n": {"$sum": 1}}},
+        {"$match": {"n": {"$gte": 20}}}])}
+    others = [o for o in others if o["id"] in playable]
     return {"category": {**cat, "count": len(ids)}, "samples": samples, "mini_quiz": mini_quiz, "others": others}
 
 

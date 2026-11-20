@@ -992,9 +992,9 @@ async def ensure_gift_indexes() -> None:
     existing = await db.gift_codes.index_information()
     for field in ("code", "code_hash", "order_id", "session_id"):
         old = existing.get(f"{field}_1")
-        if old and not (old.get("unique") and old.get("sparse")):
-            await db.gift_codes.drop_index(f"{field}_1")
         try:
+            if old and not (old.get("unique") and old.get("sparse")):
+                await db.gift_codes.drop_index(f"{field}_1")
             await db.gift_codes.create_index(field, unique=True, sparse=True)
         except Exception as e:  # ne jamais bloquer le démarrage sur un index
             logger.error(f"[gifts] index {field} non créé : {e}")

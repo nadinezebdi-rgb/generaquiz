@@ -7,10 +7,10 @@ export const SoonCategoryCard = ({ item, testidPrefix }) => (
     data-testid={`${testidPrefix}-${item.id}`}
     className="relative bg-cream/50 border-2 border-dashed border-cream-dark rounded-[28px] p-6 flex flex-col justify-center min-h-[180px] select-none"
   >
-    <span className="absolute top-3 right-3 inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-widest text-navy/40" data-testid={`${testidPrefix}-badge-${item.id}`}>
+    <span className="absolute top-3 right-3 inline-flex items-center gap-1 text-xs font-bold uppercase tracking-widest text-navy/70" data-testid={`${testidPrefix}-badge-${item.id}`}>
       <Clock className="w-3 h-3" /> Bientôt
     </span>
-    <h3 className="font-display text-xl sm:text-2xl font-bold text-navy/50 mb-2">{item.title}</h3>
-    <p className="text-navy/50 text-base">{item.description}</p>
+    <h3 className="font-display text-xl sm:text-2xl font-bold text-navy/70 mb-2">{item.title}</h3>
+    <p className="text-navy/65 text-base">{item.description}</p>
   </div>
 );

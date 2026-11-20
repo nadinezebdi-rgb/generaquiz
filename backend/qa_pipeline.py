@@ -104,7 +104,14 @@ CATEGORY_RULES = {
         "INTERDIT : tout diagnostic, tout nom de médicament, vaccin, posologie ou dosage, toute promesse de "
         "guérison ; ne jamais écrire qu'une habitude prévient, réduit le risque, soigne ou guérit une maladie ; "
         "aucun symptôme ni nom de maladie présenté comme évitable. Préférer « aide à se sentir en forme », "
-        "« est conseillé pour garder le moral », « favorise un bon sommeil »."
+        "« est conseillé pour garder le moral », « favorise un bon sommeil ». "
+        "LANGAGE : questions de bon sens et de la vie de tous les jours, en mots simples comme entre voisins ; "
+        "AUCUN terme scientifique, médical ou technique (pas de nutriments savants, hormones, neurones, "
+        "pourcentages ou chiffres d'études) ; une seule idée par question, phrase courte. "
+        "Même aux paliers élevés, la difficulté vient de l'astuce pratique, jamais du vocabulaire ni de l'érudition. "
+        "Thèmes : la maison, la cuisine, le marché, le jardin, la marche, le sommeil, la mémoire, les jeux, la famille, "
+        "les voisins, la sécurité au quotidien, les saisons. INTERDIT : les « zones bleues », les mots étrangers, "
+        "les pays lointains, les noms de chercheurs, de sigles administratifs ou d'études."
     ),
     "annees-80": (
         "RÈGLES ÉDITORIALES « Années 80 » : uniquement des faits datés de 1980 à 1989 (musique, télévision, "
@@ -129,4 +136,6 @@ def fact_check_rules(category_id: str | None) -> str:
         return ""
     return ("\n\nCONTRÔLE ÉDITORIAL : si la question, une option ou l'explication contient une allégation "
             "médicale (prévention, réduction de risque, traitement ou guérison d'une maladie, médicament, "
-            "vaccin, dosage, diagnostic), réponds verdict \"wrong\" avec comment \"allégation médicale\".")
+            "vaccin, dosage, diagnostic), réponds verdict \"wrong\" avec comment \"allégation médicale\". "
+            "De même, si elle emploie un terme scientifique, médical ou technique qu'une personne âgée "
+            "n'utiliserait pas au quotidien, réponds verdict \"wrong\" avec comment \"jargon\".")

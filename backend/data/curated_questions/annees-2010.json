@@ -1,0 +1,3502 @@
+[
+ {
+  "id": "topup_annees-2010_d1_47dee9b5b235",
+  "category_id": "annees-2010",
+  "difficulty": 1,
+  "question": "Quel animal est le héros du film d'animation 'Le Roi Lion' sorti en 2019 ?",
+  "options": [
+   "Un lion",
+   "Un éléphant",
+   "Un tigre",
+   "Un ours"
+  ],
+  "correct_index": 0,
+  "explanation": "Le Roi Lion sorti en 2019 est un remake du dessin animé classique de Disney. Le héros s'appelle Simba, un jeune lion destiné à devenir roi.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 98,
+   "comment": "Le remake de 2019 du Roi Lion a bien pour héros Simba, un lion.",
+   "correction": null,
+   "checked_at": 1795172695.1665125,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-2010_d1_f3b5b850556d",
+  "category_id": "annees-2010",
+  "difficulty": 1,
+  "question": "Quel est le prénom du célèbre bonhomme de neige dans le film d'animation 'La Reine des neiges' sorti en 2013 ?",
+  "options": [
+   "Olaf",
+   "Kristoff",
+   "Hans",
+   "Sven"
+  ],
+  "correct_index": 0,
+  "explanation": "Le bonhomme de neige du film s'appelle Olaf. C'est un personnage très apprécié des enfants, toujours joyeux et qui rêve de voir le soleil.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 100,
+   "comment": "Olaf est bien le bonhomme de neige, Kristoff et Hans sont humains, Sven est le renne.",
+   "correction": null,
+   "checked_at": 1795172699.048962,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-2010_d1_d127528121d4",
+  "category_id": "annees-2010",
+  "difficulty": 1,
+  "question": "Dans quel pays se sont déroulés les Jeux Olympiques d'été de 2024 ?",
+  "options": [
+   "La France",
+   "Le Japon",
+   "L'Australie",
+   "Les États-Unis"
+  ],
+  "correct_index": 0,
+  "explanation": "Les Jeux Olympiques d'été de 2024 ont eu lieu à Paris, en France, du 26 juillet au 11 août 2024. C'était la troisième fois que Paris accueillait les JO.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 100,
+   "comment": "Les JO d'été 2024 se sont bien déroulés à Paris, France, confirmant la troisième organisation parisienne.",
+   "correction": null,
+   "checked_at": 1795172702.8806736,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-2010_d1_64d3175628a6",
+  "category_id": "annees-2010",
+  "difficulty": 1,
+  "question": "Quel est le prénom de la petite fille aux cheveux roux, héroïne du film d'animation Pixar 'Rebelle' sorti en 2012 ?",
+  "options": [
+   "Mérida",
+   "Raiponce",
+   "Vaiana",
+   "Élisa"
+  ],
+  "correct_index": 0,
+  "explanation": "La héroïne du film 'Rebelle' s'appelle Mérida. C'est une princesse écossaise courageuse connue pour ses longs cheveux roux bouclés et son arc.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 99,
+   "comment": "Mérida est bien l'héroïne rousse du film Pixar Rebelle (2012), les autres options étant des personnages d'autres films.",
+   "correction": null,
+   "checked_at": 1795172707.3731873,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-2010_d1_9fba3b93b335",
+  "category_id": "annees-2010",
+  "difficulty": 1,
+  "question": "Dans quel ville de France ont eu lieu les Jeux Olympiques d'été de 2024 ?",
+  "options": [
+   "Paris",
+   "Lyon",
+   "Marseille",
+   "Bordeaux"
+  ],
+  "correct_index": 0,
+  "explanation": "Les Jeux Olympiques d'été de 2024 se sont déroulés à Paris, en France. C'était la troisième fois que Paris accueillait les Jeux Olympiques.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 100,
+   "comment": "Les JO d'été 2024 ont bien eu lieu à Paris, troisième accueil de la ville.",
+   "correction": null,
+   "checked_at": 1795172711.0318816,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-2010_d1_2d47715964dc",
+  "category_id": "annees-2010",
+  "difficulty": 1,
+  "question": "Quel est le nom du célèbre jeu sur smartphone où l'on attrape des petits monstres en se déplaçant dans la vraie vie, sorti en 2016 ?",
+  "options": [
+   "Angry Birds",
+   "Candy Crush",
+   "Pokémon GO",
+   "Minecraft"
+  ],
+  "correct_index": 2,
+  "explanation": "Pokémon GO est sorti en juillet 2016 et a connu un succès mondial immédiat. Les joueurs se déplacent dans la vraie vie pour attraper des Pokémon grâce à leur smartphone.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 100,
+   "comment": "Pokémon GO est bien sorti en juillet 2016 et utilise la géolocalisation en réalité augmentée.",
+   "correction": null,
+   "checked_at": 1795172715.0843046,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-2010_d1_74a09e223a72",
+  "category_id": "annees-2010",
+  "difficulty": 1,
+  "question": "Comment s'appelle la chanteuse française qui a représenté la France à l'Eurovision 2021 avec la chanson 'Voilà' ?",
+  "options": [
+   "Barbara Pravi",
+   "Céline Dion",
+   "Zaz",
+   "Louane"
+  ],
+  "correct_index": 0,
+  "explanation": "Barbara Pravi a représenté la France à l'Eurovision 2021 avec sa chanson 'Voilà' et a terminé à la deuxième place, le meilleur résultat français depuis des années.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 99,
+   "comment": "Barbara Pravi a bien représenté la France à l'Eurovision 2021 avec 'Voilà', terminant 2e.",
+   "correction": null,
+   "checked_at": 1795172738.1721194,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-2010_d1_cff4573e7414",
+  "category_id": "annees-2010",
+  "difficulty": 1,
+  "question": "Quel est le prénom du super-héros masqué héros du film 'Spider-Man : New Generation' sorti en 2018 ?",
+  "options": [
+   "Miles",
+   "Peter",
+   "Tony",
+   "Bruce"
+  ],
+  "correct_index": 0,
+  "explanation": "Dans ce film d'animation, le héros principal s'appelle Miles Morales, un adolescent qui devient le nouveau Spider-Man. Le film a remporté l'Oscar du meilleur film d'animation en 2019.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 98,
+   "comment": "Le héros principal de 'Spider-Man: New Generation' (Into the Spider-Verse, 2018) est bien Miles Morales.",
+   "correction": null,
+   "checked_at": 1795172746.3484838,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-2010_d2_39b8c0a83e04",
+  "category_id": "annees-2010",
+  "difficulty": 2,
+  "question": "Comment s'appelle la plateforme de streaming qui a lancé la série 'Stranger Things' en 2016 ?",
+  "options": [
+   "Netflix",
+   "Amazon Prime",
+   "Disney+",
+   "Canal+"
+  ],
+  "correct_index": 0,
+  "explanation": "Stranger Things est une série originale Netflix, diffusée depuis juillet 2016. Elle est devenue l'une des séries les plus regardées au monde.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 100,
+   "comment": "Stranger Things est bien une série originale Netflix lancée en juillet 2016.",
+   "correction": null,
+   "checked_at": 1795172754.98058,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-2010_d2_0330439f1be2",
+  "category_id": "annees-2010",
+  "difficulty": 2,
+  "question": "Quel est le prénom de l'espion au service de Sa Majesté dans le film 'Skyfall', sorti en 2012 ?",
+  "options": [
+   "James",
+   "John",
+   "Jack",
+   "Jason"
+  ],
+  "correct_index": 0,
+  "explanation": "Le héros de 'Skyfall' est James Bond, l'agent secret britannique le plus célèbre du cinéma. Dans ce film, il est incarné par Daniel Craig.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 100,
+   "comment": "James Bond est bien l'espion de Skyfall (2012), incarné par Daniel Craig.",
+   "correction": null,
+   "checked_at": 1795172758.9067912,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-2010_d2_b4cadf98398f",
+  "category_id": "annees-2010",
+  "difficulty": 2,
+  "question": "Quel est le prénom de la princesse héroïne du film d'animation Disney 'La Reine des neiges', sorti en 2013 ?",
+  "options": [
+   "Elsa",
+   "Belle",
+   "Raiponce",
+   "Mérida"
+  ],
+  "correct_index": 0,
+  "explanation": "Dans 'La Reine des neiges', la princesse Elsa possède le pouvoir de créer de la glace et de la neige. Ce film est devenu l'un des plus grands succès de Disney dans les années 2010.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 98,
+   "comment": "Elsa est bien la reine des neiges du film de 2013, et les autres options sont des héroïnes d'autres films Disney/Pixar.",
+   "correction": null,
+   "checked_at": 1795172763.0462925,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-2010_d2_0e13683973d2",
+  "category_id": "annees-2010",
+  "difficulty": 2,
+  "question": "Quel est le nom du célèbre réseau social de partage de photos et vidéos, lancé en 2010 et racheté par Facebook en 2012 ?",
+  "options": [
+   "Instagram",
+   "TikTok",
+   "Snapchat",
+   "Pinterest"
+  ],
+  "correct_index": 0,
+  "explanation": "Instagram a été lancé en octobre 2010 et est rapidement devenu très populaire pour partager des photos. Facebook l'a racheté en 2012 pour environ un milliard de dollars.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 100,
+   "comment": "Instagram a bien été lancé en 2010 et racheté par Facebook en 2012 pour environ 1 milliard de dollars.",
+   "correction": null,
+   "checked_at": 1795172766.9009142,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-2010_d2_a8f903b6a6ec",
+  "category_id": "annees-2010",
+  "difficulty": 2,
+  "question": "Quel est le prénom du personnage principal de la série française 'Lupin', diffusée sur Netflix à partir de 2021 ?",
+  "options": [
+   "Assane",
+   "Omar",
+   "Malik",
+   "Samir"
+  ],
+  "correct_index": 0,
+  "explanation": "Le héros de la série 'Lupin' s'appelle Assane Diop, un gentleman cambrioleur inspiré du personnage d'Arsène Lupin. Il est interprété par l'acteur Omar Sy.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 99,
+   "comment": "Le personnage principal se nomme bien Assane Diop, interprété par Omar Sy.",
+   "correction": null,
+   "checked_at": 1795172776.4846077,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-2010_d2_0953a805ab1e",
+  "category_id": "annees-2010",
+  "difficulty": 2,
+  "question": "Quel est le nom de l'application de messagerie instantanée rachetée par Facebook en 2014 pour 19 milliards de dollars ?",
+  "options": [
+   "WhatsApp",
+   "Snapchat",
+   "Telegram",
+   "Skype"
+  ],
+  "correct_index": 0,
+  "explanation": "Facebook a racheté WhatsApp en 2014 pour la somme record de 19 milliards de dollars. WhatsApp est aujourd'hui l'une des applications de messagerie les plus utilisées dans le monde.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 98,
+   "comment": "Facebook a bien racheté WhatsApp en 2014 pour environ 19 milliards de dollars, les autres options étant clairement fausses.",
+   "correction": null,
+   "checked_at": 1795172780.3154447,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-2010_d2_e7982c611bcb",
+  "category_id": "annees-2010",
+  "difficulty": 2,
+  "question": "Comment s'appelle la chanson de Pharrell Williams, bande originale du film 'Moi, moche et méchant 2', qui a connu un immense succès mondial en 2013-2014 ?",
+  "options": [
+   "Happy",
+   "Blurred Lines",
+   "Get Lucky",
+   "Stay With Me"
+  ],
+  "correct_index": 0,
+  "explanation": "La chanson 'Happy' de Pharrell Williams, sortie en 2013, a été un véritable phénomène mondial et a remporté de nombreuses récompenses. Elle est restée des semaines en tête des classements dans le monde entier.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 100,
+   "comment": "'Happy' de Pharrell Williams est bien la chanson de la BO de 'Moi, moche et méchant 2' (2013), les autres options étant d'autres artistes.",
+   "correction": null,
+   "checked_at": 1795172801.3265944,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-2010_d3_08e81dcabe94",
+  "category_id": "annees-2010",
+  "difficulty": 3,
+  "question": "Quel groupe de K-pop a sorti le tube mondial 'Dynamite' en 2020 ?",
+  "options": [
+   "EXO",
+   "BTS",
+   "BLACKPINK",
+   "TWICE"
+  ],
+  "correct_index": 1,
+  "explanation": "'Dynamite' est sorti en août 2020 par le groupe sud-coréen BTS. C'est leur premier single entièrement chanté en anglais, et il a atteint la première place du classement Billboard Hot 100.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 100,
+   "comment": "Dynamite est bien sorti en août 2020 par BTS, premier single en anglais classé n°1 au Billboard Hot 100.",
+   "correction": null,
+   "checked_at": 1795172820.831046,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-2010_d3_0b591bf28651",
+  "category_id": "annees-2010",
+  "difficulty": 3,
+  "question": "Quel est le nom du célèbre jeu vidéo de survie sorti en 2017 où 100 joueurs s'affrontent jusqu'au dernier survivant ?",
+  "options": [
+   "Minecraft",
+   "Fortnite",
+   "Call of Duty",
+   "FIFA"
+  ],
+  "correct_index": 1,
+  "explanation": "Fortnite Battle Royale est sorti en septembre 2017 et est rapidement devenu un phénomène mondial, notamment chez les jeunes. Son principe 'battle royale' consiste à être le dernier joueur en vie parmi 100 participants.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 92,
+   "comment": "Fortnite Battle Royale est bien sorti en septembre 2017 avec un mode battle royale à 100 joueurs, et les autres options ne correspondent pas.",
+   "correction": null,
+   "checked_at": 1795172832.5280788,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-2010_d3_13419d81fba6",
+  "category_id": "annees-2010",
+  "difficulty": 3,
+  "question": "Quel est le nom du film français sorti en 2011 qui raconte l'histoire d'amitié entre un milliardaire tétraplégique et son aide à domicile issu de la banlieue ?",
+  "options": [
+   "Les Invisibles",
+   "Intouchables",
+   "Le Prénom",
+   "De rouille et d'os"
+  ],
+  "correct_index": 1,
+  "explanation": "Intouchables, réalisé par Olivier Nakache et Éric Toledano, est sorti en 2011 et a rencontré un succès phénoménal avec plus de 19 millions d'entrées en France. Il met en scène Omar Sy et François Cluzet dans les rôles principaux.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 100,
+   "comment": "Intouchables (2011) d'Olivier Nakache et Éric Toledano correspond exactement à la description.",
+   "correction": null,
+   "checked_at": 1795172862.5770917,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-2010_d3_8324f5aba2e0",
+  "category_id": "annees-2010",
+  "difficulty": 3,
+  "question": "Quel est le prénom de la jeune sorcière héroïne de la série fantastique 'Chilling Adventures of Sabrina', diffusée sur Netflix à partir de 2018 ?",
+  "options": [
+   "Sabrina",
+   "Hermione",
+   "Willow",
+   "Élisa"
+  ],
+  "correct_index": 0,
+  "explanation": "La série 'Chilling Adventures of Sabrina' suit les aventures de Sabrina Spellman, une adolescente mi-sorcière mi-humaine. Elle a été diffusée sur Netflix de 2018 à 2020.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 100,
+   "comment": "Sabrina Spellman est bien l'héroïne de la série, diffusée sur Netflix de 2018 à 2020.",
+   "correction": null,
+   "checked_at": 1795172877.099829,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-2010_d3_f256877ad69d",
+  "category_id": "annees-2010",
+  "difficulty": 3,
+  "question": "Quel est le nom du tube de Stromae sorti en 2013, dont le clip montre des hommes ivres cherchant leur chemin pour rentrer chez eux ?",
+  "options": [
+   "Formidable",
+   "Papaoutai",
+   "Alors on danse",
+   "Ta fête"
+  ],
+  "correct_index": 0,
+  "explanation": "« Formidable » est un titre de l'album Racine carrée de Stromae, sorti en 2013, et son clip tourné à Bruxelles est devenu viral. « Alors on danse » date quant à lui de 2010.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 95,
+   "comment": "Formidable (2013) montre Stromae jouant un homme ivre, filmé en caméra cachée à Bruxelles, ce qui correspond à la description.",
+   "correction": null,
+   "checked_at": 1795172887.5336442,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-2010_d3_5a965a427b97",
+  "category_id": "annees-2010",
+  "difficulty": 3,
+  "question": "Quel est le titre de la chanson d'Adele, sortie en 2015, qui a battu des records de ventes mondiales et figure sur son album '25' ?",
+  "options": [
+   "Hello",
+   "Someone Like You",
+   "Rolling in the Deep",
+   "Skyfall"
+  ],
+  "correct_index": 0,
+  "explanation": "La chanson 'Hello' d'Adele est sortie en octobre 2015 en tant que premier single de l'album '25'. Elle a battu de nombreux records de streaming et de ventes dès sa sortie.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 98,
+   "comment": "'Hello' est bien le single de 2015 issu de l'album '25', les autres chansons datent d'avant.",
+   "correction": null,
+   "checked_at": 1795172898.6670349,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-2010_d3_a6b88cf3365d",
+  "category_id": "annees-2010",
+  "difficulty": 3,
+  "question": "Quel est le prénom du personnage joué par Omar Sy dans la série française 'Lupin', diffusée sur Netflix à partir de janvier 2021 ?",
+  "options": [
+   "Assane",
+   "Arsène",
+   "Amadou",
+   "Antoine"
+  ],
+  "correct_index": 0,
+  "explanation": "Dans la série 'Lupin', Omar Sy incarne Assane Diop, un homme qui s'inspire des aventures d'Arsène Lupin pour venger son père. La série a rencontré un immense succès mondial dès sa sortie en 2021.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 99,
+   "comment": "Omar Sy joue bien Assane Diop dans la série Lupin, le prénom Arsène étant celui du personnage dont il s'inspire.",
+   "correction": null,
+   "checked_at": 1795172915.0492384,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-2010_d3_ca5732e2071c",
+  "category_id": "annees-2010",
+  "difficulty": 3,
+  "question": "Quel est le nom du film de super-héros Marvel sorti en 2018 qui a réuni presque tous les Avengers pour affronter le villain Thanos ?",
+  "options": [
+   "Avengers : Infinity War",
+   "Avengers : L'Ère d'Ultron",
+   "Captain America : Civil War",
+   "Thor : Ragnarok"
+  ],
+  "correct_index": 0,
+  "explanation": "Avengers : Infinity War est sorti en 2018 et rassemble la quasi-totalité des héros Marvel face à Thanos, qui cherche à réunir les six Pierres d'Infinité. Ce film a connu un immense succès mondial.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 100,
+   "comment": "Avengers: Infinity War est bien sorti en 2018 et réunit la majorité des Avengers contre Thanos.",
+   "correction": null,
+   "checked_at": 1795172919.7739668,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-2010_d4_e326f8d63020",
+  "category_id": "annees-2010",
+  "difficulty": 4,
+  "question": "Quel est le nom de la série espagnole diffusée sur Netflix à partir de 2017, qui met en scène un braquage spectaculaire de la Monnaie nationale d'Espagne ?",
+  "options": [
+   "Élite",
+   "La Casa de Papel",
+   "Vis a Vis",
+   "Grand Hotel"
+  ],
+  "correct_index": 1,
+  "explanation": "La Casa de Papel (aussi connue sous le titre Money Heist) a été diffusée en Espagne dès 2017 avant d'être reprise par Netflix, devenant l'une des séries non anglophones les plus regardées au monde. Elle suit un groupe de braqueurs dirigés par le mystérieux Professeur.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 97,
+   "comment": "La Casa de Papel, diffusée en 2017 sur Antena 3 puis Netflix, met bien en scène un braquage de la Fábrica Nacional de Moneda y Timbre.",
+   "correction": null,
+   "checked_at": 1795172938.7604947,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-2010_d4_d4d67d9d3da4",
+  "category_id": "annees-2010",
+  "difficulty": 4,
+  "question": "Quel est le nom du nageur français qui a remporté la médaille d'or du 400 mètres quatre nages individuel aux Jeux Olympiques de Paris 2024 ?",
+  "options": [
+   "Florent Manaudou",
+   "Léon Marchand",
+   "Yannick Agnel",
+   "Clément Mignot"
+  ],
+  "correct_index": 1,
+  "explanation": "Léon Marchand a réalisé une performance historique aux JO de Paris 2024 en remportant quatre médailles d'or individuelles en natation, dont le 400 mètres quatre nages. Il est devenu le grand héros français de ces Jeux.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 99,
+   "comment": "Léon Marchand a bien remporté l'or du 400m 4 nages aux JO de Paris 2024 avec un record olympique.",
+   "correction": null,
+   "checked_at": 1795172943.8771846,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-2010_d4_881f89ea1759",
+  "category_id": "annees-2010",
+  "difficulty": 4,
+  "question": "Quel est le titre de la série britannique diffusée sur Netflix en 2020, qui suit les intrigues amoureuses et mondaines de la haute société londonienne du XIXe siècle ?",
+  "options": [
+   "Downton Abbey",
+   "La Chronique des Bridgerton",
+   "The Crown",
+   "Peaky Blinders"
+  ],
+  "correct_index": 1,
+  "explanation": "La Chronique des Bridgerton (Bridgerton en anglais) a été mise en ligne sur Netflix le 25 décembre 2020. Produite par Shonda Rhimes, cette série inspirée des romans de Julia Quinn est rapidement devenue l'une des plus regardées de la plateforme.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 98,
+   "comment": "Bridgerton, diffusée sur Netflix en décembre 2020, correspond exactement à la description et les autres options sont clairement distinctes.",
+   "correction": null,
+   "checked_at": 1795172948.9652903,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-2010_d4_bad3757e4e20",
+  "category_id": "annees-2010",
+  "difficulty": 4,
+  "question": "Quel est le nom du film de science-fiction réalisé par Christopher Nolan, sorti en 2014, qui suit un astronaute traversant un trou de ver pour trouver une nouvelle planète habitable ?",
+  "options": [
+   "Gravity",
+   "Interstellar",
+   "The Martian",
+   "Arrival"
+  ],
+  "correct_index": 1,
+  "explanation": "Interstellar, sorti en novembre 2014, est réalisé par Christopher Nolan et met en scène Matthew McConaughey dans le rôle d'un astronaute partant à la recherche d'une planète habitable pour sauver l'humanité. Le film a connu un immense succès mondial et a été salué pour sa rigueur scientifique.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 99,
+   "comment": "Interstellar de Christopher Nolan, sorti en 2014, correspond exactement à la description et les autres options sont de mauvais réalisateurs.",
+   "correction": null,
+   "checked_at": 1795172954.2975423,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-2010_d5_83d1b11f9c8e",
+  "category_id": "annees-2010",
+  "difficulty": 5,
+  "question": "Quel est le nom du réalisateur français qui a remporté la Palme d'Or au Festival de Cannes 2015 avec le film 'Dheepan' ?",
+  "options": [
+   "Jacques Audiard",
+   "François Ozon",
+   "Arnaud Desplechin",
+   "Xavier Dolan"
+  ],
+  "correct_index": 0,
+  "explanation": "'Dheepan', réalisé par Jacques Audiard, a remporté la Palme d'Or au Festival de Cannes en mai 2015. Ce film raconte l'histoire d'un réfugié tamoul qui reconstruit sa vie en France.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 99,
+   "comment": "Jacques Audiard a bien remporté la Palme d'Or 2015 avec 'Dheepan'.",
+   "correction": null,
+   "checked_at": 1795173093.3241723,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-2010_d5_015df62fc3ec",
+  "category_id": "annees-2010",
+  "difficulty": 5,
+  "question": "Quel est le titre du film de Damien Chazelle, sorti en 2016, qui a remporté six Oscars dont celui du meilleur réalisateur et met en scène deux artistes à Los Angeles incarnés par Emma Stone et Ryan Gosling ?",
+  "options": [
+   "Whiplash",
+   "La La Land",
+   "First Man",
+   "Babylon"
+  ],
+  "correct_index": 1,
+  "explanation": "La La Land, sorti en 2016, a remporté six Oscars lors de la cérémonie de 2017, dont ceux de la meilleure réalisatrice pour Damien Chazelle et de la meilleure actrice pour Emma Stone. Ryan Gosling y incarne un pianiste de jazz amoureux d'une aspirante actrice jouée par Emma Stone.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 98,
+   "comment": "La La Land (2016) a bien remporté six Oscars dont meilleur réalisateur pour Chazelle, avec Stone et Gosling.",
+   "correction": null,
+   "checked_at": 1795173118.239067,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-2010_d5_37caaf54e536",
+  "category_id": "annees-2010",
+  "difficulty": 5,
+  "question": "Quel est le nom du tennisman espagnol qui a remporté son 14e titre en simple à Roland-Garros en 2022, établissant un record absolu ?",
+  "options": [
+   "Rafael Nadal",
+   "Carlos Alcaraz",
+   "Novak Djokovic",
+   "Andy Murray"
+  ],
+  "correct_index": 0,
+  "explanation": "Rafael Nadal a remporté Roland-Garros pour la 14e fois en juin 2022, battant Casper Ruud en finale, ce qui constitue un record absolu de titres dans un même tournoi du Grand Chelem.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 100,
+   "comment": "Nadal a bien remporté son 14e Roland-Garros en 2022 contre Casper Ruud, record absolu.",
+   "correction": null,
+   "checked_at": 1795173122.681333,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-2010_d5_2a234d44f6a4",
+  "category_id": "annees-2010",
+  "difficulty": 5,
+  "question": "Quel est le titre du film d'animation Pixar sorti en 2015, qui se déroule dans l'esprit d'une jeune fille et met en scène des émotions personnifiées comme la Joie et la Tristesse ?",
+  "options": [
+   "Vice-Versa",
+   "Coco",
+   "Soul",
+   "En Avant"
+  ],
+  "correct_index": 0,
+  "explanation": "Vice-Versa (Inside Out en anglais) est sorti en 2015 et a remporté l'Oscar du meilleur film d'animation en 2016. L'histoire se passe dans la tête d'une fillette prénommée Riley, où cinq émotions — dont la Joie et la Tristesse — guident ses comportements.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 100,
+   "comment": "Vice-Versa (Inside Out) de Pixar, sorti en 2015, met bien en scène les émotions personnifiées de Riley.",
+   "correction": null,
+   "checked_at": 1795173134.4440274,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-2010_d5_a4859fd5d780",
+  "category_id": "annees-2010",
+  "difficulty": 5,
+  "question": "Quel est le nom du sprinter jamaïcain qui a annoncé sa retraite sportive en 2017, après avoir remporté trois médailles d'or aux Jeux Olympiques de Rio en 2016 ?",
+  "options": [
+   "Usain Bolt",
+   "Yohan Blake",
+   "Asafa Powell",
+   "Justin Gatlin"
+  ],
+  "correct_index": 0,
+  "explanation": "Usain Bolt a remporté le 100 m, le 200 m et le 4×100 m à Rio 2016, puis a annoncé sa retraite de la compétition en 2017. Il reste le détenteur des records du monde sur ces deux distances individuelles.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 96,
+   "comment": "Bolt a bien remporté 3 médailles d'or à Rio 2016 et pris sa retraite en 2017 (bien que l'or du relais ait ensuite été retiré pour dopage d'un coéquipier).",
+   "correction": null,
+   "checked_at": 1795173139.8664043,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-2010_d6_cdd99c0a8ea1",
+  "category_id": "annees-2010",
+  "difficulty": 6,
+  "question": "Quel est le titre de la série HBO diffusée entre 2011 et 2019, adaptée des romans de George R. R. Martin, dont le dernier épisode a été regardé par plus de 19 millions de téléspectateurs américains en direct ?",
+  "options": [
+   "Westworld",
+   "Game of Thrones",
+   "The Witcher",
+   "Vikings"
+  ],
+  "correct_index": 1,
+  "explanation": "Game of Thrones, diffusée sur HBO de 2011 à 2019, a battu tous les records d'audience de la chaîne avec son épisode final attirant environ 19,3 millions de téléspectateurs en direct aux États-Unis. La série est adaptée du cycle romanesque 'Le Trône de fer' de George R. R. Martin.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 98,
+   "comment": "Game of Thrones, diffusée sur HBO de 2011 à 2019 et adaptée des romans de G.R.R. Martin, a bien atteint environ 19,3 millions de téléspectateurs pour son épisode final.",
+   "correction": null,
+   "checked_at": 1795173183.0682776,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-2010_d6_b757b819d14d",
+  "category_id": "annees-2010",
+  "difficulty": 6,
+  "question": "Dans quelle ville s'est déroulée la cérémonie d'ouverture des Jeux Olympiques de Paris 2024, inédite car organisée en dehors d'un stade ?",
+  "options": [
+   "Sur les Champs-Élysées",
+   "Sur la Seine",
+   "Au Trocadéro",
+   "Au Stade de France"
+  ],
+  "correct_index": 1,
+  "explanation": "La cérémonie d'ouverture du 26 juillet 2024 s'est tenue sur la Seine, avec des délégations nationales défilant à bord de bateaux sur le fleuve, une première dans l'histoire olympique. Le Trocadéro a servi de scène finale pour le spectacle, mais le parcours se déroulait bien sur l'eau.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 98,
+   "comment": "La cérémonie d'ouverture du 26 juillet 2024 s'est bien déroulée sur la Seine avec un défilé de bateaux, une première olympique.",
+   "correction": null,
+   "checked_at": 1795173189.2255394,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-2010_d6_6f5e6743ba20",
+  "category_id": "annees-2010",
+  "difficulty": 6,
+  "question": "Quel est le nom du réalisateur coréen dont le film 'Parasite' a remporté la Palme d'Or à Cannes ET l'Oscar du meilleur film en 2019-2020, une première historique ?",
+  "options": [
+   "Park Chan-wook",
+   "Bong Joon-ho",
+   "Kim Jee-woon",
+   "Lee Chang-dong"
+  ],
+  "correct_index": 1,
+  "explanation": "'Parasite' de Bong Joon-ho a décroché la Palme d'Or à Cannes en mai 2019, puis l'Oscar du meilleur film en février 2020, devenant le premier film non anglophone à remporter cette récompense suprême aux Oscars. C'est une double consécration sans précédent dans l'histoire du cinéma.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 100,
+   "comment": "Bong Joon-ho a bien réalisé Parasite, Palme d'Or 2019 et Oscar du meilleur film 2020, une première historique.",
+   "correction": null,
+   "checked_at": 1795173194.4740407,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-2010_d6_3b9026ad9eb4",
+  "category_id": "annees-2010",
+  "difficulty": 6,
+  "question": "Dans quelle discipline le Français Léon Marchand a-t-il remporté quatre médailles d'or individuelles aux Jeux Olympiques de Paris 2024, exploit inédit depuis Michael Phelps en 2008 ?",
+  "options": [
+   "La natation",
+   "L'aviron",
+   "Le cyclisme sur piste",
+   "Le triathlon"
+  ],
+  "correct_index": 0,
+  "explanation": "Léon Marchand a décroché quatre titres olympiques individuels en natation à Paris 2024 (200m papillon, 200m brasse, 400m quatre nages et 200m quatre nages), devenant le nageur le plus titré d'une même édition depuis Phelps à Pékin. Il a également remporté un cinquième or en relais.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 98,
+   "comment": "Léon Marchand a bien remporté quatre titres individuels en natation à Paris 2024 (200m pap, 200m brasse, 400m et 200m 4 nages).",
+   "correction": null,
+   "checked_at": 1795173206.9616625,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-2010_d6_c21d737a6acb",
+  "category_id": "annees-2010",
+  "difficulty": 6,
+  "question": "Quel est le titre du film de Denis Villeneuve, sorti en 2016, adapté d'une nouvelle de Ted Chiang, dans lequel une linguiste doit déchiffrer le langage d'extraterrestres venus sur Terre ?",
+  "options": [
+   "Premier Contact",
+   "Annihilation",
+   "Gravity",
+   "The Martian"
+  ],
+  "correct_index": 0,
+  "explanation": "Premier Contact (Arrival en version originale) est sorti en 2016, réalisé par Denis Villeneuve, avec Amy Adams dans le rôle de la linguiste Louise Banks. Le film est adapté de la nouvelle 'Story of Your Life' de Ted Chiang et a été nominé à huit Oscars.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 100,
+   "comment": "Premier Contact (Arrival) de Villeneuve, 2016, adapté de 'Story of Your Life' de Ted Chiang, avec Amy Adams en linguiste.",
+   "correction": null,
+   "checked_at": 1795173212.3340487,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-2010_d6_255ccc282512",
+  "category_id": "annees-2010",
+  "difficulty": 6,
+  "question": "Quel est le nom du compositeur français qui a signé la musique de la cérémonie d'ouverture des Jeux Olympiques de Paris 2024, dirigeant notamment un orchestre sur le Trocadéro ?",
+  "options": [
+   "Alexandre Desplat",
+   "Victor Le Masne",
+   "Jean-Michel Jarre",
+   "Woodkid"
+  ],
+  "correct_index": 1,
+  "explanation": "Victor Le Masne a été le directeur musical de la cérémonie d'ouverture des JO de Paris 2024, composant et orchestrant la bande-son de l'événement diffusé sur la Seine. Il avait déjà collaboré sur de nombreuses cérémonies internationales.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 92,
+   "comment": "Victor Le Masne était bien le directeur musical et compositeur de la cérémonie d'ouverture des JO de Paris 2024.",
+   "correction": null,
+   "checked_at": 1795173229.549939,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-2010_d6_7c34b74196c0",
+  "category_id": "annees-2010",
+  "difficulty": 6,
+  "question": "Quel est le titre de la mini-série HBO diffusée en 2019, réalisée par Johan Renck, qui reconstitue avec précision la catastrophe nucléaire soviétique de 1986 et a remporté l'Emmy Award de la meilleure mini-série ?",
+  "options": [
+   "Chernobyl",
+   "The Leftovers",
+   "Band of Brothers",
+   "From"
+  ],
+  "correct_index": 0,
+  "explanation": "La série 'Chernobyl', coproduite par HBO et Sky Atlantic, a été diffusée en mai 2019 et a remporté l'Emmy Award de la meilleure mini-série, saluée pour sa reconstitution historique rigoureuse de la catastrophe de la centrale nucléaire de Tchernobyl en avril 1986.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 98,
+   "comment": "Chernobyl (2019), réalisée par Johan Renck, a bien remporté l'Emmy de la meilleure mini-série et les autres options sont clairement fausses.",
+   "correction": null,
+   "checked_at": 1795173234.9872563,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-2010_d6_eea11758699d",
+  "category_id": "annees-2010",
+  "difficulty": 6,
+  "question": "Quel est le titre de la série sud-coréenne diffusée sur Netflix en septembre 2021, dans laquelle des centaines de personnes endettées participent à des jeux d'enfants mortels pour remporter une somme colossale ?",
+  "options": [
+   "Hellbound",
+   "Squid Game",
+   "All of Us Are Dead",
+   "Kingdom"
+  ],
+  "correct_index": 1,
+  "explanation": "Squid Game, créée par Hwang Dong-hyuk, est sortie sur Netflix le 17 septembre 2021 et est rapidement devenue la série la plus regardée de la plateforme dans le monde. Elle met en scène 456 participants s'affrontant dans des jeux traditionnels coréens aux règles mortelles pour un gain de 45,6 milliards de wons.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 100,
+   "comment": "Squid Game est bien sortie le 17 septembre 2021 sur Netflix avec ce concept exact, les autres options sont clairement distinctes.",
+   "correction": null,
+   "checked_at": 1795173240.8430016,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-2010_d6_f386110f25bc",
+  "category_id": "annees-2010",
+  "difficulty": 6,
+  "question": "Quel est le nom du film de science-fiction de Denis Villeneuve, sorti en 2021, adapté du roman culte de Frank Herbert, dont la suite est sortie en 2024 ?",
+  "options": [
+   "Dune",
+   "Foundation",
+   "Ender's Game",
+   "The Martian"
+  ],
+  "correct_index": 0,
+  "explanation": "Denis Villeneuve a adapté le roman 'Dune' de Frank Herbert en deux parties : la première sortie en 2021, la seconde 'Dune : Deuxième Partie' en mars 2024. Le film a remporté six Oscars techniques en 2022.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 98,
+   "comment": "Dune de Denis Villeneuve est bien sorti en 2021 avec sa suite en 2024, les autres options sont clairement distinctes.",
+   "correction": null,
+   "checked_at": 1795173252.709061,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-2010_d7_61bb35b57132",
+  "category_id": "annees-2010",
+  "difficulty": 7,
+  "question": "Lors de la cérémonie des Oscars 2022, quel film de Jane Campion a remporté l'Oscar du meilleur réalisateur — une première pour cette cinéaste néo-zélandaise — avec un récit se déroulant dans le Montana des années 1920 ?",
+  "options": [
+   "The Power of the Dog",
+   "Belfast",
+   "CODA",
+   "Licorice Pizza"
+  ],
+  "correct_index": 0,
+  "explanation": "Jane Campion a remporté l'Oscar de la meilleure réalisatrice en 2022 pour 'The Power of the Dog', produit par Netflix, devenant seulement la troisième femme de l'histoire à décrocher cette récompense. Le film, adapté du roman de Thomas Savage, était par ailleurs nommé dans 12 catégories.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 98,
+   "comment": "Jane Campion a bien remporté l'Oscar de la meilleure réalisation 2022 pour 'The Power of the Dog', western psychologique situé dans le Montana des années 1920.",
+   "correction": null,
+   "checked_at": 1795173272.171568,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-2010_d7_6a74f8a262e7",
+  "category_id": "annees-2010",
+  "difficulty": 7,
+  "question": "Lors de la cérémonie des Oscars 2024, quel film de Christopher Nolan a raflé sept statuettes dont celles du meilleur film et du meilleur réalisateur, un record pour ce cinéaste ?",
+  "options": [
+   "Oppenheimer",
+   "Tenet",
+   "Dunkerque",
+   "Interstellar"
+  ],
+  "correct_index": 0,
+  "explanation": "Oppenheimer, biopic sur le père de la bombe atomique sorti en juillet 2023, a remporté sept Oscars lors de la cérémonie de mars 2024, dont meilleur film, meilleur réalisateur et meilleur acteur pour Cillian Murphy. C'était le plus grand succès aux Oscars de la carrière de Nolan.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 98,
+   "comment": "Oppenheimer a bien remporté 7 Oscars en mars 2024 dont meilleur film et meilleur réalisateur.",
+   "correction": null,
+   "checked_at": 1795173285.1333034,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-2010_d7_0bccfbcf8820",
+  "category_id": "annees-2010",
+  "difficulty": 7,
+  "question": "Lors des Jeux Olympiques de Paris 2024, le judoka français Teddy Riner a remporté l'or en individuel dans quelle catégorie de poids ?",
+  "options": [
+   "Plus de 100 kg",
+   "Moins de 100 kg",
+   "Plus de 90 kg",
+   "Moins de 90 kg"
+  ],
+  "correct_index": 0,
+  "explanation": "Teddy Riner a décroché l'or en plus de 100 kg aux JO de Paris 2024, s'ajoutant à sa médaille d'or par équipes mixtes remportée lors de la même édition. C'était son troisième titre olympique individuel, après Londres 2012 et Tokyo 2021.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 98,
+   "comment": "Teddy Riner a bien remporté l'or en +100 kg aux JO de Paris 2024, son troisième titre olympique individuel.",
+   "correction": null,
+   "checked_at": 1795173290.518486,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-2010_d7_c794f59acea0",
+  "category_id": "annees-2010",
+  "difficulty": 7,
+  "question": "Lors de la 85e cérémonie des Oscars en février 2013, quel film a remporté l'Oscar du meilleur film en tant que producteur, avec Ben Affleck — dont la réalisation avait été ignorée par l'Académie — relatant une opération secrète de la CIA en Iran en 1979–1980 ?",
+  "options": [
+   "Zero Dark Thirty",
+   "Lincoln",
+   "Argo",
+   "Les Misérables"
+  ],
+  "correct_index": 2,
+  "explanation": "Argo, réalisé et produit par Ben Affleck, a remporté l'Oscar du meilleur film en 2013 malgré l'absence de nomination de Affleck dans la catégorie meilleure réalisation, une anomalie remarquée. Le film retrace l'opération « Canadian Caper » menée en 1980 pour exfiltrer six diplomates américains cachés à Téhéran.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 98,
+   "comment": "Argo a bien remporté l'Oscar du meilleur film en 2013 malgré la non-nomination de Ben Affleck comme réalisateur, relatant l'exfiltration de diplomates à Téhéran.",
+   "correction": null,
+   "checked_at": 1795173297.33626,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-2010_d7_1b88725c8b6f",
+  "category_id": "annees-2010",
+  "difficulty": 7,
+  "question": "Lors des Jeux Olympiques de Tokyo 2021 (disputés en 2021), le perchiste suédois Armand Duplantis a établi un nouveau record olympique en franchissant quelle hauteur pour remporter l'or ?",
+  "options": [
+   "6,02 m",
+   "6,20 m",
+   "5,97 m",
+   "6,15 m"
+  ],
+  "correct_index": 0,
+  "explanation": "Armand Duplantis a remporté l'or olympique à Tokyo en franchissant 6,02 m, établissant un nouveau record olympique. Il détient par ailleurs le record du monde en salle et en plein air, qu'il a repoussé à plusieurs reprises entre 2020 et 2024.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 95,
+   "comment": "Duplantis a bien remporté l'or à Tokyo 2021 avec 6,02 m, nouveau record olympique.",
+   "correction": null,
+   "checked_at": 1795173310.3610294,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-2010_d7_45f507fdb909",
+  "category_id": "annees-2010",
+  "difficulty": 7,
+  "question": "Lors des Jeux Olympiques de Paris 2024, le gymnaste Carlos Yulo (Philippines) a remporté deux médailles d'or. Sur quels agrès a-t-il réalisé ce doublé historique ?",
+  "options": [
+   "Sol et saut de cheval",
+   "Sol et anneaux",
+   "Barres parallèles et sol",
+   "Barres parallèles et cheval d'arçons"
+  ],
+  "correct_index": 0,
+  "explanation": "Carlos Yulo a décroché l'or au sol puis au saut de cheval lors des JO de Paris 2024, offrant aux Philippines leurs deux premières médailles d'or olympiques de l'histoire. Ce doublé en gymnatique artistique masculine reste une performance rarissime à ce niveau.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 98,
+   "comment": "Carlos Yulo a bien remporté l'or au sol et au saut de cheval à Paris 2024.",
+   "correction": null,
+   "checked_at": 1795173316.2688107,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-2010_d7_dcccb740ab97",
+  "category_id": "annees-2010",
+  "difficulty": 7,
+  "question": "Lors des Jeux Olympiques de Paris 2024, l'athlète Mondo Duplantis a battu son propre record du monde au saut à la perche en franchissant quelle hauteur en finale ?",
+  "options": [
+   "6,25 m",
+   "6,10 m",
+   "6,21 m",
+   "6,17 m"
+  ],
+  "correct_index": 0,
+  "explanation": "Armand 'Mondo' Duplantis a franchi 6,25 m lors de la finale olympique du 5 août 2024 au Stade de France, améliorant de deux centimètres son précédent record du monde (6,23 m). C'était sa douzième amélioration du record du monde.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 98,
+   "comment": "Duplantis a bien franchi 6,25 m à Paris 2024, battant son record précédent de 6,23 m.",
+   "correction": null,
+   "checked_at": 1795173337.2942915,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-2010_d7_97768ff7ad7d",
+  "category_id": "annees-2010",
+  "difficulty": 7,
+  "question": "Lors de la cérémonie des Grammy Awards 2014, l'album 'Random Access Memories' de Daft Punk a remporté l'Album de l'année. Combien de Grammy Awards au total ce disque a-t-il remporté lors de cette même cérémonie ?",
+  "options": [
+   "3",
+   "4",
+   "5",
+   "6"
+  ],
+  "correct_index": 2,
+  "explanation": "Random Access Memories a remporté 5 Grammy Awards lors de la 56e cérémonie en 2014, dont Album de l'année, Meilleur album de musique électronique/dance et Meilleur enregistrement de l'année pour 'Get Lucky'. Ce score exceptionnel en fit le grand triomphateur de la soirée.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 95,
+   "comment": "Daft Punk a bien remporté 5 Grammys en 2014 : Record of the Year, Album of the Year, Best Pop Duo/Group Performance, Best Dance/Electronica Album et Best Engineered Album Non-Classical.",
+   "correction": null,
+   "checked_at": 1795173350.1447551,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-2010_d7_6c2ea9947d79",
+  "category_id": "annees-2010",
+  "difficulty": 7,
+  "question": "Dans la série 'Chernobyl' (HBO, 2019), quel acteur britannique incarne le scientifique Valery Legasov, chargé de diriger les opérations de décontamination après la catastrophe ?",
+  "options": [
+   "Jared Harris",
+   "Benedict Cumberbatch",
+   "Tom Hardy",
+   "Mark Rylance"
+  ],
+  "correct_index": 0,
+  "explanation": "Jared Harris, fils de l'acteur Richard Harris, interprète Valery Legasov dans la mini-série de Craig Mazin. Sa performance lui a valu une nomination aux Emmy Awards 2019 dans la catégorie meilleur acteur dans une mini-série.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 98,
+   "comment": "Jared Harris incarne bien Valery Legasov dans Chernobyl (2019) et fut nommé aux Emmy.",
+   "correction": null,
+   "checked_at": 1795173363.3554764,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-2010_d1_383ec761f061",
+  "category_id": "annees-2010",
+  "difficulty": 1,
+  "question": "Quel animal est le personnage principal du film d'animation Disney-Pixar 'Le Voyage d'Arlo', sorti en 2015 ?",
+  "options": [
+   "Un dinosaure",
+   "Un lion",
+   "Un éléphant",
+   "Un lapin"
+  ],
+  "correct_index": 0,
+  "explanation": "Dans 'Le Voyage d'Arlo', le héros est Arlo, un jeune dinosaure qui se retrouve perdu loin de sa famille. Il se lie d'amitié avec un garçon humain prénommé Spot.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 100,
+   "comment": "Arlo est bien un jeune Apatosaure dans Le Voyage d'Arlo (The Good Dinosaur), sorti en 2015.",
+   "correction": null,
+   "checked_at": 1795173647.4557161,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-2010_d2_3601231ce44b",
+  "category_id": "annees-2010",
+  "difficulty": 2,
+  "question": "Quel est le prénom du célèbre bonhomme de neige qui accompagne la princesse Elsa dans le film d'animation 'La Reine des Neiges', sorti en 2013 ?",
+  "options": [
+   "Olaf",
+   "Kristoff",
+   "Sven",
+   "Hans"
+  ],
+  "correct_index": 0,
+  "explanation": "Olaf est le joyeux bonhomme de neige créé par Elsa dans 'La Reine des Neiges'. Ce film Disney est devenu l'un des plus grands succès du cinéma d'animation des années 2010.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 99,
+   "comment": "Olaf est bien le bonhomme de neige, les autres options étant des personnages humains (Kristoff, Hans) ou un renne (Sven).",
+   "correction": null,
+   "checked_at": 1795173657.116248,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-2010_d2_462684554565",
+  "category_id": "annees-2010",
+  "difficulty": 2,
+  "question": "Comment s'appelle le bonhomme de neige magique créé par Elsa dans le film d'animation 'La Reine des Neiges' sorti en 2013 ?",
+  "options": [
+   "Olaf",
+   "Kristoff",
+   "Hans",
+   "Sven"
+  ],
+  "correct_index": 0,
+  "explanation": "Olaf est le joyeux bonhomme de neige créé par la magie d'Elsa dans 'La Reine des Neiges'. Il est l'un des personnages les plus populaires du film, connu pour son amour du soleil et de l'été.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 99,
+   "comment": "Olaf est bien le bonhomme de neige magique du film, les autres options étant des personnages humains ou un renne.",
+   "correction": null,
+   "checked_at": 1795173661.5847402,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-2010_d3_7bb37566a7ec",
+  "category_id": "annees-2010",
+  "difficulty": 3,
+  "question": "Quel est le titre de la chanson de Soprano sortie en 2017, dont le clip coloré et positif est devenu l'un des clips francophones les plus vus sur YouTube ?",
+  "options": [
+   "Cosmo",
+   "Chasseur d'étoiles",
+   "Medina",
+   "Millionnaire"
+  ],
+  "correct_index": 0,
+  "explanation": "La chanson 'Cosmo' de Soprano, sortie en 2017, a connu un immense succès populaire grâce à son clip joyeux et ses couleurs vives, accumulant des centaines de millions de vues sur YouTube. Elle figure sur l'album 'Cosmopolitanie'.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 92,
+   "comment": "'Cosmo' de Soprano, extraite de l'album Cosmopolitanie (2017), a un clip coloré très vu sur YouTube, les autres options étant d'autres titres de l'artiste.",
+   "correction": null,
+   "checked_at": 1795173673.2116313,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-2010_d4_cd7462c7cfcd",
+  "category_id": "annees-2010",
+  "difficulty": 4,
+  "question": "Quel est le titre de la série américaine de Netflix, sortie en 2016, qui suit une adolescente dotée de pouvoirs surnaturels dans la ville de Hawkins, Indiana, et est fortement inspirée des films des années 1980 ?",
+  "options": [
+   "Dark",
+   "Stranger Things",
+   "The OA",
+   "Wayward Pines"
+  ],
+  "correct_index": 1,
+  "explanation": "Stranger Things a été lancée sur Netflix en juillet 2016 par les frères Duffer. La série met en scène Eleven et ses amis confrontés à des créatures du 'Monde à l'envers', dans une atmosphère qui rend hommage à Spielberg, King et Carpenter.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 96,
+   "comment": "Stranger Things, sortie en juillet 2016, se déroule bien à Hawkins, Indiana, avec Eleven dotée de pouvoirs et des références aux années 1980.",
+   "correction": null,
+   "checked_at": 1795173679.5447278,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-2010_d4_f440c128547f",
+  "category_id": "annees-2010",
+  "difficulty": 4,
+  "question": "Quel film français réalisé par Michel Hazanavicius a remporté l'Oscar du meilleur film en 2012, tourné en noir et blanc et en quasi-muet ?",
+  "options": [
+   "The Artist",
+   "Intouchables",
+   "De rouille et d'os",
+   "Le Prénom"
+  ],
+  "correct_index": 0,
+  "explanation": "The Artist, sorti en 2011, a triomphé aux Oscars 2012 en remportant cinq statuettes dont celles du meilleur film et du meilleur réalisateur. Ce film muet et en noir et blanc avec Jean Dujardin et Bérénice Bejo est une déclaration d'amour au cinéma des années 1920-1930.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 99,
+   "comment": "The Artist de Hazanavicius a bien remporté l'Oscar du meilleur film en 2012, film en noir et blanc quasi-muet.",
+   "correction": null,
+   "checked_at": 1795173685.031462,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-2010_d4_4234eb2b6015",
+  "category_id": "annees-2010",
+  "difficulty": 4,
+  "question": "Quel est le titre du film de guerre de Christopher Nolan, sorti en 2017, qui retrace l'évacuation de soldats alliés sur une plage du nord de la France en 1940 ?",
+  "options": [
+   "Dunkerque",
+   "Fury",
+   "1917",
+   "Midway"
+  ],
+  "correct_index": 0,
+  "explanation": "Dunkerque (Dunkirk) est sorti en juillet 2017 et reconstitue l'opération Dynamo, au cours de laquelle plus de 300 000 soldats alliés furent évacués de la plage de Dunkerque. Le film a remporté trois Oscars techniques en 2018.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 99,
+   "comment": "Dunkerque (Dunkirk) de Nolan, sorti en 2017, retrace bien l'opération Dynamo à Dunkerque en 1940.",
+   "correction": null,
+   "checked_at": 1795173708.0708964,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-2010_d4_99f7a951ea7a",
+  "category_id": "annees-2010",
+  "difficulty": 4,
+  "question": "Quelle série américaine diffusée sur HBO à partir de 2019 suit la famille Roy, dirigeante d'un empire médiatique, et leurs luttes de pouvoir internes ?",
+  "options": [
+   "Succession",
+   "Billions",
+   "Yellowstone",
+   "The Crown"
+  ],
+  "correct_index": 0,
+  "explanation": "Succession (HBO, 2018-2023) retrace les rivalités au sein de la famille Roy pour le contrôle du conglomérat médiatique Waystar Royco. La série a remporté l'Emmy Award du meilleur drame quatre années de suite.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 95,
+   "comment": "Succession a bien débuté sur HBO en 2018 et porte sur la famille Roy, les autres options sont clairement incorrectes.",
+   "correction": null,
+   "checked_at": 1795173719.457882,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-2010_d4_9ee140daea33",
+  "category_id": "annees-2010",
+  "difficulty": 4,
+  "question": "Quel film d'animation japonais réalisé par Hayao Miyazaki est sorti en 2013 et raconte l'histoire du créateur des célèbres avions Zéro japonais ?",
+  "options": [
+   "Le Vent se lève",
+   "Ponyo sur la falaise",
+   "Nausicaä de la Vallée du Vent",
+   "Le Château ambulant"
+  ],
+  "correct_index": 0,
+  "explanation": "Le Vent se lève (Kaze Tachinu) est sorti en juillet 2013 au Japon et retrace la vie romancée de l'ingénieur Jiro Horikoshi, concepteur du chasseur Mitsubishi A6M Zero. Ce fut le film d'adieu annoncé de Miyazaki avant sa (temporaire) retraite.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 98,
+   "comment": "Le Vent se lève (2013) de Miyazaki retrace bien la vie de Jiro Horikoshi, concepteur du chasseur Mitsubishi A6M Zero.",
+   "correction": null,
+   "checked_at": 1795173725.8800757,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-2010_d5_a55c0ef2fdf1",
+  "category_id": "annees-2010",
+  "difficulty": 5,
+  "question": "Quel est le titre du film de Guillermo del Toro sorti en 2017, qui a remporté l'Oscar du meilleur film et raconte la relation entre une femme de ménage muette et une créature aquatique mystérieuse ?",
+  "options": [
+   "La Forme de l'eau",
+   "Le Labyrinthe de Pan",
+   "Pacific Rim",
+   "Crimson Peak"
+  ],
+  "correct_index": 0,
+  "explanation": "La Forme de l'eau (The Shape of Water) est sorti en 2017 et a remporté quatre Oscars lors de la cérémonie de 2018, dont ceux du meilleur film et du meilleur réalisateur pour Guillermo del Toro. L'actrice Sally Hawkins y incarne Elisa, une femme de ménage travaillant dans un laboratoire secret gouvernemental américain des années 1960.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 99,
+   "comment": "La Forme de l'eau de Guillermo del Toro a bien remporté l'Oscar du meilleur film en 2018 avec ce synopsis.",
+   "correction": null,
+   "checked_at": 1795173731.952679,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-2010_d5_52587d4a4b06",
+  "category_id": "annees-2010",
+  "difficulty": 5,
+  "question": "Quelle application de partage de courtes vidéos, lancée en Chine sous le nom Douyin en 2016, a été introduite sur les marchés internationaux en 2017 et est devenue l'une des plateformes les plus téléchargées au monde au début des années 2020 ?",
+  "options": [
+   "Snapchat",
+   "TikTok",
+   "Instagram Reels",
+   "Vine"
+  ],
+  "correct_index": 1,
+  "explanation": "TikTok, version internationale de Douyin (ByteDance), a été lancée à l'international en 2017 et est devenue un phénomène mondial, dépassant le milliard d'utilisateurs actifs en 2021. Vine, concurrent potentiel, avait fermé ses portes dès 2017.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 98,
+   "comment": "TikTok est bien la version internationale de Douyin (ByteDance), lancée à l'international en 2017, et les autres options sont clairement incorrectes.",
+   "correction": null,
+   "checked_at": 1795173737.689941,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-2010_d5_a193b196a8fa",
+  "category_id": "annees-2010",
+  "difficulty": 5,
+  "question": "Quel acteur français a remporté le César du meilleur acteur en 2012 pour son rôle dans 'The Artist', film récompensé la même année par l'Oscar du meilleur film ?",
+  "options": [
+   "Jean Dujardin",
+   "Romain Duris",
+   "Benoît Poelvoorde",
+   "Guillaume Canet"
+  ],
+  "correct_index": 0,
+  "explanation": "Jean Dujardin a remporté le César du meilleur acteur en février 2012 pour son rôle de George Valentin dans 'The Artist' de Michel Hazanavicius. Il a également décroché l'Oscar du meilleur acteur cette même année, devenant le premier acteur français à recevoir cette récompense.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 98,
+   "comment": "Jean Dujardin a bien remporté le César 2012 du meilleur acteur pour The Artist, film Oscar du meilleur film.",
+   "correction": null,
+   "checked_at": 1795173750.6789167,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-2010_d1_a9d3cdcee966",
+  "category_id": "annees-2010",
+  "difficulty": 1,
+  "question": "Quel est le prénom de la petite fille qui part à l'aventure dans le film d'animation 'Rebelle' sorti par Pixar en 2012 ?",
+  "options": [
+   "Mérida",
+   "Raiponce",
+   "Vaiana",
+   "Anna"
+  ],
+  "correct_index": 0,
+  "explanation": "Dans 'Rebelle', la courageuse princesse rousse s'appelle Mérida. Elle vit en Écosse et cherche à tracer son propre destin.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 98,
+   "comment": "Mérida est bien l'héroïne du film Pixar 'Rebelle' (Brave) sorti en 2012, et les autres options appartiennent à d'autres films.",
+   "correction": null,
+   "checked_at": 1795174187.4544744,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-2010_d1_04b00d58ae76",
+  "category_id": "annees-2010",
+  "difficulty": 1,
+  "question": "Comment s'appelle l'assistant vocal d'Apple, lancé avec l'iPhone 4S en 2011 ?",
+  "options": [
+   "Siri",
+   "Alexa",
+   "Cortana",
+   "Google"
+  ],
+  "correct_index": 0,
+  "explanation": "Siri est l'assistant vocal créé par Apple, disponible pour la première fois sur l'iPhone 4S en octobre 2011. On lui parle pour poser des questions ou demander des actions à son téléphone.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 100,
+   "comment": "Siri a bien été lancé par Apple avec l'iPhone 4S en octobre 2011, les autres sont des assistants concurrents.",
+   "correction": null,
+   "checked_at": 1795174191.8868508,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-2010_d1_c07954724af1",
+  "category_id": "annees-2010",
+  "difficulty": 1,
+  "question": "Quel est le prénom du super-héros masqué que joue Ryan Reynolds dans le film 'Deadpool', sorti en 2016 ?",
+  "options": [
+   "Wade",
+   "Tony",
+   "Bruce",
+   "Peter"
+  ],
+  "correct_index": 0,
+  "explanation": "Le personnage principal de Deadpool s'appelle Wade Wilson. Ryan Reynolds incarne ce super-héros humoristique dans ce film Marvel sorti en 2016.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 99,
+   "comment": "Le vrai nom de Deadpool est bien Wade Wilson, incarné par Ryan Reynolds en 2016.",
+   "correction": null,
+   "checked_at": 1795174200.074289,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-2010_d1_d25417fce7ac",
+  "category_id": "annees-2010",
+  "difficulty": 1,
+  "question": "Comment s'appelle le petit robot héros du film d'animation Pixar 'WALL-E', sorti en 2008 et encore très populaire dans les années 2010 ?",
+  "options": [
+   "WALL-E",
+   "R2-D2",
+   "EVE",
+   "Baymax"
+  ],
+  "correct_index": 0,
+  "explanation": "WALL-E est le nom du petit robot éboueur solitaire qui est le personnage principal du film Pixar. EVE est son amie dans le film, mais c'est bien WALL-E le héros.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 100,
+   "comment": "WALL-E est bien le robot éboueur héros éponyme du film Pixar de 2008, les autres options sont des robots d'autres franchises.",
+   "correction": null,
+   "checked_at": 1795174204.6952565,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-2010_d1_2d74a98f9989",
+  "category_id": "annees-2010",
+  "difficulty": 1,
+  "question": "Quel est le prénom de la princesse héroïne du film d'animation Disney 'La Reine des Neiges', sorti en 2013 ?",
+  "options": [
+   "Elsa",
+   "Raiponce",
+   "Mérida",
+   "Vaiana"
+  ],
+  "correct_index": 0,
+  "explanation": "Dans 'La Reine des Neiges', la princesse Elsa possède le pouvoir de créer de la glace et de la neige. C'est l'un des plus grands succès du cinéma d'animation de ces dernières années.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 96,
+   "comment": "Elsa est bien l'héroïne de La Reine des Neiges (2013), les autres sont des héroïnes d'autres films Disney/Pixar.",
+   "correction": null,
+   "checked_at": 1795174214.5368707,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-2010_d1_775d46cd8198",
+  "category_id": "annees-2010",
+  "difficulty": 1,
+  "question": "Quel est le titre de la chanson d'Adele, sortie en 2015, qui a battu des records de ventes mondiales et figure sur son album '25' ?",
+  "options": [
+   "Hello",
+   "Rolling in the Deep",
+   "Someone Like You",
+   "Skyfall"
+  ],
+  "correct_index": 0,
+  "explanation": "La chanson 'Hello' d'Adele est sortie en octobre 2015 et a immédiatement battu des records, notamment en devenant le premier titre à dépasser 1 million de téléchargements en une semaine aux États-Unis. Elle figure sur son album '25'.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 98,
+   "comment": "Hello est bien le single de 2015 issu de l'album '25', les autres titres appartiennent à des albums antérieurs.",
+   "correction": null,
+   "checked_at": 1795174219.4007301,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-2010_d1_f328d8bb5f8c",
+  "category_id": "annees-2010",
+  "difficulty": 1,
+  "question": "Quel est le prénom du héros de la série d'animation 'Miraculous, les aventures de Ladybug et Chat Noir', diffusée depuis 2015 ?",
+  "options": [
+   "Marinette",
+   "Chloé",
+   "Alya",
+   "Zoé"
+  ],
+  "correct_index": 0,
+  "explanation": "Marinette est la jeune collégienne parisienne qui devient Ladybug, l'héroïne de la série. Cette série française a connu un immense succès auprès des enfants dans le monde entier.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 92,
+   "comment": "Marinette est bien l'héroïne principale qui devient Ladybug, et les autres options sont des personnages secondaires.",
+   "correction": null,
+   "checked_at": 1795174223.6769743,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-2010_d1_5323a77ae647",
+  "category_id": "annees-2010",
+  "difficulty": 1,
+  "question": "Quel est le prénom de la petite sirène humaine dans le film Disney 'La Petite Sirène' sorti en 2023 ?",
+  "options": [
+   "Ariel",
+   "Elsa",
+   "Moana",
+   "Raiponce"
+  ],
+  "correct_index": 0,
+  "explanation": "Dans le film 'La Petite Sirène' sorti en 2023, la sirène qui rêve de vivre sur terre s'appelle Ariel. C'est une adaptation en film avec de vrais acteurs du dessin animé classique de Disney.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 98,
+   "comment": "Ariel est bien le prénom de la sirène dans le film Disney de 2023, et les autres options sont des personnages Disney distincts.",
+   "correction": null,
+   "checked_at": 1795174233.8175502,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-2010_d1_3f52f0be9357",
+  "category_id": "annees-2010",
+  "difficulty": 1,
+  "question": "Quel est le prénom du célèbre personnage joué par Tom Hanks dans le film 'Toy Story 4', sorti en 2019 ?",
+  "options": [
+   "Woody",
+   "Buzz",
+   "Rex",
+   "Lotso"
+  ],
+  "correct_index": 0,
+  "explanation": "Dans 'Toy Story 4', Tom Hanks prête sa voix au cowboy Woody, le personnage principal de la saga depuis le premier film. Woody part à l'aventure pour retrouver une nouvelle amie, Forky.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 98,
+   "comment": "Tom Hanks double bien Woody dans Toy Story 4 (2019), les autres options étant d'autres personnages.",
+   "correction": null,
+   "checked_at": 1795174238.344005,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-2010_d1_6c0beee6be88",
+  "category_id": "annees-2010",
+  "difficulty": 1,
+  "question": "Quel est le prénom de la jeune fille qui chante 'Let It Go' dans le film d'animation Disney 'La Reine des Neiges' sorti en 2013 ?",
+  "options": [
+   "Elsa",
+   "Anna",
+   "Raiponce",
+   "Mérida"
+  ],
+  "correct_index": 0,
+  "explanation": "Dans 'La Reine des Neiges', c'est Elsa, la princesse aux pouvoirs glacés, qui interprète la célèbre chanson 'Let It Go'. Cette chanson est devenue l'une des plus connues de Disney.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 100,
+   "comment": "Elsa interprète bien 'Let It Go' (Libérée, délivrée) dans La Reine des Neiges (2013).",
+   "correction": null,
+   "checked_at": 1795174242.7927635,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-2010_d1_4f0fe1b3084e",
+  "category_id": "annees-2010",
+  "difficulty": 1,
+  "question": "Quel est le prénom du super-héros araignée de Marvel apparu dans le film 'Spider-Man: Homecoming' sorti en 2017, joué par Tom Holland ?",
+  "options": [
+   "Peter",
+   "Miles",
+   "Tony",
+   "Bruce"
+  ],
+  "correct_index": 0,
+  "explanation": "Le héros de 'Spider-Man: Homecoming' s'appelle Peter Parker. Tom Holland incarne ce jeune lycéen new-yorkais qui devient Spider-Man.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 99,
+   "comment": "Peter Parker est bien l'identité de Spider-Man joué par Tom Holland dans ce film de 2017.",
+   "correction": null,
+   "checked_at": 1795174247.655579,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-2010_d2_328b1f0b489c",
+  "category_id": "annees-2010",
+  "difficulty": 2,
+  "question": "Quel est le prénom du personnage principal de la série Netflix 'Lupin', diffusée depuis 2021, incarné par Omar Sy ?",
+  "options": [
+   "Assane",
+   "Arsène",
+   "Djibril",
+   "Moussa"
+  ],
+  "correct_index": 0,
+  "explanation": "Dans la série 'Lupin', Omar Sy joue Assane Diop, un homme qui s'inspire des aventures d'Arsène Lupin pour venger son père. La série a rencontré un immense succès mondial dès sa sortie en janvier 2021.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 99,
+   "comment": "Le personnage principal de 'Lupin' est bien Assane Diop, incarné par Omar Sy depuis 2021.",
+   "correction": null,
+   "checked_at": 1795174257.4204366,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-2010_d2_282967637718",
+  "category_id": "annees-2010",
+  "difficulty": 2,
+  "question": "Quel réseau social, lancé en 2010, permet de partager des photos et des vidéos avec des filtres colorés ?",
+  "options": [
+   "Instagram",
+   "Snapchat",
+   "Pinterest",
+   "WhatsApp"
+  ],
+  "correct_index": 0,
+  "explanation": "Instagram a été lancé en octobre 2010 et est rapidement devenu très populaire grâce à ses filtres photo. Il a été racheté par Facebook en 2012.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 98,
+   "comment": "Instagram a bien été lancé en octobre 2010 et est connu pour ses filtres photo, les autres options sont lancées à d'autres dates.",
+   "correction": null,
+   "checked_at": 1795174261.2154422,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-2010_d2_aa635eeaad68",
+  "category_id": "annees-2010",
+  "difficulty": 2,
+  "question": "Quel groupe français a sorti en 2013 la chanson 'Get Lucky', qui est devenue un tube mondial ?",
+  "options": [
+   "Daft Punk",
+   "Phoenix",
+   "Justice",
+   "Air"
+  ],
+  "correct_index": 0,
+  "explanation": "Daft Punk a sorti 'Get Lucky' en 2013, avec Pharrell Williams au chant. Ce titre, extrait de l'album 'Random Access Memories', a été un énorme succès dans le monde entier.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 99,
+   "comment": "Get Lucky a bien été sortie par Daft Punk en 2013 sur l'album Random Access Memories.",
+   "correction": null,
+   "checked_at": 1795174265.5853693,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-2010_d2_98ebaa343558",
+  "category_id": "annees-2010",
+  "difficulty": 2,
+  "question": "Quel est le prénom du personnage principal de la série Netflix 'Emily in Paris', diffusée depuis 2020 ?",
+  "options": [
+   "Emily",
+   "Sophie",
+   "Claire",
+   "Camille"
+  ],
+  "correct_index": 0,
+  "explanation": "La série suit Emily Cooper, une jeune Américaine jouée par Lily Collins, qui s'installe à Paris pour son travail. Elle a rencontré un grand succès mondial dès sa première saison en 2020.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 100,
+   "comment": "Le personnage principal est bien Emily Cooper, jouée par Lily Collins, dans cette série diffusée depuis 2020.",
+   "correction": null,
+   "checked_at": 1795174269.6375265,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-2010_d2_37d231e1f9e7",
+  "category_id": "annees-2010",
+  "difficulty": 2,
+  "question": "Quel est le prénom du personnage principal de la série britannique 'Downton Abbey', la comtesse douairière pleine d'humour jouée par Maggie Smith, diffusée de 2010 à 2015 ?",
+  "options": [
+   "Violet",
+   "Mary",
+   "Edith",
+   "Cora"
+  ],
+  "correct_index": 0,
+  "explanation": "La comtesse douairière de Grantham se prénomme Violet. Jouée par Maggie Smith, elle est connue pour ses répliques cinglantes et humoristiques tout au long de la série.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 98,
+   "comment": "La comtesse douairière jouée par Maggie Smith est bien Violet Crawley.",
+   "correction": null,
+   "checked_at": 1795174273.8571823,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-2010_d2_cce959d9f794",
+  "category_id": "annees-2010",
+  "difficulty": 2,
+  "question": "Quel est le prénom du personnage principal de la série française 'Dix pour cent', diffusée sur France 2 de 2015 à 2020, joué par Camille Cottin ?",
+  "options": [
+   "Andréa",
+   "Mathilde",
+   "Sophie",
+   "Isabelle"
+  ],
+  "correct_index": 0,
+  "explanation": "Dans 'Dix pour cent', Camille Cottin joue Andréa Martel, agente talentueuse mais caractérielle de l'agence ASK. La série, qui met en scène des stars françaises en guest, a rencontré un grand succès public.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 98,
+   "comment": "Camille Cottin incarne bien Andréa Martel dans 'Dix pour cent', diffusée sur France 2 de 2015 à 2020.",
+   "correction": null,
+   "checked_at": 1795174279.1688309,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-2010_d2_28c93b1bdf6e",
+  "category_id": "annees-2010",
+  "difficulty": 2,
+  "question": "Quel est le titre de la chanson de Pharrell Williams, sortie en 2013, qui figure dans le film 'Moi, Moche et Méchant 2' et est devenue un tube mondial avec son rythme entraînant ?",
+  "options": [
+   "Happy",
+   "Blurred Lines",
+   "Uptown Funk",
+   "Stay With Me"
+  ],
+  "correct_index": 0,
+  "explanation": "'Happy' de Pharrell Williams est sorti en 2013 pour le film 'Moi, Moche et Méchant 2' et a connu un succès planétaire, restant des semaines en tête des classements dans de nombreux pays. Son clip participatif a également fait le tour du monde.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 100,
+   "comment": "'Happy' de Pharrell Williams est bien sortie en 2013 pour la bande originale de 'Moi, Moche et Méchant 2' et fut un tube mondial.",
+   "correction": null,
+   "checked_at": 1795174284.871685,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-2010_d2_2e91924d36a8",
+  "category_id": "annees-2010",
+  "difficulty": 2,
+  "question": "Quel est le prénom du héros incarné par Omar Sy dans la série française 'Lupin', diffusée sur Netflix depuis 2021 ?",
+  "options": [
+   "Assane",
+   "Arsène",
+   "Adama",
+   "Antoine"
+  ],
+  "correct_index": 0,
+  "explanation": "Dans la série 'Lupin', Omar Sy joue Assane Diop, un gentleman cambrioleur inspiré du personnage d'Arsène Lupin. La série a rencontré un immense succès mondial dès sa sortie en janvier 2021.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 99,
+   "comment": "Omar Sy incarne bien Assane Diop dans la série Lupin, inspiré d'Arsène Lupin.",
+   "correction": null,
+   "checked_at": 1795174289.2700868,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-2010_d2_28a192d78fca",
+  "category_id": "annees-2010",
+  "difficulty": 2,
+  "question": "Quel est le titre du film d'animation Disney sorti en 2016 qui met en scène une jeune polynésienne partant en mer pour sauver son île ?",
+  "options": [
+   "Vaiana",
+   "Rebelle",
+   "Encanto",
+   "Raya"
+  ],
+  "correct_index": 0,
+  "explanation": "Vaiana est le film Disney sorti en 2016 qui raconte les aventures d'une jeune fille polynésienne qui prend la mer pour accomplir sa destinée. La chanson 'Comment Aller Plus Loin' est devenue très populaire en France.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 98,
+   "comment": "Vaiana (Moana) est bien le film Disney de 2016 sur une jeune Polynésienne, les autres options sont clairement d'autres films.",
+   "correction": null,
+   "checked_at": 1795174294.1146686,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-2010_d2_148597ac0887",
+  "category_id": "annees-2010",
+  "difficulty": 2,
+  "question": "Quel est le titre du film d'animation Pixar sorti en 2015 qui se déroule dans la tête d'une petite fille et met en scène des émotions comme la Joie ou la Tristesse ?",
+  "options": [
+   "Vice-Versa",
+   "Coco",
+   "Soul",
+   "En Avant"
+  ],
+  "correct_index": 0,
+  "explanation": "Vice-Versa (Inside Out en anglais) est sorti en 2015 et raconte les aventures des émotions vivant dans la tête de Riley. Il a remporté l'Oscar du meilleur film d'animation en 2016.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 99,
+   "comment": "Vice-Versa (Inside Out) est bien le film Pixar de 2015 mettant en scène les émotions dans la tête de Riley, les autres options sont postérieures.",
+   "correction": null,
+   "checked_at": 1795174299.1785161,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-2010_d2_2f2fa02e45f9",
+  "category_id": "annees-2010",
+  "difficulty": 2,
+  "question": "Quel smartphone Apple, sorti en septembre 2014, était doté d'un grand écran de 4,7 pouces et a connu un énorme succès mondial ?",
+  "options": [
+   "iPhone 6",
+   "iPhone 5S",
+   "iPhone X",
+   "iPhone SE"
+  ],
+  "correct_index": 0,
+  "explanation": "L'iPhone 6, sorti en septembre 2014, proposait pour la première fois un écran de 4,7 pouces, une grande nouveauté pour Apple. Il s'est vendu à des dizaines de millions d'exemplaires dans le monde.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 98,
+   "comment": "L'iPhone 6 est bien sorti en septembre 2014 avec un écran de 4,7 pouces et fut un immense succès commercial.",
+   "correction": null,
+   "checked_at": 1795174304.0834203,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-2010_d3_a293163d773a",
+  "category_id": "annees-2010",
+  "difficulty": 3,
+  "question": "Quel est le titre du film d'animation Disney sorti en 2019 qui raconte l'histoire de Simba, fils d'un grand roi lion, dans une version en images de synthèse très réaliste ?",
+  "options": [
+   "Le Roi Lion",
+   "La Belle et la Bête",
+   "Aladdin",
+   "Mulan"
+  ],
+  "correct_index": 0,
+  "explanation": "Le Roi Lion, remake en images de synthèse ultra-réalistes du film de 1994, est sorti en juillet 2019 et a rencontré un immense succès mondial, dépassant le milliard de dollars au box-office. Il a été réalisé par Jon Favreau.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 98,
+   "comment": "Le Roi Lion de Jon Favreau est bien sorti en 2019 en images de synthèse réalistes racontant l'histoire de Simba.",
+   "correction": null,
+   "checked_at": 1795174309.744746,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-2010_d3_7f61a2f2890c",
+  "category_id": "annees-2010",
+  "difficulty": 3,
+  "question": "Quelle chanteuse britannique a remporté l'Oscar de la meilleure chanson originale en 2013 pour 'Skyfall', le thème du film James Bond du même nom ?",
+  "options": [
+   "Adele",
+   "Beyoncé",
+   "Rihanna",
+   "Amy Winehouse"
+  ],
+  "correct_index": 0,
+  "explanation": "Adele a interprété 'Skyfall' pour le film James Bond sorti en 2012, et la chanson lui a valu l'Oscar de la meilleure chanson originale en 2013. C'est l'une des premières fois qu'une chanson de James Bond remportait cet Oscar.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 99,
+   "comment": "Adele a bien remporté l'Oscar 2013 de la meilleure chanson originale pour 'Skyfall'.",
+   "correction": null,
+   "checked_at": 1795174325.052222,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-2010_d3_5c8e31c19029",
+  "category_id": "annees-2010",
+  "difficulty": 3,
+  "question": "Quelle ville a accueilli les Jeux Olympiques d'hiver en 2014 ?",
+  "options": [
+   "Sotchi (Russie)",
+   "Vancouver (Canada)",
+   "PyeongChang (Corée du Sud)",
+   "Turin (Italie)"
+  ],
+  "correct_index": 0,
+  "explanation": "Les Jeux Olympiques d'hiver de 2014 se sont tenus à Sotchi, en Russie, du 7 au 23 février. C'est la première fois que la Russie accueillait les JO d'hiver.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 100,
+   "comment": "Les JO d'hiver 2014 ont bien eu lieu à Sotchi, les autres villes correspondent à d'autres éditions.",
+   "correction": null,
+   "checked_at": 1795174333.2267914,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-2010_d3_850f48789e94",
+  "category_id": "annees-2010",
+  "difficulty": 3,
+  "question": "Quel film de super-héros Marvel, sorti en 2018, met en scène pour la première fois le roi du royaume fictif africain de Wakanda comme personnage principal ?",
+  "options": [
+   "Black Panther",
+   "Thor : Ragnarok",
+   "Captain America : Civil War",
+   "Ant-Man and the Wasp"
+  ],
+  "correct_index": 0,
+  "explanation": "Black Panther, sorti en février 2018, est le premier film Marvel centré sur T'Challa, roi de Wakanda, joué par Chadwick Boseman. Il a connu un succès mondial retentissant et a été nommé à l'Oscar du meilleur film.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 99,
+   "comment": "Black Panther (2018) est bien le premier film centré sur T'Challa, roi de Wakanda.",
+   "correction": null,
+   "checked_at": 1795174338.0083158,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-2010_d3_db2b38fdd942",
+  "category_id": "annees-2010",
+  "difficulty": 3,
+  "question": "Quelle ville française a accueilli la cérémonie d'ouverture des Jeux Olympiques d'été en 2024, avec un défilé inédit sur la Seine ?",
+  "options": [
+   "Marseille",
+   "Lyon",
+   "Paris",
+   "Bordeaux"
+  ],
+  "correct_index": 2,
+  "explanation": "Les Jeux Olympiques d'été de 2024 se sont tenus à Paris, avec une cérémonie d'ouverture spectaculaire et originale organisée sur la Seine le 26 juillet 2024. C'était la troisième fois que Paris accueillait les Jeux Olympiques.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 100,
+   "comment": "La cérémonie d'ouverture des JO 2024 s'est bien tenue à Paris sur la Seine le 26 juillet 2024.",
+   "correction": null,
+   "checked_at": 1795174342.3672569,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-2010_d3_0930392bba2d",
+  "category_id": "annees-2010",
+  "difficulty": 3,
+  "question": "Quel film d'animation Pixar sorti en 2017 met en scène un jeune garçon mexicain qui se retrouve dans le monde des morts lors de la fête des Morts ?",
+  "options": [
+   "Coco",
+   "Soul",
+   "En avant",
+   "Là-haut"
+  ],
+  "correct_index": 0,
+  "explanation": "Coco, sorti en 2017, suit Miguel, un jeune garçon passionné de musique qui voyage dans le Pays des Morts lors du Día de los Muertos. Le film a remporté l'Oscar du meilleur film d'animation en 2018.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 99,
+   "comment": "Coco (Pixar, 2017) met bien en scène Miguel dans le Pays des Morts lors du Día de los Muertos, les autres options sont clairement erronées.",
+   "correction": null,
+   "checked_at": 1795174366.4539342,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-2010_d3_5a615c6025aa",
+  "category_id": "annees-2010",
+  "difficulty": 3,
+  "question": "Quelle chanteuse française a représenté la France à l'Eurovision 2021 avec la chanson 'Voilà', terminant à une honorable 2e place ?",
+  "options": [
+   "Zaz",
+   "Barbara Pravi",
+   "Camelia Jordana",
+   "Pomme"
+  ],
+  "correct_index": 1,
+  "explanation": "Barbara Pravi a représenté la France à l'Eurovision 2021 avec 'Voilà' et a terminé 2e, offrant à la France son meilleur résultat en 20 ans. Cette performance a été très remarquée en France.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 99,
+   "comment": "Barbara Pravi a bien représenté la France à l'Eurovision 2021 avec 'Voilà' et terminé 2e.",
+   "correction": null,
+   "checked_at": 1795174403.598215,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-2010_d4_9925f5853449",
+  "category_id": "annees-2010",
+  "difficulty": 4,
+  "question": "Dans quelle ville s'est tenu le procès très médiatisé de Harvey Weinstein, producteur hollywoodien accusé d'agressions sexuelles, qui s'est conclu par sa condamnation en février 2020 ?",
+  "options": [
+   "Los Angeles",
+   "New York",
+   "Chicago",
+   "San Francisco"
+  ],
+  "correct_index": 1,
+  "explanation": "Harvey Weinstein a été jugé à New York et reconnu coupable de viol et d'agression sexuelle le 24 février 2020, dans un procès emblématique du mouvement #MeToo. Il a été condamné à 23 ans de prison.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 97,
+   "comment": "Weinstein a bien été condamné à New York le 24 février 2020 à 23 ans de prison.",
+   "correction": null,
+   "checked_at": 1795174513.8083646,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-2010_d6_02b7c4a1ab71",
+  "category_id": "annees-2010",
+  "difficulty": 6,
+  "question": "Dans quelle série HBO diffusée de 2011 à 2019, adaptée des romans de George R. R. Martin, l'épisode 'La Bataille des Bâtards' (saison 6, 2016) a-t-il remporté l'Emmy Award du meilleur épisode dramatique ?",
+  "options": [
+   "Game of Thrones",
+   "Westworld",
+   "True Blood",
+   "The Wire"
+  ],
+  "correct_index": 0,
+  "explanation": "'La Bataille des Bâtards' (Battle of the Bastards), sixième épisode de la saison 6 de Game of Thrones, est devenu le premier épisode d'une série à remporter l'Emmy Award du meilleur épisode dramatique en 2016. Cet épisode réalisé par Miguel Sapochnik est resté célèbre pour ses scènes de combat d'une ampleur cinématographique exceptionnelle.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 96,
+   "comment": "Game of Thrones (2011-2019, adaptée de Martin) et l'épisode a bien gagné des Emmys, notamment la meilleure réalisation pour une série dramatique en 2016.",
+   "correction": null,
+   "checked_at": 1795175371.9738863,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-2010_d6_7232cea06b18",
+  "category_id": "annees-2010",
+  "difficulty": 6,
+  "question": "Dans la série 'Black Mirror' de Charlie Brooker, quel épisode de la saison 3 (2016), sorti sur Netflix, dépeint une société où les individus sont constamment notés par leurs pairs via une application sur smartphone ?",
+  "options": [
+   "Nosedive (Chute libre)",
+   "San Junipero",
+   "Shut Up and Dance",
+   "Men Against Fire"
+  ],
+  "correct_index": 0,
+  "explanation": "'Nosedive' (ou 'Chute libre' en français), premier épisode de la saison 3 diffusée sur Netflix en octobre 2016, suit Lacie dans un monde dystopique où chaque interaction sociale génère une note qui détermine le statut social. Cet épisode est devenu une référence culturelle majeure sur les dérives des réseaux sociaux.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 98,
+   "comment": "Nosedive est bien l'épisode de la saison 3 de Black Mirror (2016) sur la notation sociale permanente, les autres options sont clairement différentes.",
+   "correction": null,
+   "checked_at": 1795175378.3312066,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-2010_d6_35cac84487f8",
+  "category_id": "annees-2010",
+  "difficulty": 6,
+  "question": "Dans la série 'Game of Thrones', quel acteur britannique incarne Jon Snow, personnage central des saisons 1 à 8 (2011-2019) ?",
+  "options": [
+   "Kit Harington",
+   "Richard Madden",
+   "Iain Glen",
+   "Nikolaj Coster-Waldau"
+  ],
+  "correct_index": 0,
+  "explanation": "Kit Harington interprète Jon Snow tout au long des huit saisons de 'Game of Thrones', rôle qui lui a valu une nomination aux Emmy Awards en 2016. Richard Madden jouait Robb Stark, Iain Glen incarnait Jorah Mormont et Nikolaj Coster-Waldau campait Jaime Lannister.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 100,
+   "comment": "Kit Harington incarne bien Jon Snow, et les autres acteurs sont correctement attribués à leurs rôles respectifs.",
+   "correction": null,
+   "checked_at": 1795175404.0355666,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-2010_d6_94865a20b869",
+  "category_id": "annees-2010",
+  "difficulty": 6,
+  "question": "Dans la série 'Breaking Bad', diffusée de 2008 à 2013, quel acteur incarne Walter White, le professeur de chimie reconverti en fabricant de méthamphétamine ?",
+  "options": [
+   "Bryan Cranston",
+   "Aaron Paul",
+   "Bob Odenkirk",
+   "Dean Norris"
+  ],
+  "correct_index": 0,
+  "explanation": "Bryan Cranston a remporté quatre Emmy Awards du meilleur acteur dramatique pour ce rôle. Aaron Paul incarnait son associé Jesse Pinkman, et Bob Odenkirk jouait l'avocat Saul Goodman.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 100,
+   "comment": "Bryan Cranston incarne bien Walter White dans Breaking Bad, diffusée de 2008 à 2013.",
+   "correction": null,
+   "checked_at": 1795175422.8798563,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-2010_d6_2eefaa6ce8e2",
+  "category_id": "annees-2010",
+  "difficulty": 6,
+  "question": "Dans la série 'Stranger Things' diffusée sur Netflix depuis 2016, dans quelle ville fictive de l'Indiana l'action principale se déroule-t-elle ?",
+  "options": [
+   "Hawkins",
+   "Millfield",
+   "Lakewood",
+   "Greendale"
+  ],
+  "correct_index": 0,
+  "explanation": "La série 'Stranger Things' se déroule à Hawkins, une petite ville fictive de l'Indiana, théâtre des phénomènes surnaturels liés au 'Monde à l'Envers'. Ce détail de géographie fictive est bien connu des fans de la série.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 100,
+   "comment": "La série Stranger Things se déroule bien à Hawkins, ville fictive de l'Indiana.",
+   "correction": null,
+   "checked_at": 1795175474.94132,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-2010_d6_699afeb1ce88",
+  "category_id": "annees-2010",
+  "difficulty": 6,
+  "question": "Dans la série 'The Crown' (Netflix, depuis 2016), quelle actrice a incarné la reine Élisabeth II dans les saisons 3 et 4, remportant pour ce rôle l'Emmy Award de la meilleure actrice dramatique en 2021 ?",
+  "options": [
+   "Helena Bonham Carter",
+   "Olivia Colman",
+   "Claire Foy",
+   "Imelda Staunton"
+  ],
+  "correct_index": 1,
+  "explanation": "Olivia Colman a joué Élisabeth II dans les saisons 3 et 4 de 'The Crown', succédant à Claire Foy, et a remporté l'Emmy Award de la meilleure actrice dramatique en 2021 pour ce rôle. Imelda Staunton a ensuite repris le personnage pour les saisons 5 et 6.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 96,
+   "comment": "Olivia Colman a bien incarné Élisabeth II dans les saisons 3 et 4 et remporté l'Emmy de la meilleure actrice dramatique en 2021.",
+   "correction": null,
+   "checked_at": 1795175480.3493013,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-2010_d6_c762d4b2d531",
+  "category_id": "annees-2010",
+  "difficulty": 6,
+  "question": "Dans la série 'Better Call Saul' (AMC, 2015-2022), préquelle de 'Breaking Bad', quel personnage l'acteur Bob Odenkirk incarne-t-il tout au long des six saisons ?",
+  "options": [
+   "Jimmy McGill / Saul Goodman",
+   "Mike Ehrmantraut",
+   "Gustavo Fring",
+   "Howard Hamlin"
+  ],
+  "correct_index": 0,
+  "explanation": "Bob Odenkirk reprend le rôle de Jimmy McGill, avocat en devenir qui adopte progressivement l'identité de Saul Goodman, avocat véreux déjà croisé dans 'Breaking Bad'. Ce double nom est au cœur de l'arc narratif de la série.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 100,
+   "comment": "Bob Odenkirk incarne bien Jimmy McGill/Saul Goodman, les autres personnages étant joués par Jonathan Banks, Giancarlo Esposito et Patrick Fabian.",
+   "correction": null,
+   "checked_at": 1795175492.1852965,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-2010_d6_b7c8898c9d38",
+  "category_id": "annees-2010",
+  "difficulty": 6,
+  "question": "Dans la série 'Succession' (HBO, 2018-2023), quel acteur britannique incarne Logan Roy, le patriarche milliardaire et fondateur du conglomérat médiatique Waystar Royco ?",
+  "options": [
+   "Brian Cox",
+   "Jonathan Pryce",
+   "Ian McShane",
+   "Derek Jacobi"
+  ],
+  "correct_index": 0,
+  "explanation": "Brian Cox, acteur écossais, incarne Logan Roy tout au long des quatre saisons de 'Succession', rôle pour lequel il a remporté le Golden Globe du meilleur acteur dramatique en 2020. La série s'est conclue en 2023 après avoir dominé les palmarès des Emmy Awards.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 98,
+   "comment": "Brian Cox incarne bien Logan Roy dans Succession et a remporté le Golden Globe 2020 pour ce rôle.",
+   "correction": null,
+   "checked_at": 1795175497.4052033,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-2010_d6_a8910b577425",
+  "category_id": "annees-2010",
+  "difficulty": 6,
+  "question": "Dans la série 'The Wire' (HBO, 2002-2008), toujours considérée comme une référence dans les années 2010, quel acteur britannique incarne le détective Jimmy McNulty, personnage central de la série ?",
+  "options": [
+   "Dominic West",
+   "Idris Elba",
+   "Lance Reddick",
+   "Michael K. Williams"
+  ],
+  "correct_index": 0,
+  "explanation": "Dominic West, acteur britannique né en 1969, incarne le détective Jimmy McNulty tout au long des cinq saisons de 'The Wire'. Idris Elba, lui, joue Stringer Bell, le bras droit du baron de la drogue Avon Barksdale.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 98,
+   "comment": "Dominic West, acteur britannique, incarne bien Jimmy McNulty dans The Wire, et les distracteurs sont correctement faux.",
+   "correction": null,
+   "checked_at": 1795175502.4499102,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-2010_d7_9d3b26949e88",
+  "category_id": "annees-2010",
+  "difficulty": 7,
+  "question": "Lors des Jeux Olympiques de Paris 2024, le Français Léon Marchand a remporté 4 médailles d'or individuelles en natation. Quelle est la combinaison exacte des quatre épreuves qu'il a remportées ?",
+  "options": [
+   "200 m papillon, 200 m dos, 400 m 4 nages, 200 m 4 nages",
+   "200 m papillon, 200 m brasse, 400 m 4 nages, 200 m 4 nages",
+   "100 m papillon, 200 m brasse, 400 m 4 nages, 200 m 4 nages",
+   "200 m papillon, 200 m brasse, 200 m dos, 400 m 4 nages"
+  ],
+  "correct_index": 1,
+  "explanation": "Léon Marchand a décroché l'or sur le 400 m 4 nages, le 200 m papillon, le 200 m brasse et le 200 m 4 nages à Paris 2024, réalisant un exploit sans précédent dans l'histoire olympique de la natation. Il a également remporté une cinquième médaille d'or en relais mixte 4×100 m 4 nages.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 98,
+   "comment": "Marchand a bien gagné l'or sur 400 m 4 nages, 200 m papillon, 200 m brasse et 200 m 4 nages à Paris 2024.",
+   "correction": null,
+   "checked_at": 1795175525.322706,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-2010_d7_2d31e3c2f24e",
+  "category_id": "annees-2010",
+  "difficulty": 7,
+  "question": "Lors des Jeux Olympiques de Londres 2012, Usain Bolt a défendu ses titres du 100 m et du 200 m. Quel temps exact a-t-il réalisé pour remporter le 100 m en finale, établissant un record olympique ?",
+  "options": [
+   "9 s 63",
+   "9 s 58",
+   "9 s 69",
+   "9 s 72"
+  ],
+  "correct_index": 0,
+  "explanation": "Usain Bolt a remporté le 100 m des JO de Londres 2012 en 9 s 63, battant le record olympique qu'il détenait depuis Pékin 2008 (9 s 69). Son record du monde personnel reste 9 s 58, établi à Berlin en 2009.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 98,
+   "comment": "Bolt a bien remporté le 100 m à Londres 2012 en 9 s 63, record olympique, les autres options correspondant à d'autres performances (9 s 58 record du monde, 9 s 69 Pékin 2008).",
+   "correction": null,
+   "checked_at": 1795175531.2870374,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-2010_d7_4ed2e4fa3a5d",
+  "category_id": "annees-2010",
+  "difficulty": 7,
+  "question": "Lors de la cérémonie des Grammy Awards 2012, quel album de Bon Iver (Justin Vernon) a remporté le Grammy du meilleur album alternatif, au grand dam des favoris, créant la surprise dans la catégorie ?",
+  "options": [
+   "'Bon Iver, Bon Iver' (2011)",
+   "'For Emma, Forever Ago' (2008, re-soumis)",
+   "'Blood Bank EP' (2009)",
+   "'22, A Million' (2016)"
+  ],
+  "correct_index": 0,
+  "explanation": "'Bon Iver, Bon Iver', l'album éponyme de 2011, a remporté le Grammy du meilleur album alternatif lors de la 54e cérémonie en février 2012, battant notamment des favoris comme Fleet Foxes. Justin Vernon a également reçu le Grammy du meilleur nouvel artiste cette même nuit, une double distinction rarissime pour un artiste indie folk.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 92,
+   "comment": "L'album 'Bon Iver, Bon Iver' a bien remporté le Grammy du meilleur album alternatif en 2012, et Bon Iver a aussi gagné meilleur nouvel artiste.",
+   "correction": null,
+   "checked_at": 1795175539.7037163,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-2010_d7_f17da3f1e9ab",
+  "category_id": "annees-2010",
+  "difficulty": 7,
+  "question": "Lors des Jeux Olympiques de Tokyo 2020 (disputés en 2021), l'athlète Marcell Jacobs est devenu champion olympique du 100 m masculin avec un temps de 9.80 s. De quelle nationalité est-il ?",
+  "options": [
+   "Italienne",
+   "Jamaïcaine",
+   "Américaine",
+   "Britannique"
+  ],
+  "correct_index": 0,
+  "explanation": "Marcell Jacobs, sprinter italo-américain courant sous les couleurs de l'Italie, a créé la surprise en remportant le 100 m des JO de Tokyo le 1er août 2021 en 9.80 s, devenant le premier Européen champion olympique sur cette distance depuis 1992. Il a ensuite complété son doublé en remportant également le relais 4×100 m avec l'équipe d'Italie.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 98,
+   "comment": "Marcell Jacobs a bien remporté le 100m à Tokyo 2020 sous les couleurs de l'Italie en 9.80 s.",
+   "correction": null,
+   "checked_at": 1795175559.7692995,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-2010_d7_e6b027b1e552",
+  "category_id": "annees-2010",
+  "difficulty": 7,
+  "question": "Lors de la cérémonie des Oscars 2020 (92e édition), 'Parasite' de Bong Joon-ho est devenu le premier film non anglophone à remporter l'Oscar du meilleur film. Combien d'Oscars a-t-il remportés cette nuit-là, et quel autre prix majeur avait-il décroché à Cannes en 2019 ?",
+  "options": [
+   "3 Oscars (meilleur film, meilleur réalisateur, meilleur scénario original) et la Palme d'or à Cannes",
+   "4 Oscars (meilleur film, meilleur réalisateur, meilleur scénario original, meilleur film international) et la Palme d'or à Cannes",
+   "4 Oscars (meilleur film, meilleur réalisateur, meilleur scénario original, meilleur film international) et le Grand Prix du jury à Cannes",
+   "2 Oscars (meilleur film et meilleur réalisateur) et la Palme d'or à Cannes"
+  ],
+  "correct_index": 1,
+  "explanation": "'Parasite' a remporté 4 Oscars lors de la cérémonie du 9 février 2020 : meilleur film, meilleur réalisateur, meilleur scénario original et meilleur film international. Il avait auparavant décroché la Palme d'or au Festival de Cannes en mai 2019, devenant ainsi le premier film sud-coréen à recevoir cette récompense.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 99,
+   "comment": "Parasite a bien remporté 4 Oscars en 2020 et la Palme d'or à Cannes 2019.",
+   "correction": null,
+   "checked_at": 1795175567.2466123,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-2010_d7_032efb50cde3",
+  "category_id": "annees-2010",
+  "difficulty": 7,
+  "question": "Lors des Jeux Olympiques de Rio 2016, le nageur Michael Phelps a terminé sa carrière olympique avec un total record de médailles. Combien de médailles d'or olympiques individuelles avait-il accumulées au total à l'issue de ces Jeux, toutes olympiades confondues ?",
+  "options": [
+   "11",
+   "13",
+   "15",
+   "23"
+  ],
+  "correct_index": 1,
+  "explanation": "Michael Phelps a remporté 13 médailles d'or individuelles en tout au cours de ses quatre olympiades (2000-2016), auxquelles s'ajoutent 6 médailles d'or en relais, pour un grand total de 23 médailles d'or et 28 médailles toutes couleurs confondues. Le chiffre global de 23 or est souvent cité, mais il inclut les relais ; les 13 or en épreuves individuelles constituent le record absolu dans cette catégorie.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 95,
+   "comment": "Phelps détient bien le record de 13 médailles d'or olympiques individuelles, distinct de ses 23 titres au total incluant les relais.",
+   "correction": null,
+   "checked_at": 1795175574.1782892,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-2010_d7_701b24e22505",
+  "category_id": "annees-2010",
+  "difficulty": 7,
+  "question": "Lors des Jeux Olympiques de Londres 2012, la gymnaste américaine Gabby Douglas est devenue la première femme afro-américaine à remporter l'or au concours général individuel. Quel autre titre olympique a-t-elle décroché lors de ces mêmes Jeux ?",
+  "options": [
+   "L'or au sol",
+   "L'or par équipes avec les 'Fierce Five'",
+   "L'or aux barres asymétriques",
+   "L'or à la poutre"
+  ],
+  "correct_index": 1,
+  "explanation": "À Londres 2012, Gabby Douglas a remporté deux médailles d'or : le concours général individuel et le concours par équipes avec l'équipe américaine surnommée les 'Fierce Five'. Elle n'a décroché aucune médaille individuelle aux agrès lors de ces Jeux.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 97,
+   "comment": "Gabby Douglas a bien remporté l'or par équipes avec les 'Fierce Five' et le concours général individuel à Londres 2012, sans médaille individuelle aux agrès.",
+   "correction": null,
+   "checked_at": 1795175587.2295299,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-2010_d7_934b09b8fb28",
+  "category_id": "annees-2010",
+  "difficulty": 7,
+  "question": "Dans la série 'Chernobyl' (HBO/Sky, 2019), Craig Mazin a remporté l'Emmy Award du meilleur scénario pour une minisérie. Combien d'Emmy Awards au total cette minisérie de 5 épisodes a-t-elle remportés lors de la cérémonie de septembre 2019 ?",
+  "options": [
+   "10 Emmy Awards",
+   "7 Emmy Awards",
+   "4 Emmy Awards",
+   "13 Emmy Awards"
+  ],
+  "correct_index": 0,
+  "explanation": "La minisérie 'Chernobyl' a remporté 10 Emmy Awards en 2019, dont ceux du meilleur scénario (Craig Mazin), de la meilleure réalisation (Johan Renck) et de la meilleure minisérie, établissant un record pour une minisérie cette année-là.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 93,
+   "comment": "Chernobyl a bien remporté 10 Emmy Awards en 2019, dont meilleure minisérie, scénario et réalisation.",
+   "correction": null,
+   "checked_at": 1795175592.749752,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-2010_d7_a5e49fed95b0",
+  "category_id": "annees-2010",
+  "difficulty": 7,
+  "question": "Lors de la cérémonie des Grammy Awards 2014, quel album de Daft Punk a remporté le Grammy du meilleur album de l'année, devenant ainsi le premier album électronique à décrocher ce titre suprême ?",
+  "options": [
+   "Random Access Memories",
+   "Discovery",
+   "Human After All",
+   "Alive 2007"
+  ],
+  "correct_index": 0,
+  "explanation": "Sorti en mai 2013, 'Random Access Memories' a remporté le Grammy du meilleur album de l'année lors de la 56e cérémonie en janvier 2014, un exploit inédit pour un album de musique électronique dans cette catégorie. Le duo français a également décroché cette nuit-là le Grammy du meilleur album dance/électronique et de l'enregistrement de l'année pour 'Get Lucky'.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 98,
+   "comment": "Random Access Memories a bien remporté l'Album of the Year aux Grammy Awards 2014.",
+   "correction": null,
+   "checked_at": 1795175614.704764,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-2010_d7_c92711511c53",
+  "category_id": "annees-2010",
+  "difficulty": 7,
+  "question": "Lors des Jeux Olympiques de Paris 2024, le perchiste suédois Armand Duplantis a établi un nouveau record du monde en finale. À quelle hauteur exacte a-t-il sauté pour décrocher l'or olympique ?",
+  "options": [
+   "6,25 m",
+   "6,10 m",
+   "6,21 m",
+   "6,15 m"
+  ],
+  "correct_index": 0,
+  "explanation": "Armand Duplantis a franchi 6,25 m lors de la finale du saut à la perche des JO de Paris le 5 août 2024, améliorant son propre record du monde (6,24 m) et remportant l'or olympique. C'était son 9e record du monde en carrière.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 98,
+   "comment": "Duplantis a bien franchi 6,25 m le 5 août 2024 à Paris, battant son propre record du monde.",
+   "correction": null,
+   "checked_at": 1795175626.8463163,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-2010_d7_e46bd454ab23",
+  "category_id": "annees-2010",
+  "difficulty": 7,
+  "question": "Lors de la cérémonie des Emmy Awards 2019, la série 'Game of Thrones' (saison 8) a remporté l'Emmy de la meilleure série dramatique. Combien d'Emmy Awards au total cette ultime saison a-t-elle remportés cette année-là, établissant un record pour une saison unique ?",
+  "options": [
+   "10 Emmy Awards",
+   "12 Emmy Awards",
+   "32 Emmy Awards",
+   "17 Emmy Awards"
+  ],
+  "correct_index": 0,
+  "explanation": "La saison 8 de 'Game of Thrones' a remporté 10 Emmy Awards lors de la cérémonie de septembre 2019, dont celui de la meilleure série dramatique, établissant un record pour une saison unique de série télévisée. Elle avait reçu 32 nominations au total cette année-là, ce qui explique la confusion fréquente entre nominations et victoires.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 92,
+   "comment": "La saison 8 a bien remporté 10 Emmy Awards en 2019 (dont la meilleure série dramatique) avec 32 nominations record.",
+   "correction": null,
+   "checked_at": 1795175632.5779335,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-2010_d3_7dcc268fce8a",
+  "category_id": "annees-2010",
+  "difficulty": 3,
+  "question": "Quel film de la saga 'Avengers', sorti en 2019, a réuni presque tous les super-héros Marvel pour affronter Thanos et est devenu l'un des plus grands succès du box-office mondial ?",
+  "options": [
+   "Avengers: Endgame",
+   "Avengers: Infinity War",
+   "Captain America: Civil War",
+   "Thor: Ragnarok"
+  ],
+  "correct_index": 0,
+  "explanation": "Avengers: Endgame, sorti en avril 2019, a dépassé Avatar au box-office mondial avec plus de 2,7 milliards de dollars de recettes. Ce film conclut l'arc narratif de Thanos entamé dans Infinity War (2018).",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 98,
+   "comment": "Avengers: Endgame est bien sorti en 2019 et a battu le record du box-office mondial.",
+   "correction": null,
+   "checked_at": 1795175824.5291126,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-2010_d3_77f966465c0d",
+  "category_id": "annees-2010",
+  "difficulty": 3,
+  "question": "Quel chanteur canadien a sorti en 2015 l'album 'Purpose', contenant les tubes mondials 'Sorry' et 'Love Yourself' ?",
+  "options": [
+   "Justin Bieber",
+   "Drake",
+   "The Weeknd",
+   "Shawn Mendes"
+  ],
+  "correct_index": 0,
+  "explanation": "'Purpose', sorti en novembre 2015, est le quatrième album studio de Justin Bieber. Il a produit plusieurs hits planétaires, notamment 'Sorry' et 'Love Yourself', et s'est vendu à des millions d'exemplaires dans le monde.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 99,
+   "comment": "L'album 'Purpose' (2015) de Justin Bieber contient bien 'Sorry' et 'Love Yourself'.",
+   "correction": null,
+   "checked_at": 1795175829.3446903,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-2010_d3_032893d86598",
+  "category_id": "annees-2010",
+  "difficulty": 3,
+  "question": "Quelle application de messagerie, rachetée par Facebook en 2014 pour 19 milliards de dollars, permet d'envoyer des messages et des photos gratuitement via Internet ?",
+  "options": [
+   "WhatsApp",
+   "Snapchat",
+   "Telegram",
+   "Signal"
+  ],
+  "correct_index": 0,
+  "explanation": "WhatsApp a été racheté par Facebook (aujourd'hui Meta) en février 2014 pour environ 19 milliards de dollars. C'est l'une des plus grandes acquisitions de l'histoire des technologies.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 100,
+   "comment": "WhatsApp a bien été racheté par Facebook en 2014 pour environ 19 milliards de dollars.",
+   "correction": null,
+   "checked_at": 1795175833.429585,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-2010_d3_768ae66a4574",
+  "category_id": "annees-2010",
+  "difficulty": 3,
+  "question": "Quel film de super-héros sorti en 2012 réunit pour la première fois Iron Man, Captain America, Thor et Hulk dans la même aventure ?",
+  "options": [
+   "The Avengers",
+   "Spider-Man 3",
+   "Batman Begins",
+   "X-Men : Days of Future Past"
+  ],
+  "correct_index": 0,
+  "explanation": "The Avengers, réalisé par Joss Whedon et sorti en 2012, est le premier film Marvel à rassembler ces quatre super-héros emblématiques. Il a connu un immense succès mondial au box-office.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 99,
+   "comment": "The Avengers (2012) de Joss Whedon réunit bien pour la première fois ces quatre héros, et les autres options sont clairement erronées.",
+   "correction": null,
+   "checked_at": 1795175837.767217,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-2010_d4_4425bdc6eb8d",
+  "category_id": "annees-2010",
+  "difficulty": 4,
+  "question": "Dans la série française 'Le Bureau des Légendes' (Canal+, 2015-2020), quel acteur incarne le personnage de Malotru, officier de la DGSE dont le double jeu constitue le cœur de l'intrigue ?",
+  "options": [
+   "Mathieu Kassovitz",
+   "Kad Merad",
+   "Vincent Cassel",
+   "Reda Kateb"
+  ],
+  "correct_index": 0,
+  "explanation": "Mathieu Kassovitz incarne Guillaume Debailly, alias 'Malotru', dans les cinq saisons du Bureau des Légendes. La série, créée par Éric Rochant, est saluée comme l'une des meilleures productions françaises des années 2010.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 99,
+   "comment": "Mathieu Kassovitz incarne bien Guillaume Debailly alias Malotru dans Le Bureau des Légendes.",
+   "correction": null,
+   "checked_at": 1795175858.5994856,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-2010_d4_49e1100610c1",
+  "category_id": "annees-2010",
+  "difficulty": 4,
+  "question": "Dans la série 'Mindhunter' (Netflix, 2017-2019), de quel service du FBI les agents Holden Ford et Bill Tench font-ils partie, en interviewant des tueurs en série pour mieux comprendre leur psychologie ?",
+  "options": [
+   "L'Unité des sciences du comportement (BSU)",
+   "La Division antiterroriste",
+   "L'Unité criminelle spéciale (SCU)",
+   "Le Bureau des affaires internes"
+  ],
+  "correct_index": 0,
+  "explanation": "Dans 'Mindhunter', Ford et Tench appartiennent à la Behavioral Science Unit (Unité des sciences du comportement) du FBI, basée à Quantico. Cette unité a réellement été pionnière dans le profilage criminel aux États-Unis dans les années 1970-80.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 97,
+   "comment": "Ford et Tench font bien partie de la Behavioral Science Unit basée à Quantico, conformément à la réalité historique et à la série.",
+   "correction": null,
+   "checked_at": 1795175864.8186274,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-2010_d4_e1a308762019",
+  "category_id": "annees-2010",
+  "difficulty": 4,
+  "question": "Quel film de Christopher Nolan, sorti en 2014, raconte l'histoire d'astronautes qui voyagent à travers un trou de ver pour trouver une nouvelle planète habitable pour l'humanité ?",
+  "options": [
+   "Gravity",
+   "Interstellar",
+   "The Martian",
+   "Ad Astra"
+  ],
+  "correct_index": 1,
+  "explanation": "Interstellar est sorti en novembre 2014 et met en scène Matthew McConaughey dans le rôle d'un pilote parti explorer des planètes au-delà de notre galaxie. Le film a remporté l'Oscar des meilleurs effets visuels en 2015.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 99,
+   "comment": "Interstellar, réalisé par Christopher Nolan, est bien sorti en 2014 et correspond exactement à la description.",
+   "correction": null,
+   "checked_at": 1795175903.1752877,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-2010_d4_dbe9290d3493",
+  "category_id": "annees-2010",
+  "difficulty": 4,
+  "question": "Dans la série 'Squid Game' (Netflix, 2021), de quelle nationalité est le créateur et réalisateur de la série, Hwang Dong-hyuk ?",
+  "options": [
+   "Japonaise",
+   "Chinoise",
+   "Sud-coréenne",
+   "Taïwanaise"
+  ],
+  "correct_index": 2,
+  "explanation": "Hwang Dong-hyuk est un réalisateur et scénariste sud-coréen. 'Squid Game' est devenue en 2021 la série non anglophone la plus regardée de l'histoire de Netflix, avec plus de 111 millions de foyers touchés en moins d'un mois.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 99,
+   "comment": "Hwang Dong-hyuk est bien un réalisateur sud-coréen, créateur de Squid Game.",
+   "correction": null,
+   "checked_at": 1795175928.3684108,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-2010_d4_f27c67bb6553",
+  "category_id": "annees-2010",
+  "difficulty": 4,
+  "question": "Quel groupe français a remporté la Palme d'or à Cannes en 2015 avec le film 'Dheepan', réalisé par Jacques Audiard ?",
+  "options": [
+   "L'équipe du film 'Mon Roi' de Maïwenn",
+   "L'équipe du film 'Dheepan' de Jacques Audiard",
+   "L'équipe du film 'La Loi du marché' de Stéphane Brizé",
+   "L'équipe du film 'Valley of Love' de Guillaume Nicloux"
+  ],
+  "correct_index": 1,
+  "explanation": "'Dheepan', de Jacques Audiard, a remporté la Palme d'or au Festival de Cannes 2015, créant la surprise face à des favoris très attendus. Ce film raconte l'histoire de réfugiés tamouls reconstruisant leur vie en France.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 98,
+   "comment": "Dheepan de Jacques Audiard a bien remporté la Palme d'or à Cannes 2015, mais la question est tautologique car elle contient déjà la réponse.",
+   "correction": null,
+   "checked_at": 1795175967.9538221,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-2010_d4_119e4b1d68dd",
+  "category_id": "annees-2010",
+  "difficulty": 4,
+  "question": "Dans la série 'Lupin' (Netflix, 2021), quel acteur français incarne Assane Diop, le gentleman cambrioleur inspiré du personnage d'Arsène Lupin ?",
+  "options": [
+   "Omar Sy",
+   "Tahar Rahim",
+   "Roschdy Zem",
+   "Kad Merad"
+  ],
+  "correct_index": 0,
+  "explanation": "Omar Sy incarne Assane Diop dans 'Lupin', série française à succès mondial lancée sur Netflix en janvier 2021. La série a été visionnée par plus de 70 millions de foyers dans le monde dès ses premières semaines.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 100,
+   "comment": "Omar Sy incarne bien Assane Diop dans la série Lupin (Netflix, 2021).",
+   "correction": null,
+   "checked_at": 1795175972.6731286,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-2010_d4_14a752c82ba1",
+  "category_id": "annees-2010",
+  "difficulty": 4,
+  "question": "Quel service de streaming musical, lancé en 2015 par Apple, est venu concurrencer Spotify en proposant notamment une radio mondiale nommée 'Beats 1' ?",
+  "options": [
+   "Apple Music",
+   "iTunes Radio",
+   "Apple Podcasts",
+   "Apple Sound"
+  ],
+  "correct_index": 0,
+  "explanation": "Apple Music a été lancé en juin 2015, incluant la station de radio mondiale Beats 1 animée notamment par Zane Lowe. Ce service a rapidement atteint plusieurs dizaines de millions d'abonnés, s'imposant comme le principal concurrent de Spotify.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 98,
+   "comment": "Apple Music a bien été lancé en juin 2015 avec la radio Beats 1, les autres options sont clairement fausses.",
+   "correction": null,
+   "checked_at": 1795175977.5680366,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-2010_d4_f26f9ad42b18",
+  "category_id": "annees-2010",
+  "difficulty": 4,
+  "question": "Quelle série espagnole diffusée sur Netflix à partir de 2017 met en scène un braquage spectaculaire de la Monnaie Royale d'Espagne, orchestré par un personnage surnommé 'le Professeur' ?",
+  "options": [
+   "La Casa de Papel",
+   "Elite",
+   "Grand Hotel",
+   "Vis a vis"
+  ],
+  "correct_index": 0,
+  "explanation": "La Casa de Papel (Money Heist) a été diffusée sur Netflix à partir de 2017 et est devenue un phénomène mondial, avec le Professeur (Álvaro Morte) comme cerveau du braquage. Elle a remporté l'Emmy International de la meilleure série dramatique en 2018.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 97,
+   "comment": "La Casa de Papel correspond exactement à la description du braquage de la Fabrique Nationale de la Monnaie orchestré par le Professeur.",
+   "correction": null,
+   "checked_at": 1795175998.514232,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-2010_d4_3c7976e19555",
+  "category_id": "annees-2010",
+  "difficulty": 4,
+  "question": "Dans la série 'Peaky Blinders' (BBC, 2013-2022), quel acteur incarne Tommy Shelby, le chef du gang familial de Birmingham ?",
+  "options": [
+   "Cillian Murphy",
+   "Tom Hardy",
+   "Sam Neill",
+   "Paul Anderson"
+  ],
+  "correct_index": 0,
+  "explanation": "Cillian Murphy incarne Tommy Shelby tout au long des six saisons de la série, un rôle qui lui a valu une reconnaissance internationale et un BAFTA. Tom Hardy, Sam Neill et Paul Anderson jouent également dans la série, mais dans des rôles secondaires.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 100,
+   "comment": "Cillian Murphy incarne bien Tommy Shelby dans Peaky Blinders, les autres acteurs ayant des rôles secondaires.",
+   "correction": null,
+   "checked_at": 1795176008.053541,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-2010_d4_8183f46834cd",
+  "category_id": "annees-2010",
+  "difficulty": 4,
+  "question": "Quel film de Denis Villeneuve, sorti en 2016, adapte le roman de Ted Chiang 'Story of Your Life' et raconte le premier contact entre l'humanité et une civilisation extraterrestre à travers le regard d'une linguiste ?",
+  "options": [
+   "Premier Contact (Arrival)",
+   "Annihilation",
+   "Interstellar",
+   "Gravity"
+  ],
+  "correct_index": 0,
+  "explanation": "Arrival (Premier Contact en français) est sorti en 2016 et est réalisé par le Canadien Denis Villeneuve. Amy Adams y incarne la linguiste Louise Banks chargée de décoder le langage des extraterrestres, le film ayant remporté l'Oscar du meilleur montage sonore en 2017.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 99,
+   "comment": "Arrival (Premier Contact), 2016, Villeneuve, adapte bien la nouvelle de Ted Chiang avec Amy Adams en linguiste.",
+   "correction": null,
+   "checked_at": 1795176019.9613357,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-2010_d5_d0a1c7934fc3",
+  "category_id": "annees-2010",
+  "difficulty": 5,
+  "question": "Dans la série 'Fleabag' de Phoebe Waller-Bridge, diffusée sur BBC Three puis Amazon Prime Video, combien d'Emmy Awards la saison 2 a-t-elle remportés lors de la cérémonie de septembre 2019 ?",
+  "options": [
+   "6",
+   "4",
+   "3",
+   "8"
+  ],
+  "correct_index": 1,
+  "explanation": "La saison 2 de 'Fleabag' a remporté 4 Emmy Awards en 2019, dans les catégories meilleure série comique, meilleure actrice, meilleur scénario et meilleure réalisation pour une comédie. Ce triomphe a consacré Phoebe Waller-Bridge comme l'une des voix majeures de la télévision britannique.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 95,
+   "comment": "Fleabag a bien remporté 4 Emmy Awards en septembre 2019 : meilleure série comique, meilleure actrice, meilleur scénario et meilleure réalisation pour une comédie.",
+   "correction": null,
+   "checked_at": 1795176046.0973465,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-2010_d5_0d082610cf38",
+  "category_id": "annees-2010",
+  "difficulty": 5,
+  "question": "Dans la série 'The Handmaid's Tale' (Hulu, depuis 2017), adaptée du roman de Margaret Atwood, quelle actrice incarne Offred / June Osborne et a remporté l'Emmy Award de la meilleure actrice dramatique en 2017 pour ce rôle ?",
+  "options": [
+   "Elisabeth Moss",
+   "Claire Danes",
+   "Robin Wright",
+   "Tatiana Maslany"
+  ],
+  "correct_index": 0,
+  "explanation": "Elisabeth Moss incarne June Osborne (Offred) depuis la première saison en 2017 et a remporté l'Emmy Award de la meilleure actrice dramatique cette même année pour ce rôle. La série, produite par Hulu, est la première d'une plateforme de streaming à remporter l'Emmy de la meilleure série dramatique.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 99,
+   "comment": "Elisabeth Moss incarne bien June/Offred et a remporté l'Emmy de meilleure actrice dramatique en 2017.",
+   "correction": null,
+   "checked_at": 1795176051.6788878,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-2010_d5_391bc3ba2e26",
+  "category_id": "annees-2010",
+  "difficulty": 5,
+  "question": "Dans la série 'Ozark' (Netflix, 2017-2022), quel acteur incarne Marty Byrde, le comptable de Chicago contraint de blanchir de l'argent pour un cartel mexicain dans le Missouri ?",
+  "options": [
+   "Bryan Cranston",
+   "Jason Bateman",
+   "Michael Shannon",
+   "Aaron Paul"
+  ],
+  "correct_index": 1,
+  "explanation": "Jason Bateman incarne Marty Byrde dans 'Ozark' et a également réalisé plusieurs épisodes de la série, remportant l'Emmy Award du meilleur réalisateur pour une série dramatique en 2019. Bryan Cranston et Aaron Paul sont associés à 'Breaking Bad', tandis que Michael Shannon joue un rôle secondaire dans la série.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 99,
+   "comment": "Jason Bateman incarne bien Marty Byrde dans Ozark et a réalisé plusieurs épisodes.",
+   "correction": null,
+   "checked_at": 1795176056.8857265,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-2010_d5_5847619cdc5b",
+  "category_id": "annees-2010",
+  "difficulty": 5,
+  "question": "Dans la série 'Narcos' (Netflix, 2015-2017), quel acteur brésilien incarne Pablo Escobar, le célèbre baron de la drogue colombien, dans les saisons 1 et 2 ?",
+  "options": [
+   "Wagner Moura",
+   "Benicio del Toro",
+   "Javier Bardem",
+   "Diego Luna"
+  ],
+  "correct_index": 0,
+  "explanation": "Wagner Moura, acteur brésilien connu notamment pour 'Tropa de Elite', incarne Pablo Escobar dans les deux premières saisons de 'Narcos'. Pour préparer ce rôle, il a appris l'espagnol et s'est rendu en Colombie afin de s'imprégner de la culture locale.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 99,
+   "comment": "Wagner Moura, acteur brésilien, incarne bien Pablo Escobar dans les saisons 1 et 2 de Narcos.",
+   "correction": null,
+   "checked_at": 1795176082.4399533,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-2010_d5_f3e47cca24e9",
+  "category_id": "annees-2010",
+  "difficulty": 5,
+  "question": "Dans la série 'Mare of Easttown' (HBO, 2021), quelle actrice incarne Mare Sheehan, inspectrice de police d'une petite ville de Pennsylvanie enquêtant sur un meurtre, et a remporté l'Emmy Award de la meilleure actrice dans une minisérie pour ce rôle ?",
+  "options": [
+   "Kate Winslet",
+   "Nicole Kidman",
+   "Reese Witherspoon",
+   "Amy Adams"
+  ],
+  "correct_index": 0,
+  "explanation": "Kate Winslet incarne Mare Sheehan dans cette minisérie en 7 épisodes et a effectivement remporté l'Emmy Award de la meilleure actrice dans une minisérie ou un film en septembre 2021 pour ce rôle. La série a été saluée comme l'une des meilleures productions télévisées de l'année.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 99,
+   "comment": "Kate Winslet incarne Mare Sheehan et a remporté l'Emmy 2021 de la meilleure actrice en minisérie.",
+   "correction": null,
+   "checked_at": 1795176100.8024778,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-2010_d5_0a19a97ade19",
+  "category_id": "annees-2010",
+  "difficulty": 5,
+  "question": "Dans la série 'Homeland' (Showtime, 2011-2020), quel acteur britannique incarne Nicholas Brody, le marine américain suspecté d'avoir été retourné par Al-Qaïda, dans les saisons 1 à 3 ?",
+  "options": [
+   "Damian Lewis",
+   "Benedict Cumberbatch",
+   "Hugh Dancy",
+   "Idris Elba"
+  ],
+  "correct_index": 0,
+  "explanation": "Damian Lewis, acteur britannique né en 1971, incarne le sergent Nicholas Brody dans les trois premières saisons de 'Homeland', rôle pour lequel il a remporté le Golden Globe du meilleur acteur dramatique en 2012. Son personnage est finalement exécuté à la fin de la saison 3.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 99,
+   "comment": "Damian Lewis incarne bien Nicholas Brody et a remporté l'Emmy (2012) ainsi que le Golden Globe (2013) pour ce rôle.",
+   "correction": null,
+   "checked_at": 1795176106.4984953,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-2010_d5_6ca663ff6f2e",
+  "category_id": "annees-2010",
+  "difficulty": 5,
+  "question": "Dans la série 'The Last of Us' (HBO, 2023), adaptée du jeu vidéo éponyme, quelle actrice incarne Tess, la partenaire de Joel qui l'aide à escorter Ellie hors de Boston dans les premiers épisodes ?",
+  "options": [
+   "Anna Torv",
+   "Melanie Lynskey",
+   "Catherine O'Hara",
+   "Merritt Wever"
+  ],
+  "correct_index": 0,
+  "explanation": "C'est l'actrice australienne Anna Torv, connue pour son rôle dans 'Fringe', qui incarne Tess dans les deux premiers épisodes de la série. Son personnage sacrifie sa vie pour permettre à Joel et Ellie de poursuivre leur mission.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 98,
+   "comment": "Anna Torv incarne bien Tess dans la série The Last of Us (2023), les autres options sont clairement fausses.",
+   "correction": null,
+   "checked_at": 1795176112.106662,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-2010_d5_1194f419d7ec",
+  "category_id": "annees-2010",
+  "difficulty": 5,
+  "question": "Dans la série 'Stranger Things' (Netflix, depuis 2016), quel acteur incarne le personnage de Jim Hopper, le chef de la police de Hawkins et figure paternelle d'Eleven ?",
+  "options": [
+   "David Harbour",
+   "Winona Ryder",
+   "Matthew Modine",
+   "Sean Astin"
+  ],
+  "correct_index": 0,
+  "explanation": "David Harbour incarne Jim Hopper depuis la saison 1 de 'Stranger Things' en 2016. Son interprétation lui a valu plusieurs nominations aux Screen Actors Guild Awards, et le personnage reste central tout au long de la série.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 100,
+   "comment": "David Harbour incarne bien Jim Hopper depuis la saison 1 de Stranger Things.",
+   "correction": null,
+   "checked_at": 1795176124.6364915,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-2010_d5_24df8ad0932e",
+  "category_id": "annees-2010",
+  "difficulty": 5,
+  "question": "Dans la série 'Black Mirror' (Netflix, depuis 2016), quel épisode de la saison 3, sorti en 2016, se déroule dans un monde où chaque individu est noté par ses pairs via une application mobile, influençant directement son statut social ?",
+  "options": [
+   "Nosedive",
+   "San Junipero",
+   "Shut Up and Dance",
+   "Men Against Fire"
+  ],
+  "correct_index": 0,
+  "explanation": "'Nosedive' (S03E01) met en scène Lacie Pound dans une société dystopique où les interactions sociales sont régies par un système de notation à cinq étoiles. L'épisode, réalisé par Joe Wright, est souvent cité comme l'une des meilleures entrées de la série.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 98,
+   "comment": "Nosedive (S03E01) décrit bien ce système de notation sociale à cinq étoiles, réalisé par Joe Wright.",
+   "correction": null,
+   "checked_at": 1795176130.2400544,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-2010_d5_7a98f6ae25de",
+  "category_id": "annees-2010",
+  "difficulty": 5,
+  "question": "Dans la série 'The Americans' (FX, 2013-2018), quelle actrice incarne Elizabeth Jennings, l'une des deux espions soviétiques infiltrés aux États-Unis sous couverture d'un couple américain ordinaire ?",
+  "options": [
+   "Keri Russell",
+   "Claire Danes",
+   "Robin Wright",
+   "Julianna Margulies"
+  ],
+  "correct_index": 0,
+  "explanation": "Keri Russell incarne Elizabeth Jennings aux côtés de Matthew Rhys (Philip Jennings) dans cette série acclamée par la critique. Matthew Rhys a remporté l'Emmy Award du meilleur acteur dramatique en 2018 pour ce rôle.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 99,
+   "comment": "Keri Russell incarne bien Elizabeth Jennings dans The Americans, aux côtés de Matthew Rhys.",
+   "correction": null,
+   "checked_at": 1795176135.6034222,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-2010_d5_4d4b520187e3",
+  "category_id": "annees-2010",
+  "difficulty": 5,
+  "question": "Dans la série 'Breaking Bad' (AMC, 2008-2013), dont la popularité mondiale a explosé entre 2010 et 2013, quel acteur a remporté l'Emmy Award du meilleur acteur dramatique pour le rôle de Walter White lors de la cérémonie de 2014 ?",
+  "options": [
+   "Bryan Cranston",
+   "Aaron Paul",
+   "Bob Odenkirk",
+   "Michael Keaton"
+  ],
+  "correct_index": 0,
+  "explanation": "Bryan Cranston a remporté l'Emmy Award du meilleur acteur dramatique en 2014 pour son interprétation de Walter White dans la saison finale de 'Breaking Bad'. Il avait déjà décroché ce même prix en 2008, 2009 et 2010 pour le même rôle.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 98,
+   "comment": "Bryan Cranston a bien remporté l'Emmy du meilleur acteur dramatique en 2014 pour Walter White, après ses victoires de 2008, 2009 et 2010.",
+   "correction": null,
+   "checked_at": 1795176140.7273314,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-2010_d5_ad2a2384471e",
+  "category_id": "annees-2010",
+  "difficulty": 5,
+  "question": "Lors de la cérémonie des Oscars 2022 (94e édition), quel film de Jane Campion a remporté l'Oscar de la meilleure réalisation, faisant de Campion seulement la troisième femme à décrocher cette récompense ?",
+  "options": [
+   "The Power of the Dog",
+   "Belfast",
+   "CODA",
+   "Licorice Pizza"
+  ],
+  "correct_index": 0,
+  "explanation": "Jane Campion a remporté l'Oscar de la meilleure réalisation pour 'The Power of the Dog' (2021), adaptation du roman de Thomas Savage avec Benedict Cumberbatch. Elle devient ainsi la troisième femme à obtenir ce prix après Kathryn Bigelow (2010) et Chloé Zhao (2021).",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 98,
+   "comment": "Jane Campion a bien remporté l'Oscar de la meilleure réalisation 2022 pour The Power of the Dog, troisième femme après Bigelow et Zhao.",
+   "correction": null,
+   "checked_at": 1795176146.1544065,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-2010_d6_87e84c0f027d",
+  "category_id": "annees-2010",
+  "difficulty": 6,
+  "question": "Dans la série 'Severance' (Apple TV+, lancée en 2022), quel acteur incarne Mark Scout, l'employé de Lumon Industries qui dirige l'équipe du département MDR et dont la vie personnelle est hantée par le deuil de sa femme ?",
+  "options": [
+   "Adam Scott",
+   "Ben Stiller",
+   "Christopher Walken",
+   "John Turturro"
+  ],
+  "correct_index": 0,
+  "explanation": "Adam Scott incarne Mark Scout dans 'Severance', série créée par Dan Erickson où la procédure de 'severance' sépare chirurgicalement les souvenirs professionnels et personnels des employés. Ben Stiller, lui, est le réalisateur et producteur exécutif de la série.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 98,
+   "comment": "Adam Scott incarne bien Mark Scout dans Severance, Ben Stiller étant réalisateur/producteur.",
+   "correction": null,
+   "checked_at": 1795176151.7737913,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-2010_d6_69821111af28",
+  "category_id": "annees-2010",
+  "difficulty": 6,
+  "question": "Dans la série 'The Crown' (Netflix), quelle actrice a incarné la reine Élisabeth II dans les saisons 3 et 4, diffusées en 2019 et 2020, remportant l'Emmy Award de la meilleure actrice dramatique en 2021 pour ce rôle ?",
+  "options": [
+   "Olivia Colman",
+   "Claire Foy",
+   "Helena Bonham Carter",
+   "Imelda Staunton"
+  ],
+  "correct_index": 0,
+  "explanation": "Olivia Colman a repris le rôle de la reine Élisabeth II pour les saisons 3 et 4, succédant à Claire Foy qui l'avait incarnée dans les saisons 1 et 2. Sa performance lui a valu l'Emmy Award de la meilleure actrice dans une série dramatique en septembre 2021.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 96,
+   "comment": "Olivia Colman a bien joué la reine en saisons 3-4 et remporté l'Emmy de meilleure actrice dramatique en 2021.",
+   "correction": null,
+   "checked_at": 1795176157.2720804,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ }
+]

@@ -172,25 +172,58 @@ STATIC_DIR.mkdir(exist_ok=True)
 app.mount("/api/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
 
 
+async def _safe_index(coll, keys, **kw):
+    """Crée un index sans jamais bloquer le démarrage (conflit d'options → drop + recréation)."""
+    from pymongo.errors import OperationFailure
+    try:
+        await coll.create_index(keys, **kw)
+    except OperationFailure as e:
+        if e.code not in (85, 86):
+            logger.error(f"[index] {coll.name} {keys} non créé : {e}")
+            return
+        name = kw.get("name") or "_".join(f"{k}_{d}" for k, d in ([(keys, 1)] if isinstance(keys, str) else keys))
+        try:
+            await coll.drop_index(name)
+            await coll.create_index(keys, **kw)
+            logger.info(f"[index] {coll.name}.{name} recréé")
+        except Exception as e2:
+            logger.error(f"[index] {coll.name}.{name} non recréé : {e2}")
+    except Exception as e:
+        logger.error(f"[index] {coll.name} {keys} non créé : {e}")
+
+
+CURATED_DIR = ROOT_DIR / "data" / "curated_questions"
+
+
+async def sync_curated_questions():
+    """Recopie (upsert par id) les questions générées et vérifiées en aperçu, pour que la prod ait les mêmes."""
+    import json as _json
+    for f in sorted(CURATED_DIR.glob("*.json")):
+        docs = _json.loads(f.read_text(encoding="utf-8"))
+        for d in docs:
+            await db.questions.update_one({"id": d["id"]}, {"$set": d}, upsert=True)
+        logger.info(f"[curated] {f.stem} : {len(docs)} question(s) synchronisée(s)")
+
+
 @app.on_event("startup")
 async def startup():
     # Indexes
-    await db.users.create_index("email", unique=True)
-    await db.users.create_index("apple_sub", sparse=True)
-    await db.users.create_index("google_sub", sparse=True)
-    await db.categories.create_index("id", unique=True)
-    await db.questions.create_index("category_id")
+    await _safe_index(db.users, "email", unique=True)
+    await _safe_index(db.users, "apple_sub", sparse=True)
+    await _safe_index(db.users, "google_sub", sparse=True)
+    await _safe_index(db.categories, "id", unique=True)
+    await _safe_index(db.questions, "category_id")
     # Composite index for the security lookup in POST /attempts
     # (fetches questions by their id list restricted to the category)
-    await db.questions.create_index([("id", 1), ("category_id", 1)])
-    await db.attempts.create_index([("user_id", 1), ("created_at", -1)])
-    await db.payment_transactions.create_index("session_id", unique=True)
-    await db.challenges.create_index("token", unique=True)
-    await db.challenges.create_index([("creator_user_id", 1), ("created_at", -1)])
-    await db.promo_codes.create_index("code", unique=True)
+    await _safe_index(db.questions, [("id", 1), ("category_id", 1)])
+    await _safe_index(db.attempts, [("user_id", 1), ("created_at", -1)])
+    await _safe_index(db.payment_transactions, "session_id", unique=True)
+    await _safe_index(db.challenges, "token", unique=True)
+    await _safe_index(db.challenges, [("creator_user_id", 1), ("created_at", -1)])
+    await _safe_index(db.promo_codes, "code", unique=True)
     await gifts_router.ensure_gift_indexes()
-    await db.family_proches.create_index("token", unique=True)
-    await db.family_proches.create_index([("owner_id", 1), ("status", 1)])
+    await _safe_index(db.family_proches, "token", unique=True)
+    await _safe_index(db.family_proches, [("owner_id", 1), ("status", 1)])
 
     # -- QA jobs sweep — au startup, TOUS les jobs "running" sont zombies
     # (leur PID a été tué par le restart et peut avoir été réattribué). On
@@ -207,41 +240,38 @@ async def startup():
     _asyncio.create_task(_dequeue_next())
     # Watchdog : reprend les jobs orphelins (heartbeat mort) depuis leur checkpoint
     _asyncio.create_task(qa_watchdog_loop())
-    await db.password_reset_tokens.create_index("token", unique=True)
-    await db.password_reset_tokens.create_index("expires_at", expireAfterSeconds=0)
-    await db.daily_attempts.create_index([("user_id", 1), ("date_key", 1)], unique=True)
-    await db.daily_quizzes.create_index("date_key", unique=True)
-    await db.attempts.create_index(
+    await _safe_index(db.password_reset_tokens, "token", unique=True)
+    await _safe_index(db.password_reset_tokens, "expires_at", expireAfterSeconds=0)
+    await _safe_index(db.daily_attempts, [("user_id", 1), ("date_key", 1)], unique=True)
+    await _safe_index(db.daily_quizzes, "date_key", unique=True)
+    await _safe_index(db.attempts, 
         [("user_id", 1), ("source", 1), ("category_id", 1), ("mini_week", 1)],
         unique=True, partialFilterExpression={"source": "mini_quiz"}, name="uniq_mini_quiz_claim",
     )
-    await db.daily_attempts.create_index([("date_key", 1), ("score", -1), ("duration_seconds", 1)])
+    await _safe_index(db.daily_attempts, [("date_key", 1), ("score", -1), ("duration_seconds", 1)])
     # Gamification indexes
-    await db.credit_ledger.create_index([("user_id", 1), ("created_at", -1)])
-    await db.league_memberships.create_index([("user_id", 1), ("week_key", 1)], unique=True)
-    await db.league_memberships.create_index("cohort_id")
-    await db.league_scores.create_index([("user_id", 1), ("week_key", 1)], unique=True)
-    await db.league_scores.create_index([("week_key", 1), ("xp", -1)])
-    await db.question_reports.create_index([("status", 1), ("question_id", 1)])
-    await db.question_reports.create_index([("user_id", 1), ("question_id", 1)])
+    await _safe_index(db.credit_ledger, [("user_id", 1), ("created_at", -1)])
+    await _safe_index(db.league_memberships, [("user_id", 1), ("week_key", 1)], unique=True)
+    await _safe_index(db.league_memberships, "cohort_id")
+    await _safe_index(db.league_scores, [("user_id", 1), ("week_key", 1)], unique=True)
+    await _safe_index(db.league_scores, [("week_key", 1), ("xp", -1)])
+    await _safe_index(db.question_reports, [("status", 1), ("question_id", 1)])
+    await _safe_index(db.question_reports, [("user_id", 1), ("question_id", 1)])
     # Referral indexes (unique sparse: users created before P2 have no code yet)
-    await db.users.create_index("referral_code", unique=True, sparse=True)
+    await _safe_index(db.users, "referral_code", unique=True, sparse=True)
     # App-wide state (e.g. Mistral last regen) — single doc keyed by `key`
-    await db.app_state.create_index("key", unique=True)
+    await _safe_index(db.app_state, "key", unique=True)
     # Cooperative challenges — token lookup + creator listing
-    await db.coop_challenges.create_index("token", unique=True)
-    await db.coop_challenges.create_index([("creator_user_id", 1), ("created_at", -1)])
+    await _safe_index(db.coop_challenges, "token", unique=True)
+    await _safe_index(db.coop_challenges, [("creator_user_id", 1), ("created_at", -1)])
     # Badges — one row per (user, badge) with unique index for idempotent inserts
-    await db.user_badges.create_index([("user_id", 1), ("badge_id", 1)], unique=True)
+    await _safe_index(db.user_badges, [("user_id", 1), ("badge_id", 1)], unique=True)
     # Category mastery — one row per (user, category)
-    await db.user_category_stats.create_index([("user_id", 1), ("category_id", 1)], unique=True)
-    await db.palier_attempts.create_index([("user_id", 1), ("category_id", 1), ("palier", 1)])
+    await _safe_index(db.user_category_stats, [("user_id", 1), ("category_id", 1)], unique=True)
+    await _safe_index(db.palier_attempts, [("user_id", 1), ("category_id", 1), ("palier", 1)])
     from routers.palier import backfill_legacy_palier_attempts
     logger.info(f"[palier] tentatives historiques reconstituées : {await backfill_legacy_palier_attempts()}")
-    from routers.admin_qa import one_shot_prod_topup
-    await one_shot_prod_topup("bien-vieillir", "topup_bien_vieillir_2026_11")
-    await one_shot_prod_topup("annees-80", "topup_annees_80_2026_11")
-    await one_shot_prod_topup("annees-2010", "topup_annees_2010_2026_11")
+    await sync_curated_questions()
 
     # Seed categories (always refresh metadata: title/description/mascot/count/group/sort_order)
     for cat in CATEGORIES:

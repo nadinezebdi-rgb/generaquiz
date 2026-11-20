@@ -1950,3 +1950,11 @@ Les routes `/bulk/*` étaient interceptées par `/{qid}/approve|flag|apply-corre
 - Validation Pydantic : HTTP 422 sur ids vides ou > 500
 - Sécurité : HTTP 403 pour non-admin sur tous les endpoints bulk
 
+
+## 2026-11-20 — Fork : déblocage prod + stocks de questions
+- Démarrage : toutes les créations d'index passent par `_safe_index` (server.py) — conflit d'options (code 85/86) → drop + recréation, jamais de crash (cause probable : `payment_transactions.session_id_1`). `ensure_gift_indexes` entièrement protégé.
+- Bien vieillir, Années 80, 2010 à aujourd'hui : 140 questions vérifiées chacune (20/palier) générées en aperçu, exportées dans `backend/data/curated_questions/*.json` et synchronisées au démarrage (upsert par id) → la prod reçoit exactement les mêmes. Script : `export_curated_questions.py` (à relancer après toute modif).
+- Lucette : règles « bon sens, aucun jargon, pas de zones bleues/mots étrangers » + thème imposé aléatoire (BV_THEMES dans topup_paliers.py) ; fact-check rejette le jargon. 99 questions trop savantes/répétitives écartées.
+- Remplacement des one_shot_prod_topup par la synchro curated.
+- Mascotte Nathalie la Fluo régénérée (2 bras).
+- Restant : LOT 3 (rapport hebdo aidants / alertes inactivité), EHPAD superviseur, CRM B2B.

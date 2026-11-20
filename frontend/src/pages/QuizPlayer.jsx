@@ -87,6 +87,18 @@ export default function QuizPlayer() {
   }
 
   const { category, questions, is_premium, pool } = data;
+  if (!questions.length) {
+    return (
+      <div className="min-h-screen paper-bg">
+        <Navbar variant="app" />
+        <main className="max-w-xl mx-auto px-4 py-16 text-center" data-testid="quiz-soon">
+          <h1 className="font-display text-3xl font-extrabold text-navy mb-3">{category.title} — bientôt disponible</h1>
+          <p className="text-navy/70 text-lg mb-6">{category.mascot_name} prépare ses questions. Revenez très vite !</p>
+          <Link to="/app/dashboard" className="bg-navy text-cream font-bold px-6 py-3 rounded-full hover:bg-terracotta transition-colors">Retour au tableau de bord</Link>
+        </main>
+      </div>
+    );
+  }
   const total = questions.length;
   const q = questions[idx];
   const currentMember = familyMode && members.length > 0 ? members[responderIdx] : null;
