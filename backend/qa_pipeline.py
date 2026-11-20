@@ -106,6 +106,16 @@ CATEGORY_RULES = {
         "aucun symptôme ni nom de maladie présenté comme évitable. Préférer « aide à se sentir en forme », "
         "« est conseillé pour garder le moral », « favorise un bon sommeil »."
     ),
+    "annees-80": (
+        "RÈGLES ÉDITORIALES « Années 80 » : uniquement des faits datés de 1980 à 1989 (musique, télévision, "
+        "cinéma, objets du quotidien, jeux, mode, sport, grands événements en France et dans le monde). "
+        "Culture populaire accessible à toutes les générations ; aucune question politique clivante."
+    ),
+    "annees-2010": (
+        "RÈGLES ÉDITORIALES « 2010 à aujourd'hui » : uniquement des faits datés de 2010 à 2024 inclus "
+        "(smartphones et applications, séries, musique, cinéma, sport dont JO de Paris 2024, grands événements). "
+        "Ne rien affirmer sur l'actualité postérieure à 2024 ; aucune question politique clivante."
+    ),
 }
 
 
@@ -115,7 +125,7 @@ def category_rules(category_id: str | None) -> str:
 
 
 def fact_check_rules(category_id: str | None) -> str:
-    if category_id not in CATEGORY_RULES:
+    if category_id != "bien-vieillir":
         return ""
     return ("\n\nCONTRÔLE ÉDITORIAL : si la question, une option ou l'explication contient une allégation "
             "médicale (prévention, réduction de risque, traitement ou guérison d'une maladie, médicament, "

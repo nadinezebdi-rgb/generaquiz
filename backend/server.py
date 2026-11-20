@@ -240,6 +240,8 @@ async def startup():
     logger.info(f"[palier] tentatives historiques reconstituées : {await backfill_legacy_palier_attempts()}")
     from routers.admin_qa import one_shot_prod_topup
     await one_shot_prod_topup("bien-vieillir", "topup_bien_vieillir_2026_11")
+    await one_shot_prod_topup("annees-80", "topup_annees_80_2026_11")
+    await one_shot_prod_topup("annees-2010", "topup_annees_2010_2026_11")
 
     # Seed categories (always refresh metadata: title/description/mascot/count/group/sort_order)
     for cat in CATEGORIES:

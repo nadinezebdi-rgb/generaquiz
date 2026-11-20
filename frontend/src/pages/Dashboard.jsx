@@ -290,7 +290,7 @@ export default function Dashboard() {
         <div className="mb-12">
           <div className="flex items-end justify-between mb-6">
             <h2 className="font-display text-3xl font-extrabold text-navy">Mes catégories</h2>
-            <span className="text-navy/60 font-medium">{categories.length} disponibles</span>
+            <span className="text-navy/60 font-medium">{categories.filter((c) => (c.count || 0) >= 20).length} disponibles</span>
           </div>
           {groupCategories(categories).map((universe) => (
           <section key={universe.id} className="mb-10 last:mb-0" data-testid={`dashboard-universe-${universe.id}`}>

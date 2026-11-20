@@ -81,7 +81,7 @@ export default function ChallengeNew() {
             <div>
               <label className="block font-bold text-navy mb-3 text-lg">Catégorie</label>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {categories.map((cat) => (
+                {categories.filter((c) => (c.count || 0) >= 20).map((cat) => (
                   <button
                     type="button"
                     key={cat.id}

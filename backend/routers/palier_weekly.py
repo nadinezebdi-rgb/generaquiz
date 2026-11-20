@@ -42,6 +42,9 @@ async def pick_weekly_challenge() -> dict:
         return existing
 
     cats = await db.categories.find({}, {"_id": 0, "id": 1, "title": 1}).to_list(50)
+    # Uniquement les catégories au stock complet (les nouvelles époques arrivent progressivement)
+    cats = [c for c in cats if await db.questions.count_documents(
+        {"category_id": c["id"], "quality": {"$ne": "flagged"}}) >= 140]
     if not cats:
         logger.warning("[weekly-palier] aucune catégorie disponible")
         return {}

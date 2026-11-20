@@ -1,7 +1,30 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Check, Gamepad2, Loader2, X } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { api } from "@/lib/api";
+import { useAuth } from "@/contexts/AuthContext";
+import { showBadgeToasts } from "@/lib/badgeToast";
+
+function SeriesProgress({ habit }) {
+  const { user } = useAuth();
+  const [series, setSeries] = useState(null);
+  useEffect(() => {
+    if (!user) return;
+    api.post(`/bien-vieillir/habits/${habit.id}/quiz/complete`).then(({ data }) => {
+      setSeries(data);
+      showBadgeToasts(data.awarded_badges);
+    }).catch(() => {});
+  }, [user, habit.id]);
+  if (!user) return <p className="text-sm text-navy/60 mt-3" data-testid="habit-series-login">Connectez-vous pour gagner le badge « Série d&apos;habitudes ».</p>;
+  if (!series) return null;
+  const left = Math.max(0, series.target - series.habits_played);
+  return (
+    <p className="text-base text-navy mt-3 font-semibold" data-testid="habit-series-progress">
+      🌿 {series.habits_played} habitude{series.habits_played > 1 ? "s" : ""} jouée{series.habits_played > 1 ? "s" : ""} cette semaine
+      {left > 0 ? ` — encore ${left} pour le badge « Série d'habitudes »` : " — badge « Série d'habitudes » obtenu !"}
+    </p>
+  );
+}
 
 function QuizBody({ habit, questions }) {
   const [idx, setIdx] = useState(0);
@@ -13,6 +36,7 @@ function QuizBody({ habit, questions }) {
       <div className="text-center py-6" data-testid="habit-quiz-result">
         <p className="font-display text-3xl font-extrabold text-navy mb-2">{score} / {questions.length}</p>
         <p className="text-lg text-navy/75">Bravo ! Un geste de plus pour « {habit.label} ».</p>
+        <SeriesProgress habit={habit} />
       </div>
     );
   }
@@ -66,6 +90,10 @@ export function HabitQuizButton({ habit }) {
     const r = await api.get(`/bien-vieillir/habits/${habit.id}/quiz`).catch(() => ({ data: { questions: [] } }));
     setData(r.data);
   };
+  useEffect(() => {
+    // Lien de l'e-mail du matin : /bien-vieillir?quiz=<habitude>
+    if (new URLSearchParams(window.location.search).get("quiz") === habit.id) start();
+  }, [habit.id]); // eslint-disable-line react-hooks/exhaustive-deps
   return (
     <>
       <button type="button" onClick={start} data-testid={`routine-habit-quiz-${habit.id}`}

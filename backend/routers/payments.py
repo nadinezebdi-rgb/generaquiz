@@ -123,8 +123,10 @@ async def stripe_webhook(request: Request):
     if evt.payment_status == "paid":
         tx = await db.payment_transactions.find_one({"session_id": evt.session_id})
         if tx and tx.get("gift"):
-            from routers.gifts import fulfill_gift_transaction
-            await fulfill_gift_transaction(tx)
+            from routers.gifts import fulfill_gift_transaction, _confirm_gift_order
+            confirmed = await _confirm_gift_order(tx)
+            if confirmed:
+                await fulfill_gift_transaction(confirmed)
             await db.payment_transactions.update_one({"session_id": evt.session_id},
                                                       {"$set": {"payment_status": "paid", "status": "complete"}})
         elif tx and tx["payment_status"] != "paid":

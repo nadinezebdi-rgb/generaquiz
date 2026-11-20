@@ -52,6 +52,7 @@ BADGES: list[dict] = [
     {"id": "palier_expert",    "title": "Expert d'une catégorie", "desc": "Valider le palier 7 (Expert) d'une catégorie", "emoji": "🎓", "tier": "or",      "family": "palier"},
     {"id": "palier_grand_maitre", "title": "Grand Maître",    "desc": "Valider le palier 7 dans 3 catégories différentes", "emoji": "👑", "tier": "diamant", "family": "palier"},
     {"id": "palier_perfect_20", "title": "Sans-faute palier", "desc": "20/20 sur un palier (score parfait)",   "emoji": "💯", "tier": "or",     "family": "palier"},
+    {"id": "habit_series",      "title": "Série d'habitudes", "desc": "4 quiz express d'habitudes différentes dans la même semaine", "emoji": "🌿", "tier": "argent", "family": "bien_vieillir"},
     {"id": "weekly_streak_4",   "title": "Fidèle du défi",    "desc": "Relever le défi hebdo 4 semaines d'affilée", "emoji": "🔥", "tier": "or",     "family": "palier"},
 ]
 BADGE_INDEX = {b["id"]: b for b in BADGES}

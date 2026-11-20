@@ -779,7 +779,7 @@ def is_preview_env() -> bool:
     return "preview.emergentagent.com" in (FRONTEND_URL or "") or "localhost" in (FRONTEND_URL or "")
 
 
-PROD_ONLY_TOPUP = {"bien-vieillir"}  # génération IA coûteuse : jamais en aperçu
+PROD_ONLY_TOPUP = {"bien-vieillir", "annees-80", "annees-2010"}  # génération IA coûteuse : jamais en aperçu
 
 
 async def one_shot_prod_topup(category_id: str, marker: str) -> None:

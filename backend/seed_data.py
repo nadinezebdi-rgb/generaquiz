@@ -52,11 +52,25 @@ CATEGORIES = [
         "mascot_name": "Chef Bernard", "count": 100,
     },
     {
-        "id": "culture-40-ans", "title": "Années 90-2000", "group": "epoques", "sort_order": 2,
+        "id": "culture-40-ans", "title": "Années 90-2000", "group": "epoques", "sort_order": 3,
         "description": "Pop culture, tech et événements des années 90 et 2000.",
         "color": "#8B5CF6", "icon": "sparkles",
         "mascot_image": "/api/static/mascots/culture-40-ans.png",
         "mascot_name": "Sophie la Quadra", "count": 100,
+    },
+    {
+        "id": "annees-80", "title": "Années 80", "group": "epoques", "sort_order": 2,
+        "description": "Les tubes, la télé et les grands moments des années 80.",
+        "color": "#DB2777", "icon": "music",
+        "mascot_image": "/api/static/mascots/annees-80.png",
+        "mascot_name": "Nathalie la Fluo", "count": 0,
+    },
+    {
+        "id": "annees-2010", "title": "2010 à aujourd'hui", "group": "epoques", "sort_order": 4,
+        "description": "Smartphones, séries et événements des quinze dernières années.",
+        "color": "#2563EB", "icon": "phone",
+        "mascot_image": "/api/static/mascots/annees-2010.png",
+        "mascot_name": "Léo le Connecté", "count": 0,
     },
     {
         "id": "culture-70-ans", "title": "Années 60-70", "group": "epoques", "sort_order": 1,

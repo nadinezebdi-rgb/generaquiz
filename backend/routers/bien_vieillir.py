@@ -247,3 +247,27 @@ async def habit_quiz_answer(habit_id: str, body: HabitQuizAnswer) -> dict[str, A
     ci = int(q["correct_index"])
     return {"correct": body.choice == ci, "correct_index": ci, "correct_answer": q["options"][ci],
             "explanation": (q.get("explanation") or "").strip()}
+
+
+HABIT_SERIES_TARGET = 4  # quiz express d'habitudes différentes dans la même semaine
+
+
+@router.post("/habits/{habit_id}/quiz/complete")
+async def habit_quiz_complete(habit_id: str, user: dict = Depends(get_current_user)) -> dict[str, Any]:
+    """Enregistre un quiz express terminé ; badge « Série d'habitudes » à 4 habitudes dans la semaine."""
+    if habit_id not in HABIT_QUIZ_KEYWORDS:
+        raise HTTPException(status_code=404, detail="Habitude inconnue")
+    from zoneinfo import ZoneInfo
+    from badges import award_badge
+    y, w, _ = datetime.now(ZoneInfo("Europe/Paris")).isocalendar()
+    week = f"{y}-W{w:02d}"
+    uid = str(user["_id"])
+    await db.habit_quiz_plays.update_one(
+        {"user_id": uid, "week": week, "habit_id": habit_id},
+        {"$setOnInsert": {"user_id": uid, "week": week, "habit_id": habit_id,
+                          "created_at": datetime.now(timezone.utc).isoformat()}}, upsert=True)
+    done = await db.habit_quiz_plays.count_documents({"user_id": uid, "week": week})
+    awarded = []
+    if done >= HABIT_SERIES_TARGET and await award_badge(uid, "habit_series", {"week": week}):
+        awarded.append("habit_series")
+    return {"week": week, "habits_played": done, "target": HABIT_SERIES_TARGET, "awarded_badges": awarded}

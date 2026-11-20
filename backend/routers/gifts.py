@@ -13,6 +13,7 @@ from typing import Literal, Optional
 from zoneinfo import ZoneInfo
 
 import stripe
+from emergentintegrations.payments.stripe.checkout import StripeCheckout, CheckoutSessionRequest
 from bson import ObjectId
 from fastapi import APIRouter, Depends, HTTPException, Request, Response
 from fastapi.responses import JSONResponse
@@ -28,6 +29,7 @@ from core import (
     GIFT_STRIPE_LIVE_SECRET_KEY, GIFT_STRIPE_LIVE_WEBHOOK_SECRET, GIFT_STRIPE_MODE,
     GIFT_STRIPE_TEST_PRODUCT_ID, GIFT_STRIPE_TEST_PRICE_ID, GIFT_STRIPE_TEST_SECRET_KEY,
     GIFT_STRIPE_TEST_WEBHOOK_SECRET, FRONTEND_URL, STRIPE_WEBHOOK_SECRET, client, db,
+    JWT_SECRET, STRIPE_API_KEY,
     RESEND_API_KEY, SENDER_EMAIL, get_admin_user, get_current_user, is_premium_active,
     logger, rate_limit, record_audit,
 )
@@ -67,11 +69,16 @@ def _new_code() -> str:
     return "GQ-" + "-".join(raw[index:index + 8] for index in range(0, 32, 8))
 
 
+def _gift_encryption_key() -> str:
+    """Clé dédiée si fournie, sinon dérivée de JWT_SECRET (stable par environnement)."""
+    if GIFT_CODE_ENCRYPTION_KEY:
+        return GIFT_CODE_ENCRYPTION_KEY
+    return base64.urlsafe_b64encode(hashlib.sha256(b"gq-gift-codes-v1:" + JWT_SECRET.encode()).digest()).decode()
+
+
 def _fernet() -> Fernet:
-    if not GIFT_CODE_ENCRYPTION_KEY:
-        raise HTTPException(status_code=503, detail="Le service de cartes cadeau n'est pas configuré")
     try:
-        return Fernet(GIFT_CODE_ENCRYPTION_KEY.encode())
+        return Fernet(_gift_encryption_key().encode())
     except Exception as exc:
         logger.error("Clé de chiffrement des cartes cadeau invalide")
         raise HTTPException(status_code=503, detail="Le service de cartes cadeau n'est pas configuré") from exc
@@ -154,6 +161,19 @@ def _stripe_create_catalog_entry(config: dict, offer_id: str, amount_cents: int,
             idempotency_key=f"gq-gift-price-v1-{config['mode']}-{offer_id}-{amount_cents}",
         )
     return {"product_id": product["id"], "price_id": price["id"]}
+
+
+def _native_stripe_configured() -> bool:
+    try:
+        _stripe_config()
+        return True
+    except HTTPException:
+        return False
+
+
+def _platform_checkout() -> StripeCheckout:
+    """Paiement Stripe de la plateforme (le même que les abonnements)."""
+    return StripeCheckout(api_key=STRIPE_API_KEY, webhook_url=f"{FRONTEND_URL.rstrip('/')}/api/webhook/stripe")
 
 
 async def _ensure_stripe_catalog_entry(offer_id: str, amount_cents: int, tier: str) -> dict:
@@ -401,7 +421,9 @@ async def gift_checkout(body: GiftCheckout, request: Request) -> dict:
         raise HTTPException(status_code=410, detail="L'offre de Noël est terminée")
     _fernet()
     amount_cents = int((Decimal(str(offer["price"])) * 100).quantize(Decimal("1")))
-    catalog = await _ensure_stripe_catalog_entry(body.offer, amount_cents, tier)
+    platform = not _native_stripe_configured()
+    catalog = ({"mode": "platform", "product_id": None, "price_id": None} if platform
+               else await _ensure_stripe_catalog_entry(body.offer, amount_cents, tier))
     mode = catalog["mode"]
     order_id = ObjectId()
     buyer_access_token = secrets.token_urlsafe(32)
@@ -431,6 +453,21 @@ async def gift_checkout(body: GiftCheckout, request: Request) -> dict:
     await db.payment_transactions.insert_one(transaction)
 
     origin = FRONTEND_URL.rstrip("/")
+    if platform:
+        try:
+            ps = await _platform_checkout().create_checkout_session(CheckoutSessionRequest(
+                amount=amount_cents / 100, currency="eur",
+                success_url=f"{origin}/offrir/merci?session_id={{CHECKOUT_SESSION_ID}}#access={buyer_access_token}",
+                cancel_url=f"{origin}/offrir",
+                metadata={"gift_order_id": str(order_id), "gift_offer": body.offer, "package_id": package_id},
+            ))
+        except Exception as exc:
+            await db.payment_transactions.update_one({"_id": order_id}, {"$set": {"status": "checkout_error"}})
+            logger.error("Création de session Stripe cadeau impossible (order=%s): %s", order_id, exc)
+            raise HTTPException(status_code=503, detail="Impossible de démarrer le paiement") from exc
+        await db.payment_transactions.update_one({"_id": order_id}, {"$set": {
+            "session_id": ps.session_id, "status": "open", "checkout_url": ps.url}})
+        return {"url": ps.url, "session_id": ps.session_id}
     config = _stripe_config(mode, body.offer)
     stripe.api_key = config["api_key"]
     try:
@@ -514,9 +551,30 @@ def _validate_paid_session(tx: dict, session) -> dict:
             "paid_at": paid_at}
 
 
+async def _confirm_platform_order(tx: dict) -> Optional[dict]:
+    st = await _platform_checkout().get_checkout_status(tx["session_id"])
+    if st.payment_status != "paid":
+        await db.payment_transactions.update_one({"_id": tx["_id"]}, {"$set": {
+            "payment_status": st.payment_status, "status": st.status}})
+        return None
+    if (st.amount_total != tx.get("amount_cents") or (st.currency or "").lower() != "eur"
+            or (st.metadata or {}).get("gift_order_id") != str(tx["_id"])):
+        raise ValueError("La session Stripe ne correspond pas à la commande")
+    paid_at = datetime.now(timezone.utc)
+    if tx.get("gift", {}).get("is_christmas") and paid_at >= SALE_CUTOFF:
+        raise ValueError("Le paiement Noël a été effectué après la fermeture de l'offre")
+    delivery_status = "queued" if tx.get("gift", {}).get("delivery_method") == "direct" else "not_required"
+    await db.payment_transactions.update_one({"_id": tx["_id"]}, {"$set": {
+        "payment_status": "paid", "status": "complete", "stripe_verified": True,
+        "gift_delivery_status": delivery_status, "paid_at": paid_at}})
+    return await db.payment_transactions.find_one({"_id": tx["_id"]})
+
+
 async def _confirm_gift_order(tx: dict) -> Optional[dict]:
     if tx.get("payment_status") == "paid" and tx.get("stripe_verified") is True:
         return tx
+    if tx.get("stripe_mode") == "platform":
+        return await _confirm_platform_order(tx)
     session = await _retrieve_checkout_session(tx)
     session_data = _stripe_object(session)
     if session_data.get("payment_status") != "paid":
@@ -659,6 +717,15 @@ async def close_expired_christmas_checkouts() -> None:
     }).limit(100)
     async for tx in cursor:
         try:
+            if tx.get("stripe_mode") == "platform":
+                confirmed = await _confirm_gift_order(tx)
+                if confirmed:
+                    await _ensure_gift_pdf(await fulfill_gift_transaction(confirmed))
+                else:
+                    await db.payment_transactions.update_one(
+                        {"_id": tx["_id"], "payment_status": {"$ne": "paid"}},
+                        {"$set": {"status": "expired", "payment_status": "unpaid"}})
+                continue
             session = await _retrieve_checkout_session(tx)
             session_data = _stripe_object(session)
             if session_data.get("payment_status") == "paid":
