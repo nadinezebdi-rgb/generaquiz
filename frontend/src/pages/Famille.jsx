@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
-import { Users, UserPlus, Trash2, Trophy, Swords, Copy, LogOut, Gift } from "lucide-react";
+import { Users, UserPlus, Trash2, Trophy, Swords, Copy, LogOut, Gift, Mail } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
 import Navbar from "@/components/Navbar";
 import { FamilyAccessTable } from "@/components/FamilyAccessTable";
 import { api, formatError } from "@/lib/api";
@@ -91,6 +92,35 @@ function Challenges({ items }) {
   );
 }
 
+function ShareProgress({ space, reload }) {
+  const owner = space.role === "owner";
+  const toggle = async (enabled) => {
+    try { await api.put("/famille/partage", { enabled }); toast.success(enabled ? "Partage activé" : "Partage désactivé"); reload(); }
+    catch (e) { err(e); }
+  };
+  return (
+    <section className="bg-white rounded-3xl border-2 border-cream-dark p-6 flex flex-wrap items-start gap-4" data-testid="famille-share">
+      <Mail className="w-6 h-6 text-terracotta mt-1 shrink-0" />
+      <div className="flex-1 min-w-[200px]">
+        <h2 className="font-display text-2xl font-extrabold text-navy mb-1">Nouvelles du dimanche</h2>
+        <p className="text-navy/70 text-sm" data-testid="famille-share-text">
+          {owner
+            ? "Chaque dimanche, vos proches reçoivent un petit mot sur votre semaine de jeu et une idée de sujet pour vous appeler. Si vous ne jouez pas pendant 3 jours, ils sont prévenus une fois."
+            : space.share_progress
+              ? `${space.owner_name} partage sa semaine de jeu avec vous : vous recevez un e-mail chaque dimanche et une alerte après 3 jours sans jouer.`
+              : `${space.owner_name} n'a pas activé le partage de ses progrès.`}
+        </p>
+      </div>
+      {owner && (
+        <label className="flex items-center gap-3 font-semibold text-navy">
+          {space.share_progress ? "Activé" : "Désactivé"}
+          <Switch checked={space.share_progress} onCheckedChange={toggle} data-testid="famille-share-toggle" />
+        </label>
+      )}
+    </section>
+  );
+}
+
 function NoFamily() {
   return (
     <div className="grid gap-6" data-testid="famille-none">
@@ -128,6 +158,7 @@ export default function Famille() {
               </h1>
             </header>
             <Leaderboard rows={space.leaderboard} me={space.me} />
+            <ShareProgress space={space} reload={load} />
             <Challenges items={space.challenges} />
             <ProchesList space={space} reload={load} />
             {space.role === "proche" && (

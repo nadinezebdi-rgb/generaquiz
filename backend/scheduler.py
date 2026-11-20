@@ -62,6 +62,7 @@ def start_scheduler() -> None:
     from topup_paliers_job import topup_all_categories_nightly
     from daily_tips import daily_tip_job
     from morning_report import send_admin_morning_report
+    from family_report import send_inactivity_alerts, send_weekly_family_reports
     from routers.gifts import close_expired_christmas_checkouts, retry_pending_gift_pdfs
 
     _scheduler = AsyncIOScheduler(timezone="Europe/Paris")
@@ -78,6 +79,8 @@ def start_scheduler() -> None:
     _schedule(_scheduler, send_admin_morning_report, hour=7,  minute=30, job_id="admin_morning_report")
     _schedule(_scheduler, send_morning_emails,       hour=9,  minute=0,  job_id="daily_quiz_email")
     _schedule(_scheduler, send_expiration_emails,    hour=10, minute=0,  job_id="premium_expiration_email_j7")
+    _schedule(_scheduler, send_inactivity_alerts,    hour=11, minute=0,  job_id="family_inactivity_alert")
+    _schedule(_scheduler, send_weekly_family_reports, day_of_week="sun", hour=10, minute=0, job_id="family_weekly_report_sunday")
 
     # -- Ligues (dimanche 20:00 + lundi 00:05 Paris) ----------------------------
     _schedule(_scheduler, send_league_reminders,     day_of_week="sun", hour=20, minute=0, job_id="league_reminder_sunday_20h")
