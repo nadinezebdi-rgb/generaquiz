@@ -1,13 +1,15 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import { api, formatError, BACKEND_URL } from "@/lib/api";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { PlayView, MistakesReview } from "@/components/PalierPlay";
+import { useAuth } from "@/contexts/AuthContext";
 import {
-  Lock, Unlock, Check, Trophy, ChevronRight, ChevronLeft, ArrowLeft, Sparkles,
-  Loader2, X, RotateCcw, Award,
+  Lock, Unlock, Check, Trophy, ChevronRight, ArrowLeft, Sparkles,
+  Loader2, RotateCcw, Award,
 } from "lucide-react";
 
 /**
@@ -23,7 +25,7 @@ export default function Parcours() {
   const [overview, setOverview] = useState(null);
   const [loading, setLoading] = useState(true);
   const [mode, setMode] = useState("overview"); // overview | playing | result
-  const [playState, setPlayState] = useState(null); // {palier, questions, answers, idx}
+  const [playState, setPlayState] = useState(null); // {palier, questions, feedback, idx}
   const [result, setResult] = useState(null);
 
   const refresh = useCallback(async () => {
@@ -48,7 +50,7 @@ export default function Parcours() {
         label: data.label,
         pass_threshold: data.pass_threshold,
         questions: data.questions,
-        answers: {},
+        feedback: {},
         idx: 0,
       });
       setResult(null);
@@ -67,15 +69,9 @@ export default function Parcours() {
 
   async function submitPalier() {
     if (!playState) return;
-    const { palier, questions, answers } = playState;
-    const payload = {
-      answers: questions.map((q) => ({
-        question_id: q.id,
-        answer_index: answers[q.id] ?? -1,
-      })),
-    };
+    const { palier } = playState;
     try {
-      const { data } = await api.post(`/palier/categories/${categoryId}/${palier}/submit`, payload);
+      const { data } = await api.post(`/palier/categories/${categoryId}/${palier}/submit`, {});
       setResult(data);
       setMode("result");
       // Toast pour chaque nouveau badge — récompense visible immédiatement
@@ -127,6 +123,7 @@ export default function Parcours() {
               <PlayView
                 state={playState}
                 setState={setPlayState}
+                categoryId={categoryId}
                 onSubmit={submitPalier}
                 onAbandon={returnToOverview}
               />
@@ -275,6 +272,8 @@ function LeaderboardRow({ entry }) {
 
 function PalierRow({ palier, onStart }) {
   const { palier: n, label, unlocked, completed, best_score, target_size, pass_threshold, stock_available, attempts } = palier;
+  const { user } = useAuth();
+  const isAdmin = user?.role === "admin" || user?.role === "superadmin";
   const stockOk = stock_available >= target_size;
   const stockBadgeColor = stockOk ? "text-[#2A7350] bg-[#3D9970]/15" : "text-terracotta bg-terracotta/15";
   return (
@@ -304,18 +303,21 @@ function PalierRow({ palier, onStart }) {
           {best_score > 0 && ` · meilleur score : ${best_score}/${target_size}`}
           {attempts > 0 && ` · ${attempts} tentative${attempts > 1 ? "s" : ""}`}
         </p>
-        {!stockOk && (
-          <span className={`inline-flex items-center gap-1 mt-2 text-[10px] font-bold uppercase px-2 py-0.5 rounded-full ${stockBadgeColor}`}>
+        {!stockOk && isAdmin && (
+          <span data-testid={`parcours-stock-badge-${n}`} className={`inline-flex items-center gap-1 mt-2 text-[10px] font-bold uppercase px-2 py-0.5 rounded-full ${stockBadgeColor}`}>
             ⚠ stock {stock_available}/{target_size}
           </span>
         )}
       </div>
       <div className="shrink-0">
-        {unlocked ? (
+        {unlocked && !stockOk ? (
+          <span data-testid={`parcours-soon-${n}`} className="inline-flex items-center gap-2 bg-cream text-navy/70 border-2 border-cream-dark font-bold px-5 py-3 rounded-full min-w-[140px] justify-center">
+            Bientôt disponible
+          </span>
+        ) : unlocked ? (
           <button
             type="button"
             onClick={() => onStart(n)}
-            disabled={!stockOk}
             data-testid={`parcours-start-${n}`}
             className={`inline-flex items-center gap-2 font-bold px-5 py-3 rounded-full transition min-w-[140px] justify-center ${
               completed
@@ -330,121 +332,6 @@ function PalierRow({ palier, onStart }) {
           <span className="inline-flex items-center gap-2 bg-cream-dark text-navy/40 font-bold px-5 py-3 rounded-full min-w-[140px] justify-center">
             <Lock className="w-4 h-4" /> Verrouillé
           </span>
-        )}
-      </div>
-    </div>
-  );
-}
-
-// -----------------------------------------------------------------------------
-// PLAY VIEW
-// -----------------------------------------------------------------------------
-function PlayView({ state, setState, onSubmit, onAbandon }) {
-  const { palier, label, pass_threshold, questions, answers, idx } = state;
-  const q = questions[idx];
-  const answered = Object.keys(answers).length;
-  const total = questions.length;
-  const allAnswered = answered === total;
-
-  function selectAnswer(qid, i) {
-    setState((s) => ({ ...s, answers: { ...s.answers, [qid]: i } }));
-  }
-  function next() { if (idx < total - 1) setState((s) => ({ ...s, idx: s.idx + 1 })); }
-  function prev() { if (idx > 0) setState((s) => ({ ...s, idx: s.idx - 1 })); }
-
-  const chosen = answers[q.id];
-
-  return (
-    <div data-testid="parcours-play">
-      <div className="flex items-center justify-between mb-4">
-        <button
-          type="button"
-          onClick={() => { if (window.confirm("Abandonner le palier ? Vos réponses seront perdues.")) onAbandon(); }}
-          data-testid="parcours-abandon"
-          className="inline-flex items-center gap-1 text-sm font-bold text-navy/60 hover:text-navy"
-        >
-          <X className="w-4 h-4" /> Quitter
-        </button>
-        <div className="text-sm font-bold text-navy/70">
-          Palier {palier} · {label}
-        </div>
-      </div>
-
-      {/* Progress */}
-      <div className="mb-6">
-        <div className="flex items-center justify-between text-xs text-navy/60 mb-1">
-          <span>Question {idx + 1} / {total}</span>
-          <span>{answered}/{total} répondues · seuil {pass_threshold}/{total}</span>
-        </div>
-        <div className="w-full h-2 rounded-full bg-cream-dark overflow-hidden">
-          <div className="h-full bg-terracotta transition-all" style={{ width: `${((idx + 1) / total) * 100}%` }} />
-        </div>
-      </div>
-
-      <motion.div
-        key={q.id}
-        initial={{ opacity: 0, x: 20 }}
-        animate={{ opacity: 1, x: 0 }}
-        className="bg-white rounded-3xl border-2 border-cream-dark p-6 sm:p-8 mb-4"
-        data-testid="parcours-question"
-      >
-        <h2 className="font-display text-2xl font-extrabold text-navy mb-6">{q.question}</h2>
-        <div className="grid gap-3">
-          {q.options.map((opt, i) => {
-            const selected = chosen === i;
-            return (
-              <button
-                key={i}
-                type="button"
-                onClick={() => selectAnswer(q.id, i)}
-                data-testid={`parcours-option-${i}`}
-                className={`text-left flex items-center gap-3 p-4 rounded-2xl border-2 font-bold transition ${
-                  selected
-                    ? "border-terracotta bg-terracotta/10 text-navy"
-                    : "border-cream-dark bg-white hover:border-navy/40 text-navy/80"
-                }`}
-              >
-                <span className={`w-8 h-8 rounded-full flex items-center justify-center text-sm shrink-0 ${
-                  selected ? "bg-terracotta text-white" : "bg-cream text-navy/60"
-                }`}>
-                  {String.fromCharCode(65 + i)}
-                </span>
-                <span className="flex-1">{opt}</span>
-              </button>
-            );
-          })}
-        </div>
-      </motion.div>
-
-      <div className="flex items-center justify-between gap-3">
-        <button
-          type="button"
-          onClick={prev}
-          disabled={idx === 0}
-          data-testid="parcours-prev"
-          className="inline-flex items-center gap-1 bg-white border-2 border-cream-dark text-navy font-bold px-4 py-3 rounded-full hover:border-navy/40 disabled:opacity-40 transition"
-        >
-          <ChevronLeft className="w-5 h-5" /> Précédente
-        </button>
-        {idx < total - 1 ? (
-          <button
-            type="button"
-            onClick={next}
-            data-testid="parcours-next"
-            className="inline-flex items-center gap-1 bg-navy text-cream font-bold px-5 py-3 rounded-full hover:bg-navy-dark transition"
-          >
-            Suivante <ChevronRight className="w-5 h-5" />
-          </button>
-        ) : (
-          <button
-            type="button"
-            onClick={onSubmit}
-            disabled={!allAnswered}
-            data-testid="parcours-submit"
-            className="inline-flex items-center gap-2 bg-terracotta text-white font-bold px-6 py-3 rounded-full hover:bg-terracotta-dark shadow-warm disabled:opacity-50 transition"
-          >
-            <Check className="w-5 h-5" /> Valider mes réponses ({answered}/{total})
-          </button>
         )}
       </div>
     </div>
@@ -528,6 +415,7 @@ function ResultView({ result, palier, label, onRetry, onNext, onBackToOverview }
           Vue d&apos;ensemble
         </button>
       </div>
+      {result.mistakes && <MistakesReview mistakes={result.mistakes} />}
     </div>
   );
 }

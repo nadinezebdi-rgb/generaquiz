@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { api, BACKEND_URL } from "@/lib/api";
+import { groupCategories } from "@/lib/categoryGroups";
+import { SoonCategoryCard } from "@/components/SoonCategoryCard";
 import { useAuth } from "@/contexts/AuthContext";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -288,10 +290,15 @@ export default function Dashboard() {
         <div className="mb-12">
           <div className="flex items-end justify-between mb-6">
             <h2 className="font-display text-3xl font-extrabold text-navy">Mes catégories</h2>
-            <span className="text-navy/60 font-medium">{categories.length} disponibles</span>
+            <span className="text-navy/60 font-medium">{categories.filter((c) => (c.count || 0) >= 20).length} disponibles</span>
           </div>
+          {groupCategories(categories).map((universe) => (
+          <section key={universe.id} className="mb-10 last:mb-0" data-testid={`dashboard-universe-${universe.id}`}>
+          <h3 className="font-display text-2xl font-bold text-navy mb-4" data-testid={`dashboard-universe-title-${universe.id}`}>{universe.title}</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {categories.map((cat, idx) => (
+            {universe.items.map((cat, idx) => cat.soon ? (
+              <SoonCategoryCard key={cat.id} item={cat} testidPrefix="dashboard-soon" />
+            ) : (
               <motion.div
                 key={cat.id}
                 initial={{ opacity: 0, y: 16 }}
@@ -322,11 +329,11 @@ export default function Dashboard() {
                     <p className="text-navy/80 text-base line-clamp-2">{cat.description}</p>
                   </div>
                 </div>
-                <div className="relative mt-5 flex items-center justify-between gap-2">
+                <div className="relative mt-5 flex flex-wrap items-center justify-between gap-2">
                   <span className="text-xs font-bold uppercase tracking-wider text-navy/60">
                     {cat.count} questions
                   </span>
-                  <div className="flex gap-2">
+                  <div className="flex flex-wrap gap-2">
                     <Link
                       to={`/app/parcours/${cat.id}`}
                       data-testid={`dashboard-parcours-${cat.id}`}
@@ -347,6 +354,8 @@ export default function Dashboard() {
               </motion.div>
             ))}
           </div>
+          </section>
+          ))}
         </div>
 
         {/* Recent attempts */}

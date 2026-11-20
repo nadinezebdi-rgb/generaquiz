@@ -14,17 +14,24 @@ from bson import ObjectId
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, EmailStr, Field
 
-from core import db, logger, FRONTEND_URL, RESEND_API_KEY, SENDER_EMAIL, get_current_user, is_premium_active
+from core import db, logger, FRONTEND_URL, RESEND_API_KEY, SENDER_EMAIL, get_admin_user, get_current_user, is_premium_active
 
 router = APIRouter(prefix="/famille", tags=["famille"])
 
 MAX_PROCHES = 3
 LEGACY_MAX_PROCHES = 4
-OWNER_TIERS = {"famille", "famille_v2", "heritage", "premium"}
+NOEL_TIER = "famille_noel"
+OWNER_TIERS = {"famille", "famille_v2", NOEL_TIER, "heritage", "premium"}
+
+
+def max_proches(owner: dict) -> int:
+    return family_capacity(owner)
 
 
 def family_capacity(owner: dict) -> int:
     # Les abonnements antérieurs à cette limite n'ont pas de capacité enregistrée.
+    if owner.get("plan_tier") == NOEL_TIER:
+        return MAX_PROCHES
     return owner.get("family_max_proches", LEGACY_MAX_PROCHES)
 
 
@@ -33,7 +40,7 @@ def family_subscription_fields(user: dict, tier: str) -> dict:
         return {}
     if user.get("plan_tier") in OWNER_TIERS:
         return {"family_max_proches": family_capacity(user)}
-    return {"family_max_proches": MAX_PROCHES if tier == "famille_v2" else LEGACY_MAX_PROCHES}
+    return {"family_max_proches": MAX_PROCHES if tier in {"famille_v2", NOEL_TIER} else LEGACY_MAX_PROCHES}
 
 
 def is_family_owner(u: dict) -> bool:
@@ -114,6 +121,7 @@ async def _space(owner: dict, me: dict, role: str) -> dict:
                         "participants": len(c.get("participants", [])), "created_at": c.get("created_at")}
                        for c in challenges],
         "me": str(me["_id"]),
+        "share_progress": bool(owner.get("family_share_progress")),
     }
 
 
@@ -206,3 +214,28 @@ async def leave_family(user: dict = Depends(get_current_user)) -> dict:
                                         {"$set": {"status": "revoked"}})
     await db.users.update_one({"_id": user["_id"]}, {"$unset": {"family_owner_id": ""}})
     return {"ok": True}
+
+
+class ShareToggle(BaseModel):
+    enabled: bool
+
+
+@router.put("/partage")
+async def set_progress_sharing(body: ShareToggle, user: dict = Depends(get_current_user)) -> dict:
+    """Le bénéficiaire autorise (ou non) l'envoi de ses progrès aux proches qui ont rejoint l'espace."""
+    if not is_family_owner(user):
+        raise HTTPException(status_code=403, detail="Seul le bénéficiaire peut gérer ce partage")
+    update = {"family_share_progress": body.enabled}
+    if body.enabled and not user.get("family_share_progress"):
+        update["family_share_since"] = datetime.now(timezone.utc).isoformat()
+    await db.users.update_one({"_id": user["_id"]}, {"$set": update})
+    return {"share_progress": body.enabled}
+
+
+@router.post("/admin/rapports/{kind}")
+async def run_family_reports(kind: str, _: dict = Depends(get_admin_user)) -> dict:
+    from family_report import send_inactivity_alerts, send_weekly_family_reports
+    jobs = {"hebdo": send_weekly_family_reports, "inactivite": send_inactivity_alerts}
+    if kind not in jobs:
+        raise HTTPException(status_code=404, detail="Rapport inconnu")
+    return await jobs[kind]()

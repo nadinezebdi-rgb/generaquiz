@@ -1,0 +1,42 @@
+{
+  "summary": "Tested the GénéraQuiz iteration-54 batch: platform Stripe gift checkout, admin gift redeem plus the /activer UI flow, the habit express quiz and the habit_series badge, the morning-email habit block, the new epoques categories (annees-80, annees-2010) and the palier regression. Backend: the new suite test_iteration54_gifts_platform_habit_series.py passes 17/17. Gift checkout returns a checkout.stripe.com url with stripe_mode=platform: famille costs 79 € (7900 cents) and solo 49 €. The order status endpoint, called with a valid buyer token, goes through _confirm_platform_order and returns unpaid; a bad token returns 404. An admin code redeems with 200 (famille_v2, max_proches 3), and a second redeem returns 409. The habit quiz returns 3-5 questions without the answer key, and /answer returns correct/correct_index/correct_answer/explanation. /complete returns 401 without login; a repeated habit is not counted twice; the 4th distinct habit awards ['habit_series'] exactly once; the badge shows in /api/badges/mine. The morning email HTML contains the 'Quiz express Bien vieillir' block and a /bien-vieillir?quiz=...#routine link. /api/categories returns 12 categories: the new ones are in epoques with sort 2 and 4 and count 0, and 10 are playable. Frontend: the dashboard 'Par époque' order is right: 60-70, Années 80 (Bientôt), 90-2000, 2010 (Bientôt). The soon cards are divs (not links); clicking one does not navigate. The header reads '10 disponibles'. The landing page has the same order with landing-soon-*. At 390px, neither dashboard nor landing scrolls sideways. /app/challenges/new and /app/coop/new list 10 categories, without annees-80 or annees-2010. On /bien-vieillir there are 6 routine-habit-quiz-* buttons; the dialog plays to the result. Logged out shows habit-series-login. Logged in shows progress text 1->1 (repeat)->2->3->4, with 'badge obtenu', a badge toast, and the badge on the Progression page. ?quiz=sommeil auto-opens the sommeil quiz. A full /activer flow works (preview, activate, success, redirect to /app/famille, 'déjà activé' on reuse). A cinema palier 1 played in full in the UI scores 4/20 with 16 mistakes, matching the feedback counts.",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {"endpoint": "GET /api/categories/{id}/showcase (routers/quiz.py ~L63 'others')", "issue": "The 'others' list includes the empty annees-80 and annees-2010. On /decouvrir/cinema the 'other themes' links point to /decouvrir/annees-80, a public page that says '0 QUESTIONS VÉRIFIÉES'. It needs a filter on question count >= 20 (or the frontend should filter)."},
+      {"endpoint": "palier_weekly.py (>=140 filter)", "issue": "Product risk: in preview only cinema (142) meets >=140. All other categories are between 21 and 138, so every weekly palier draw will be Cinéma until stock grows. Consider using the stock of the chosen palier (for example 20 * palier) instead of 140 overall."},
+      {"endpoint": "POST /api/bien-vieillir/habits/{id}/quiz/complete", "issue": "There is no server proof that the quiz was played (no answers or session are checked). A logged-in user can get habit_series with 4 POSTs. The badge is low value, so this is acceptable, but note it."},
+      {"endpoint": "POST /api/webhook/stripe (platform gift branch)", "issue": "After _confirm_gift_order the code sets payment_status='paid' on the transaction even when confirmed is None. If _confirm_platform_order raises ValueError (amount or metadata mismatch), the error is not caught and the webhook returns 500. Code review only: I could not run it because no real payment can be made."}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [
+      {"flow": "Direct URL to an empty category", "issue": "/app/quiz/annees-80 opens the category play page with '0/0 nouvelles questions' and the game-mode choices, with no 'Bientôt' guard. /app/parcours/annees-2010 handles this correctly (Bientôt disponible).", "affected_selectors": ["/app/quiz/:categoryId"]},
+      {"flow": "ThemeShowcase other themes", "issue": "Links to /decouvrir/annees-80 and /decouvrir/annees-2010, which show an empty showcase page.", "affected_selectors": ["a[href^='/decouvrir/annees-']"]}
+    ],
+    "design_issues": [
+      {"screen": "SoonCategoryCard (dashboard and landing)", "issues": ["The 'Bientôt' badge is 10px text-navy/40 on cream, which is low contrast for a senior audience. The title and description at navy/50 are also faint. Suggest navy/60-70 and at least 12px for the badge."]},
+      {"screen": "Habit quiz", "issues": ["Bien vieillir has only 21 questions, so most habit quizzes have exactly 3 questions (filled with off-topic Bien vieillir questions). This is fine, but the quizzes are short."]}
+    ]
+  },
+  "test_report_links": ["/app/backend/tests/test_iteration54_gifts_platform_habit_series.py", "/app/test_reports/pytest/pytest_iteration54.xml"],
+  "action_items": [
+    "Filter categories with count < 20 out of the 'others' list in the category showcase (routers/quiz.py) and/or ThemeShowcase.",
+    "Add a 'Bientôt' guard or redirect on /app/quiz/:categoryId when the category has fewer than 20 questions.",
+    "Reconsider the >=140 weekly palier threshold: only cinema qualifies right now, so the challenge will always be cinema.",
+    "Webhook platform gift branch: wrap _confirm_gift_order in try/except and only mark paid when confirmed.",
+    "Update the stale regression tests: test_iteration52 (it expects 10 categories and culture-40-ans at sort 2) and test_iteration51 (old 12-character code format; checkout body missing buyer_full_name). They fail only because the spec changed."
+  ],
+  "critical_code_review_comments": [
+    "gifts.py: _gift_encryption_key falls back to sha256(JWT_SECRET), which gives a valid Fernet key. If the preview key is used in production and JWT_SECRET rotates, stored code_encrypted values can no longer be decrypted. Document that the key must stay stable.",
+    "habit quiz /complete trusts the client (see the minor backend issue).",
+    "gifts.py is about 1000 lines and should be split (checkout/stripe, redeem, admin)."
+  ],
+  "updated_files": ["/app/backend/tests/test_iteration54_gifts_platform_habit_series.py"],
+  "success_rate": {"backend": "100% (17/17 new tests)", "frontend": "100% of requested flows; 2 minor integration gaps outside the scope"},
+  "seed_data_creation": "TEST_ users test_it54_* are deleted, along with their habit plays, badges and palier rows. Admin gift codes created with TEST_Mamie/TEST_Paul: the pytest one is cancelled by the fixture after activation; the UI one is activated. Gift checkout payment_transactions rows: two created by the pytest run were set to status TEST_cancelled; any others from earlier runs are still open (unpaid).",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Admin is admin@generaquiz.fr (see /app/memory/test_credentials.md). Onboarding key: generaquiz_onboarding_v1='seen'. The gift order status endpoint needs ?access_token; the test sets a known buyer_access_hash on its own transaction. Habit series week = ISO week in Europe/Paris, stored in db.habit_quiz_plays. Category counts: cinema 142, bien-vieillir 21, annees-80 and annees-2010 0. No AI generation or QA jobs were triggered, and no real Stripe payment was made."
+}

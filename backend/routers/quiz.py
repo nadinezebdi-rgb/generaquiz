@@ -63,6 +63,10 @@ async def category_showcase(category_id: str):
     others = await db.categories.find(
         {"id": {"$ne": category_id}}, {"_id": 0, "id": 1, "title": 1, "mascot_image": 1, "color": 1}
     ).to_list(50)
+    playable = {d["_id"] async for d in db.questions.aggregate([
+        {"$match": {"quality": "verified"}}, {"$group": {"_id": "$category_id", "n": {"$sum": 1}}},
+        {"$match": {"n": {"$gte": 20}}}])}
+    others = [o for o in others if o["id"] in playable]
     return {"category": {**cat, "count": len(ids)}, "samples": samples, "mini_quiz": mini_quiz, "others": others}
 
 
@@ -317,14 +321,13 @@ async def list_attempts(user: dict = Depends(get_current_user)):
 @router.get("/stats")
 async def get_stats(user: dict = Depends(get_current_user)):
     user_id = str(user["_id"])
-    total = await db.attempts.count_documents({"user_id": user_id})
-    agg = await db.attempts.aggregate([
-        {"$match": {"user_id": user_id}},
-        {"$group": {"_id": None, "score": {"$sum": "$score"}, "total": {"$sum": "$total"}}},
-    ]).to_list(1)
-    if agg:
-        s, t = agg[0]["score"], agg[0]["total"]
-        pct = round((s / t) * 100) if t else 0
-    else:
-        s, t, pct = 0, 0, 0
+    total, s, t = 0, 0, 0
+    for coll in (db.attempts, db.palier_attempts):  # parties classiques + tentatives de palier
+        agg = await coll.aggregate([
+            {"$match": {"user_id": user_id}},
+            {"$group": {"_id": None, "n": {"$sum": 1}, "score": {"$sum": "$score"}, "total": {"$sum": "$total"}}},
+        ]).to_list(1)
+        if agg:
+            total += agg[0]["n"]; s += agg[0]["score"]; t += agg[0]["total"]
+    pct = round((s / t) * 100) if t else 0
     return {"quizzes_played": total, "correct_answers": s, "total_answers": t, "accuracy_pct": pct}

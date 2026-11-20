@@ -1,0 +1,3502 @@
+[
+ {
+  "id": "topup_annees-80_d1_7e02bfa3b419",
+  "category_id": "annees-80",
+  "difficulty": 1,
+  "question": "Quel personnage magique habite dans la forêt et devient l'ami de deux enfants japonais dans le dessin animé diffusé en France à la fin des années 80 ?",
+  "options": [
+   "Totoro",
+   "Pikachu",
+   "Doraemon",
+   "Grendizer"
+  ],
+  "correct_index": 0,
+  "explanation": "Totoro est le grand esprit de la forêt dans le film d'animation japonais 'Mon Voisin Totoro' de Hayao Miyazaki, sorti en 1988. Ce personnage doux et rond est devenu une icône mondiale des dessins animés japonais.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 92,
+   "comment": "Totoro est bien l'esprit de la forêt ami de deux enfants (Satsuki et Mei) dans le film de Miyazaki de 1988, et les autres options sont clairement incorrectes.",
+   "correction": null,
+   "checked_at": 1795172702.1432142,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-80_d1_ccd2c6653115",
+  "category_id": "annees-80",
+  "difficulty": 1,
+  "question": "Quel célèbre chanteur portait un seul gant blanc et a sorti l'album 'Thriller' en 1982 ?",
+  "options": [
+   "Michael Jackson",
+   "David Bowie",
+   "Prince",
+   "Elton John"
+  ],
+  "correct_index": 0,
+  "explanation": "Michael Jackson est l'auteur de 'Thriller', l'album le plus vendu de l'histoire. Il était reconnaissable à son fameux gant blanc brillant.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 100,
+   "comment": "Michael Jackson a sorti Thriller en 1982 et était célèbre pour son gant blanc.",
+   "correction": null,
+   "checked_at": 1795172706.1033485,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-80_d1_55aa210ba746",
+  "category_id": "annees-80",
+  "difficulty": 1,
+  "question": "Comment s'appelle le personnage principal du film 'E.T. l'extra-terrestre' sorti en 1982 ?",
+  "options": [
+   "Elliott",
+   "Michael",
+   "Kevin",
+   "Lucas"
+  ],
+  "correct_index": 0,
+  "explanation": "Dans le film de Steven Spielberg sorti en 1982, le petit garçon qui se lie d'amitié avec l'extraterrestre s'appelle Elliott. Ce film est l'un des plus grands succès du cinéma des années 80.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 98,
+   "comment": "Elliott est bien le jeune garçon protagoniste du film de Spielberg, les autres noms ne correspondent pas aux personnages principaux.",
+   "correction": null,
+   "checked_at": 1795172710.2293918,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-80_d1_c5001f389d48",
+  "category_id": "annees-80",
+  "difficulty": 1,
+  "question": "Quel est le prénom du célèbre robot de la série télévisée pour enfants 'Les Visiteurs du futur' ? Non, reformulons : dans les années 80, quel animal est la mascotte des Jeux Olympiques de Los Angeles en 1984 ?",
+  "options": [
+   "Un aigle",
+   "Un ours",
+   "Un coyote",
+   "Un lion"
+  ],
+  "correct_index": 0,
+  "explanation": "La mascotte des Jeux Olympiques de Los Angeles en 1984 était Sam, un aigle américain. L'aigle représente les États-Unis, pays organisateur de ces Jeux.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 96,
+   "comment": "La mascotte des JO de Los Angeles 1984 était bien Sam l'aigle, symbole des États-Unis, malgré la formulation confuse de la question.",
+   "correction": null,
+   "checked_at": 1795172715.2527194,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-80_d1_25085c65a961",
+  "category_id": "annees-80",
+  "difficulty": 1,
+  "question": "Quel est le prénom du célèbre robot sympathique dans le film 'Court-circuit' sorti en 1986 ?",
+  "options": [
+   "Numéro 5",
+   "R2-D2",
+   "Wall-E",
+   "Terminator"
+  ],
+  "correct_index": 0,
+  "explanation": "Dans le film 'Court-circuit' (1986), le robot militaire qui prend vie après un orage s'appelle Numéro 5. Il devient célèbre avec sa phrase 'Besoin d'apprendre !'",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 97,
+   "comment": "Le robot du film Short Circuit (1986) s'appelle bien Numéro 5, les autres options étant des robots d'autres films.",
+   "correction": null,
+   "checked_at": 1795172719.5921142,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-80_d1_10ce6baea2b1",
+  "category_id": "annees-80",
+  "difficulty": 1,
+  "question": "Quel est le prénom du jeune héros du film 'Retour vers le futur' sorti en 1985 ?",
+  "options": [
+   "Marty",
+   "Kevin",
+   "Elliott",
+   "Daniel"
+  ],
+  "correct_index": 0,
+  "explanation": "Le héros de 'Retour vers le futur' s'appelle Marty McFly. Il voyage dans le temps à bord d'une voiture DeLorean avec son ami le professeur Emmett Brown.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 100,
+   "comment": "Le héros de Retour vers le futur (1985) est bien Marty McFly, joué par Michael J. Fox.",
+   "correction": null,
+   "checked_at": 1795172723.1682563,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-80_d1_449d6f75670e",
+  "category_id": "annees-80",
+  "difficulty": 1,
+  "question": "Quel est le nom du célèbre cube coloré à faire pivoter, inventé par Ernő Rubik, qui a rendu fou tous les enfants dans les années 80 ?",
+  "options": [
+   "Le Cube Rubik",
+   "Le Cube Lego",
+   "Le Cube Magic",
+   "Le Cube Tetris"
+  ],
+  "correct_index": 0,
+  "explanation": "Le Cube Rubik a été inventé par le Hongrois Ernő Rubik et est devenu un véritable phénomène mondial dans les années 80. Des millions d'enfants et d'adultes ont essayé de réaligner les couleurs sur chacune de ses faces.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 96,
+   "comment": "Le Rubik's Cube fut bien inventé par Ernő Rubik et les autres options sont clairement fausses.",
+   "correction": null,
+   "checked_at": 1795172727.9058344,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-80_d1_23fde7177754",
+  "category_id": "annees-80",
+  "difficulty": 1,
+  "question": "Quel animal est la mascotte des Jeux Olympiques de Los Angeles en 1984 ?",
+  "options": [
+   "Un aigle",
+   "Un ours",
+   "Un lion",
+   "Un dauphin"
+  ],
+  "correct_index": 0,
+  "explanation": "La mascotte des Jeux Olympiques de Los Angeles en 1984 était Sam l'aigle, un aigle américain habillé en tenue de cow-boy. L'aigle est le symbole national des États-Unis.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 98,
+   "comment": "Sam l'aigle était bien la mascotte officielle des JO de Los Angeles 1984.",
+   "correction": null,
+   "checked_at": 1795172744.9897904,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-80_d2_5f7094091e9f",
+  "category_id": "annees-80",
+  "difficulty": 2,
+  "question": "Quel est le titre de la chanson qui a rendu célèbre Cindy Lauper en 1983 avec le refrain 'Girls just want to have fun' ?",
+  "options": [
+   "Girls Just Want to Have Fun",
+   "Like a Virgin",
+   "What's Love Got to Do with It",
+   "Walking on Sunshine"
+  ],
+  "correct_index": 0,
+  "explanation": "Cyndi Lauper a sorti 'Girls Just Want to Have Fun' en 1983, un tube mondial aux couleurs et aux clips très typiques des années 80. Cette chanson est restée l'une des plus emblématiques de la décennie.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 96,
+   "comment": "La chanson 'Girls Just Want to Have Fun' de Cyndi Lauper est sortie fin 1983 et est devenue un tube emblématique, les autres options étant d'autres artistes.",
+   "correction": null,
+   "checked_at": 1795172755.1062648,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-80_d2_9e2d63caa267",
+  "category_id": "annees-80",
+  "difficulty": 2,
+  "question": "Quel groupe chantait 'La Bamba' en 1987, une reprise d'un tube latino devenu numéro 1 dans le monde entier ?",
+  "options": [
+   "Los Lobos",
+   "Miami Sound Machine",
+   "Los Reyes",
+   "Gipsy Kings"
+  ],
+  "correct_index": 0,
+  "explanation": "Los Lobos a enregistré 'La Bamba' pour la bande originale du film du même nom en 1987. La chanson est devenue un immense succès mondial, atteignant la première place des charts dans de nombreux pays.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 98,
+   "comment": "Los Lobos a bien repris 'La Bamba' en 1987 pour le film éponyme, atteignant la première place des charts.",
+   "correction": null,
+   "checked_at": 1795172760.013913,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-80_d2_e1897e8c3ab1",
+  "category_id": "annees-80",
+  "difficulty": 2,
+  "question": "Quel est le nom du célèbre jeu de société apparu dans les années 80 où l'on doit deviner des mots en faisant dessiner son équipier ?",
+  "options": [
+   "Pictionary",
+   "Monopoly",
+   "Scrabble",
+   "Risk"
+  ],
+  "correct_index": 0,
+  "explanation": "Le Pictionary a été créé en 1985 et est rapidement devenu un succès mondial. Dans ce jeu, un joueur doit faire deviner un mot à ses coéquipiers en le dessinant, sans parler.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 98,
+   "comment": "Pictionary, créé en 1985, repose bien sur le dessin pour faire deviner des mots, et les autres options sont clairement d'autres types de jeux.",
+   "correction": null,
+   "checked_at": 1795172764.539038,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-80_d2_22e27bcb2592",
+  "category_id": "annees-80",
+  "difficulty": 2,
+  "question": "Quel est le prénom de la petite sirène dans le dessin animé de Disney sorti en 1989 ?",
+  "options": [
+   "Ariel",
+   "Nala",
+   "Marina",
+   "Coral"
+  ],
+  "correct_index": 0,
+  "explanation": "La Petite Sirène, sorti en 1989, met en scène Ariel, une jeune sirène rêvant de découvrir le monde des humains. Ce film a marqué le grand retour des classiques animés Disney.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 100,
+   "comment": "Ariel est bien le prénom de la petite sirène dans le film Disney de 1989, les autres options sont clairement fausses.",
+   "correction": null,
+   "checked_at": 1795172778.0434685,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-80_d2_c33d7fc0bae8",
+  "category_id": "annees-80",
+  "difficulty": 2,
+  "question": "Quel est le nom du célèbre jeu vidéo de Nintendo où l'on guide un petit plombier qui saute sur des champignons et des tortues ?",
+  "options": [
+   "Super Mario Bros",
+   "Pac-Man",
+   "Donkey Kong",
+   "Space Invaders"
+  ],
+  "correct_index": 0,
+  "explanation": "Super Mario Bros est sorti en 1985 sur la console Nintendo NES et est devenu l'un des jeux les plus populaires de la décennie. Le petit plombier Mario est rapidement devenu la mascotte de Nintendo.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 98,
+   "comment": "Super Mario Bros est bien le jeu Nintendo mettant en scène le plombier Mario sautant sur champignons et tortues, les autres options sont clairement fausses.",
+   "correction": null,
+   "checked_at": 1795172788.2869356,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-80_d2_a1a13d101d94",
+  "category_id": "annees-80",
+  "difficulty": 2,
+  "question": "Quel est le prénom de la petite orpheline rousse qui chantait 'Tomorrow' dans la comédie musicale 'Annie', adaptée au cinéma en 1982 ?",
+  "options": [
+   "Annie",
+   "Sandy",
+   "Molly",
+   "Polly"
+  ],
+  "correct_index": 0,
+  "explanation": "Le film 'Annie' sorti en 1982 raconte l'histoire d'une petite orpheline prénommée Annie, dont la chanson 'Tomorrow' est restée très populaire. Ce film a été vu par des millions de spectateurs dans le monde entier.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 99,
+   "comment": "Annie est bien le personnage titre qui chante 'Tomorrow' dans le film de 1982.",
+   "correction": null,
+   "checked_at": 1795172801.4883544,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-80_d2_71564a718cea",
+  "category_id": "annees-80",
+  "difficulty": 2,
+  "question": "Quel est le prénom du jeune détective héros de la série télévisée 'Magnum' diffusée en France dans les années 80 ?",
+  "options": [
+   "Thomas",
+   "Michael",
+   "Jack",
+   "Peter"
+  ],
+  "correct_index": 0,
+  "explanation": "Le personnage principal de la série 'Magnum' s'appelle Thomas Magnum, incarné par l'acteur américain Tom Selleck. La série a connu un immense succès en France tout au long des années 80.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 96,
+   "comment": "Le héros se nomme bien Thomas Magnum, incarné par Tom Selleck, même si le qualificatif 'jeune détective' est discutable.",
+   "correction": null,
+   "checked_at": 1795172816.0301485,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-80_d2_c29afbc94ddd",
+  "category_id": "annees-80",
+  "difficulty": 2,
+  "question": "Quel est le prénom de la petite fille qui se fait emporter par une tornade au pays d'Oz dans le film musical diffusé à la télévision chaque année dans les années 80 ?",
+  "options": [
+   "Dorothy",
+   "Scarlett",
+   "Wendy",
+   "Alice"
+  ],
+  "correct_index": 0,
+  "explanation": "Le Magicien d'Oz met en scène Dorothy, une petite fille emportée par une tornade au pays d'Oz. Ce film classique de 1939 était régulièrement rediffusé à la télévision française dans les années 80, et toute la famille le regardait ensemble.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 98,
+   "comment": "Dorothy est bien la protagoniste du Magicien d'Oz emportée par la tornade, les autres options sont clairement fausses.",
+   "correction": null,
+   "checked_at": 1795172820.602504,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-80_d3_0a25713857db",
+  "category_id": "annees-80",
+  "difficulty": 3,
+  "question": "Quel est le nom du tube de Chantal Goya qui a rendu célèbres 'Bécassine' et ses amis dans les années 80 ?",
+  "options": [
+   "Bécassine, c'est ma cousine",
+   "Bienvenue chez les Bisounours",
+   "Nanette et Rinalda",
+   "Le Petit Indien"
+  ],
+  "correct_index": 0,
+  "explanation": "Chantal Goya a sorti 'Bécassine, c'est ma cousine' en 1983, un titre qui a connu un immense succès auprès des enfants français. La chanteuse a bâti toute sa carrière sur des chansons pour enfants inspirées de personnages populaires.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 95,
+   "comment": "Chantal Goya a bien popularisé 'Bécassine c'est ma cousine' au début des années 80.",
+   "correction": null,
+   "checked_at": 1795172865.5968144,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-80_d3_04fdad925fbb",
+  "category_id": "annees-80",
+  "difficulty": 3,
+  "question": "Quel est le prénom du célèbre cow-boy de jouet qui accompagne Woody dans 'Toy Story' ? Non — dans les années 80, comment s'appelait la console de jeux vidéo portable lancée par Nintendo en 1989 ?",
+  "options": [
+   "Game Boy",
+   "Game Gear",
+   "Atari Lynx",
+   "Mega Drive"
+  ],
+  "correct_index": 0,
+  "explanation": "La Game Boy a été lancée par Nintendo en 1989 et est devenue un succès mondial grâce notamment au jeu Tetris livré avec la console. Elle a marqué toute une génération d'enfants et d'adolescents.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 98,
+   "comment": "La Game Boy a bien été lancée par Nintendo en 1989, les autres options sont d'autres constructeurs ou consoles différentes.",
+   "correction": null,
+   "checked_at": 1795172875.516039,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-80_d3_f0296cbea8c3",
+  "category_id": "annees-80",
+  "difficulty": 3,
+  "question": "Quel est le nom du célèbre groupe de pop britannique formé par George Michael et Andrew Ridgeley, qui a cartonné avec 'Wake Me Up Before You Go-Go' en 1984 ?",
+  "options": [
+   "Wham!",
+   "Duran Duran",
+   "Culture Club",
+   "Spandau Ballet"
+  ],
+  "correct_index": 0,
+  "explanation": "Wham! est le duo britannique formé par George Michael et Andrew Ridgeley, dont 'Wake Me Up Before You Go-Go' est sorti en 1984 et a été un succès mondial. Le groupe s'est séparé en 1986.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 100,
+   "comment": "Wham! est bien le duo de George Michael et Andrew Ridgeley, auteur de ce tube en 1984.",
+   "correction": null,
+   "checked_at": 1795172880.5766063,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-80_d3_d5a22d6fa38c",
+  "category_id": "annees-80",
+  "difficulty": 3,
+  "question": "Quel est le titre du film de Steven Spielberg sorti en 1981 dans lequel Harrison Ford incarne un archéologue aventurier à la recherche d'un objet biblique légendaire ?",
+  "options": [
+   "Les Aventuriers de l'arche perdue",
+   "Le Temple maudit",
+   "La Dernière Croisade",
+   "Le Trésor de Cristal"
+  ],
+  "correct_index": 0,
+  "explanation": "Les Aventuriers de l'arche perdue, sorti en 1981, est le premier film de la saga Indiana Jones réalisé par Steven Spielberg. Harrison Ford y joue le personnage d'Indiana Jones, à la recherche de l'Arche d'Alliance.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 99,
+   "comment": "Les Aventuriers de l'arche perdue (1981) de Spielberg met bien en scène Indiana Jones cherchant l'Arche d'Alliance, objet biblique.",
+   "correction": null,
+   "checked_at": 1795172885.5724435,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-80_d3_0c8b6d5cd3e4",
+  "category_id": "annees-80",
+  "difficulty": 3,
+  "question": "Quel est le nom du célèbre groupe suédois qui a représenté la France… non : quel groupe pop suédois a cartonné dans les années 80 avec le tube 'The Final Countdown' sorti en 1986 ?",
+  "options": [
+   "Roxette",
+   "ABBA",
+   "Europe",
+   "A-ha"
+  ],
+  "correct_index": 2,
+  "explanation": "'The Final Countdown' est le titre phare du groupe de rock suédois Europe, sorti en 1986. Ce morceau à l'introduction de synthétiseur inoubliable est devenu un hymne mondial des années 80.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 96,
+   "comment": "'The Final Countdown' est bien le tube de 1986 du groupe suédois Europe, les trois autres options sont clairement fausses.",
+   "correction": null,
+   "checked_at": 1795172890.306449,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-80_d3_23523288baa5",
+  "category_id": "annees-80",
+  "difficulty": 3,
+  "question": "Quel est le nom du chanteur français qui a lancé le tube 'Voyage voyage' en 1986 ?",
+  "options": [
+   "Desireless",
+   "Mylène Farmer",
+   "Lio",
+   "Jeanne Mas"
+  ],
+  "correct_index": 0,
+  "explanation": "'Voyage voyage' est une chanson interprétée par Desireless, sortie en 1986, qui est devenue un immense succès en France et dans toute l'Europe. Desireless, de son vrai nom Claudie Fritsch-Mentrop, est une chanteuse française.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 96,
+   "comment": "'Voyage voyage' est bien interprété par Desireless (Claudie Fritsch-Mentrop), sortie en 1986, même si la question dit à tort 'chanteur'.",
+   "correction": null,
+   "checked_at": 1795172910.848818,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-80_d3_e0bc547a22da",
+  "category_id": "annees-80",
+  "difficulty": 3,
+  "question": "Quel est le nom du célèbre jeu de société apparu en 1987 où il faut faire deviner des mots à son équipe en utilisant uniquement des synonymes, sans jamais prononcer certains mots interdits ?",
+  "options": [
+   "Taboo",
+   "Pictionary",
+   "Trivial Pursuit",
+   "Rapidо"
+  ],
+  "correct_index": 0,
+  "explanation": "Taboo est un jeu de société créé par Hasbro en 1987 : chaque joueur doit faire deviner un mot à son équipe sans prononcer les mots 'tabous' listés sur la carte. Il a connu un grand succès en France à la fin des années 80.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 93,
+   "comment": "Taboo a bien été publié en 1987 (par Parker Brothers/Hasbro) et consiste à faire deviner un mot sans utiliser les mots interdits, les autres options correspondant à d'autres jeux.",
+   "correction": null,
+   "checked_at": 1795172916.5572395,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-80_d4_2a426a3c7331",
+  "category_id": "annees-80",
+  "difficulty": 4,
+  "question": "Quel film de 1988 avec Tom Hanks raconte l'histoire d'un garçon de 12 ans dont le vœu de grandir se réalise du jour au lendemain ?",
+  "options": [
+   "Grand",
+   "Big",
+   "Kindy",
+   "Splash"
+  ],
+  "correct_index": 1,
+  "explanation": "Dans 'Big' (1988), le jeune Josh fait un vœu devant une machine de fête foraine et se réveille dans le corps d'un adulte, interprété par Tom Hanks. Le film est un énorme succès public et vaut à Hanks sa première nomination aux Oscars.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 98,
+   "comment": "Big (1988) de Penny Marshall avec Tom Hanks correspond exactement à cette description.",
+   "correction": null,
+   "checked_at": 1795172921.8626888,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-80_d4_8e0033cd65b8",
+  "category_id": "annees-80",
+  "difficulty": 4,
+  "question": "Quel est le nom du groupe français qui a connu un énorme succès en 1986 avec le titre 'Voyage Voyage', chanté par Desireless ?",
+  "options": [
+   "Désireless chantait seule sous ce nom de scène",
+   "C'était le groupe Début de Soirée",
+   "C'était le groupe Les Forbans",
+   "C'était le duo Niagara"
+  ],
+  "correct_index": 0,
+  "explanation": "Desireless est bien un nom de scène solo : il s'agit de Claudie Fritsch-Mentrop, qui a sorti 'Voyage Voyage' en 1986, un titre devenu numéro 1 dans toute l'Europe. Elle n'était pas membre d'un groupe.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 95,
+   "comment": "Desireless est le nom de scène solo de Claudie Fritsch-Mentrop, 'Voyage Voyage' sorti en 1986, ce n'était pas un groupe.",
+   "correction": null,
+   "checked_at": 1795172946.3666093,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-80_d4_f43dddf11483",
+  "category_id": "annees-80",
+  "difficulty": 4,
+  "question": "Quel est le titre du premier album solo de Phil Collins sorti en 1981, qui a rencontré un énorme succès mondial avec le single 'In the Air Tonight' ?",
+  "options": [
+   "No Jacket Required",
+   "Face Value",
+   "Hello, I Must Be Going!",
+   "Both Sides"
+  ],
+  "correct_index": 1,
+  "explanation": "'Face Value' est le premier album solo de Phil Collins, sorti en février 1981. Il contient le célèbre titre 'In the Air Tonight', reconnaissable à son introduction de batterie devenue iconique.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 100,
+   "comment": "Face Value est bien le premier album solo de Phil Collins, sorti en 1981 avec 'In the Air Tonight'.",
+   "correction": null,
+   "checked_at": 1795172976.4433818,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-80_d4_5464a6c8160c",
+  "category_id": "annees-80",
+  "difficulty": 4,
+  "question": "Quel est le nom du film de 1986 dans lequel Tom Cruise joue un jeune pilote de chasse surnommé 'Maverick' ?",
+  "options": [
+   "Top Gun",
+   "Iron Eagle",
+   "Firefox",
+   "An Officer and a Gentleman"
+  ],
+  "correct_index": 0,
+  "explanation": "Top Gun, sorti en 1986 et réalisé par Tony Scott, a propulsé Tom Cruise au rang de superstar mondiale. Le film a également rendu célèbre la chanson 'Take My Breath Away' du groupe Berlin.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 100,
+   "comment": "Top Gun (1986) de Tony Scott avec Tom Cruise dans le rôle de Maverick est exact.",
+   "correction": null,
+   "checked_at": 1795172981.3907123,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-80_d4_a58fdf2577a0",
+  "category_id": "annees-80",
+  "difficulty": 4,
+  "question": "Quel est le nom du groupe britannique qui a dominé les charts en 1981 avec l'album 'Ghost in the Machine', contenant le tube 'Every Little Thing She Does Is Magic' ?",
+  "options": [
+   "The Police",
+   "Dire Straits",
+   "Duran Duran",
+   "The Cure"
+  ],
+  "correct_index": 0,
+  "explanation": "The Police, le groupe de Sting, a sorti 'Ghost in the Machine' en 1981, avec 'Every Little Thing She Does Is Magic' comme single phare. Cet album fut l'un des plus vendus de l'année dans le monde entier.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 98,
+   "comment": "Ghost in the Machine (1981) est bien un album de The Police contenant 'Every Little Thing She Does Is Magic'.",
+   "correction": null,
+   "checked_at": 1795172999.7031045,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-80_d4_0ea5afc9301f",
+  "category_id": "annees-80",
+  "difficulty": 4,
+  "question": "Quel est le titre du film de 1984 dans lequel le acteur Bill Murray incarne un chasseur de fantômes à New York ?",
+  "options": [
+   "Gremlins",
+   "Ghostbusters",
+   "Poltergeist",
+   "The Thing"
+  ],
+  "correct_index": 1,
+  "explanation": "Ghostbusters (SOS Fantômes en France) est sorti en 1984 avec Bill Murray, Dan Aykroyd et Harold Ramis. Le film est devenu un phénomène mondial, accompagné du tube éponyme de Ray Parker Jr.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 99,
+   "comment": "Ghostbusters (1984) avec Bill Murray en chasseur de fantômes à New York est exact, les autres options sont clairement fausses.",
+   "correction": null,
+   "checked_at": 1795173029.7132802,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-80_d5_db927c494eb6",
+  "category_id": "annees-80",
+  "difficulty": 5,
+  "question": "Quel est le nom du dessinateur français qui a créé la bande dessinée 'Les Bidochon', dont le premier album est paru en 1977 mais qui a connu un énorme succès populaire dans les années 80 ?",
+  "options": [
+   "Gotlib",
+   "Binet",
+   "Bretécher",
+   "Reiser"
+  ],
+  "correct_index": 1,
+  "explanation": "Les Bidochon sont l'œuvre de Christian Binet, qui croque avec humour la vie d'un couple de Français ordinaires. La série a rencontré un très large public dans les années 80, avec plusieurs albums parus tout au long de la décennie.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 98,
+   "comment": "Les Bidochon ont bien été créés par Christian Binet, premier album paru en 1980 chez Fluide Glacial (prépublication antérieure).",
+   "correction": null,
+   "checked_at": 1795173046.6644423,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-80_d5_59f3023be217",
+  "category_id": "annees-80",
+  "difficulty": 5,
+  "question": "Quel est le titre du film de 1988 dans lequel Dustin Hoffman incarne un savant autiste capable de retenir des milliers de chiffres, aux côtés de Tom Cruise ?",
+  "options": [
+   "Rain Man",
+   "Good Morning Vietnam",
+   "La Mouche",
+   "Mississippi Burning"
+  ],
+  "correct_index": 0,
+  "explanation": "Rain Man, réalisé par Barry Levinson, est sorti en 1988 et a valu à Dustin Hoffman l'Oscar du meilleur acteur en 1989. Le film a connu un immense succès mondial et a popularisé le terme 'autisme' auprès du grand public.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 99,
+   "comment": "Rain Man (1988) de Barry Levinson avec Hoffman et Cruise est exact, et les autres options sont des films sans rapport.",
+   "correction": null,
+   "checked_at": 1795173051.4327898,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-80_d5_46e9d299ac13",
+  "category_id": "annees-80",
+  "difficulty": 5,
+  "question": "Quel groupe irlandais a sorti l'album 'The Joshua Tree' en 1987, qui s'est vendu à plus de 25 millions d'exemplaires dans le monde ?",
+  "options": [
+   "Simple Minds",
+   "U2",
+   "Depeche Mode",
+   "The Cure"
+  ],
+  "correct_index": 1,
+  "explanation": "U2, le groupe de Bono et The Edge, a publié 'The Joshua Tree' en mars 1987. Cet album contient des titres emblématiques comme 'With or Without You' et 'I Still Haven't Found What I'm Looking For', et est considéré comme l'un des plus grands albums rock des années 80.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 99,
+   "comment": "U2 est bien le groupe irlandais ayant sorti The Joshua Tree en 1987, et les autres options sont britanniques.",
+   "correction": null,
+   "checked_at": 1795173113.019519,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-80_d5_462a88824ed2",
+  "category_id": "annees-80",
+  "difficulty": 5,
+  "question": "En quelle année Madonna a-t-elle sorti son tube 'Like a Virgin', qui est devenu numéro 1 dans de nombreux pays ?",
+  "options": [
+   "1982",
+   "1984",
+   "1986",
+   "1988"
+  ],
+  "correct_index": 1,
+  "explanation": "'Like a Virgin' est sorti en novembre 1984 et s'est immédiatement hissé en tête des classements aux États-Unis et en Europe. C'est ce titre qui a véritablement lancé Madonna au rang de superstar mondiale.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 98,
+   "comment": "Le single 'Like a Virgin' est bien sorti en novembre 1984 et a atteint la première place du Billboard Hot 100.",
+   "correction": null,
+   "checked_at": 1795173173.6461546,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-80_d6_08db56e4fd61",
+  "category_id": "annees-80",
+  "difficulty": 6,
+  "question": "Quel est le nom du synthétiseur portable lancé par Casio en 1981, devenu l'instrument emblématique des musiciens amateurs des années 80 grâce à ses rythmes préprogrammés et son prix abordable ?",
+  "options": [
+   "Casio VL-Tone",
+   "Casio MT-40",
+   "Casio CT-410V",
+   "Casio SK-1"
+  ],
+  "correct_index": 0,
+  "explanation": "Le Casio VL-Tone (VL-1), sorti en 1981, fut le premier synthétiseur-calculatrice grand public à prix modeste, et acquit une renommée mondiale notamment grâce à l'utilisation de son rythme 'Samba' par le groupe Trio dans le tube 'Da Da Da' en 1982.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 90,
+   "comment": "Le Casio VL-Tone (VL-1) fut bien lancé en 1981, instrument abordable emblématique des années 80, célèbre via 'Da Da Da' de Trio.",
+   "correction": null,
+   "checked_at": 1795173180.0933757,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-80_d6_a3c90a9d663f",
+  "category_id": "annees-80",
+  "difficulty": 6,
+  "question": "Quel est le titre de l'album que Prince a sorti en 1984, bande originale du film du même nom dans lequel il jouait le rôle principal ?",
+  "options": [
+   "Purple Rain",
+   "Sign 'O' the Times",
+   "1999",
+   "Around the World in a Day"
+  ],
+  "correct_index": 0,
+  "explanation": "Purple Rain est à la fois le titre du film et de l'album de Prince, sortis en 1984. Cet album s'est vendu à plus de 25 millions d'exemplaires dans le monde et a valu à Prince deux Grammy Awards ainsi qu'un Oscar pour la meilleure chanson originale.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 99,
+   "comment": "Purple Rain est bien l'album et le film de Prince sortis en 1984.",
+   "correction": null,
+   "checked_at": 1795173184.4381115,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-80_d6_b70b3880c70c",
+  "category_id": "annees-80",
+  "difficulty": 6,
+  "question": "Quel est le nom du guitariste légendaire qui a réalisé un solo de guitare sur le titre 'Beat It' de Michael Jackson, paru sur l'album 'Thriller' en 1982 ?",
+  "options": [
+   "Eddie Van Halen",
+   "Carlos Santana",
+   "Angus Young",
+   "Slash"
+  ],
+  "correct_index": 0,
+  "explanation": "Eddie Van Halen, guitariste du groupe Van Halen, a enregistré le solo de guitare électrique de 'Beat It' gratuitement, en signe d'admiration pour Michael Jackson. Ce solo est devenu l'un des plus célèbres de l'histoire de la pop.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 99,
+   "comment": "Eddie Van Halen a bien enregistré le solo de 'Beat It' gratuitement, fait historiquement documenté.",
+   "correction": null,
+   "checked_at": 1795173189.0869231,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-80_d6_9d219b80a1a2",
+  "category_id": "annees-80",
+  "difficulty": 6,
+  "question": "Quel est le nom du chanteur britannique qui a interprété le titre 'A Different Corner' en 1986, atteignant la première place des charts au Royaume-Uni, après s'être séparé de son groupe Wham! ?",
+  "options": [
+   "George Michael",
+   "Simon Le Bon",
+   "Boy George",
+   "Sting"
+  ],
+  "correct_index": 0,
+  "explanation": "George Michael a sorti 'A Different Corner' en mars 1986, quelques mois avant la dissolution officielle de Wham!, confirmant ainsi son envol en solo. Ce titre doux et mélancolique, qu'il a entièrement écrit et produit, est immédiatement monté à la première place des charts britanniques.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 95,
+   "comment": "George Michael a bien interprété 'A Different Corner' qui a atteint la première place des charts britanniques en 1986.",
+   "correction": null,
+   "checked_at": 1795173194.4849944,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-80_d6_e930d05f1b67",
+  "category_id": "annees-80",
+  "difficulty": 6,
+  "question": "Quel est le nom du film de 1986 réalisé par Oliver Stone, avec Tom Berenger et Willem Dafoe, qui a remporté l'Oscar du meilleur film et du meilleur réalisateur en 1987 en racontant la guerre du Viêt Nam ?",
+  "options": [
+   "Full Metal Jacket",
+   "Platoon",
+   "Apocalypse Now",
+   "Born on the Fourth of July"
+  ],
+  "correct_index": 1,
+  "explanation": "Platoon, sorti en 1986, a remporté quatre Oscars en 1987, dont ceux du meilleur film et du meilleur réalisateur. Oliver Stone s'est inspiré de sa propre expérience de combattant au Viêt Nam pour écrire ce film devenu culte.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 99,
+   "comment": "Platoon (1986) d'Oliver Stone avec Berenger et Dafoe a bien remporté l'Oscar du meilleur film et du meilleur réalisateur en 1987.",
+   "correction": null,
+   "checked_at": 1795173206.7032454,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-80_d6_35f13c346e70",
+  "category_id": "annees-80",
+  "difficulty": 6,
+  "question": "Quel est le nom du bassiste des Rolling Stones qui est décédé noyé dans sa piscine en juillet 1969 — non, restons dans les années 80 : quel chanteur britannique a interprété le duo 'Don't You Want Me' avec Susan Ann Sulley, tube numéro 1 en 1981, au sein du groupe The Human League ?",
+  "options": [
+   "Phil Oakey",
+   "Dave Gahan",
+   "Martin Gore",
+   "Andy McCluskey"
+  ],
+  "correct_index": 0,
+  "explanation": "Phil Oakey est le chanteur principal et fondateur de The Human League ; c'est lui qui interprète le duo 'Don't You Want Me' avec Susan Ann Sulley, tube sorti en 1981 qui atteint la première place des charts britanniques et américains.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 95,
+   "comment": "Phil Oakey est bien le chanteur de The Human League interprétant 'Don't You Want Me' en duo, bien que la formulation de la question soit confuse et trompeuse.",
+   "correction": null,
+   "checked_at": 1795173213.034191,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-80_d6_28588af3ea78",
+  "category_id": "annees-80",
+  "difficulty": 6,
+  "question": "Quel est le nom du film de 1982 réalisé par Ridley Scott, avec Harrison Ford, dans lequel un policier du futur traque des androïdes quasi humains dans un Los Angeles dystopique ?",
+  "options": [
+   "Blade Runner",
+   "Total Recall",
+   "RoboCop",
+   "The Terminator"
+  ],
+  "correct_index": 0,
+  "explanation": "Blade Runner, sorti en 1982 et réalisé par Ridley Scott, est devenu un film culte de la science-fiction avec Harrison Ford dans le rôle de Rick Deckard. Adapté du roman de Philip K. Dick, il a profondément marqué l'esthétique et l'imaginaire des années 80.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 100,
+   "comment": "Blade Runner de Ridley Scott (1982) avec Harrison Ford traquant des réplicants à Los Angeles est exact, les autres films ne correspondent pas.",
+   "correction": null,
+   "checked_at": 1795173218.41711,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-80_d6_5d204c322668",
+  "category_id": "annees-80",
+  "difficulty": 6,
+  "question": "Quel est le nom du groupe new-wave britannique qui a sorti en 1982 le single 'Don't You Want Me', extrait de l'album 'Dare', atteignant la première place des charts dans plusieurs pays ?",
+  "options": [
+   "Duran Duran",
+   "The Human League",
+   "Depeche Mode",
+   "Soft Cell"
+  ],
+  "correct_index": 1,
+  "explanation": "'Don't You Want Me' est un titre du groupe The Human League, issu de leur album 'Dare' sorti en 1981, et qui est devenu numéro 1 au Royaume-Uni en 1981 puis aux États-Unis en 1982. Le morceau est interprété en duo par Philip Oakey et Susan Ann Sulley.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 98,
+   "comment": "'Don't You Want Me' est bien de The Human League, issu de l'album 'Dare' (1981), numéro 1 au UK fin 1981 et aux USA en 1982.",
+   "correction": null,
+   "checked_at": 1795173223.6012251,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-80_d6_1e7d07723115",
+  "category_id": "annees-80",
+  "difficulty": 6,
+  "question": "Quel est le nom du film de 1984 réalisé par Miloš Forman, qui retrace la vie du compositeur Wolfgang Amadeus Mozart et qui a remporté huit Oscars, dont celui du meilleur film ?",
+  "options": [
+   "Amadeus",
+   "Farinelli",
+   "Immortal Beloved",
+   "Mozart in Jungle"
+  ],
+  "correct_index": 0,
+  "explanation": "Amadeus, sorti en 1984 et réalisé par Miloš Forman, a remporté huit Oscars lors de la cérémonie de 1985, dont ceux du meilleur film et du meilleur réalisateur. Adapté de la pièce de Peter Shaffer, il met en scène la rivalité entre Mozart et Salieri.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 99,
+   "comment": "Amadeus de Miloš Forman (1984) a bien remporté huit Oscars dont celui du meilleur film, et les autres options sont clairement fausses.",
+   "correction": null,
+   "checked_at": 1795173228.5772781,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-80_d7_645e1a6faa1b",
+  "category_id": "annees-80",
+  "difficulty": 7,
+  "question": "Dans quel stade s'est tenu le concert historique 'Live Aid' organisé par Bob Geldof à Londres le 13 juillet 1985, retransmis en direct dans 150 pays ?",
+  "options": [
+   "Wembley Stadium",
+   "Stade de Twickenham",
+   "Crystal Palace National Sports Centre",
+   "Stade de Wembley Arena"
+  ],
+  "correct_index": 0,
+  "explanation": "Le volet britannique de Live Aid s'est déroulé au Wembley Stadium de Londres devant 72 000 spectateurs, tandis que la seconde scène était installée au JFK Stadium de Philadelphie. L'événement a réuni des artistes comme Queen, David Bowie et Paul McCartney et a levé environ 150 millions de dollars pour les victimes de la famine en Éthiopie.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 97,
+   "comment": "Le volet londonien de Live Aid s'est bien tenu au Wembley Stadium le 13 juillet 1985.",
+   "correction": null,
+   "checked_at": 1795173249.1120594,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-80_d7_03024e9a2c38",
+  "category_id": "annees-80",
+  "difficulty": 7,
+  "question": "Lors des Jeux Olympiques de Séoul en 1988, quel athlète fut disqualifié et déchu de sa médaille d'or du 100 mètres après contrôle positif aux stéroïdes anabolisants, établissant pourtant un record du monde en 9 s 79 ?",
+  "options": [
+   "Ben Johnson",
+   "Carl Lewis",
+   "Linford Christie",
+   "Calvin Smith"
+  ],
+  "correct_index": 0,
+  "explanation": "Le Canadien Ben Johnson franchit la ligne en 9 s 79, nouveau record du monde, mais fut disqualifié trois jours plus tard pour usage de stanozolol ; l'or fut attribué à l'Américain Carl Lewis. Ce scandale reste le plus retentissant de l'histoire de l'athlétisme olympique.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 98,
+   "comment": "Ben Johnson a bien couru en 9 s 79 à Séoul 1988 puis fut disqualifié pour stanozolol, un stéroïde anabolisant.",
+   "correction": null,
+   "checked_at": 1795173302.7950592,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-80_d7_deb25ad56564",
+  "category_id": "annees-80",
+  "difficulty": 7,
+  "question": "En 1987, le film 'Full Metal Jacket' de Stanley Kubrick s'ouvre sur une scène d'enrôlement de Marines accompagnée d'une chanson des années 60, mais quelle est la chanson des Trashmen, datant de 1963, que Kubrick réutilise dans la bande originale pour souligner l'absurdité de la guerre, et qui figure sur l'album 'Full Metal Jacket (I Wanna Be Your Drill Instructor)' sorti en 1987 ?",
+  "options": [
+   "Surfin' Bird",
+   "Wipe Out",
+   "Pipeline",
+   "Walk Don't Run"
+  ],
+  "correct_index": 0,
+  "explanation": "Kubrick utilise 'Surfin' Bird' des Trashmen (1963) dans 'Full Metal Jacket' (1987) pour son caractère délibérément absurde et abrutissant, en écho à l'aliénation des soldats. Ce choix musical est devenu l'une des signatures les plus mémorables et commentées de la bande originale du film.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 96,
+   "comment": "'Surfin' Bird' des Trashmen (1963) figure bien dans Full Metal Jacket et sur la BO de 1987, tandis que les autres sont des titres surf d'autres groupes.",
+   "correction": null,
+   "checked_at": 1795173364.309191,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-80_d7_3d16bd819264",
+  "category_id": "annees-80",
+  "difficulty": 7,
+  "question": "En 1983, le constructeur automobile Citroën lance en France une série limitée de sa BX baptisée d'un nom évoquant la haute technologie. Quel était ce nom ?",
+  "options": [
+   "BX Sport",
+   "BX Digit",
+   "BX Leader",
+   "BX Turbo"
+  ],
+  "correct_index": 1,
+  "explanation": "La BX Digit, lancée en 1983, se distinguait par son tableau de bord entièrement numérique, une première très remarquée sur une voiture de grande série en France. Ce nom soulignait l'affichage digital de ses instruments, symbole du modernisme technologique de l'époque.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 90,
+   "comment": "La BX Digit, série limitée de 1983 avec tableau de bord numérique, est bien attestée.",
+   "correction": null,
+   "checked_at": 1795173369.6325455,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-80_d1_0972de67e72b",
+  "category_id": "annees-80",
+  "difficulty": 1,
+  "question": "Comment s'appelait le petit extraterrestre héros du film de Steven Spielberg sorti en 1982 ?",
+  "options": [
+   "E.T.",
+   "R2-D2",
+   "Alf",
+   "Yoda"
+  ],
+  "correct_index": 0,
+  "explanation": "E.T. l'extra-terrestre est le film de Steven Spielberg sorti en 1982 qui raconte l'amitié entre un petit garçon et un extraterrestre abandonné sur Terre. C'est l'un des plus grands succès du cinéma des années 80.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 100,
+   "comment": "E.T. l'extra-terrestre de Steven Spielberg est bien sorti en 1982, les autres options sont clairement fausses.",
+   "correction": null,
+   "checked_at": 1795173647.228171,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-80_d2_62674aaceaf0",
+  "category_id": "annees-80",
+  "difficulty": 2,
+  "question": "Quel animal en peluche est devenu le jouet favori des enfants dans les années 80, capable de parler et de réagir grâce à une cassette audio glissée dans son ventre ?",
+  "options": [
+   "Teddy Ruxpin",
+   "Furby",
+   "Calinours",
+   "Gromit"
+  ],
+  "correct_index": 0,
+  "explanation": "Teddy Ruxpin, lancé en 1985, était un ours en peluche animatronique qui bougeait la bouche et les yeux en synchronisation avec une cassette audio. Il a été l'un des jouets les plus vendus de la décennie.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 96,
+   "comment": "Teddy Ruxpin, lancé en 1985, était bien un ours animatronique utilisant une cassette audio, les autres options sont clairement fausses.",
+   "correction": null,
+   "checked_at": 1795173658.4853652,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-80_d3_eb30b717e033",
+  "category_id": "annees-80",
+  "difficulty": 3,
+  "question": "Quel est le nom du célèbre cube coloré à six faces, inventé par le Hongrois Ernő Rubik, qui est devenu le jouet le plus vendu des années 80 dans le monde entier ?",
+  "options": [
+   "Le Cube Rubik",
+   "Le Cube Tetris",
+   "Le Puzzle Ravensburger",
+   "Le Cube Tangram"
+  ],
+  "correct_index": 0,
+  "explanation": "Le Rubik's Cube, inventé en 1974 par Ernő Rubik, a connu un succès planétaire fulgurant dans les années 80, avec plus de 100 millions d'exemplaires vendus. Résoudre ce casse-tête aux 43 quintillions de combinaisons est devenu un véritable défi de société.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 96,
+   "comment": "Le Rubik's Cube inventé par Ernő Rubik en 1974 est la bonne réponse, les autres options sont clairement fausses.",
+   "correction": null,
+   "checked_at": 1795173664.1245644,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-80_d3_baf79d42649a",
+  "category_id": "annees-80",
+  "difficulty": 3,
+  "question": "Quel est le titre du film de 1985 dans lequel Michael J. Fox voyage dans le temps à bord d'une voiture DeLorean modifiée par un savant excentrique ?",
+  "options": [
+   "Retour vers le futur",
+   "Les Aventures de Buckaroo Banzai",
+   "Terminator",
+   "WarGames"
+  ],
+  "correct_index": 0,
+  "explanation": "Retour vers le futur, réalisé par Robert Zemeckis, est sorti en 1985 et met en scène Marty McFly (Michael J. Fox) et le Docteur Brown (Christopher Lloyd). Le film a été un immense succès mondial et la DeLorean transformée en machine à voyager dans le temps est devenue un symbole des années 80.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 100,
+   "comment": "Retour vers le futur (1985) correspond exactement à la description avec Michael J. Fox et la DeLorean.",
+   "correction": null,
+   "checked_at": 1795173669.6718373,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-80_d4_ee0c31f91f33",
+  "category_id": "annees-80",
+  "difficulty": 4,
+  "question": "Quel groupe britannique a sorti en 1983 le single 'True', qui s'est hissé numéro 1 en Grande-Bretagne et a contribué à populariser le mouvement 'new romantic' ?",
+  "options": [
+   "Spandau Ballet",
+   "Duran Duran",
+   "Culture Club",
+   "Simple Minds"
+  ],
+  "correct_index": 0,
+  "explanation": "'True' est un titre de Spandau Ballet, sorti en mars 1983 et numéro 1 au Royaume-Uni pendant quatre semaines. Ce groupe londonien incarnait parfaitement l'esthétique new romantic des années 80.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 98,
+   "comment": "'True' de Spandau Ballet est bien sorti en 1983 et a atteint le numéro 1 au Royaume-Uni, groupe emblématique du new romantic.",
+   "correction": null,
+   "checked_at": 1795173680.4927065,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-80_d4_9d96a350bd9e",
+  "category_id": "annees-80",
+  "difficulty": 4,
+  "question": "Quel chanteur français a représenté la France au Concours Eurovision de la chanson en 1990… non : quel chanteur a interprété 'Sans contrefaçon' en 1987, tube extrait de l'album 'Ainsi soit je…' ?",
+  "options": [
+   "Mylène Farmer",
+   "Catherine Lara",
+   "Lio",
+   "Jeanne Mas"
+  ],
+  "correct_index": 0,
+  "explanation": "'Sans contrefaçon' est un titre de Mylène Farmer, sorti en 1987 sur l'album 'Ainsi soit je…', qui s'est hissé dans le top 5 des ventes en France. C'est l'un des titres emblématiques de sa carrière.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 98,
+   "comment": "'Sans contrefaçon' est bien un titre de Mylène Farmer sorti en 1987 sur l'album 'Ainsi soit je…', malgré la formulation confuse de la question.",
+   "correction": null,
+   "checked_at": 1795173693.5854833,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-80_d4_d27003b531c9",
+  "category_id": "annees-80",
+  "difficulty": 4,
+  "question": "Quel est le titre du film d'animation Disney sorti en 1989, inspiré d'un conte d'Andersen, dont la chanson 'Part of Your World' est devenue un classique ?",
+  "options": [
+   "La Belle au Bois Dormant",
+   "La Petite Sirène",
+   "Cendrillon",
+   "Rox et Rouky"
+  ],
+  "correct_index": 1,
+  "explanation": "La Petite Sirène, sorti en novembre 1989, marque le début de la renaissance Disney avec ses chansons d'Alan Menken. 'Part of Your World' ('Le monde où je vis' en français) est interprétée par l'héroïne Ariel.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 99,
+   "comment": "La Petite Sirène est bien le film Disney de 1989 inspiré d'Andersen contenant 'Part of Your World'.",
+   "correction": null,
+   "checked_at": 1795173707.2644985,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-80_d5_41b26fcac77d",
+  "category_id": "annees-80",
+  "difficulty": 5,
+  "question": "Quel est le nom du coureur cycliste américain qui a remporté le Tour de France 1986, devenant ainsi le premier non-Européen à s'imposer dans la Grande Boucle ?",
+  "options": [
+   "Greg LeMond",
+   "Bernard Hinault",
+   "Laurent Fignon",
+   "Andy Hampsten"
+  ],
+  "correct_index": 0,
+  "explanation": "Greg LeMond a remporté le Tour de France 1986 en tant que coéquipier de Bernard Hinault chez La Vie Claire, devenant le premier Américain et premier non-Européen à gagner l'épreuve. Il s'imposa au terme d'une rivalité mémorable avec Hinault lui-même.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 98,
+   "comment": "Greg LeMond a bien remporté le Tour 1986, premier Américain et non-Européen vainqueur.",
+   "correction": null,
+   "checked_at": 1795173712.270629,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-80_d5_2899f2b5d16d",
+  "category_id": "annees-80",
+  "difficulty": 5,
+  "question": "Quel est le nom du chanteur américain qui a enregistré le duo 'Ebony and Ivory' avec Paul McCartney en 1982, atteignant la première place des charts aux États-Unis et au Royaume-Uni ?",
+  "options": [
+   "Stevie Wonder",
+   "Michael Jackson",
+   "Lionel Richie",
+   "Ray Charles"
+  ],
+  "correct_index": 0,
+  "explanation": "'Ebony and Ivory', sorti en avril 1982, est une collaboration entre Paul McCartney et Stevie Wonder, extraite de l'album 'Tug of War'. Le titre fut numéro 1 aux États-Unis pendant sept semaines.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 98,
+   "comment": "'Ebony and Ivory' est bien un duo de Paul McCartney et Stevie Wonder, numéro 1 en 1982 des deux côtés de l'Atlantique.",
+   "correction": null,
+   "checked_at": 1795173717.1626813,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-80_d5_37f0f017a1cf",
+  "category_id": "annees-80",
+  "difficulty": 5,
+  "question": "Quel film de science-fiction sorti en 1984, réalisé par James Cameron, met en scène un robot tueur envoyé du futur pour éliminer une jeune femme prénommée Sarah Connor ?",
+  "options": [
+   "RoboCop",
+   "Terminator",
+   "Predator",
+   "Total Recall"
+  ],
+  "correct_index": 1,
+  "explanation": "Terminator, sorti en 1984, est réalisé par James Cameron et révèle Arnold Schwarzenegger dans le rôle du cyborg assassin T-800. Le film lance la carrière internationale de Schwarzenegger et devient l'un des grands classiques de la science-fiction des années 80.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 100,
+   "comment": "The Terminator (1984) de James Cameron met bien en scène un cyborg envoyé du futur pour tuer Sarah Connor, les autres films ayant des réalisateurs et intrigues différents.",
+   "correction": null,
+   "checked_at": 1795173722.5056212,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-80_d5_5c878c568eae",
+  "category_id": "annees-80",
+  "difficulty": 5,
+  "question": "Quel est le titre de l'hymne officiel des Jeux Olympiques de Los Angeles en 1984, composé par John Williams et interprété par un orchestre symphonique, qui est depuis régulièrement utilisé lors des cérémonies olympiques ?",
+  "options": [
+   "Olympic Fanfare and Theme",
+   "Chariots of Fire",
+   "Hand in Hand",
+   "The Power of the Dream"
+  ],
+  "correct_index": 0,
+  "explanation": "John Williams a composé 'Olympic Fanfare and Theme' pour les Jeux Olympiques de Los Angeles en 1984 ; cette fanfare est devenue la signature musicale des cérémonies olympiques et lui a valu un Grammy Award en 1985. 'Hand in Hand' était quant à elle la chanson officielle des JO de Séoul en 1988.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 95,
+   "comment": "John Williams a bien composé 'Olympic Fanfare and Theme' pour les JO de Los Angeles 1984, œuvre devenue emblématique des cérémonies olympiques.",
+   "correction": null,
+   "checked_at": 1795173753.9675581,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-80_d5_5cbccbda2761",
+  "category_id": "annees-80",
+  "difficulty": 5,
+  "question": "Quel groupe britannique a sorti en 1985 le single 'Don't You Forget About Me', titre phare de la bande originale du film 'The Breakfast Club' de John Hughes ?",
+  "options": [
+   "Simple Minds",
+   "Duran Duran",
+   "Depeche Mode",
+   "Tears for Fears"
+  ],
+  "correct_index": 0,
+  "explanation": "C'est Simple Minds, groupe écossais emmené par Jim Kerr, qui a enregistré ce titre à la demande du réalisateur John Hughes. Le single s'est hissé numéro 1 aux États-Unis et reste l'une des chansons emblématiques des années 80.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 99,
+   "comment": "Simple Minds a bien enregistré ce titre pour The Breakfast Club en 1985, numéro 1 aux États-Unis.",
+   "correction": null,
+   "checked_at": 1795173758.7608037,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-80_d7_43ed7879eb87",
+  "category_id": "annees-80",
+  "difficulty": 7,
+  "question": "Lors de la finale de la Coupe du monde de football 1986 à Mexico, par quel score l'Argentine de Diego Maradona a-t-elle battu l'Allemagne de l'Ouest ?",
+  "options": [
+   "3-2",
+   "2-0",
+   "1-0",
+   "2-1"
+  ],
+  "correct_index": 0,
+  "explanation": "La finale du 29 juin 1986 au stade Azteca s'est conclue sur le score de 3-2 : Burruchaga a inscrit le but victorieux à la 83e minute après que l'Allemagne de l'Ouest avait réduit l'écart de 2-0 à 2-2. Ce mondial reste celui du célèbre 'but du siècle' de Maradona contre l'Angleterre.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 99,
+   "comment": "L'Argentine a bien battu la RFA 3-2 en finale le 29 juin 1986 au stade Azteca, Burruchaga marquant le but décisif.",
+   "correction": null,
+   "checked_at": 1795173765.394586,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-80_d7_181273e0ea0e",
+  "category_id": "annees-80",
+  "difficulty": 7,
+  "question": "En 1982, le label Celluloid publie en France le premier album du groupe Grandmaster Flash and the Furious Five contenant le titre 'The Message'. Quel est le nom exact de cet album ?",
+  "options": [
+   "The Message",
+   "Adventures of Grandmaster Flash on the Wheels of Steel",
+   "Flash to the Beat",
+   "Grandmaster Flash & the Furious Five"
+  ],
+  "correct_index": 0,
+  "explanation": "L'album sorti en 1982 sur Sugar Hill Records (distribué en France par Celluloid) porte le titre 'The Message', du nom de son single phare, considéré comme l'un des textes fondateurs du rap conscient. Il est distinct du maxi 'Adventures on the Wheels of Steel' paru en 1981.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 90,
+   "comment": "L'album 'The Message' sorti en 1982 sur Sugar Hill Records contient bien le titre éponyme et les autres options ne sont pas des albums studio valides.",
+   "correction": null,
+   "checked_at": 1795173844.0112388,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-80_d7_c5c9ef8d8c30",
+  "category_id": "annees-80",
+  "difficulty": 7,
+  "question": "En 1983, Michael Jackson réalise le clip de 'Thriller', considéré comme le plus coûteux jamais produit à l'époque. Quel célèbre réalisateur de films d'horreur l'a mis en scène, et quel était le budget approximatif de ce clip ?",
+  "options": [
+   "John Landis, environ 500 000 dollars",
+   "John Carpenter, environ 800 000 dollars",
+   "Wes Craven, environ 300 000 dollars",
+   "Tobe Hooper, environ 1 million de dollars"
+  ],
+  "correct_index": 0,
+  "explanation": "Le clip de 'Thriller' a été réalisé par John Landis, déjà connu pour 'An American Werewolf in London' (1981), pour un budget d'environ 500 000 dollars — une somme exceptionnelle pour un clip en 1983. Sa durée de près de 14 minutes et ses effets de maquillage spectaculaires en ont fait un véritable court-métrage de référence.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 96,
+   "comment": "John Landis a bien réalisé Thriller en 1983 avec un budget d'environ 500 000 dollars, record pour l'époque.",
+   "correction": null,
+   "checked_at": 1795173879.0608912,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-80_d1_1b6d12b1a47e",
+  "category_id": "annees-80",
+  "difficulty": 1,
+  "question": "Comment s'appelait le robot gentil dans le film 'Cocoon' sorti en 1985 ? Non — plus simple : dans le dessin animé 'Les Schtroumpfs', quelle est la couleur des petits personnages créés par le Belge Peyo ?",
+  "options": [
+   "Rouge",
+   "Verte",
+   "Bleue",
+   "Jaune"
+  ],
+  "correct_index": 2,
+  "explanation": "Les Schtroumpfs sont de petits personnages bleus, créés par le dessinateur belge Peyo. Leur série animée a connu un énorme succès dans les années 80 à la télévision.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 99,
+   "comment": "Les Schtroumpfs de Peyo sont effectivement bleus, les autres options sont clairement fausses.",
+   "correction": null,
+   "checked_at": 1795174204.761178,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-80_d1_f3b7886df0b3",
+  "category_id": "annees-80",
+  "difficulty": 1,
+  "question": "Comment s'appelle le chanteur américain connu pour son célèbre gant blanc et ses pas de danse, qui a sorti l'album 'Thriller' en 1982 ?",
+  "options": [
+   "Michael Jackson",
+   "Prince",
+   "David Bowie",
+   "Elton John"
+  ],
+  "correct_index": 0,
+  "explanation": "Michael Jackson est l'auteur de l'album 'Thriller', sorti en 1982, qui est devenu l'album le plus vendu de l'histoire. Il était reconnaissable à son gant blanc et à son fameux pas de danse appelé le moonwalk.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 100,
+   "comment": "Michael Jackson a bien sorti Thriller en 1982 et est associé au gant blanc et au moonwalk.",
+   "correction": null,
+   "checked_at": 1795174216.4584248,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-80_d1_58e91f0f6649",
+  "category_id": "annees-80",
+  "difficulty": 1,
+  "question": "Dans quel pays se trouvait la ville de Tchernobyl, touchée par une catastrophe nucléaire en 1986 ?",
+  "options": [
+   "Ukraine (URSS)",
+   "France",
+   "Allemagne",
+   "Chine"
+  ],
+  "correct_index": 0,
+  "explanation": "La centrale nucléaire de Tchernobyl se trouvait en Ukraine, qui faisait alors partie de l'URSS. L'explosion du réacteur n°4, le 26 avril 1986, est considérée comme la plus grave catastrophe nucléaire de l'histoire.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 100,
+   "comment": "Tchernobyl était bien situé en RSS d'Ukraine, partie de l'URSS en 1986.",
+   "correction": null,
+   "checked_at": 1795174220.6521103,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-80_d1_976a1de146b3",
+  "category_id": "annees-80",
+  "difficulty": 1,
+  "question": "Comment s'appelle la petite fée qui accompagne Peter Pan dans le dessin animé de Disney ?",
+  "options": [
+   "Clochette",
+   "Cendrillon",
+   "Fée Bleue",
+   "Mélusine"
+  ],
+  "correct_index": 0,
+  "explanation": "Clochette est la petite fée lumineuse et espiègle qui accompagne Peter Pan. Elle est devenue un symbole très populaire chez les enfants dans les années 80, notamment grâce aux rediffusions du dessin animé à la télévision.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 100,
+   "comment": "Clochette (Tinker Bell) est bien la fée qui accompagne Peter Pan dans le film Disney, les autres options sont clairement d'autres personnages.",
+   "correction": null,
+   "checked_at": 1795174259.02883,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-80_d1_abfa1e61882e",
+  "category_id": "annees-80",
+  "difficulty": 1,
+  "question": "Comment s'appelait le chanteur de 'We Are the World', le grand tube caritatif sorti en 1985 pour aider l'Afrique, qui a aussi chanté 'Billie Jean' ?",
+  "options": [
+   "Michael Jackson",
+   "Elton John",
+   "David Bowie",
+   "Freddie Mercury"
+  ],
+  "correct_index": 0,
+  "explanation": "Michael Jackson est l'un des principaux initiateurs et chanteurs de 'We Are the World', sorti en 1985. Il est également connu pour son album 'Thriller' et son tube 'Billie Jean'.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 96,
+   "comment": "Michael Jackson a co-écrit et chanté 'We Are the World' (1985) et est l'interprète de 'Billie Jean'.",
+   "correction": null,
+   "checked_at": 1795174263.7102115,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-80_d1_be97a56804b9",
+  "category_id": "annees-80",
+  "difficulty": 1,
+  "question": "Dans quel film de 1982 voit-on un petit robot sympathique nommé R2-D2 aux côtés de… non : quel est le prénom de la petite fille qui se lie d'amitié avec E.T. dans le film de Spielberg sorti en 1982 ?",
+  "options": [
+   "Gertie",
+   "Mary",
+   "Lisa",
+   "Sophie"
+  ],
+  "correct_index": 0,
+  "explanation": "Dans le film 'E.T. l'extra-terrestre' de Steven Spielberg (1982), la petite sœur du héros Elliott s'appelle Gertie, jouée par la jeune Drew Barrymore. C'est elle qui apprend à E.T. à parler en lui lisant des livres.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 96,
+   "comment": "Gertie, jouée par Drew Barrymore, est bien la petite sœur d'Elliott qui se lie d'amitié avec E.T. dans le film de 1982.",
+   "correction": null,
+   "checked_at": 1795174311.8207572,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-80_d1_a3e1e6eebe1b",
+  "category_id": "annees-80",
+  "difficulty": 1,
+  "question": "Dans les années 80, quel sport pratique la célèbre championne Steffi Graf, qui a remporté Roland-Garros pour la première fois en 1987 ?",
+  "options": [
+   "Le tennis",
+   "La natation",
+   "Le patinage artistique",
+   "La gymnastique"
+  ],
+  "correct_index": 0,
+  "explanation": "Steffi Graf est une grande championne de tennis allemande. Elle a dominé ce sport à la fin des années 80 et a même réalisé le Grand Chelem en 1988.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 100,
+   "comment": "Steffi Graf est bien une joueuse de tennis ayant remporté Roland-Garros en 1987, les autres options sont clairement fausses.",
+   "correction": null,
+   "checked_at": 1795174327.3950493,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-80_d1_7774f08f8c3f",
+  "category_id": "annees-80",
+  "difficulty": 1,
+  "question": "Dans quel pays a eu lieu la catastrophe nucléaire de Tchernobyl en 1986 ?",
+  "options": [
+   "L'Ukraine (alors en URSS)",
+   "La France",
+   "L'Allemagne",
+   "La Pologne"
+  ],
+  "correct_index": 0,
+  "explanation": "La centrale nucléaire de Tchernobyl se trouvait en Ukraine, qui faisait alors partie de l'URSS. L'explosion du réacteur n°4, le 26 avril 1986, est la plus grave catastrophe nucléaire de l'histoire.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 100,
+   "comment": "La centrale de Tchernobyl est située en Ukraine, alors République socialiste soviétique de l'URSS, où l'explosion a eu lieu le 26 avril 1986.",
+   "correction": null,
+   "checked_at": 1795174337.331136,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-80_d1_6a7cb2d56da4",
+  "category_id": "annees-80",
+  "difficulty": 1,
+  "question": "Comment s'appelait le jeu vidéo de Nintendo, sorti en 1985, dans lequel un plombier moustachu saute sur des champignons et des tortues pour sauver une princesse ?",
+  "options": [
+   "Super Mario Bros",
+   "Pac-Man",
+   "Tetris",
+   "Donkey Kong"
+  ],
+  "correct_index": 0,
+  "explanation": "Super Mario Bros est sorti en 1985 sur la console Nintendo NES. Le héros, Mario, est devenu l'un des personnages de jeux vidéo les plus célèbres au monde.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 98,
+   "comment": "Super Mario Bros est bien sorti en 1985 sur NES avec ce gameplay décrit, les autres options sont clairement fausses.",
+   "correction": null,
+   "checked_at": 1795174347.4828587,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-80_d2_faf056c3f290",
+  "category_id": "annees-80",
+  "difficulty": 2,
+  "question": "Quel groupe chantait 'La Bamba' en 1987, reprenant ce classique mexicain pour en faire un tube mondial ?",
+  "options": [
+   "Los Lobos",
+   "Santana",
+   "Miami Sound Machine",
+   "Gipsy Kings"
+  ],
+  "correct_index": 0,
+  "explanation": "Le groupe américain Los Lobos a enregistré 'La Bamba' pour la bande originale du film du même nom sorti en 1987. Le titre est monté en tête des charts dans de nombreux pays.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 98,
+   "comment": "Los Lobos a bien repris 'La Bamba' en 1987 pour le film éponyme, devenant un tube mondial numéro un.",
+   "correction": null,
+   "checked_at": 1795174351.8898125,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-80_d2_22a61c65fcf0",
+  "category_id": "annees-80",
+  "difficulty": 2,
+  "question": "Dans les années 80, quel célèbre chanteur portait le surnom de 'King of Pop' ?",
+  "options": [
+   "Michael Jackson",
+   "David Bowie",
+   "Elton John",
+   "Prince"
+  ],
+  "correct_index": 0,
+  "explanation": "Michael Jackson a été surnommé le 'King of Pop' grâce à ses succès extraordinaires, notamment l'album 'Thriller' sorti en 1982, le plus vendu de l'histoire.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 99,
+   "comment": "Michael Jackson est universellement reconnu comme le 'King of Pop' dans les années 80.",
+   "correction": null,
+   "checked_at": 1795174361.8410256,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-80_d2_cda7e99c6d9e",
+  "category_id": "annees-80",
+  "difficulty": 2,
+  "question": "Quel était le prénom du personnage principal de la série américaine 'Magnum' diffusée en France dans les années 80, incarné par Tom Selleck ?",
+  "options": [
+   "Thomas",
+   "Michael",
+   "Robert",
+   "David"
+  ],
+  "correct_index": 0,
+  "explanation": "Le personnage s'appelait Thomas Magnum, détective privé à Hawaï. Tom Selleck, avec sa moustache et sa chemise hawaïenne, est devenu l'un des héros préférés des téléspectateurs français des années 80.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 100,
+   "comment": "Le personnage s'appelait bien Thomas Magnum, incarné par Tom Selleck.",
+   "correction": null,
+   "checked_at": 1795174386.8881493,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-80_d2_e845f3357dfb",
+  "category_id": "annees-80",
+  "difficulty": 2,
+  "question": "Quel était le nom de la console de jeux vidéo portable lancée par Nintendo en 1989, dotée d'un petit écran noir et blanc ?",
+  "options": [
+   "Game Boy",
+   "Atari Lynx",
+   "Sega Game Gear",
+   "Neo Geo Pocket"
+  ],
+  "correct_index": 0,
+  "explanation": "La Game Boy a été lancée par Nintendo en 1989 au Japon et aux États-Unis. Avec son écran LCD monochrome et sa longue autonomie, elle est devenue un succès mondial, notamment grâce au jeu Tetris livré avec la console.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 99,
+   "comment": "La Game Boy est bien la console portable Nintendo lancée en 1989 avec écran LCD monochrome ; les autres options sont d'autres constructeurs et postérieures.",
+   "correction": null,
+   "checked_at": 1795174392.2498052,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-80_d2_703ffa8baf12",
+  "category_id": "annees-80",
+  "difficulty": 2,
+  "question": "Quel est le prénom de la sorcière malveillante qui poursuit Blanche-Neige dans le dessin animé Disney… non — quelle star américaine a chanté 'Like a Virgin' lors de la toute première cérémonie des MTV Video Music Awards en 1984 ?",
+  "options": [
+   "Cyndi Lauper",
+   "Madonna",
+   "Tina Turner",
+   "Whitney Houston"
+  ],
+  "correct_index": 1,
+  "explanation": "Madonna a interprété 'Like a Virgin' lors de la première cérémonie des MTV Video Music Awards en septembre 1984, en robe de mariée, dans une performance restée mémorable. Ce moment a contribué à faire d'elle l'une des plus grandes stars des années 80.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 98,
+   "comment": "Madonna a bien interprété 'Like a Virgin' en robe de mariée lors des premiers MTV VMA en 1984, performance iconique.",
+   "correction": null,
+   "checked_at": 1795174424.0728552,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-80_d2_493ce50d32c3",
+  "category_id": "annees-80",
+  "difficulty": 2,
+  "question": "Quel animal est la mascotte des Jeux Olympiques de Moscou en 1980 ?",
+  "options": [
+   "Un ours",
+   "Un aigle",
+   "Un lion",
+   "Un tigre"
+  ],
+  "correct_index": 0,
+  "explanation": "La mascotte des Jeux Olympiques de Moscou 1980 était Misha, un ourson souriant devenu très célèbre dans le monde entier. Son image a été utilisée sur de nombreux produits dérivés vendus en France.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 100,
+   "comment": "La mascotte des JO de Moscou 1980 était bien Misha, un ourson.",
+   "correction": null,
+   "checked_at": 1795174447.7541823,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-80_d2_0d4190684e9d",
+  "category_id": "annees-80",
+  "difficulty": 2,
+  "question": "Quel était le prénom du célèbre robot de la série télévisée française 'Téléfoot'... non — dans la série américaine 'Hé Dude !' Non. Quel acteur jouait le rôle de MacGyver dans la série du même nom diffusée en France dans les années 80 ?",
+  "options": [
+   "Richard Dean Anderson",
+   "Tom Selleck",
+   "David Hasselhoff",
+   "Pierce Brosnan"
+  ],
+  "correct_index": 0,
+  "explanation": "MacGyver était incarné par l'acteur américain Richard Dean Anderson. La série, diffusée de 1985 à 1992, a rendu célèbre ce personnage ingénieux capable de se sortir de n'importe quelle situation avec trois fois rien.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 99,
+   "comment": "Richard Dean Anderson a bien incarné MacGyver dans la série diffusée de 1985 à 1992, les autres options sont clairement fausses malgré l'énoncé confus.",
+   "correction": null,
+   "checked_at": 1795174471.499096,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-80_d2_e6a14d4d5a02",
+  "category_id": "annees-80",
+  "difficulty": 2,
+  "question": "Quel était le nom du personnage principal de la série américaine 'Dynastie', diffusée en France dans les années 80, interprété par John Forsythe ?",
+  "options": [
+   "Blake Carrington",
+   "J.R. Ewing",
+   "Alexis Colby",
+   "Bobby Ewing"
+  ],
+  "correct_index": 0,
+  "explanation": "Dans la série 'Dynastie', diffusée aux États-Unis de 1981 à 1989, John Forsythe incarnait Blake Carrington, le puissant patriarche d'une famille de milliardaires du pétrole. J.R. et Bobby Ewing étaient, eux, les personnages de la série concurrente 'Dallas'.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 99,
+   "comment": "John Forsythe interprétait bien Blake Carrington dans Dynastie, et les autres options sont des personnages de Dallas ou l'antagoniste Alexis.",
+   "correction": null,
+   "checked_at": 1795174476.5433867,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-80_d2_c2f8d5f5329f",
+  "category_id": "annees-80",
+  "difficulty": 2,
+  "question": "Quel est le titre de la chanson interprétée par Céline Dion lors de sa victoire au Concours Eurovision de la chanson en 1988, représentant la Suisse ?",
+  "options": [
+   "Ne partez pas sans moi",
+   "D'amour ou d'amitié",
+   "Pour que tu m'aimes encore",
+   "Je sais pas"
+  ],
+  "correct_index": 0,
+  "explanation": "Céline Dion a remporté l'Eurovision 1988 à Dublin avec 'Ne partez pas sans moi', représentant la Suisse. Ce succès a lancé sa carrière internationale.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 99,
+   "comment": "Céline Dion a bien gagné l'Eurovision 1988 pour la Suisse avec 'Ne partez pas sans moi', les autres titres sont des chansons différentes.",
+   "correction": null,
+   "checked_at": 1795174487.856816,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-80_d2_35364a44b902",
+  "category_id": "annees-80",
+  "difficulty": 2,
+  "question": "Quel était le prénom du personnage joué par Tom Hanks dans le film 'Big' sorti en 1988, un garçon qui se réveille un matin dans le corps d'un adulte ?",
+  "options": [
+   "Josh",
+   "Kevin",
+   "Danny",
+   "Mike"
+  ],
+  "correct_index": 0,
+  "explanation": "Dans 'Big' (1988), Tom Hanks incarne Josh Baskin, un garçon de 12 ans dont le vœu de grandir se réalise du jour au lendemain. Ce film est l'un des grands succès comiques des années 80.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 98,
+   "comment": "Le personnage joué par Tom Hanks dans 'Big' (1988) est bien Josh Baskin.",
+   "correction": null,
+   "checked_at": 1795174529.8167076,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-80_d3_25c5f3adac4c",
+  "category_id": "annees-80",
+  "difficulty": 3,
+  "question": "Quel est le nom de la console de jeux vidéo commercialisée par Sega en 1986 en Europe, rivale de la NES de Nintendo ?",
+  "options": [
+   "Master System",
+   "Mega Drive",
+   "Game Gear",
+   "Saturn"
+  ],
+  "correct_index": 0,
+  "explanation": "La Sega Master System est sortie en Europe en 1986 et fut la grande rivale de la NES de Nintendo tout au long de la fin des années 80. La Mega Drive, elle, n'est arrivée qu'en 1990 en Europe.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 93,
+   "comment": "La Master System de Sega est bien sortie en Europe en 1986 comme rivale de la NES, les autres consoles étant postérieures.",
+   "correction": null,
+   "checked_at": 1795174534.6856642,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-80_d3_9955830a3bed",
+  "category_id": "annees-80",
+  "difficulty": 3,
+  "question": "Quel groupe américain a connu un succès mondial en 1987 avec la chanson 'Nothing's Gonna Stop Us Now', extraite de la bande originale du film 'Mannequin' ?",
+  "options": [
+   "Starship",
+   "Journey",
+   "Foreigner",
+   "REO Speedwagon"
+  ],
+  "correct_index": 0,
+  "explanation": "'Nothing's Gonna Stop Us Now' est interprétée par Starship, groupe issu de Jefferson Airplane. Le titre s'est classé numéro 1 dans de nombreux pays en 1987 et a été nommé aux Oscars.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 98,
+   "comment": "Starship a bien interprété ce titre n°1 en 1987 pour le film Mannequin, nommé aux Oscars.",
+   "correction": null,
+   "checked_at": 1795174546.6804488,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-80_d3_52e668f1f19f",
+  "category_id": "annees-80",
+  "difficulty": 3,
+  "question": "Quel chanteur français a représenté la France à l'Eurovision 1986 avec la chanson 'J'aime la vie'... non — quel est le titre du tube de Desireless sorti en 1986 qui a connu un énorme succès en France et en Europe ?",
+  "options": [
+   "Voyage Voyage",
+   "Partir un jour",
+   "Je te survivrai",
+   "Femme libérée"
+  ],
+  "correct_index": 0,
+  "explanation": "Desireless a sorti 'Voyage Voyage' en 1986, un tube qui a conquis toute l'Europe et reste l'un des plus grands succès de la chanson française des années 80. Le titre a été numéro 1 dans plusieurs pays européens.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 96,
+   "comment": "'Voyage Voyage' de Desireless est bien sorti en 1986 et fut un immense succès européen.",
+   "correction": null,
+   "checked_at": 1795174552.474304,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-80_d3_319cabebf34a",
+  "category_id": "annees-80",
+  "difficulty": 3,
+  "question": "Quel est le nom du célèbre jeu de société sorti en France au début des années 80, dans lequel les joueurs répondent à des questions de culture générale pour remplir leur camembert ?",
+  "options": [
+   "Trivial Pursuit",
+   "Pictionary",
+   "Scrabble",
+   "Taboo"
+  ],
+  "correct_index": 0,
+  "explanation": "Trivial Pursuit, inventé par des Canadiens en 1979, est commercialisé en France dès 1983 et devient rapidement un succès massif. Les joueurs doivent répondre à des questions dans six catégories pour gagner six portions et compléter leur pion en forme de camembert.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 98,
+   "comment": "Trivial Pursuit, avec son pion camembert à six portions, est bien sorti en France au début des années 80.",
+   "correction": null,
+   "checked_at": 1795174564.481566,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-80_d3_332cb90c4237",
+  "category_id": "annees-80",
+  "difficulty": 3,
+  "question": "Quel groupe irlandais a sorti en 1987 le tube 'With or Without You', extrait de l'album 'The Joshua Tree' ?",
+  "options": [
+   "U2",
+   "The Cure",
+   "Depeche Mode",
+   "Simple Minds"
+  ],
+  "correct_index": 0,
+  "explanation": "'With or Without You' est un titre phare du groupe irlandais U2, sorti en 1987 sur l'album 'The Joshua Tree'. Ce single s'est hissé numéro 1 aux États-Unis et dans de nombreux pays.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 100,
+   "comment": "U2, groupe irlandais, a bien sorti 'With or Without You' en 1987 sur 'The Joshua Tree'.",
+   "correction": null,
+   "checked_at": 1795174569.4537134,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-80_d3_c645286aeefe",
+  "category_id": "annees-80",
+  "difficulty": 3,
+  "question": "Quel chanteur français a connu un immense succès en 1987 avec la chanson 'La Lambada'... non — quel est le prénom du héros de la série télévisée américaine 'Côte Ouest' (Knots Landing), diffusée en France dans les années 80... non. Quel acteur français interprète le rôle d'un flic parisien dans le film 'Le Cop' sorti en 1985... non.\n\nQuel était le nom du célèbre cheval dans la série télévisée américaine 'Zorro'... \n\nQuel film de 1988 avec Tom Cruise et Dustin Hoffman raconte l'histoire d'un homme qui découvre qu'il a un frère autiste ?",
+  "options": [
+   "Rain Man",
+   "Good Morning Vietnam",
+   "Cocktail",
+   "The Color of Money"
+  ],
+  "correct_index": 0,
+  "explanation": "Rain Man, sorti en 1988 et réalisé par Barry Levinson, met en scène Tom Cruise découvrant son frère autiste Raymond, joué magistralement par Dustin Hoffman. Le film a remporté quatre Oscars, dont celui du meilleur film.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 99,
+   "comment": "Rain Man (1988) avec Tom Cruise et Dustin Hoffman correspond exactement à la description, les autres options ne mettent pas en scène un frère autiste.",
+   "correction": null,
+   "checked_at": 1795174642.4597952,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-80_d3_33d3d9128051",
+  "category_id": "annees-80",
+  "difficulty": 3,
+  "question": "Quel est le titre du film de 1988 avec Tom Cruise et Dustin Hoffman, dans lequel un homme découvre qu'il a un frère autiste ?",
+  "options": [
+   "Rain Man",
+   "Good Morning Vietnam",
+   "Cocktail",
+   "The Color of Money"
+  ],
+  "correct_index": 0,
+  "explanation": "Rain Man, sorti en 1988 et réalisé par Barry Levinson, met en scène Tom Cruise et Dustin Hoffman dans le rôle de deux frères que tout oppose. Le film a remporté quatre Oscars, dont celui du meilleur film.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 99,
+   "comment": "Rain Man (1988) de Barry Levinson avec Cruise et Hoffman a bien remporté 4 Oscars dont meilleur film.",
+   "correction": null,
+   "checked_at": 1795174646.6261966,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-80_d3_109ab1026aca",
+  "category_id": "annees-80",
+  "difficulty": 3,
+  "question": "Quel est le nom du personnage extraterrestre sympathique au long cou qui fait fondre les cœurs dans le film de Steven Spielberg sorti en 1982 ?",
+  "options": [
+   "E.T.",
+   "Yoda",
+   "ALF",
+   "Gizmo"
+  ],
+  "correct_index": 0,
+  "explanation": "E.T. l'extra-terrestre, sorti en 1982, est l'un des plus grands succès du cinéma de Steven Spielberg. Le film raconte l'amitié entre un petit garçon prénommé Elliott et un alien perdu sur Terre.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 99,
+   "comment": "E.T. l'extra-terrestre de Spielberg est bien sorti en 1982 et les autres options sont clairement fausses.",
+   "correction": null,
+   "checked_at": 1795174651.5637472,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-80_d3_42851347c198",
+  "category_id": "annees-80",
+  "difficulty": 3,
+  "question": "Quel tube de Jean-Jacques Goldman, sorti en 1982, est devenu l'un des plus grands succès de la chanson française des années 80 ?",
+  "options": [
+   "Là-bas",
+   "Il suffira d'un signe",
+   "Envole-moi",
+   "Je te donne"
+  ],
+  "correct_index": 1,
+  "explanation": "'Il suffira d'un signe' est sorti en 1982 sur l'album 'Positif' de Jean-Jacques Goldman et s'est imposé comme un immense succès populaire en France. Goldman est devenu l'une des figures majeures de la chanson française grâce à ce titre.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 90,
+   "comment": "'Il suffira d'un signe' figure bien sur l'album 'Positif' de 1982 et fut un grand succès, tandis que les autres titres sont postérieurs.",
+   "correction": null,
+   "checked_at": 1795174670.949037,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-80_d4_9f95601f3e3b",
+  "category_id": "annees-80",
+  "difficulty": 4,
+  "question": "Quel est le titre de l'album de Bruce Springsteen sorti en 1984, dont la pochette emblématique montre un jean et un drapeau américain, et qui contient le tube 'Born in the U.S.A.' ?",
+  "options": [
+   "Born to Run",
+   "Nebraska",
+   "Born in the U.S.A.",
+   "Tunnel of Love"
+  ],
+  "correct_index": 2,
+  "explanation": "L'album 'Born in the U.S.A.' est sorti en juin 1984 et a produit sept singles classés dans le Top 10 américain, un record à l'époque. Sa pochette, photographiée par Annie Leibovitz, est l'une des plus reconnaissables du rock des années 80.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 99,
+   "comment": "L'album 'Born in the U.S.A.' est bien sorti en juin 1984 avec la pochette iconique photographiée par Annie Leibovitz.",
+   "correction": null,
+   "checked_at": 1795174700.3872511,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-80_d4_5552e6a25904",
+  "category_id": "annees-80",
+  "difficulty": 4,
+  "question": "Quel film de Robert Zemeckis, sorti en 1985, suit les aventures de Marty McFly qui remonte le temps à bord d'une DeLorean ?",
+  "options": [
+   "Retour vers le futur",
+   "Gremlins",
+   "Indiana Jones et le Temple maudit",
+   "Les Aventuriers de l'arche perdue"
+  ],
+  "correct_index": 0,
+  "explanation": "Retour vers le futur est sorti en juillet 1985 et a été un triomphe mondial. Réalisé par Robert Zemeckis, il met en scène Michael J. Fox dans le rôle de Marty McFly et Christopher Lloyd dans celui du Dr Emmett Brown, inventeur de la DeLorean voyageuse dans le temps.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 100,
+   "comment": "Retour vers le futur de Zemeckis, sorti en 1985, avec Marty McFly et la DeLorean, les autres options sont clairement fausses.",
+   "correction": null,
+   "checked_at": 1795174712.144987,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-80_d4_b5bdf123c1d0",
+  "category_id": "annees-80",
+  "difficulty": 4,
+  "question": "Quel groupe britannique a enregistré le tube 'Don't You Want Me', numéro 1 en France et au Royaume-Uni en 1981, extrait de l'album 'Dare' ?",
+  "options": [
+   "Duran Duran",
+   "The Human League",
+   "Depeche Mode",
+   "Spandau Ballet"
+  ],
+  "correct_index": 1,
+  "explanation": "'Don't You Want Me' est l'un des plus grands tubes du groupe The Human League, sorti en 1981 sur l'album 'Dare'. Ce titre synthpop a dominé les charts de nombreux pays et reste un symbole du son électronique du début des années 80.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 98,
+   "comment": "'Don't You Want Me' est bien de The Human League, issu de l'album 'Dare' (1981), numéro 1 au Royaume-Uni.",
+   "correction": null,
+   "checked_at": 1795174749.7750688,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-80_d4_a17990570774",
+  "category_id": "annees-80",
+  "difficulty": 4,
+  "question": "Quel chanteur français a sorti en 1985 le tube 'Quelque chose de Tennessee', en hommage au dramaturge américain Tennessee Williams ?",
+  "options": [
+   "Johnny Hallyday",
+   "Michel Sardou",
+   "Herbert Léonard",
+   "Julien Clerc"
+  ],
+  "correct_index": 0,
+  "explanation": "'Quelque chose de Tennessee' est l'un des plus grands succès de Johnny Hallyday, sorti en 1985 et écrit par Michel Berger. Le titre rend hommage à l'atmosphère du sud américain chère à Tennessee Williams.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 99,
+   "comment": "Chanson écrite par Michel Berger, interprétée par Johnny Hallyday en 1985 sur l'album Rock'n'Roll Attitude.",
+   "correction": null,
+   "checked_at": 1795174754.4061873,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-80_d4_25f95cd1321d",
+  "category_id": "annees-80",
+  "difficulty": 4,
+  "question": "Quel film de Tim Burton, sorti en 1989, marque le retour sur grand écran du célèbre justicier masqué de Gotham City, incarné par Michael Keaton ?",
+  "options": [
+   "Batman",
+   "Superman IV",
+   "Dick Tracy",
+   "The Shadow"
+  ],
+  "correct_index": 0,
+  "explanation": "En 1989, Tim Burton réalise 'Batman' avec Michael Keaton dans le rôle-titre et Jack Nicholson en Joker, un succès colossal qui relance la franchise. Le film est l'un des plus grands triomphes au box-office de l'année.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 100,
+   "comment": "Batman de Tim Burton est sorti en 1989 avec Michael Keaton, les autres options sont clairement erronées.",
+   "correction": null,
+   "checked_at": 1795174759.5145724,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-80_d4_dc4612814107",
+  "category_id": "annees-80",
+  "difficulty": 4,
+  "question": "Quel groupe pop britannique a enregistré le tube 'Club Tropicana' en 1983, avant de se séparer en 1986 ?",
+  "options": [
+   "Duran Duran",
+   "Spandau Ballet",
+   "Wham!",
+   "Culture Club"
+  ],
+  "correct_index": 2,
+  "explanation": "Wham!, le duo formé par George Michael et Andrew Ridgeley, a sorti 'Club Tropicana' en 1983, l'un de leurs plus grands succès. Le groupe s'est officiellement séparé en 1986 lors d'un concert d'adieu à Wembley.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 98,
+   "comment": "'Club Tropicana' est bien un tube de Wham! sorti en 1983, et le duo s'est séparé en 1986.",
+   "correction": null,
+   "checked_at": 1795174770.3666675,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-80_d4_85fd0df51f79",
+  "category_id": "annees-80",
+  "difficulty": 4,
+  "question": "Quel chanteur britannique a sorti en 1987 l'album 'Faith', qui contient notamment le tube 'I Want Your Sex' et s'est vendu à plus de 20 millions d'exemplaires dans le monde ?",
+  "options": [
+   "George Michael",
+   "Elton John",
+   "David Bowie",
+   "Phil Collins"
+  ],
+  "correct_index": 0,
+  "explanation": "George Michael a sorti 'Faith' en octobre 1987, son premier album solo après la séparation de Wham!. L'album a été un triomphe mondial et lui a valu le Grammy Award de l'album de l'année en 1989.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 98,
+   "comment": "Faith (1987) est bien le premier album solo de George Michael contenant 'I Want Your Sex', vendu à plus de 20 millions d'exemplaires.",
+   "correction": null,
+   "checked_at": 1795174775.2892685,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-80_d4_c7f60b9f5e2d",
+  "category_id": "annees-80",
+  "difficulty": 4,
+  "question": "Quel est le titre du film d'animation des studios Disney sorti en 1989, adapté d'un conte d'Andersen, dont l'héroïne est une jeune sirène rousse nommée Ariel ?",
+  "options": [
+   "La Belle au Bois Dormant",
+   "La Petite Sirène",
+   "Cendrillon",
+   "Blanche-Neige et les Sept Nains"
+  ],
+  "correct_index": 1,
+  "explanation": "La Petite Sirène est sorti en novembre 1989 aux États-Unis, marquant le début du renouveau des studios Disney. Adapté du conte d'Hans Christian Andersen, il met en scène Ariel, une sirène qui rêve de vivre parmi les humains.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 100,
+   "comment": "La Petite Sirène est bien le film Disney de 1989 adapté d'Andersen avec l'héroïne Ariel.",
+   "correction": null,
+   "checked_at": 1795174780.8270323,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-80_d4_ce56b63ff4cd",
+  "category_id": "annees-80",
+  "difficulty": 4,
+  "question": "Quel groupe britannique a enregistré en 1981 le tube 'Tainted Love', reprise d'un titre soul des années 60, qui est resté 43 semaines au hit-parade britannique ?",
+  "options": [
+   "Soft Cell",
+   "Depeche Mode",
+   "The Human League",
+   "Yazoo"
+  ],
+  "correct_index": 0,
+  "explanation": "C'est le duo synthpop Soft Cell, composé de Marc Almond et Dave Ball, qui a repris 'Tainted Love' de Gloria Jones en 1981. Ce single a établi un record en restant 43 semaines consécutives dans le classement britannique.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 96,
+   "comment": "Soft Cell a bien repris 'Tainted Love' de Gloria Jones en 1981, battant un record de longévité dans les charts britanniques.",
+   "correction": null,
+   "checked_at": 1795174785.9425259,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-80_d4_097783fdb748",
+  "category_id": "annees-80",
+  "difficulty": 4,
+  "question": "Quel est le titre du tube de Cyndi Lauper sorti en 1983, premier single de son album 'She's So Unusual', qui célèbre le droit des filles à s'amuser ?",
+  "options": [
+   "Girls Just Want to Have Fun",
+   "Time After Time",
+   "True Colors",
+   "She Bop"
+  ],
+  "correct_index": 0,
+  "explanation": "'Girls Just Want to Have Fun' est sorti en 1983 et a propulsé Cyndi Lauper au sommet des charts mondiaux. Ce titre est devenu l'un des hymnes féminins emblématiques de la décennie.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 96,
+   "comment": "Girls Just Want to Have Fun est bien le premier single de She's So Unusual sorti en 1983.",
+   "correction": null,
+   "checked_at": 1795174797.942875,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-80_d5_a6b369c725e5",
+  "category_id": "annees-80",
+  "difficulty": 5,
+  "question": "Dans quel stade s'est déroulée la finale de la Coupe du monde de football 1986, remportée par l'Argentine face à la RFA (3-2) ?",
+  "options": [
+   "Stade Azteca de Mexico",
+   "Stade Jalisco de Guadalajara",
+   "Stade Universitario de Monterrey",
+   "Stade Nemesio Diez de Toluca"
+  ],
+  "correct_index": 0,
+  "explanation": "La finale du Mondial 1986 s'est disputée le 29 juin au stade Azteca de Mexico devant plus de 114 000 spectateurs. L'Argentine, emmenée par Diego Maradona, a battu la République fédérale d'Allemagne 3 buts à 2.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 99,
+   "comment": "La finale de la Coupe du monde 1986 s'est bien jouée au stade Azteca de Mexico, l'Argentine battant la RFA 3-2.",
+   "correction": null,
+   "checked_at": 1795174803.6565168,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-80_d5_6885aff1ca66",
+  "category_id": "annees-80",
+  "difficulty": 5,
+  "question": "Quel chanteur britannique a interprété le titre 'A Different Corner' en 1986, atteignant la première place des charts au Royaume-Uni, quelques mois après la séparation de son duo Wham! ?",
+  "options": [
+   "George Michael",
+   "Elton John",
+   "David Bowie",
+   "Boy George"
+  ],
+  "correct_index": 0,
+  "explanation": "'A Different Corner', sorti en mars 1986, est le deuxième single solo de George Michael, publié peu après la dissolution officielle de Wham!. Il s'agit de l'un des rares singles de l'histoire à atteindre directement le numéro 1 au Royaume-Uni dès sa sortie.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 98,
+   "comment": "'A Different Corner' est bien un single solo de George Michael sorti en 1986 ayant atteint la première place au Royaume-Uni après la séparation de Wham!.",
+   "correction": null,
+   "checked_at": 1795174809.2131271,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-80_d5_792a2287be5a",
+  "category_id": "annees-80",
+  "difficulty": 5,
+  "question": "Quel est le titre du tube de Vanessa Paradis, sorti en 1987, qui l'a révélée au grand public à seulement 14 ans ?",
+  "options": [
+   "Joe le taxi",
+   "Maxou",
+   "Sunday Mondays",
+   "Dis lui toi que je t'aime"
+  ],
+  "correct_index": 0,
+  "explanation": "Vanessa Paradis a connu un succès fulgurant avec 'Joe le taxi', sorti en 1987 alors qu'elle n'avait que 14 ans. Ce titre, écrit par Franck Langolff et Étienne Roda-Gil, s'est classé numéro 1 dans plusieurs pays européens.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 100,
+   "comment": "Joe le taxi est bien le tube de Vanessa Paradis sorti en 1987 qui l'a révélée à 14 ans.",
+   "correction": null,
+   "checked_at": 1795174826.714771,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-80_d5_157239acadba",
+  "category_id": "annees-80",
+  "difficulty": 5,
+  "question": "Quel est le titre du premier album solo de Phil Collins, sorti en 1981, qui contient le tube mondial 'In the Air Tonight' ?",
+  "options": [
+   "Hello, I Must Be Going!",
+   "No Jacket Required",
+   "Face Value",
+   "Both Sides"
+  ],
+  "correct_index": 2,
+  "explanation": "'Face Value', sorti en février 1981, est le premier album solo de Phil Collins, ex-batteur et chanteur de Genesis. Il contient 'In the Air Tonight', reconnaissable entre autres à son fameux roulement de batterie.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 99,
+   "comment": "Face Value (1981) est bien le premier album solo de Phil Collins et contient 'In the Air Tonight'.",
+   "correction": null,
+   "checked_at": 1795174838.2846036,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-80_d5_1f4380826025",
+  "category_id": "annees-80",
+  "difficulty": 5,
+  "question": "Quel est le titre du film d'animation japonais réalisé par Hayao Miyazaki, sorti en 1988, qui raconte l'histoire de deux sœurs s'installant à la campagne et rencontrant des créatures forestières magiques ?",
+  "options": [
+   "Nausicaä de la Vallée du Vent",
+   "Mon Voisin Totoro",
+   "Le Château dans le Ciel",
+   "Kiki la Petite Sorcière"
+  ],
+  "correct_index": 1,
+  "explanation": "Mon Voisin Totoro est sorti au Japon en avril 1988. Le film met en scène Satsuki et Mei, deux fillettes qui découvrent Totoro, un esprit géant de la forêt, et a été distribué en France dans les années suivantes, devenant un classique mondial.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 100,
+   "comment": "Mon Voisin Totoro, réalisé par Miyazaki et sorti en 1988, raconte bien l'histoire de Satsuki et Mei rencontrant Totoro.",
+   "correction": null,
+   "checked_at": 1795174844.4005957,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-80_d5_56e5dd0b943f",
+  "category_id": "annees-80",
+  "difficulty": 5,
+  "question": "Quel est le titre de l'album de Michael Jackson sorti en 1982, qui est devenu l'album le plus vendu de tous les temps avec des titres comme 'Billie Jean' et 'Beat It' ?",
+  "options": [
+   "Bad",
+   "Thriller",
+   "Off the Wall",
+   "Dangerous"
+  ],
+  "correct_index": 1,
+  "explanation": "Thriller, sorti en novembre 1982, s'est écoulé à plus de 66 millions d'exemplaires dans le monde. Il contient sept singles classés dans le Top 10 américain, un record absolu à l'époque.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 99,
+   "comment": "Thriller, sorti en 1982, est bien l'album le plus vendu de tous les temps et contient 'Billie Jean' et 'Beat It'.",
+   "correction": null,
+   "checked_at": 1795174889.4146352,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-80_d5_b995b2ff9a07",
+  "category_id": "annees-80",
+  "difficulty": 5,
+  "question": "Quel est le nom du virus informatique apparu en 1986, considéré comme l'un des tout premiers virus à se propager sur PC, créé par deux frères pakistanais ?",
+  "options": [
+   "Brain",
+   "Melissa",
+   "Creeper",
+   "Stuxnet"
+  ],
+  "correct_index": 0,
+  "explanation": "Le virus Brain, créé en 1986 par les frères Alvi à Lahore (Pakistan), est considéré comme le premier virus à se propager sur les PC sous MS-DOS via les disquettes. Il n'était pas destructeur mais marqua un tournant dans l'histoire de l'informatique.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 98,
+   "comment": "Le virus Brain, créé en 1986 par les frères Alvi au Pakistan, est bien le premier virus pour PC MS-DOS.",
+   "correction": null,
+   "checked_at": 1795174900.7485118,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-80_d5_c4b7d799505c",
+  "category_id": "annees-80",
+  "difficulty": 5,
+  "question": "Dans quel film de 1986, réalisé par Oliver Stone, Tom Berenger et Willem Dafoe incarnent deux sergents qui s'affrontent moralement au sein d'une unité américaine au Viêt Nam ?",
+  "options": [
+   "Full Metal Jacket",
+   "Platoon",
+   "Apocalypse Now",
+   "Rambo II"
+  ],
+  "correct_index": 1,
+  "explanation": "Platoon, sorti en 1986, a remporté quatre Oscars dont celui du Meilleur film et du Meilleur réalisateur. Tom Berenger y joue le Sergent Barnes et Willem Dafoe le Sergent Elias, deux figures antagonistes inoubliables.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 99,
+   "comment": "Platoon (1986) d'Oliver Stone met bien Berenger et Dafoe en sergents antagonistes au Viêt Nam.",
+   "correction": null,
+   "checked_at": 1795174913.4435399,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-80_d5_9e397f2034c3",
+  "category_id": "annees-80",
+  "difficulty": 5,
+  "question": "Quel est le titre du tube de Kim Wilde sorti en 1981, premier single de sa carrière solo, co-écrit par son père Marty Wilde et son frère Ricky ?",
+  "options": [
+   "Kids in America",
+   "Chequered Love",
+   "Cambodia",
+   "View from a Bridge"
+  ],
+  "correct_index": 0,
+  "explanation": "'Kids in America' est le tout premier single de Kim Wilde, sorti en janvier 1981 et co-écrit par son père Marty Wilde et son frère Ricky. Il s'est classé numéro 2 au Royaume-Uni et a lancé sa carrière internationale.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 98,
+   "comment": "Kids in America, sorti en janvier 1981, est bien le premier single solo de Kim Wilde, écrit par Marty et Ricky Wilde.",
+   "correction": null,
+   "checked_at": 1795174931.1719599,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-80_d5_e6db6a264173",
+  "category_id": "annees-80",
+  "difficulty": 5,
+  "question": "Quel est le titre de la chanson avec laquelle Sandra Kim a remporté l'Eurovision 1986 pour la Belgique, devenant à 13 ans la plus jeune gagnante de l'histoire du concours ?",
+  "options": [
+   "J'aime la vie",
+   "Ne partez pas sans moi",
+   "Un peu de tendresse",
+   "La det swinge"
+  ],
+  "correct_index": 0,
+  "explanation": "Sandra Kim a triomphé à l'Eurovision 1986 à Bergen (Norvège) avec 'J'aime la vie', offrant à la Belgique sa première et unique victoire dans le concours. À 13 ans (officiellement déclarés 15 à l'époque), elle reste la plus jeune lauréate de l'histoire de l'Eurovision.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 98,
+   "comment": "Sandra Kim a bien gagné l'Eurovision 1986 avec 'J'aime la vie' pour la Belgique, et les autres options sont des chansons gagnantes d'autres années/pays.",
+   "correction": null,
+   "checked_at": 1795174936.9445672,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-80_d6_c5f3dcd95989",
+  "category_id": "annees-80",
+  "difficulty": 6,
+  "question": "Quel compositeur français a signé la bande originale du film 'Le Grand Bleu' de Luc Besson, sorti en 1988, contribuant largement au succès du film ?",
+  "options": [
+   "Jean-Michel Jarre",
+   "Éric Serra",
+   "Michel Legrand",
+   "Vladimir Cosma"
+  ],
+  "correct_index": 1,
+  "explanation": "Éric Serra, collaborateur régulier de Luc Besson, a composé la bande originale du 'Grand Bleu'. Sa musique planante et atmosphérique est indissociable du succès et de l'ambiance unique de ce film culte.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 96,
+   "comment": "Éric Serra, compositeur attitré de Luc Besson, a bien signé la BO du Grand Bleu (1988).",
+   "correction": null,
+   "checked_at": 1795174941.739271,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-80_d6_348ff86ffdd8",
+  "category_id": "annees-80",
+  "difficulty": 6,
+  "question": "Quel est le titre de l'album de Prince sorti en 1984, dont la bande originale du film éponyme contient les tubes 'When Doves Cry' et 'Let's Go Crazy' ?",
+  "options": [
+   "Purple Rain",
+   "Sign 'O' the Times",
+   "Around the World in a Day",
+   "Dirty Mind"
+  ],
+  "correct_index": 0,
+  "explanation": "Purple Rain est à la fois le titre du film semi-autobiographique de Prince sorti en 1984 et celui de son album phare, qui s'est vendu à plus de 25 millions d'exemplaires dans le monde. Le single 'When Doves Cry' fut numéro 1 aux États-Unis pendant cinq semaines consécutives.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 99,
+   "comment": "Purple Rain (1984) est bien l'album et la bande originale du film contenant ces deux tubes.",
+   "correction": null,
+   "checked_at": 1795174946.9269514,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-80_d6_6c6edf4f2237",
+  "category_id": "annees-80",
+  "difficulty": 6,
+  "question": "Quel est le titre du tube de Depeche Mode, sorti en 1984, extrait de l'album 'Some Great Reward', qui aborde le thème de la religion et fut censuré dans plusieurs pays ?",
+  "options": [
+   "People Are People",
+   "Master and Servant",
+   "Blasphemous Rumours",
+   "Somebody"
+  ],
+  "correct_index": 2,
+  "explanation": "« Blasphemous Rumours », sorti en face B de « Somebody » en 1984, traite avec un humour noir de la foi et du destin, ce qui lui valut d'être jugé scandaleux et de faire l'objet de censures et de protestations religieuses dans plusieurs pays. Le titre figure sur l'album 'Some Great Reward'.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 92,
+   "comment": "Blasphemous Rumours, de Some Great Reward (1984), traite de religion avec humour noir et suscita des protestations religieuses, contrairement aux autres titres.",
+   "correction": null,
+   "checked_at": 1795174958.2126534,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-80_d6_c9abf681b1b9",
+  "category_id": "annees-80",
+  "difficulty": 6,
+  "question": "Quel est le titre du film de 1980 réalisé par Stanley Kubrick, adapté du roman de Stephen King, dans lequel Jack Nicholson incarne un écrivain sombrant dans la folie dans un hôtel isolé ?",
+  "options": [
+   "The Shining",
+   "Misery",
+   "Carrie",
+   "Christine"
+  ],
+  "correct_index": 0,
+  "explanation": "The Shining (1980) est l'adaptation par Stanley Kubrick du roman de Stephen King, avec Jack Nicholson dans le rôle de Jack Torrance. Le film est devenu un classique de l'horreur, notamment grâce à la scène iconique de la porte défoncée à la hache.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 100,
+   "comment": "The Shining (1980) de Kubrick, adapté de Stephen King avec Jack Nicholson en Jack Torrance, est exact.",
+   "correction": null,
+   "checked_at": 1795174963.2377448,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-80_d6_0904c1ccf436",
+  "category_id": "annees-80",
+  "difficulty": 6,
+  "question": "Quel est le titre du single de New Order sorti en 1983, dont la ligne de basse iconique et le mélange guitare/synthétiseur en ont fait l'un des titres les plus diffusés en discothèque dans les années 80 ?",
+  "options": [
+   "Blue Monday",
+   "True Faith",
+   "Bizarre Love Triangle",
+   "Regret"
+  ],
+  "correct_index": 0,
+  "explanation": "'Blue Monday', sorti en mars 1983, est le single le plus vendu de l'histoire de Factory Records. Son introduction aux synthétiseurs et sa durée inhabituellement longue (7 minutes) en ont fait un monument de la new wave et de la musique électronique des années 80.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 97,
+   "comment": "Blue Monday de New Order est bien sorti en 1983 et est un titre emblématique des discothèques des années 80, tandis que les autres sont postérieurs (1986-1993).",
+   "correction": null,
+   "checked_at": 1795174969.5824306,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-80_d6_6c2e08c6858f",
+  "category_id": "annees-80",
+  "difficulty": 6,
+  "question": "Quel est le titre du premier album de Dire Straits à atteindre le numéro 1 en France, sorti en 1985, dont la pochette montre une guitare et qui contient le tube 'Money for Nothing' ?",
+  "options": [
+   "Brothers in Arms",
+   "Love over Gold",
+   "Making Movies",
+   "Communiqué"
+  ],
+  "correct_index": 0,
+  "explanation": "'Brothers in Arms', sorti en mai 1985, est le cinquième album de Dire Straits. Il fut un triomphe mondial, notamment grâce au tube 'Money for Nothing', et fut l'un des premiers albums à se vendre massivement en CD.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 92,
+   "comment": "Brothers in Arms (1985) contient bien 'Money for Nothing' et la pochette montre une guitare National Style O, les autres options sont antérieures et ne contiennent pas ce titre.",
+   "correction": null,
+   "checked_at": 1795174975.0551605,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-80_d6_0518d1b887a6",
+  "category_id": "annees-80",
+  "difficulty": 6,
+  "question": "Quel est le titre du morceau instrumental composé par Harold Faltermeyer pour le film 'Top Gun' (1986), qui s'imposa comme l'un des tubes instrumentaux les plus reconnaissables de la décennie ?",
+  "options": [
+   "Axel F",
+   "Top Gun Anthem",
+   "Danger Zone",
+   "Highway to the Danger Zone"
+  ],
+  "correct_index": 1,
+  "explanation": "'Top Gun Anthem' est la composition instrumentale emblématique de Harold Faltermeyer pour le film de Tony Scott, distincte du tube vocal 'Danger Zone' de Kenny Loggins. Elle lui valut un Grammy Award en 1987 dans la catégorie meilleure composition instrumentale pour un film.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 94,
+   "comment": "Le 'Top Gun Anthem' de Faltermeyer (avec Steve Stevens à la guitare) a bien remporté un Grammy en 1987, tandis que Danger Zone est un titre vocal de Kenny Loggins et Axel F provient de Beverly Hills Cop.",
+   "correction": null,
+   "checked_at": 1795174981.1566606,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-80_d6_d607762e95ed",
+  "category_id": "annees-80",
+  "difficulty": 6,
+  "question": "Quel groupe britannique a enregistré en 1983 le tube 'Karma Chameleon', extrait de l'album 'Colour by Numbers', qui atteignit la première place dans plus de douze pays ?",
+  "options": [
+   "Duran Duran",
+   "Spandau Ballet",
+   "Culture Club",
+   "ABC"
+  ],
+  "correct_index": 2,
+  "explanation": "'Karma Chameleon' est le single le plus vendu de Culture Club, le groupe mené par Boy George. Il s'est classé numéro 1 au Royaume-Uni pendant six semaines consécutives et figura en tête des charts dans toute l'Europe en 1983.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 100,
+   "comment": "'Karma Chameleon' de Culture Club (Boy George) figure bien sur l'album 'Colour by Numbers' (1983) et fut n°1 dans de nombreux pays.",
+   "correction": null,
+   "checked_at": 1795175005.7389746,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-80_d6_b8c5e078212f",
+  "category_id": "annees-80",
+  "difficulty": 6,
+  "question": "Quel est le titre du morceau de synthpop sorti en 1982 par le groupe Yazoo (Yaz aux États-Unis), fondé par Vince Clarke après son départ de Depeche Mode, qui atteignit la 2e place des charts britanniques ?",
+  "options": [
+   "Only You",
+   "Don't Go",
+   "Situation",
+   "Nobody's Diary"
+  ],
+  "correct_index": 0,
+  "explanation": "'Only You' est le premier single de Yazoo, sorti en mars 1982, et fut un succès immédiat au Royaume-Uni, révélant la voix puissante d'Alison Moyet sur fond de synthétiseurs signés Vince Clarke. Ce titre reste l'un des classiques de la new wave britannique des années 80.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 92,
+   "comment": "'Only You' (1982) de Yazoo atteignit bien la 2e place des charts britanniques, les autres titres ayant culminé plus bas ('Don't Go' 3e, 'Nobody's Diary' 3e en 1983, 'Situation' moins bien classé au UK).",
+   "correction": null,
+   "checked_at": 1795175041.469638,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-80_d6_5498148761f1",
+  "category_id": "annees-80",
+  "difficulty": 6,
+  "question": "Quel est le titre du film de John Hughes sorti en 1986, dans lequel Ferris Bueller, lycéen facétieux de Chicago, simule une maladie pour s'offrir une journée de liberté avec ses amis ?",
+  "options": [
+   "Ferris Bueller's Day Off",
+   "Weird Science",
+   "Some Kind of Wonderful",
+   "Pretty in Pink"
+  ],
+  "correct_index": 0,
+  "explanation": "Ferris Bueller's Day Off (La Folle Journée de Ferris Bueller) est sorti en 1986, réalisé par John Hughes avec Matthew Broderick dans le rôle-titre. Le film est devenu un symbole culte de la comédie adolescente des années 80.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 100,
+   "comment": "Film de John Hughes sorti en 1986 avec Matthew Broderick, les trois autres options sont des films différents.",
+   "correction": null,
+   "checked_at": 1795175046.767975,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-80_d6_982f2a0bfd17",
+  "category_id": "annees-80",
+  "difficulty": 6,
+  "question": "Quel est le titre du film de 1982 réalisé par Ridley Scott, avec Harrison Ford dans le rôle d'un chasseur de primes chargé d'éliminer des androïdes dans un Los Angeles futuriste de 2019 ?",
+  "options": [
+   "Blade Runner",
+   "Total Recall",
+   "RoboCop",
+   "The Terminator"
+  ],
+  "correct_index": 0,
+  "explanation": "Blade Runner, sorti en 1982 et adapté du roman de Philip K. Dick 'Les androïdes rêvent-ils de moutons électriques ?', est devenu un film culte du cinéma de science-fiction. Harrison Ford y incarne Rick Deckard, un 'blade runner' traquant des réplicants dans un Los Angeles dystopique.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 99,
+   "comment": "Blade Runner de Ridley Scott (1982) avec Harrison Ford traquant des réplicants dans un Los Angeles de 2019 est exact.",
+   "correction": null,
+   "checked_at": 1795175069.4568443,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-80_d7_bdf27f8f7822",
+  "category_id": "annees-80",
+  "difficulty": 7,
+  "question": "En quelle année exacte le groupe australien Men at Work a-t-il été reconnu coupable de plagiat pour le riff de flûte de son tube mondial 'Down Under' (1981), et quelle mélodie traditionnelle était au cœur du litige ?",
+  "options": [
+   "2010 – 'Kookaburra Sits in the Old Gum Tree', comptine enfantine australienne de 1934",
+   "2008 – 'Waltzing Matilda', ballade folklorique australienne de 1895",
+   "2012 – 'Click Go the Shears', chanson des tondeurs de moutons du XIXe siècle",
+   "2009 – 'The Wild Colonial Boy', chanson populaire irlando-australienne du XIXe siècle"
+  ],
+  "correct_index": 0,
+  "explanation": "En 2010, la justice australienne a condamné les ayants droit de Men at Work pour plagiat de 'Kookaburra Sits in the Old Gum Tree', comptine écrite par Marion Sinclair en 1934 et publiée par la Larrikin Music. La ligne de flûte du tube de 1981 en reproduisait en effet une partie de la mélodie.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 93,
+   "comment": "La décision de la Cour fédérale australienne reconnaissant le plagiat de 'Kookaburra' (Marion Sinclair, 1934) date bien de 2010, le jugement initial de culpabilité ayant été rendu en 2010 (appel rejeté la même année).",
+   "correction": null,
+   "checked_at": 1795175078.8912833,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-80_d7_8e54bd1687d2",
+  "category_id": "annees-80",
+  "difficulty": 7,
+  "question": "Dans quel film de 1980 réalisé par Martin Scorsese, Robert De Niro prend-il 27 kg pour incarner Jake LaMotta vieilli, exploit physique qui lui vaudra l'Oscar du meilleur acteur en 1981 ?",
+  "options": [
+   "Raging Bull",
+   "The King of Comedy",
+   "New York, New York",
+   "Mean Streets"
+  ],
+  "correct_index": 0,
+  "explanation": "Dans 'Raging Bull' (1980), Robert De Niro subit une transformation physique spectaculaire : il prend réellement 27 kg pour jouer la version âgée du boxeur Jake LaMotta, ce qui lui vaut l'Oscar du meilleur acteur lors de la cérémonie de 1981.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 97,
+   "comment": "Raging Bull (1980) de Scorsese, prise de poids d'environ 27 kg par De Niro et Oscar du meilleur acteur en 1981, tout est exact.",
+   "correction": null,
+   "checked_at": 1795175332.7744353,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-80_d7_aa03ddd8fbfe",
+  "category_id": "annees-80",
+  "difficulty": 7,
+  "question": "En 1984, Frankie Goes to Hollywood voit son single 'Relax' banni par la BBC pour ses paroles jugées obscènes. Combien de semaines ce titre resta-t-il numéro 1 au hit-parade britannique malgré cette interdiction ?",
+  "options": [
+   "5 semaines",
+   "9 semaines",
+   "14 semaines",
+   "19 semaines"
+  ],
+  "correct_index": 0,
+  "explanation": "'Relax' resta 5 semaines au sommet des charts britanniques en janvier-février 1984, paradoxalement propulsé par le scandale de son interdiction par la BBC. Il devint l'un des singles les plus vendus de la décennie au Royaume-Uni avec plus de deux millions d'exemplaires.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 95,
+   "comment": "'Relax' est bien resté 5 semaines au sommet des charts britanniques en 1984 malgré le bannissement de la BBC.",
+   "correction": null,
+   "checked_at": 1795175338.829686,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-80_d7_9ada33dad535",
+  "category_id": "annees-80",
+  "difficulty": 7,
+  "question": "En 1983, le groupe Talking Heads sort un album live enregistré lors de leur tournée 'Speaking in Tongues', filmé par Jonathan Demme et sorti simultanément au cinéma. Quel est le titre exact de ce film-concert, considéré par de nombreux critiques comme le meilleur film de concert jamais réalisé ?",
+  "options": [
+   "Stop Making Sense",
+   "Remain in Light",
+   "Fear of Music",
+   "More Songs About Buildings and Food"
+  ],
+  "correct_index": 0,
+  "explanation": "Sorti en salles en 1984, 'Stop Making Sense' de Jonathan Demme fut enregistré au Pantages Theatre de Hollywood en décembre 1983 ; son titre est emprunté à la chanson 'Girlfriend Is Better' et il est régulièrement classé numéro un des films de concert de tous les temps. Les trois autres titres sont bien des albums studio des Talking Heads, mais aucun n'est ce film.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 96,
+   "comment": "Stop Making Sense est bien le film-concert de Jonathan Demme filmé en 1983, les autres options étant des albums studio.",
+   "correction": null,
+   "checked_at": 1795175372.6625955,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-80_d7_76ed489863a0",
+  "category_id": "annees-80",
+  "difficulty": 7,
+  "question": "En 1986, lors des sessions d'enregistrement de l'album 'Graceland', Paul Simon collabore avec plusieurs musiciens sud-africains. Quel nom porte le groupe zoulou qui interprète les chœurs sur le titre phare 'Diamonds on the Soles of Her Shoes', contribuant au triomphe mondial de l'album ?",
+  "options": [
+   "Ladysmith Black Mambazo",
+   "Mahotella Queens",
+   "Soul Brothers",
+   "Stimela"
+  ],
+  "correct_index": 0,
+  "explanation": "Ladysmith Black Mambazo, groupe a cappella zoulou dirigé par Joseph Shabalala, apporte ses chœurs caractéristiques sur plusieurs titres de 'Graceland', dont 'Diamonds on the Soles of Her Shoes'. Cette collaboration valut au groupe une notoriété internationale et contribua au Grammy Award du meilleur album de l'année décerné à Paul Simon en 1987.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 97,
+   "comment": "Ladysmith Black Mambazo, groupe a cappella zoulou de Joseph Shabalala, chante bien les chœurs sur 'Diamonds on the Soles of Her Shoes' de Graceland.",
+   "correction": null,
+   "checked_at": 1795175379.7334404,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-80_d7_3e6ef28c929a",
+  "category_id": "annees-80",
+  "difficulty": 7,
+  "question": "En 1989, la console Game Boy est lancée par Nintendo au Japon le 21 avril, puis en Amérique du Nord en juillet. Quel jeu de puzzle, développé par l'ingénieur soviétique Alexeï Pajitnov, était inclus dans le bundle de lancement nord-américain de la console, assurant en grande partie son succès fulgurant ?",
+  "options": [
+   "Tetris",
+   "Super Mario Land",
+   "Alleyway",
+   "Baseball"
+  ],
+  "correct_index": 0,
+  "explanation": "Nintendo choisit délibérément de bundler la Game Boy avec Tetris plutôt que Super Mario Land pour les États-Unis, estimant que le jeu de Pajitnov toucherait un public plus large et plus adulte. Ce choix stratégique fut déterminant : la console se vendit à 40 000 unités dès le premier jour aux États-Unis.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 97,
+   "comment": "Tetris, créé par Pajitnov, était bien inclus dans le bundle nord-américain de la Game Boy et a largement contribué à son succès.",
+   "correction": null,
+   "checked_at": 1795175424.0593884,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-80_d1_6750fe23eb51",
+  "category_id": "annees-80",
+  "difficulty": 1,
+  "question": "Quel est le prénom du personnage principal de la série télévisée américaine 'MacGyver', diffusée à partir de 1985 ?",
+  "options": [
+   "Angus",
+   "Jack",
+   "Mike",
+   "Steve"
+  ],
+  "correct_index": 0,
+  "explanation": "Le héros de MacGyver s'appelle Angus MacGyver, même si tout le monde l'appelle 'Mac'. La série est célèbre pour ses astuces ingénieuses avec des objets du quotidien.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 97,
+   "comment": "Le prénom complet du héros est bien Angus MacGyver, révélé dans la série originale.",
+   "correction": null,
+   "checked_at": 1795175880.4325001,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-80_d2_c79d418cd332",
+  "category_id": "annees-80",
+  "difficulty": 2,
+  "question": "Quel animal est la mascotte des Jeux olympiques de Los Angeles 1984 ?",
+  "options": [
+   "Un aigle",
+   "Un ours",
+   "Un lion",
+   "Un coyote"
+  ],
+  "correct_index": 0,
+  "explanation": "Sam l'aigle, un aigle à tête blanche portant un chapeau haut-de-forme aux couleurs américaines, était la mascotte officielle des Jeux olympiques d'été de Los Angeles en 1984. L'aigle a été choisi comme symbole national des États-Unis.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 100,
+   "comment": "Sam l'aigle était bien la mascotte officielle des JO de Los Angeles 1984.",
+   "correction": null,
+   "checked_at": 1795175884.4810636,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-80_d3_bd47f0d950b2",
+  "category_id": "annees-80",
+  "difficulty": 3,
+  "question": "Quel film de Steven Spielberg, sorti en 1982, raconte l'amitié entre un jeune garçon prénommé Elliott et un extraterrestre échoué sur Terre ?",
+  "options": [
+   "E.T. l'extra-terrestre",
+   "Rencontres du troisième type",
+   "Indiana Jones et le Temple maudit",
+   "Les Goonies"
+  ],
+  "correct_index": 0,
+  "explanation": "E.T. l'extra-terrestre est sorti en 1982 et est devenu l'un des plus grands succès du cinéma mondial. Le film met en scène Elliott, un enfant qui aide un alien à rentrer chez lui, dans une histoire touchante signée Spielberg.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 100,
+   "comment": "E.T. l'extra-terrestre, réalisé par Spielberg et sorti en 1982, raconte bien l'amitié entre Elliott et un extraterrestre.",
+   "correction": null,
+   "checked_at": 1795175917.3654943,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-80_d3_bd84f73040c1",
+  "category_id": "annees-80",
+  "difficulty": 3,
+  "question": "Quel tube de Lionel Richie, sorti en 1984, est accompagné d'un clip où une jeune sculptrice aveugle modèle le visage du chanteur en argile ?",
+  "options": [
+   "Hello",
+   "All Night Long",
+   "Say You, Say Me",
+   "Dancing on the Ceiling"
+  ],
+  "correct_index": 0,
+  "explanation": "Le clip de 'Hello' (1984) met en scène une étudiante en art non-voyante qui, à la fin, sculpte le visage de Lionel Richie, dans une scène devenue iconique des années 80. Ce titre a atteint la première place dans de nombreux pays à travers le monde.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 98,
+   "comment": "Le clip de 'Hello' (1984) montre bien une étudiante aveugle sculptant le buste de Lionel Richie dans sa scène finale iconique.",
+   "correction": null,
+   "checked_at": 1795175929.3511288,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-80_d4_5e7c8c01c618",
+  "category_id": "annees-80",
+  "difficulty": 4,
+  "question": "Quel est le titre du film de John Carpenter sorti en 1982, dans lequel un groupe de scientifiques en Antarctique est confronté à une créature extraterrestre capable d'imiter parfaitement n'importe quel être vivant ?",
+  "options": [
+   "The Fog",
+   "The Thing",
+   "Christine",
+   "Escape from New York"
+  ],
+  "correct_index": 1,
+  "explanation": "The Thing (1982) est un film d'horreur science-fiction de John Carpenter avec Kurt Russell, adapté de la nouvelle de John W. Campbell. Initialement boudé à sa sortie, il est aujourd'hui considéré comme un classique du genre.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 99,
+   "comment": "The Thing de John Carpenter, sorti en 1982, correspond exactement à la description.",
+   "correction": null,
+   "checked_at": 1795175934.1022096,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-80_d5_64ad5f33d8d1",
+  "category_id": "annees-80",
+  "difficulty": 5,
+  "question": "Quel est le titre de la chanson interprétée par Irène Cara, extraite du film 'Flashdance' (1983), qui remporta l'Oscar de la meilleure chanson originale cette même année ?",
+  "options": [
+   "What a Feeling",
+   "Maniac",
+   "Gloria",
+   "Fame"
+  ],
+  "correct_index": 0,
+  "explanation": "'What a Feeling', interprétée par Irène Cara et co-écrite par Giorgio Moroder, remporta l'Oscar de la meilleure chanson originale en 1984 pour le film 'Flashdance' (1983). Elle atteignit également le numéro 1 dans de nombreux pays, devenant l'un des tubes emblématiques de la décennie.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 96,
+   "comment": "'Flashdance... What a Feeling' d'Irène Cara a bien remporté l'Oscar de la meilleure chanson originale pour Flashdance, les autres options étant clairement fausses.",
+   "correction": null,
+   "checked_at": 1795175939.4007382,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-80_d7_b7c6fe99e9b1",
+  "category_id": "annees-80",
+  "difficulty": 7,
+  "question": "En 1988, le groupe écossais Wet Wet Wet passe 4 semaines au numéro 1 au Royaume-Uni avec sa reprise de 'With a Little Help from My Friends'. Sur quelle face B d'un double single ce titre était-il originellement couplé, et quel autre artiste occupait l'autre face A de ce disque caritatif pour l'émission britannique 'Childline' ?",
+  "options": [
+   "Billy Bragg avec 'She's Leaving Home'",
+   "Morrissey avec 'Every Day Is Like Sunday'",
+   "Elvis Costello avec 'Alison'",
+   "Squeeze avec 'Up the Junction'"
+  ],
+  "correct_index": 0,
+  "explanation": "Ce single caritatif sorti en 1988 couplait Wet Wet Wet reprenant 'With a Little Help from My Friends' avec Billy Bragg reprenant 'She's Leaving Home' des Beatles, les bénéfices allant à l'association Childline fondée par Esther Rantzen. Les deux titres atteignirent conjointement la première place des charts britanniques.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 95,
+   "comment": "Le double A-side de 1988 pour Childline couplait bien Wet Wet Wet et Billy Bragg reprenant 'She's Leaving Home', toutes deux tirées de 'Sgt. Pepper'.",
+   "correction": null,
+   "checked_at": 1795175972.653205,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-80_d7_fc90ec6ed93e",
+  "category_id": "annees-80",
+  "difficulty": 7,
+  "question": "En 1987, le label Death Row Records n'existait pas encore. Mais en 1987, quel label indépendant américain spécialisé dans le rap signait Public Enemy et sortait leur premier album 'Yo! Bum Rush the Show', devenant l'un des pionniers du hip-hop ?",
+  "options": [
+   "Def Jam Recordings",
+   "Tommy Boy Records",
+   "Cold Chillin' Records",
+   "Profile Records"
+  ],
+  "correct_index": 0,
+  "explanation": "Def Jam Recordings, fondé en 1984 par Rick Rubin et Russell Simmons, signa Public Enemy et produisit 'Yo! Bum Rush the Show' en février 1987, album fondateur du rap politique américain. Ce label était déjà la maison de LL Cool J et des Beastie Boys, s'imposant comme la référence du hip-hop des années 80.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 96,
+   "comment": "Public Enemy a bien sorti 'Yo! Bum Rush the Show' sur Def Jam en 1987, les autres labels n'ont pas signé le groupe.",
+   "correction": null,
+   "checked_at": 1795175979.353475,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-80_d7_fe1806ab717d",
+  "category_id": "annees-80",
+  "difficulty": 7,
+  "question": "En 1988, lors des Jeux olympiques de Séoul, la médaille d'or du 100 mètres masculin est d'abord attribuée à Ben Johnson avant d'être retirée pour dopage. Quel temps exact (en secondes) Johnson avait-il réalisé, établissant un record du monde annulé par la suite ?",
+  "options": [
+   "9.79",
+   "9.83",
+   "9.92",
+   "9.86"
+  ],
+  "correct_index": 0,
+  "explanation": "Ben Johnson avait couru le 100 mètres en 9,79 secondes le 24 septembre 1988 à Séoul, un record du monde qui lui fut retiré après qu'il eut été contrôlé positif à la stanozolol. L'or fut finalement attribué à l'Américain Carl Lewis, dont le temps officiel était de 9,92 secondes.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 98,
+   "comment": "Ben Johnson a bien réalisé 9,79 s à Séoul en 1988, record annulé pour dopage, et Carl Lewis a hérité de l'or avec 9,92 s.",
+   "correction": null,
+   "checked_at": 1795175994.095241,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-80_d7_7d3c4c74f463",
+  "category_id": "annees-80",
+  "difficulty": 7,
+  "question": "En 1985, le label Def Jam sort l'album 'Radio' de LL Cool J, premier album de rap de son histoire. Mais quel ingénieur du son légendaire, connu pour son travail avec les Beastie Boys et Run-DMC, a produit la quasi-totalité de cet album, créditant même son nom sur la pochette comme 'Reduced by Rick Rubin' ?",
+  "options": [
+   "Rick Rubin",
+   "Marley Marl",
+   "DJ Premier",
+   "Hank Shocklee"
+  ],
+  "correct_index": 0,
+  "explanation": "Rick Rubin co-fonda Def Jam avec Russell Simmons et produisit 'Radio' (1985) de LL Cool J, inscrivant sur la pochette 'Reduced by Rick Rubin' — une formule ironique devenue culte dans l'histoire du hip-hop. Marley Marl, DJ Premier et Hank Shocklee étaient des producteurs majeurs de l'époque mais n'ont pas travaillé sur cet album.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 96,
+   "comment": "Rick Rubin a bien produit 'Radio' (1985) de LL Cool J avec la mention 'Reduced by Rick Rubin' sur la pochette.",
+   "correction": null,
+   "checked_at": 1795176016.8233466,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-80_d7_54a8bb89d355",
+  "category_id": "annees-80",
+  "difficulty": 7,
+  "question": "En 1980, le groupe britannique Joy Division se dissout tragiquement après le suicide de son chanteur Ian Curtis, à la veille d'une tournée américaine. Quel était l'âge exact d'Ian Curtis au moment de sa mort, survenue le 18 mai 1980 ?",
+  "options": [
+   "23 ans",
+   "26 ans",
+   "21 ans",
+   "28 ans"
+  ],
+  "correct_index": 0,
+  "explanation": "Ian Curtis est né le 15 juillet 1956 et s'est donné la mort le 18 mai 1980, à seulement 23 ans. Les membres survivants fondèrent ensuite New Order, l'un des groupes emblématiques de la décennie.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 98,
+   "comment": "Né le 15 juillet 1956 et mort le 18 mai 1980, Ian Curtis avait bien 23 ans.",
+   "correction": null,
+   "checked_at": 1795176030.5441542,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-80_d7_8ae00ab5f15d",
+  "category_id": "annees-80",
+  "difficulty": 7,
+  "question": "En 1982, le film 'Koyaanisqatsi' de Godfrey Reggio, œuvre expérimentale sans dialogue ni narration composée d'images accélérées de la civilisation moderne, fut accompagné d'une bande originale signée par un compositeur minimaliste américain. Qui en est l'auteur ?",
+  "options": [
+   "Steve Reich",
+   "Philip Glass",
+   "John Adams",
+   "Terry Riley"
+  ],
+  "correct_index": 1,
+  "explanation": "Philip Glass a composé l'intégralité de la bande originale de 'Koyaanisqatsi' (1982), œuvre qui contribua à faire connaître sa musique minimaliste au grand public. Cette collaboration entre Reggio et Glass donna lieu à une trilogie, Glass signant également les musiques de 'Powaqqatsi' (1988) et 'Naqoyqatsi' (2002).",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 99,
+   "comment": "Philip Glass a bien composé la bande originale de Koyaanisqatsi (1982) et de toute la trilogie Qatsi.",
+   "correction": null,
+   "checked_at": 1795176063.3714714,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-80_d7_9a74c7e963cf",
+  "category_id": "annees-80",
+  "difficulty": 7,
+  "question": "En 1984, lors des Jeux olympiques de Los Angeles, le perchiste français Pierre Quinon remporte la médaille d'or avec un saut à quelle hauteur exacte ?",
+  "options": [
+   "5,70 m",
+   "5,75 m",
+   "5,65 m",
+   "5,80 m"
+  ],
+  "correct_index": 1,
+  "explanation": "Pierre Quinon franchit 5,75 m pour décrocher l'or olympique à Los Angeles en 1984, devenant champion olympique de perche devant Mike Tully (États-Unis). Ce saut constituait alors son meilleur résultat en compétition majeure.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 85,
+   "comment": "Pierre Quinon a bien gagné l'or à Los Angeles 1984 avec un saut à 5,75 m, les autres options étant distinctes et fausses.",
+   "correction": null,
+   "checked_at": 1795176068.7025843,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ },
+ {
+  "id": "topup_annees-80_d1_fcfdbcb7743b",
+  "category_id": "annees-80",
+  "difficulty": 1,
+  "question": "Quel est le prénom de l'extraterrestre du film 'E.T.' de Steven Spielberg, sorti en 1982 ?",
+  "options": [
+   "E.T.",
+   "Yoda",
+   "Alf",
+   "Mac"
+  ],
+  "correct_index": 0,
+  "explanation": "Dans le film, l'extraterrestre n'a pas d'autre prénom : les enfants l'appellent simplement 'E.T.', abréviation d'Extra-Terrestre. Le film de Spielberg est l'un des plus grands succès du cinéma des années 80.",
+  "quality": "verified",
+  "fact_check": {
+   "verdict": "correct",
+   "confidence": 96,
+   "comment": "L'extraterrestre est bien appelé 'E.T.' dans le film, et les autres options renvoient à d'autres personnages.",
+   "correction": null,
+   "checked_at": 1795176318.45359,
+   "checker_model": "claude-opus-4-8",
+   "generated_by": "claude-sonnet-4-6",
+   "topup": true
+  }
+ }
+]

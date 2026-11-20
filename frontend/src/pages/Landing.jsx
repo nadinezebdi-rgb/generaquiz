@@ -15,9 +15,13 @@ import ProPricing from "@/components/ProPricing";
 import HeroPhoneDemo from "@/components/HeroPhoneDemo";
 import { themePath } from "@/pages/ThemeShowcase";
 import { mascotSrc } from "@/lib/mascot";
+import { groupCategories } from "@/lib/categoryGroups";
+import { SoonCategoryCard } from "@/components/SoonCategoryCard";
+import { BLOCK_DEMO_QUESTION } from "@/lib/demoQuestions";
 import TestimonialsSection from "@/components/TestimonialsSection";
 import { api, BACKEND_URL } from "@/lib/api";
 import { PLANS, pricePresentation, annualDiscountBadge, fmt } from "@/config/pricing";
+import { useGiftOffers } from "@/lib/gifts";
 
 const ICON_MAP = { tv: Film, music: Music, film: Film, phone: Phone, landmark: Landmark, utensils: Utensils, sparkles: Sparkles, book: Book, heart: HeartPulse, map: MapIcon };
 
@@ -25,6 +29,8 @@ export default function Landing() {
   const [categories, setCategories] = useState([]);
   const [packages, setPackages] = useState([]);
   const [testimonials, setTestimonials] = useState([]);
+  const giftOffers = useGiftOffers();
+  const christmasFamily = giftOffers?.offers?.find((offer) => offer.id === "famille");
 
   useEffect(() => {
     api.get("/testimonials").then((r) => setTestimonials(r.data)).catch(() => {});
@@ -38,6 +44,27 @@ export default function Landing() {
   return (
     <div className="paper-bg min-h-screen">
       <Navbar variant="landing" />
+      {giftOffers?.promo?.active && (
+        <Link
+          to="/offrir?offre=famille"
+          aria-label={`Offre de Noël : carte cadeau Famille à ${fmt(christmasFamily?.price || 69, { integer: true })}, découvrir`}
+          data-testid="landing-christmas-banner"
+          className="block overflow-hidden border-y-2 border-mustard-dark bg-bordeaux py-3 text-cream hover:bg-navy-dark focus-visible:bg-navy-dark"
+        >
+          <div className="christmas-marquee-track inline-flex min-w-max items-center whitespace-nowrap font-display text-lg font-bold sm:text-xl" aria-hidden="true">
+            {[0, 1].map((copy) => (
+              <span key={copy} className="px-6 sm:px-10">
+                ✦ Offre de Noël · {fmt(christmasFamily?.price || 69, { integer: true })} · Possibilité de jouer avec 3 membres au quiz pendant 1 an · Carte personnalisée femme ou homme · Jusqu&apos;au 24 décembre · Découvrir <span aria-hidden="true">→</span>
+              </span>
+            ))}
+          </div>
+        </Link>
+      )}
+      {giftOffers?.promo?.closed && (
+        <p className="border-y-2 border-bordeaux bg-cream px-4 py-3 text-center font-bold text-bordeaux" role="status">
+          L’offre de Noël est terminée
+        </p>
+      )}
 
       {/* ============ HERO ============ */}
       <section className="relative overflow-hidden">
@@ -196,71 +223,27 @@ export default function Landing() {
           <div className="text-center max-w-3xl mx-auto mb-14">
             <span className="inline-block bg-mustard text-navy font-bold px-4 py-1 rounded-full text-sm mb-4">Choisissez votre thème</span>
             <h2 className="font-display text-4xl sm:text-5xl font-extrabold text-navy mb-4">
-              Neuf univers, neuf personnages
+              Des années 50 à aujourd&apos;hui : à chacun son époque
             </h2>
             <p className="text-xl text-navy/70 leading-relaxed">
-              Chaque catégorie a son ambassadeur caricaturé pour vous accompagner dans la découverte —
-              avec notre toute dernière <strong>Voyages &amp; régions de France</strong> guidée par Jeanne la Voyageuse.
+              Chaque catégorie a son personnage pour vous accompagner — choisissez votre époque ou explorez celle de vos proches.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-7">
-            {categories.map((cat, idx) => {
-              const Icon = ICON_MAP[cat.icon] || Sparkles;
-              return (
-                <motion.div
-                  key={cat.id}
-                  data-testid={`category-card-${cat.id}`}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: idx * 0.05 }}
-                  className="group relative bg-white border-2 border-cream-dark rounded-[28px] p-6 hover:border-terracotta hover:-translate-y-1 transition-all shadow-soft hover:shadow-warm overflow-hidden"
-                >
-                  <div
-                    className="absolute -top-12 -right-12 w-48 h-48 rounded-full opacity-15 group-hover:opacity-25 transition"
-                    style={{ backgroundColor: cat.color }}
-                  />
-                  {cat.id === "bien-vieillir" && (
-                    <span
-                      data-testid={`category-badge-nouveau-${cat.id}`}
-                      className="absolute top-3 right-3 z-10 inline-flex items-center gap-1 bg-terracotta text-white text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full shadow-warm"
-                    >
-                      ✨ Nouveau
-                    </span>
-                  )}
-                  <div className="relative">
-                    <div className="aspect-square w-32 mx-auto rounded-3xl overflow-hidden bg-cream border-2 border-cream-dark mb-5">
-                      <img
-                        src={mascotSrc(cat.mascot_image, "md")}
-                        loading="lazy"
-                        alt={cat.mascot_name}
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                      />
-                    </div>
-                    <div className="flex items-center justify-center gap-2 mb-2">
-                      <Icon className="w-5 h-5" style={{ color: cat.color }} strokeWidth={2.5} />
-                      <span className="text-xs font-bold uppercase tracking-wider text-navy/60">{cat.count} questions</span>
-                    </div>
-                    <h3 className="font-display text-2xl font-bold text-navy text-center mb-2">{cat.title}</h3>
-                    <p className="text-navy/70 text-center mb-4">{cat.description}</p>
-                    <div className="text-center">
-                      <span className="inline-block bg-cream text-navy font-bold text-sm px-3 py-1 rounded-full">
-                        Avec {cat.mascot_name}
-                      </span>
-                    </div>
-                    <Link
-                      to={themePath(cat.id)}
-                      data-testid={`category-discover-${cat.id}`}
-                      className="mt-5 w-full inline-flex items-center justify-center gap-2 px-5 py-3 rounded-full bg-navy text-white font-bold hover:bg-terracotta transition"
-                    >
-                      Découvrir <ArrowRight className="w-4 h-4" />
-                    </Link>
-                  </div>
-                </motion.div>
-              );
-            })}
-          </div>
+          {categories.length > 0 && groupCategories(categories).map((universe) => (
+            <div key={universe.id} className="mb-12 last:mb-0" data-testid={`landing-universe-${universe.id}`}>
+              <h3 className="font-display text-2xl sm:text-3xl font-bold text-navy mb-6" data-testid={`landing-universe-title-${universe.id}`}>{universe.title}</h3>
+              {universe.id === "nostalgie" ? (
+                <NostalgieCard items={universe.items} />
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-7">
+                  {universe.items.map((cat, idx) => cat.soon
+                    ? <SoonCategoryCard key={cat.id} item={cat} testidPrefix="landing-soon" />
+                    : <LandingCategoryCard key={cat.id} cat={cat} idx={idx} />)}
+                </div>
+              )}
+            </div>
+          ))}
         </div>
       </section>
 
@@ -354,14 +337,96 @@ function LandingPlanCard({ plan }) {
   );
 }
 
+function LandingCategoryCard({ cat, idx }) {
+  const Icon = ICON_MAP[cat.icon] || Sparkles;
+  return (
+    <motion.div
+      data-testid={`category-card-${cat.id}`}
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ delay: idx * 0.05 }}
+      className="group relative bg-white border-2 border-cream-dark rounded-[28px] p-6 hover:border-terracotta hover:-translate-y-1 transition-all shadow-soft hover:shadow-warm overflow-hidden"
+    >
+      <div
+        className="absolute -top-12 -right-12 w-48 h-48 rounded-full opacity-15 group-hover:opacity-25 transition"
+        style={{ backgroundColor: cat.color }}
+      />
+      {cat.id === "bien-vieillir" && (
+        <span
+          data-testid={`category-badge-nouveau-${cat.id}`}
+          className="absolute top-3 right-3 z-10 inline-flex items-center gap-1 bg-terracotta text-white text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full shadow-warm"
+        >
+          ✨ Nouveau
+        </span>
+      )}
+      <div className="relative">
+        <div className="aspect-square w-32 mx-auto rounded-3xl overflow-hidden bg-cream border-2 border-cream-dark mb-5">
+          <img
+            src={mascotSrc(cat.mascot_image, "md")}
+            loading="lazy"
+            alt={cat.mascot_name}
+            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+          />
+        </div>
+        <div className="flex items-center justify-center gap-2 mb-2">
+          <Icon className="w-5 h-5" style={{ color: cat.color }} strokeWidth={2.5} />
+          <span className="text-xs font-bold uppercase tracking-wider text-navy/60">{cat.count} questions</span>
+        </div>
+        <h3 className="font-display text-2xl font-bold text-navy text-center mb-2">{cat.title}</h3>
+        <p className="text-navy/70 text-center mb-4">{cat.description}</p>
+        <div className="text-center">
+          <span className="inline-block bg-cream text-navy font-bold text-sm px-3 py-1 rounded-full">
+            Avec {cat.mascot_name}
+          </span>
+        </div>
+        <Link
+          to={themePath(cat.id)}
+          data-testid={`category-discover-${cat.id}`}
+          className="mt-5 w-full inline-flex items-center justify-center gap-2 px-5 py-3 rounded-full bg-navy text-white font-bold hover:bg-terracotta transition"
+        >
+          Découvrir <ArrowRight className="w-4 h-4" />
+        </Link>
+      </div>
+    </motion.div>
+  );
+}
+
+function NostalgieCard({ items }) {
+  const total = items.reduce((sum, c) => sum + (c.count || 0), 0);
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
+      className="relative bg-white border-2 border-cream-dark rounded-[28px] p-6 sm:p-8 shadow-soft overflow-hidden grid md:grid-cols-[auto_1fr] gap-6 items-center"
+      data-testid="landing-nostalgie-card"
+    >
+      <div className="flex -space-x-4 justify-center">
+        {items.map((c) => (
+          <img key={c.id} src={mascotSrc(c.mascot_image, "sm")} alt={c.mascot_name} loading="lazy"
+            className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl object-cover border-4 border-white shadow-soft bg-cream" />
+        ))}
+      </div>
+      <div>
+        <span className="text-xs font-bold uppercase tracking-wider text-navy/60" data-testid="landing-nostalgie-total">{total} questions</span>
+        <h3 className="font-display text-2xl sm:text-3xl font-bold text-navy mt-1 mb-4">Univers Nostalgie</h3>
+        <ul className="flex flex-wrap gap-3">
+          {items.map((c) => (
+            <li key={c.id}>
+              <Link to={themePath(c.id)} data-testid={`landing-nostalgie-link-${c.id}`}
+                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full bg-navy text-white font-bold hover:bg-terracotta transition-colors">
+                {c.title} <ArrowRight className="w-4 h-4" />
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </motion.div>
+  );
+}
+
 function DemoQuiz() {
-  const sample = {
-    question: "Quel chanteur français a composé et interprété « La Mer » en 1946 ?",
-    options: ["Édith Piaf", "Charles Trenet", "Jacques Brel", "Georges Brassens"],
-    correct: 1,
-    explanation: "Charles Trenet a composé « La Mer » en 1943 et l'a enregistrée en 1946.",
-    category: "Chansons",
-  };
+  const sample = BLOCK_DEMO_QUESTION;
+
   const [selected, setSelected] = useState(null);
 
   return (

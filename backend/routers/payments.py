@@ -1,6 +1,7 @@
 """Payments router: Stripe checkout + webhook + packages."""
 from datetime import datetime, timezone, timedelta
 
+import stripe
 from bson import ObjectId
 from fastapi import APIRouter, Depends, HTTPException, Request
 
@@ -8,7 +9,10 @@ from emergentintegrations.payments.stripe.checkout import (
     StripeCheckout, CheckoutSessionRequest, CheckoutSessionResponse, CheckoutStatusResponse,
 )
 
-from core import db, logger, STRIPE_API_KEY, PACKAGES, get_current_user, CheckoutCreate
+from core import (
+    db, logger, STRIPE_API_KEY, STRIPE_WEBHOOK_SECRET, PACKAGES, get_current_user, CheckoutCreate,
+    GIFT_STRIPE_TEST_WEBHOOK_SECRET, GIFT_STRIPE_LIVE_WEBHOOK_SECRET,
+)
 from routers.family import family_subscription_fields
 
 router = APIRouter(tags=["payments"])
@@ -83,6 +87,31 @@ async def get_checkout_status(session_id: str, request: Request, user: dict = De
 async def stripe_webhook(request: Request):
     body = await request.body()
     sig = request.headers.get("Stripe-Signature", "")
+    gift_event = None
+    gift_mode = None
+    for mode, secret in (("test", GIFT_STRIPE_TEST_WEBHOOK_SECRET),
+                         ("live", GIFT_STRIPE_LIVE_WEBHOOK_SECRET)):
+        if not secret:
+            continue
+        try:
+            gift_event = stripe.Webhook.construct_event(body, sig, secret)
+            gift_mode = mode
+            break
+        except Exception:
+            continue
+    if gift_event is not None:
+        if bool(gift_event.get("livemode")) != (gift_mode == "live"):
+            raise HTTPException(status_code=400, detail="Environnement Stripe incorrect")
+        try:
+            from routers.gifts import process_gift_stripe_event
+            await process_gift_stripe_event(gift_event, gift_mode)
+        except Exception as e:
+            logger.error("Traitement webhook cadeau impossible : %s", type(e).__name__)
+            raise HTTPException(status_code=500, detail="Événement Stripe à réessayer") from e
+        return {"ok": True}
+
+    if not STRIPE_WEBHOOK_SECRET:
+        raise HTTPException(status_code=400, detail="Signature Stripe invalide")
     host_url = str(request.base_url)
     webhook_url = f"{host_url.rstrip('/')}/api/webhook/stripe"
     stripe_checkout = StripeCheckout(api_key=STRIPE_API_KEY, webhook_url=webhook_url)
@@ -94,8 +123,10 @@ async def stripe_webhook(request: Request):
     if evt.payment_status == "paid":
         tx = await db.payment_transactions.find_one({"session_id": evt.session_id})
         if tx and tx.get("gift"):
-            from routers.gifts import fulfill_gift_transaction
-            await fulfill_gift_transaction(tx)
+            from routers.gifts import fulfill_gift_transaction, _confirm_gift_order
+            confirmed = await _confirm_gift_order(tx)
+            if confirmed:
+                await fulfill_gift_transaction(confirmed)
             await db.payment_transactions.update_one({"session_id": evt.session_id},
                                                       {"$set": {"payment_status": "paid", "status": "complete"}})
         elif tx and tx["payment_status"] != "paid":

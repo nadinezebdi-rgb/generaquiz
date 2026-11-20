@@ -56,6 +56,25 @@ def _build_tip_block(tip: dict | None) -> str:
         </td></tr>"""
 
 
+def _habit_of_the_day() -> dict:
+    """Habitude de la routine Bien vieillir mise en avant, tournante chaque jour."""
+    from routers.bien_vieillir import HABITS
+    return HABITS[datetime.now(PARIS_TZ).timetuple().tm_yday % len(HABITS)]
+
+
+def _build_habit_quiz_block() -> str:
+    h = _habit_of_the_day()
+    url = f"{FRONTEND_URL}/bien-vieillir?quiz={h['id']}#routine"
+    return f"""
+        <tr><td style="padding:0 30px 26px 30px;">
+          <div style="background-color:#F4F1DE;border-radius:18px;padding:18px 20px;">
+            <p style="margin:0 0 4px 0;font-size:13px;font-weight:bold;color:#6A994E;text-transform:uppercase;letter-spacing:1px;">Quiz express Bien vieillir</p>
+            <p style="margin:0 0 10px 0;font-size:17px;font-weight:bold;color:#1E3A5F;">{h['emoji']} {h['label']}</p>
+            <a href="{url}" style="color:#E07A5F;font-weight:bold;font-size:15px;">Jouer au quiz de l'habitude du jour →</a>
+          </div>
+        </td></tr>"""
+
+
 def _build_morning_email_html(name: str, streak: int, play_url: str, tip: dict | None = None) -> str:
     streak_block = ""
     if streak >= 2:
@@ -90,6 +109,7 @@ def _build_morning_email_html(name: str, streak: int, play_url: str, tip: dict |
           </a>
         </td></tr>
         {_build_tip_block(tip)}
+        {_build_habit_quiz_block()}
         <tr><td style="background-color:#F4F1DE;padding:18px 30px;text-align:center;font-size:12px;color:#1E3A5F;">
           Vous recevez cet email car vous êtes inscrit·e à GénéraQuiz.<br/>
           <a href="{FRONTEND_URL}/app/account" style="color:#7A1F2B;">Gérer mes préférences email</a>

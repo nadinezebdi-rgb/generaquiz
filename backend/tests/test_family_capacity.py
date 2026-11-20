@@ -93,7 +93,7 @@ def checkout_modules(family, monkeypatch):
     payments = importlib.import_module("routers.payments")
     gifts = importlib.import_module("routers.gifts")
     monkeypatch.setattr(payments, "StripeCheckout", checkout.StripeCheckout)
-    monkeypatch.setattr(gifts, "StripeCheckout", checkout.StripeCheckout)
+    monkeypatch.setattr(gifts, "StripeCheckout", checkout.StripeCheckout, raising=False)
     return payments, gifts, checkout
 
 

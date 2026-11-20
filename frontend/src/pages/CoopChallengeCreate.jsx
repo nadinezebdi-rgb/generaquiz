@@ -139,7 +139,7 @@ export default function CoopChallengeCreate() {
           <div>
             <label className="block text-sm font-bold text-navy mb-2">Catégorie</label>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-              {categories.map((c) => (
+              {categories.filter((c) => (c.count || 0) >= 20).map((c) => (
                 <button
                   type="button"
                   key={c.id}

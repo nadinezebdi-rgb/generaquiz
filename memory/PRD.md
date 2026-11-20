@@ -1,10 +1,24 @@
 # Quiz d'Antan — SaaS pour seniors français
 
+## 2026-11-20 — Fusion GitHub main + cartes cadeau en aperçu + quiz par habitude
+- Fusion de `nadinezebdi-rgb/generaquiz@main` (Bien vieillir éditorial, routine hebdo, capacité famille 3 proches / 4 anciens, visuel cadeau). `/api/admin/users` GitHub renommé `/api/admin/users-export` (évitait d'écraser la liste admin).
+- `ensure_gift_indexes` : remplace les index non-sparse (cause des 3 déploiements échoués) — à republier.
+- Aperçu : `GIFT_CODE_ENCRYPTION_KEY` ajoutée dans backend/.env (aperçu seulement, ABSENTE des secrets production) ; activation cadeau sans transaction si MongoDB autonome (code 20).
+- Routine Bien vieillir : bouton « Jouer au quiz express » par habitude → `GET /api/bien-vieillir/habits/{id}/quiz` (questions Bien vieillir par mots-clés, complété à 3 min.) + `POST .../quiz/answer`. Composant `components/bien-vieillir/HabitQuiz.jsx`.
+- Production vérifiée (lecture seule) : Bien vieillir 20 questions × 7 paliers, job top-up terminé 121/121 ; migration paliers 15 tentatives reconstituées.
+
 ## 2026-11-19 — Offre Famille et visuel cadeau de Noël
 - Offre actuelle : 1 bénéficiaire + 3 proches, 79 €/an (mensuel inchangé à 7,90 €). Textes du site, CGV et PDF cadeau alignés.
 - Les nouveaux abonnements Famille et activations cadeau enregistrent `users.family_max_proches = 3`. Les anciens bénéficiaires sans ce champ conservent 4 places, y compris au renouvellement ; aucun proche existant n'est supprimé ni masqué.
 - `/offrir` utilise `/images/carte-cadeau-noel.webp` (visuel Mamie fourni), au ratio 3:2 avec chargement prioritaire et mention explicite de carte d'exemple.
 - Prix particuliers inchangés : ancienne formule Famille à 79,99 €/an ; promotion cadeau configurable à 69 € (désactivée par défaut).
+
+## 2026-11-11 — Univers de catégories + corrections A/B/C (terminé, en attente de republication)
+- **Catégories** : titres Années 60-70 / Années 90-2000 / Chansons d'antan ; `group` + `sort_order` dans `seed_data.CATEGORIES` (recopiés en base au démarrage, ids inchangés) ; titres recopiés dans challenges/coop_challenges/weekly_palier_challenges synchronisés au démarrage. Dashboard + accueil groupés (Par époque / Intemporels / Nostalgie), cartes « Bientôt » frontend (`lib/categoryGroups.js`, `SoonCategoryCard`), carte « Univers Nostalgie ». Démo accueil : 4 questions tirées au hasard (`lib/demoQuestions.js`).
+- **A Paliers** : `POST /api/palier/categories/{cat}/{n}/answer` (réponse verrouillée en base `user_paliers.run_answers`, propositions mélangées par partie `run_perm`), `/start` n'envoie plus correct_index/explication, `/submit` score serveur + `mistakes`, partie fermée (`run_open`). UI `components/PalierPlay.jsx` (correction immédiate, relecture, « Revoir mes erreurs »).
+- **B Bien vieillir** : top-up lancé UNE fois au démarrage en production (`one_shot_prod_topup`, marqueur `site_settings.topup_bien_vieillir_2026_11`), jamais en aperçu (aussi exclu du top-up nocturne en aperçu). Explication obligatoire + règles santé renforcées. Joueurs : « Bientôt disponible » si stock < 20 ; badge stock admin seulement.
+- **C Maîtrise** : cause = compteur `user_category_stats` créé le 2026-07-01 sans rattrapage et jamais alimenté par les paliers. Maîtrise et /api/stats calculées en direct depuis `attempts` + `palier_attempts` (nouvelle collection, chaque tentative ; rattrapage unique 1 tentative au meilleur score par palier joué, marqueur `migration_palier_attempts_v1`). XP/niveau inchangés.
+- Tests : iteration_52 (catégories), iteration_53 (A/B2/C, 7/7 + UI complète).
 
 ## 2026-11-11 — LOT 2 : Offrir GénéraQuiz + nouvel espace famille + nouvelle grille (terminé)
 - **Grille** (`config/pricing.js`, `core.PACKAGES`) : Découverte gratuit · Solo 4,90 €/mois ou 49 €/an · Famille 7,90 €/mois ou 79 €/an (annuel = 10 mensualités → « 2 mois offerts »). Héritage retiré des tableaux (packages `legacy`, abonnés conservés). Un seul prix affiché selon le toggle, plus de prix barré ni d'équivalent mensuel, badge « Pour jouer ensemble ». Livre imprimé = option séparée 79,90 € l'exemplaire (`PrintedBookPricing`, tarif à confirmer après devis impression). CGV mises à jour.
@@ -1936,3 +1950,16 @@ Les routes `/bulk/*` étaient interceptées par `/{qid}/approve|flag|apply-corre
 - Validation Pydantic : HTTP 422 sur ids vides ou > 500
 - Sécurité : HTTP 403 pour non-admin sur tous les endpoints bulk
 
+
+## 2026-11-20 — Fork : déblocage prod + stocks de questions
+- Démarrage : toutes les créations d'index passent par `_safe_index` (server.py) — conflit d'options (code 85/86) → drop + recréation, jamais de crash (cause probable : `payment_transactions.session_id_1`). `ensure_gift_indexes` entièrement protégé.
+- Bien vieillir, Années 80, 2010 à aujourd'hui : 140 questions vérifiées chacune (20/palier) générées en aperçu, exportées dans `backend/data/curated_questions/*.json` et synchronisées au démarrage (upsert par id) → la prod reçoit exactement les mêmes. Script : `export_curated_questions.py` (à relancer après toute modif).
+- Lucette : règles « bon sens, aucun jargon, pas de zones bleues/mots étrangers » + thème imposé aléatoire (BV_THEMES dans topup_paliers.py) ; fact-check rejette le jargon. 99 questions trop savantes/répétitives écartées.
+- Remplacement des one_shot_prod_topup par la synchro curated.
+- Mascotte Nathalie la Fluo régénérée (2 bras).
+- Restant : LOT 3 (rapport hebdo aidants / alertes inactivité), EHPAD superviseur, CRM B2B.
+
+## 2026-11-20 — LOT 3 : nouvelles du dimanche (DONE, testé iteration_55)
+- `backend/family_report.py` : rapport hebdo (dim 10:00) aux proches ayant REJOINT l'espace + alerte d'inactivité (3 jours, une seule fois par absence, réessai si aucun e-mail parti). Contenu : jours joués / parties de la semaine + idée de sujet d'appel (discussion_prompt).
+- Opt-in du bénéficiaire : `PUT /api/famille/partage` (users.family_share_progress, family_share_since), carte « Nouvelles du dimanche » dans /app/famille. Déclenchement admin : `POST /api/famille/admin/rapports/{hebdo|inactivite}`.
+- Republication lancée (correctif index + 420 questions).

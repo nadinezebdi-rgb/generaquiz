@@ -16,8 +16,9 @@ export function formatCodeInput(raw) {
   let s = up.replace(/[^A-Z0-9]/g, "");
   if (s === "G" || s === "GQ") return up.replace(/[^A-Z0-9-]/g, "");
   if (s.startsWith("GQ")) s = s.slice(2);
-  s = s.slice(0, 8);
-  return s.length > 4 ? `GQ-${s.slice(0, 4)}-${s.slice(4)}` : s ? `GQ-${s}` : "";
+  s = s.slice(0, 32);
+  const groups = s.match(/.{1,8}/g) || [];
+  return groups.length ? `GQ-${groups.join("-")}` : "";
 }
 
 export const fmtDate = (iso) =>

@@ -64,6 +64,14 @@ DIFFICULTY_HINTS = {
     7: "Expert — anecdotes rares, chiffres précis, seul un érudit répond.",
 }
 
+BV_THEMES = [
+    "le sommeil et la sieste", "la marche et les promenades", "la cuisine de saison", "le jardin et les plantes",
+    "les jeux de société et de cartes", "la mémoire au quotidien (listes, mots croisés, lecture)",
+    "la famille et les petits-enfants", "les voisins et l'entraide", "la sécurité à la maison (chutes, rangement, lumière)",
+    "boire de l'eau et bien s'hydrater", "les saisons et la météo", "le petit-déjeuner et les repas",
+    "les loisirs (chant, danse, musique)", "le moral et la bonne humeur", "les astuces de grand-mère au quotidien",
+]
+
 client = AsyncIOMotorClient(MONGO_URL)
 db = client[DB_NAME]
 
@@ -71,6 +79,9 @@ db = client[DB_NAME]
 async def generate_for_difficulty(category: dict, difficulty: int, avoid_texts: list[str]) -> dict[str, Any] | None:
     """Génère UNE question au niveau de difficulté demandé."""
     hint = DIFFICULTY_HINTS[difficulty]
+    if category["id"] == "bien-vieillir":
+        import random
+        hint += f" Thème imposé pour cette question : {random.choice(BV_THEMES)}. Ne commence pas la question par « Au marché »."
     avoid = "\n".join(f"- {t}" for t in avoid_texts[-40:])
     prompt = f"""Catégorie : {category['title']}
 Description : {category.get('description', '')}{category_rules(category['id'])}
@@ -79,6 +90,7 @@ NIVEAU DE DIFFICULTÉ demandé : {difficulty}/7
 Consigne : {hint}
 
 Génère UNE question à choix multiple (4 options, 1 seule correcte), factuellement irréprochable, adaptée à ce niveau.
+Le champ "explanation" est OBLIGATOIRE : 1 à 2 phrases simples qui expliquent la bonne réponse.
 
 Ne reproduis PAS les questions suivantes (ni leur paraphrase) :
 {avoid}
@@ -110,6 +122,8 @@ Format JSON STRICT, rien d'autre :
     idx = d.get("correct_index")
     if not isinstance(idx, int) or not (0 <= idx <= 3):
         return None
+    if not (d.get("explanation") or "").strip() or len({str(o).strip().lower() for o in d["options"]}) != 4:
+        return None  # explication obligatoire, 4 propositions distinctes
     return {
         "question": d["question"].strip(),
         "options": [str(o) for o in d["options"]],

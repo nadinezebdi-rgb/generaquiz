@@ -18,6 +18,7 @@ const BADGE_META = {
   league_diamond:   { title: "Ligue Diamant",       emoji: "💎" },
   referrer_1:       { title: "Bon voisin",          emoji: "💌" },
   referrer_5:       { title: "Ambassadeur",         emoji: "📢" },
+  habit_series:     { title: "Série d'habitudes",   emoji: "🌿" },
 };
 
 /**

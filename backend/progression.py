@@ -102,6 +102,19 @@ def _tier_for(correct: int, total: int) -> dict:
     return {"key": "novice", "label": "Novice", "ratio_pct": round(ratio * 100)}
 
 
+async def live_category_stats(user_id: str) -> dict[str, dict]:
+    """Maîtrise par catégorie calculée sur les données brutes : parties classiques + tentatives de palier."""
+    out: dict[str, dict] = {}
+    for coll in (db.attempts, db.palier_attempts):
+        async for r in coll.aggregate([
+            {"$match": {"user_id": user_id}},
+            {"$group": {"_id": "$category_id", "c": {"$sum": "$score"}, "t": {"$sum": "$total"}, "n": {"$sum": 1}}},
+        ]):
+            s = out.setdefault(r["_id"], {"correct": 0, "total": 0, "quizzes_played": 0})
+            s["correct"] += int(r["c"]); s["total"] += int(r["t"]); s["quizzes_played"] += int(r["n"])
+    return out
+
+
 async def record_category_mastery(user_id: str, category_id: str, correct: int, total: int) -> dict:
     """Upsert `user_category_stats` and return the fresh cumulative stats.
 
@@ -118,8 +131,7 @@ async def record_category_mastery(user_id: str, category_id: str, correct: int, 
         upsert=True,
         return_document=True,
     )
-    if not res:  # returning-doc quirk in some Motor versions
-        res = await db.user_category_stats.find_one({"user_id": user_id, "category_id": category_id})
+    res = (await live_category_stats(user_id)).get(category_id, {})
     return {
         "category_id": category_id,
         "correct": int(res.get("correct", 0)),
@@ -136,10 +148,7 @@ async def get_progression(user: dict) -> dict:
     user_id = str(user["_id"])
     mastery: list[dict] = []
     cats = await db.categories.find({}, {"_id": 0, "id": 1, "title": 1, "mascot_image": 1, "mascot_name": 1}).to_list(50)
-    stats_docs = await db.user_category_stats.find(
-        {"user_id": user_id}, {"_id": 0},
-    ).to_list(50)
-    by_cat = {s["category_id"]: s for s in stats_docs}
+    by_cat = await live_category_stats(user_id)
     for c in cats:
         s = by_cat.get(c["id"], {})
         correct = int(s.get("correct", 0))

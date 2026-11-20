@@ -25,6 +25,7 @@ juste sur l'horaire prévu, le job passe quand même dans l'heure suivante.
 """
 from __future__ import annotations
 
+from datetime import datetime
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
 
@@ -61,6 +62,8 @@ def start_scheduler() -> None:
     from topup_paliers_job import topup_all_categories_nightly
     from daily_tips import daily_tip_job
     from morning_report import send_admin_morning_report
+    from family_report import send_inactivity_alerts, send_weekly_family_reports
+    from routers.gifts import close_expired_christmas_checkouts, retry_pending_gift_pdfs
 
     _scheduler = AsyncIOScheduler(timezone="Europe/Paris")
 
@@ -76,6 +79,8 @@ def start_scheduler() -> None:
     _schedule(_scheduler, send_admin_morning_report, hour=7,  minute=30, job_id="admin_morning_report")
     _schedule(_scheduler, send_morning_emails,       hour=9,  minute=0,  job_id="daily_quiz_email")
     _schedule(_scheduler, send_expiration_emails,    hour=10, minute=0,  job_id="premium_expiration_email_j7")
+    _schedule(_scheduler, send_inactivity_alerts,    hour=11, minute=0,  job_id="family_inactivity_alert")
+    _schedule(_scheduler, send_weekly_family_reports, day_of_week="sun", hour=10, minute=0, job_id="family_weekly_report_sunday")
 
     # -- Ligues (dimanche 20:00 + lundi 00:05 Paris) ----------------------------
     _schedule(_scheduler, send_league_reminders,     day_of_week="sun", hour=20, minute=0, job_id="league_reminder_sunday_20h")
@@ -83,11 +88,18 @@ def start_scheduler() -> None:
     _schedule(_scheduler, pick_weekly_challenge,     day_of_week="mon", hour=0,  minute=10, job_id="weekly_palier_pick")
     _schedule(_scheduler, send_weekly_challenge_reminders, day_of_week="sun", hour=19, minute=0, job_id="weekly_palier_reminder")
 
+    _scheduler.add_job(close_expired_christmas_checkouts, "interval", minutes=5,
+                       id="christmas_gift_checkout_closure", replace_existing=True,
+                       next_run_time=datetime.now(_scheduler.timezone), max_instances=1)
+    _scheduler.add_job(retry_pending_gift_pdfs, "interval", minutes=2,
+                       id="gift_pdf_retry", replace_existing=True,
+                       next_run_time=datetime.now(_scheduler.timezone), max_instances=1)
+
     _scheduler.start()
     logger.info(
-        "[scheduler] démarré — 13 jobs actifs "
+        "[scheduler] démarré — 15 jobs actifs "
         "(conseil du jour 02:30 · quiz 03:00 · wordsearch 03:30 · charades 04:00 · fléchés 04:30 · auto-seed paliers 05:00 · "
-        "rapport admin 07:30 · email quotidien 09:00 · relance J-7 10:00 · rappel ligues dim 20:00 · rappel défi dim 19:00 · "
+        "rapport admin 07:30 · email quotidien 09:00 · relance J-7 10:00 · alerte inactivité famille 11:00 · rapport famille dim 10:00 · rappel ligues dim 20:00 · rappel défi dim 19:00 · "
         "clôture ligues lun 00:05 · défi hebdo palier lun 00:10, Europe/Paris)"
     )
 

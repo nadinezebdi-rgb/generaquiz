@@ -162,7 +162,7 @@ export default function Challenges() {
           // Non-premium : aperçu de 2 cards de démo verrouillées + CTA d'upgrade
           <div className="grid md:grid-cols-2 gap-6" data-testid="challenges-demo-locked">
             {[
-              { title: "Chansons françaises", participants: 3, mascot: "🎵" },
+              { title: "Chansons d'antan", participants: 3, mascot: "🎵" },
               { title: "Cinéma d'antan", participants: 5, mascot: "🎬" },
             ].map((demo, i) => (
               <div
