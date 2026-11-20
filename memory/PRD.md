@@ -1,5 +1,11 @@
 # Quiz d'Antan — SaaS pour seniors français
 
+## 2026-11-19 — Offre Famille et visuel cadeau de Noël
+- Offre actuelle : 1 bénéficiaire + 3 proches, 79 €/an (mensuel inchangé à 7,90 €). Textes du site, CGV et PDF cadeau alignés.
+- Les nouveaux abonnements Famille et activations cadeau enregistrent `users.family_max_proches = 3`. Les anciens bénéficiaires sans ce champ conservent 4 places, y compris au renouvellement ; aucun proche existant n'est supprimé ni masqué.
+- `/offrir` utilise `/images/carte-cadeau-noel.webp` (visuel Mamie fourni), au ratio 3:2 avec chargement prioritaire et mention explicite de carte d'exemple.
+- Prix particuliers inchangés : ancienne formule Famille à 79,99 €/an ; promotion cadeau configurable à 69 € (désactivée par défaut).
+
 ## 2026-11-11 — Univers de catégories + corrections A/B/C (terminé, en attente de republication)
 - **Catégories** : titres Années 60-70 / Années 90-2000 / Chansons d'antan ; `group` + `sort_order` dans `seed_data.CATEGORIES` (recopiés en base au démarrage, ids inchangés) ; titres recopiés dans challenges/coop_challenges/weekly_palier_challenges synchronisés au démarrage. Dashboard + accueil groupés (Par époque / Intemporels / Nostalgie), cartes « Bientôt » frontend (`lib/categoryGroups.js`, `SoonCategoryCard`), carte « Univers Nostalgie ». Démo accueil : 4 questions tirées au hasard (`lib/demoQuestions.js`).
 - **A Paliers** : `POST /api/palier/categories/{cat}/{n}/answer` (réponse verrouillée en base `user_paliers.run_answers`, propositions mélangées par partie `run_perm`), `/start` n'envoie plus correct_index/explication, `/submit` score serveur + `mistakes`, partie fermée (`run_open`). UI `components/PalierPlay.jsx` (correction immédiate, relecture, « Revoir mes erreurs »).

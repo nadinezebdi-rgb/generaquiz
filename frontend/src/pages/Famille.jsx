@@ -96,7 +96,7 @@ function NoFamily() {
     <div className="grid gap-6" data-testid="famille-none">
       <div className="bg-white rounded-3xl border-2 border-cream-dark p-8">
         <h1 className="font-display text-3xl sm:text-4xl font-extrabold text-navy mb-3">L&apos;espace famille</h1>
-        <p className="text-navy/75 mb-6">Avec l&apos;offre Famille, le bénéficiaire invite 4 proches pour jouer ensemble toute l&apos;année.</p>
+        <p className="text-navy/75 mb-6">Avec l&apos;offre Famille, le bénéficiaire invite 3 proches pour jouer ensemble toute l&apos;année.</p>
         <div className="flex flex-wrap gap-3">
           <Link to="/app/pricing" data-testid="famille-none-pricing" className="bg-terracotta text-white font-bold px-6 py-3 rounded-full hover:bg-terracotta-dark transition-colors">Voir l&apos;offre Famille</Link>
           <Link to="/activer" data-testid="famille-none-activate" className="bg-white border-2 border-navy text-navy font-bold px-6 py-3 rounded-full inline-flex items-center gap-2 hover:bg-navy hover:text-cream transition-colors"><Gift className="w-4 h-4" /> J&apos;ai un code cadeau</Link>

@@ -10,7 +10,7 @@ import { GIFTS, fmt } from "@/config/pricing";
 import { api, formatError } from "@/lib/api";
 import { useGiftOffers } from "@/lib/gifts";
 
-const HERO_IMG = "https://images.unsplash.com/photo-1758612897055-3d17a4a1e8fb?crop=entropy&cs=srgb&fm=jpg&q=85&w=1200";
+const HERO_IMG = "/images/carte-cadeau-noel.webp";
 const input = "w-full rounded-xl border-2 border-cream-dark bg-white px-4 py-3 text-navy text-base focus:border-navy outline-none";
 
 function Hero({ promo, selected }) {
@@ -31,7 +31,7 @@ function Hero({ promo, selected }) {
                 ? "Offre Solo — une année complète de quiz et de souvenirs. Une carte à imprimer, un code à glisser sous le sapin."
               : noel
                 ? "Offre Noël — possibilité de jouer avec 3 membres au quiz pendant un an. Une carte personnalisée à imprimer."
-                : "Offre Famille — 1 bénéficiaire + 4 proches pour partager une année de jeux. Une carte à imprimer, un code à offrir."}
+                : "Offre Famille — 1 bénéficiaire + 3 proches pour partager une année de jeux. Une carte à imprimer, un code à offrir."}
           </p>
           {famille && (
             <div className="flex items-baseline gap-3" data-testid="offrir-hero-price">
@@ -42,9 +42,11 @@ function Hero({ promo, selected }) {
           )}
           {noel && <p className="text-sm text-cream/70 mt-2" data-testid="offrir-promo-end">Prix de Noël jusqu&apos;au 24 décembre 2026 inclus</p>}
         </motion.div>
-        <motion.div initial={{ opacity: 0, scale: 0.97 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.6, delay: 0.1 }}
-          className={`rounded-[28px] overflow-hidden border-4 ${noel ? "border-mustard/70" : "border-white"} shadow-warm aspect-[4/3]`}>
-          <img src={HERO_IMG} alt="Un grand-père et son petit-fils jouent ensemble sur une tablette" className="w-full h-full object-cover" />
+        <motion.div initial={{ opacity: 0, scale: 0.97 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.6, delay: 0.1 }}>
+          <div className={`rounded-[28px] overflow-hidden border-4 ${noel ? "border-mustard/70" : "border-white"} shadow-warm aspect-[3/2]`}>
+            <img src={HERO_IMG} alt="Exemple de carte cadeau GénéraQuiz de Noël : une grand-mère souriante joue au quiz sur sa tablette" width="1536" height="1024" fetchPriority="high" className="w-full h-full object-cover" />
+          </div>
+          <p className={`text-xs mt-2 text-center ${noel ? "text-cream/70" : "text-navy/70"}`}>Exemple de carte cadeau — prénom, message et code fictifs.</p>
         </motion.div>
       </div>
     </section>
@@ -212,7 +214,7 @@ export default function Offrir() {
         {offer === "famille" && !isChristmas && (
           <section>
             <h2 className="font-display text-2xl md:text-3xl font-extrabold text-navy mb-2">Qui a accès à quoi ?</h2>
-            <p className="text-navy/70 mb-4">1 abonnement complet pour le bénéficiaire + 4 accès aux jeux en famille inclus pendant un an.</p>
+            <p className="text-navy/70 mb-4">1 abonnement complet pour le bénéficiaire + 3 accès aux jeux en famille inclus pendant un an.</p>
             <FamilyAccessTable />
           </section>
         )}

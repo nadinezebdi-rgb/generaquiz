@@ -24,6 +24,7 @@ import OffrirMerci from "@/pages/OffrirMerci";
 import Activer from "@/pages/Activer";
 import Famille from "@/pages/Famille";
 import FamilleRejoindre from "@/pages/FamilleRejoindre";
+import AdminUsers from "@/pages/AdminUsers";
 import Account from "@/pages/Account";
 import ForgotPassword from "@/pages/ForgotPassword";
 import ResetPassword from "@/pages/ResetPassword";
@@ -35,7 +36,6 @@ import AdminReports from "@/pages/AdminReports";
 import AdminAnalytics from "@/pages/AdminAnalytics";
 import AdminHome from "@/pages/AdminHome";
 import AdminQA from "@/pages/AdminQA";
-import AdminUsers from "@/pages/AdminUsers";
 import AdminAudit from "@/pages/AdminAudit";
 import Parcours from "@/pages/Parcours";
 import Pourquoi from "@/pages/Pourquoi";
@@ -59,6 +59,8 @@ import { EhpadNewSession, EhpadSessionView } from "@/pages/EhpadSession";
 import Charades from "@/pages/Charades";
 import MotsMeles from "@/pages/MotsMeles";
 import MotsFleches from "@/pages/MotsFleches";
+import BienVieillir from "@/pages/BienVieillir";
+import FicheBienVieillir from "@/pages/FicheBienVieillir";
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();
@@ -159,7 +161,9 @@ export default function App() {
           <Route path="/confidentialite" element={<Confidentialite />} />
           <Route path="/ehpad" element={<Ehpad />} />
           <Route path="/voyages-france" element={<VoyagesShowcase />} />
-          <Route path="/bien-vieillir" element={<BienVieillirShowcase />} />
+          <Route path="/bien-vieillir" element={<BienVieillir />} />
+          <Route path="/bien-vieillir/:slug" element={<FicheBienVieillir />} />
+          <Route path="/quiz-bien-vieillir" element={<BienVieillirShowcase />} />
           <Route path="/conseils-bien-vieillir" element={<ConseilsArchive />} />
           <Route path="/conseils-bien-vieillir/:dateKey" element={<ConseilsArchive />} />
           <Route path="/decouvrir/:categoryId" element={<ThemeShowcase />} />

@@ -23,6 +23,16 @@ if (config.enableHealthCheck) {
 }
 
 let webpackConfig = {
+  // L'alias "@" est déjà défini pour webpack plus bas ; jest a sa propre
+  // résolution de modules et ne lit ni webpack ni jsconfig.json. Sans ce bloc,
+  // tout test important via "@/..." échoue à la résolution.
+  jest: {
+    configure: {
+      moduleNameMapper: {
+        "^@/(.*)$": "<rootDir>/src/$1",
+      },
+    },
+  },
   eslint: {
     configure: {
       extends: ["plugin:react-hooks/recommended"],

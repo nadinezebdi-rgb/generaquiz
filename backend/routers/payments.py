@@ -13,6 +13,7 @@ from core import (
     db, logger, STRIPE_API_KEY, STRIPE_WEBHOOK_SECRET, PACKAGES, get_current_user, CheckoutCreate,
     GIFT_STRIPE_TEST_WEBHOOK_SECRET, GIFT_STRIPE_LIVE_WEBHOOK_SECRET,
 )
+from routers.family import family_subscription_fields
 
 router = APIRouter(tags=["payments"])
 
@@ -68,10 +69,14 @@ async def get_checkout_status(session_id: str, request: Request, user: dict = De
         expires = (datetime.now(timezone.utc) + timedelta(days=days)).isoformat()
         # Legacy `plan` kept as "premium" for backward compat with existing gates;
         # `plan_tier` is the authoritative value for the new 3-tier gating.
+        subscriber = await db.users.find_one({"_id": ObjectId(tx["user_id"])})
+        if not subscriber:
+            raise HTTPException(status_code=404, detail="Bénéficiaire introuvable")
         await db.users.update_one({"_id": ObjectId(tx["user_id"])},
                                   {"$set": {"plan": "premium", "plan_tier": tier,
                                             "plan_period": pkg.get("period", "monthly"),
-                                            "plan_expires_at": expires}})
+                                            "plan_expires_at": expires,
+                                            **family_subscription_fields(subscriber, tier)}})
     await db.payment_transactions.update_one({"session_id": session_id},
                                               {"$set": {"payment_status": status.payment_status, "status": status.status}})
     return {"session_id": session_id, "payment_status": status.payment_status,
@@ -128,10 +133,14 @@ async def stripe_webhook(request: Request):
             tier = pkg.get("tier", "premium")
             days = 365 if pkg.get("period") == "yearly" else 30
             expires = (datetime.now(timezone.utc) + timedelta(days=days)).isoformat()
+            subscriber = await db.users.find_one({"_id": ObjectId(tx["user_id"])})
+            if not subscriber:
+                raise HTTPException(status_code=404, detail="Bénéficiaire introuvable")
             await db.users.update_one({"_id": ObjectId(tx["user_id"])},
                                       {"$set": {"plan": "premium", "plan_tier": tier,
                                                 "plan_period": pkg.get("period", "monthly"),
-                                                "plan_expires_at": expires}})
+                                                "plan_expires_at": expires,
+                                                **family_subscription_fields(subscriber, tier)}})
             await db.payment_transactions.update_one({"session_id": evt.session_id},
                                                       {"$set": {"payment_status": "paid", "status": "complete"}})
     return {"ok": True}

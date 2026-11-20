@@ -32,6 +32,7 @@ from core import (
     logger, rate_limit, record_audit,
 )
 from gift_card_pdf import build_gift_pdf
+from routers.family import family_subscription_fields
 
 router = APIRouter(tags=["gifts"])
 
@@ -290,6 +291,13 @@ async def retry_pending_gift_pdfs() -> None:
         await _ensure_gift_pdf(gift)
 
 
+def _with_code(gift: dict, code: str) -> dict:
+    """Document interne (jamais renvoyé tel quel à l'API) enrichi du code en clair."""
+    out = dict(gift)
+    out["code"] = code
+    return out
+
+
 async def _insert_gift(fields: dict) -> dict:
     for _ in range(6):
         code = _new_code()
@@ -298,16 +306,16 @@ async def _insert_gift(fields: dict) -> dict:
                "created_at": datetime.now(timezone.utc)}
         try:
             await db.gift_codes.insert_one(doc)
-            return {**doc, "code": code}
+            return _with_code(doc, code)
         except DuplicateKeyError as e:
             if fields.get("order_id"):
                 existing = await db.gift_codes.find_one({"order_id": fields["order_id"]})
                 if existing:
-                    return {**existing, "code": _reveal_code(existing)}
+                    return _with_code(existing, _reveal_code(existing))
             if fields.get("session_id") and "session_id" in str(e):
                 existing = await db.gift_codes.find_one({"session_id": fields["session_id"]})
                 if existing:
-                    return {**existing, "code": _reveal_code(existing)}
+                    return _with_code(existing, _reveal_code(existing))
     raise HTTPException(status_code=500, detail="Impossible de générer un code cadeau")
 
 
@@ -807,7 +815,7 @@ async def gift_redeem(body: GiftRedeem, user: dict = Depends(get_current_user)) 
                 await db.users.update_one({"_id": user_id}, {"$set": {
                     "plan": "premium", "plan_tier": tier,
                     "plan_period": current.get("plan_period") if keep_lifetime else "yearly",
-                    "plan_expires_at": expires_value}}, session=session)
+                    "plan_expires_at": expires_value, **family_subscription_fields(current, tier)}}, session=session)
                 await db.gift_codes.update_one({"_id": g["_id"]}, {"$set": {
                     "plan_expires_at": expires, "activation_order_id": str(g.get("order_id") or "")}},
                     session=session)
@@ -905,11 +913,13 @@ async def admin_set_promo(body: PromoSettings, admin: dict = Depends(get_admin_u
 
 
 async def ensure_gift_indexes() -> None:
+    """Index uniques + sparse ; remplace un ancien index au même nom mais aux options différentes."""
     existing = await db.gift_codes.index_information()
-    old_code_index = existing.get("code_1")
-    if old_code_index and old_code_index.get("unique") and not old_code_index.get("sparse"):
-        await db.gift_codes.drop_index("code_1")
-    await db.gift_codes.create_index("code", unique=True, sparse=True)
-    await db.gift_codes.create_index("code_hash", unique=True, sparse=True)
-    await db.gift_codes.create_index("order_id", unique=True, sparse=True)
-    await db.gift_codes.create_index("session_id", unique=True, sparse=True)
+    for field in ("code", "code_hash", "order_id", "session_id"):
+        old = existing.get(f"{field}_1")
+        if old and not (old.get("unique") and old.get("sparse")):
+            await db.gift_codes.drop_index(f"{field}_1")
+        try:
+            await db.gift_codes.create_index(field, unique=True, sparse=True)
+        except Exception as e:  # ne jamais bloquer le démarrage sur un index
+            logger.error(f"[gifts] index {field} non créé : {e}")

@@ -1,4 +1,4 @@
-"""Espace famille : 1 bénéficiaire (abonné Famille/Héritage) + 4 proches invités.
+"""Espace famille : 1 bénéficiaire + 3 proches (4 pour les anciens abonnés).
 
 Les proches jouent gratuitement aux quiz et défis du groupe familial et voient
 le classement ; le catalogue solo et leur propre Livre de Vie restent payants.
@@ -18,13 +18,29 @@ from core import db, logger, FRONTEND_URL, RESEND_API_KEY, SENDER_EMAIL, get_cur
 
 router = APIRouter(prefix="/famille", tags=["famille"])
 
-MAX_PROCHES = 4
+MAX_PROCHES = 3
+LEGACY_MAX_PROCHES = 4
 NOEL_TIER = "famille_noel"
 OWNER_TIERS = {"famille", "famille_v2", NOEL_TIER, "heritage", "premium"}
 
 
 def max_proches(owner: dict) -> int:
-    return 3 if owner.get("plan_tier") == NOEL_TIER else MAX_PROCHES
+    return family_capacity(owner)
+
+
+def family_capacity(owner: dict) -> int:
+    # Les abonnements antérieurs à cette limite n'ont pas de capacité enregistrée.
+    if owner.get("plan_tier") == NOEL_TIER:
+        return MAX_PROCHES
+    return owner.get("family_max_proches", LEGACY_MAX_PROCHES)
+
+
+def family_subscription_fields(user: dict, tier: str) -> dict:
+    if tier not in OWNER_TIERS:
+        return {}
+    if user.get("plan_tier") in OWNER_TIERS:
+        return {"family_max_proches": family_capacity(user)}
+    return {"family_max_proches": MAX_PROCHES if tier in {"famille_v2", NOEL_TIER} else LEGACY_MAX_PROCHES}
 
 
 def is_family_owner(u: dict) -> bool:
@@ -87,16 +103,16 @@ async def _leaderboard(member_ids: list[str]) -> list[dict]:
 
 async def _space(owner: dict, me: dict, role: str) -> dict:
     owner_id = str(owner["_id"])
-    proche_limit = max_proches(owner)
+    capacity = family_capacity(owner)
     invites = await db.family_proches.find({"owner_id": owner_id, "status": {"$in": ["invited", "accepted"]}},
-                                           {"_id": 0}).sort("invited_at", 1).to_list(MAX_PROCHES)
+                                           {"_id": 0}).sort("invited_at", 1).to_list(None)
     accepted = [i["user_id"] for i in invites if i["status"] == "accepted" and i.get("user_id")]
     member_ids = [owner_id, *accepted]
     challenges = await db.challenges.find({"creator_user_id": {"$in": member_ids}},
                                           {"_id": 0, "token": 1, "creator_name": 1, "category_title": 1,
                                            "participants": 1, "created_at": 1}).sort("created_at", -1).to_list(10)
     return {
-        "role": role, "owner_name": owner.get("name"), "max_proches": proche_limit,
+        "role": role, "owner_name": owner.get("name"), "max_proches": capacity,
         "proches": [_invite_public(i) if role == "owner" else {"name": i.get("name"), "status": i["status"]}
                     for i in invites],
         "leaderboard": await _leaderboard(member_ids),
@@ -127,17 +143,17 @@ class ProcheInvite(BaseModel):
 async def invite_proche(body: ProcheInvite, user: dict = Depends(get_current_user)) -> dict:
     if not is_family_owner(user):
         raise HTTPException(status_code=402, detail="L'espace famille est inclus dans l'offre Famille")
+    capacity = family_capacity(user)
     owner_id = str(user["_id"])
     email = body.email.lower()
     if email == user["email"].lower():
         raise HTTPException(status_code=400, detail="Vous êtes déjà le bénéficiaire de cet espace")
-    limit = max_proches(user)
     active = await db.family_proches.find({"owner_id": owner_id, "status": {"$in": ["invited", "accepted"]}},
-                                          {"email": 1}).to_list(limit + 1)
+                                          {"email": 1}).to_list(capacity + 1)
     if any(a["email"] == email for a in active):
         raise HTTPException(status_code=400, detail="Cette personne est déjà invitée")
-    if len(active) >= limit:
-        raise HTTPException(status_code=400, detail=f"Votre espace famille compte déjà {limit} proches")
+    if len(active) >= capacity:
+        raise HTTPException(status_code=400, detail=f"Votre espace famille compte déjà {capacity} proches")
     doc = {"id": str(uuid.uuid4()), "owner_id": owner_id, "name": body.name.strip(), "email": email,
            "status": "invited", "token": secrets.token_urlsafe(18), "user_id": None,
            "invited_at": datetime.now(timezone.utc).isoformat(), "accepted_at": None}
