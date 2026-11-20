@@ -1966,3 +1966,7 @@ Les routes `/bulk/*` étaient interceptées par `/{qid}/approve|flag|apply-corre
 
 ## 2026-11-20 — Adresse de contact
 - Adresse affichée partout (pied de page, CGU/CGV/RGPD, EHPAD, tarifs Pro, livre imprimé, merci cadeau) : contact.generaquiz@gmail.com. Tous les e-mails Resend ont reply_to = CONTACT_EMAIL (core.py) ; l'expéditeur reste @generaquiz.fr (domaine vérifié).
+
+## 2026-11-20 — Contact + félicitations dans le rapport
+- Page publique `/contact` (lien « Nous écrire » dans le pied de page) → `POST /api/contact` (5/h par IP, piège à robots, stocké dans contact_messages), e-mail vers CONTACT_EMAIL avec reply_to = visiteur + accusé de réception.
+- Rapport du dimanche : bloc « De quoi le féliciter » (meilleur palier réussi ≥14/20 par catégorie dans la semaine + badges gagnés).

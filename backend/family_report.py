@@ -80,6 +80,27 @@ async def _sharing_owners():
             yield owner, recipients
 
 
+async def _achievements(owner_id: str, since: str) -> str:
+    from badges import BADGES
+    titles = {b["id"]: b["title"] for b in BADGES}
+    passed = await db.palier_attempts.find(
+        {"user_id": owner_id, "created_at": {"$gte": since}, "score": {"$gte": 14}, "legacy": {"$ne": True}},
+        {"_id": 0, "category_id": 1, "palier": 1}).to_list(200)
+    best: dict[str, int] = {}
+    for p in passed:
+        best[p["category_id"]] = max(best.get(p["category_id"], 0), int(p["palier"]))
+    cats = {c["id"]: c["title"] async for c in db.categories.find({"id": {"$in": list(best)}}, {"_id": 0, "id": 1, "title": 1})}
+    badges = [titles.get(b["badge_id"], b["badge_id"]) async for b in db.user_badges.find(
+        {"user_id": owner_id, "earned_at": {"$gte": since}}, {"_id": 0, "badge_id": 1})]
+    items = [f"🏔️ Palier {n} réussi en <strong>{escape(cats.get(c, c))}</strong>" for c, n in best.items()]
+    items += [f"🏅 Badge « <strong>{escape(t)}</strong> » gagné" for t in badges]
+    if not items:
+        return ""
+    lis = "".join(f"<li style='margin:4px 0'>{i}</li>" for i in items)
+    return (f"<p style='margin:16px 0 4px;font-weight:bold;color:#1E3A5F'>De quoi le féliciter :</p>"
+            f"<ul style='padding-left:20px;margin:0'>{lis}</ul>")
+
+
 async def build_weekly_report(owner: dict) -> dict:
     owner_id = str(owner["_id"])
     since = (datetime.now(timezone.utc) - timedelta(days=7)).isoformat()
@@ -92,6 +113,7 @@ async def build_weekly_report(owner: dict) -> dict:
                 f"({len(rows)} partie{'s' if len(rows) > 1 else ''}).</p>")
     else:
         body = f"<p>{name} n'a pas joué cette semaine. Un petit appel lui fera sûrement plaisir.</p>"
+    body += await _achievements(owner_id, since)
     topic = await _topic_idea(cats)
     return {"days": days, "games": len(rows), "topic": topic,
             "subject": f"La semaine de {owner.get('name') or 'votre proche'} sur GénéraQuiz",

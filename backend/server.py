@@ -26,6 +26,7 @@ from scheduler import start_scheduler, stop_scheduler
 from mistral_client import regenerate_all as mistral_regenerate_all
 
 from routers import auth as auth_router
+from routers import contact as contact_router
 from routers import social_auth as social_auth_router
 from routers import quiz as quiz_router
 from routers import payments as payments_router
@@ -122,6 +123,7 @@ async def admin_list_users(user: dict = Depends(get_admin_user)):
 
 # Mount routers under /api
 api.include_router(auth_router.router)
+api.include_router(contact_router.router)
 api.include_router(social_auth_router.router)
 api.include_router(quiz_router.router)
 api.include_router(payments_router.router)
