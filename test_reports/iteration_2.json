@@ -30,7 +30,7 @@
     "/app/test_reports/pytest/pytest_results.xml (regenerated)"
   ],
   "success_rate": {"backend": "100% (38/38)", "frontend": "100% (all Défi Famille flows passing)"},
-  "test_credentials": "Admin: admin@quizdantan.fr / Admin2026! (premium). Free users registered dynamically (qa.free.{ts}@quizdantan.fr / test1234).",
+  "test_credentials": "Admin: admin@quizdantan.fr / <ancien mot de passe admin> (premium). Free users registered dynamically (qa.free.{ts}@quizdantan.fr / test1234).",
   "seed_data_creation": "Server auto-seeds 6 categories and 24 questions on startup. Tests create fresh challenges per run; old ones (token 'tQ2qhcssjmc') remain in DB and visible in /api/challenges/mine when logged in as admin.",
   "retest_needed": false,
   "main_agent_can_self_test": true,

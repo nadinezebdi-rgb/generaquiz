@@ -48,3 +48,7 @@ frontend/node_modules/.cache/default-development/13.pack
 frontend/node_modules/.cache/default-development/16.pack
 frontend/node_modules/.cache/default-development/11.pack
 *.pem
+
+# Secrets : ne jamais commiter de .env réel, seulement le modèle
+!.env.example
+memory/test_credentials.local.md

@@ -23,7 +23,7 @@
     "/app/backend/tests/test_forgot_password.py (new)"
   ],
   "success_rate": {"backend": "100%", "frontend": "100%"},
-  "test_credentials": "admin@quizdantan.fr / Admin2026! ; nadine.zebdi@gmail.com / test1234 (Resend account email)",
+  "test_credentials": "admin@quizdantan.fr / <ancien mot de passe admin> ; <compte propriétaire> / <mot de passe> (Resend account email)",
   "seed_data_creation": "test_forgot_password.py creates TEST_reset_<ts>@example.com users for E2E flow (not cleaned up but harmless).",
   "retest_needed": false,
   "main_agent_can_self_test": true,

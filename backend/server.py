@@ -10,6 +10,7 @@ Modular structure:
 """
 from datetime import datetime, timezone, timedelta
 import asyncio
+import os
 import re
 
 from fastapi import APIRouter, Depends, FastAPI
@@ -439,13 +440,19 @@ async def startup():
         logger.info(f"Codes parrainage rétroactifs : {backfill_count} utilisateurs")
 
     # Seed default promo codes (idempotent)
+    # Le code cadeau « Premium à vie » n'est plus écrit dans le code source (dépôt
+    # public) : son nom vient de la variable d'environnement FAMILY_PROMO_CODE.
+    # Sans cette variable, aucun code « à vie » n'est créé.
     default_promos = [
         {"code": "DECOUVERTE30", "label": "Essai 30 jours — 50 utilisations",
          "duration_days": 30, "max_uses": 50, "expires_at": None, "active": True},
-        # FAMILLE2026 : code cadeau — débloque Premium à vie, usage illimité
-        {"code": "FAMILLE2026", "label": "Cadeau Famille — accès Premium à vie",
-         "duration_days": 36500, "max_uses": None, "expires_at": None, "active": True},
     ]
+    family_code = (os.environ.get("FAMILY_PROMO_CODE") or "").strip().upper()
+    if family_code:
+        default_promos.append(
+            {"code": family_code, "label": "Cadeau Famille — accès Premium à vie",
+             "duration_days": 36500, "max_uses": None, "expires_at": None, "active": True}
+        )
     for promo in default_promos:
         existing = await db.promo_codes.find_one({"code": promo["code"]})
         if not existing:
@@ -453,14 +460,18 @@ async def startup():
                                              "created_at": datetime.now(timezone.utc).isoformat(),
                                              "created_by": "system"})
             logger.info(f"Promo seedé : {promo['code']}")
-        elif not existing.get("active"):
-            # Réactive un code désactivé auparavant, sans perdre l'historique used_count
-            await db.promo_codes.update_one(
-                {"code": promo["code"]},
-                {"$set": {"active": True, "duration_days": promo["duration_days"],
-                          "max_uses": promo["max_uses"], "label": promo["label"]}}
-            )
-            logger.info(f"Promo réactivé : {promo['code']}")
+        # Un code désactivé depuis l'admin reste désactivé : plus de réactivation
+        # automatique au démarrage.
+
+    # Ancien code « à vie » publié dans le dépôt public : désactivé au démarrage.
+    # Les comptes qui l'ont déjà utilisé gardent leur Premium.
+    leaked = [c for c in ("FAMILLE2026",) if c != family_code]
+    if leaked:
+        res = await db.promo_codes.update_many(
+            {"code": {"$in": leaked}, "active": True}, {"$set": {"active": False}}
+        )
+        if res.modified_count:
+            logger.info(f"Promo désactivé (code exposé publiquement) : {leaked}")
 
     # Seed 5 word-search grids on first boot (idempotent).
     from wordsearch_mistral import seed_grids_if_empty

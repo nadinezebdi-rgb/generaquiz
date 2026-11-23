@@ -16,7 +16,7 @@ if not BASE_URL:
 API = f"{BASE_URL}/api"
 
 ADMIN_EMAIL = "admin@generaquiz.fr"
-ADMIN_PW = "Admin2026!"
+ADMIN_PW = os.environ.get("ADMIN_PASSWORD", "")
 
 EXPECTED_KEYS = ["culture", "regularite", "attention", "rapidite", "memoire"]
 

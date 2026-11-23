@@ -8,7 +8,7 @@ BASE_URL = os.environ.get("REACT_APP_BACKEND_URL", "https://caricature-saas.prev
 API = f"{BASE_URL}/api"
 
 ADMIN_EMAIL = "admin@quizdantan.fr"
-ADMIN_PASSWORD = "Admin2026!"
+ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "")
 
 CATEGORY_IDS = [
     "annees-50-60", "chansons", "cinema",

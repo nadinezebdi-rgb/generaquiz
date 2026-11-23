@@ -33,7 +33,7 @@
   "updated_files": ["/app/backend/tests/test_iteration44_bien_vieillir.py"],
   "success_rate": {"backend": "100% (17/17)", "frontend": "100% of requested flows"},
   "seed_data_creation": "No seed data. Temporary TEST_ user created and deleted for daily submit. The admin user_paliers doc created by the palier start test (bien-vieillir palier 1) was deleted. Data left on the admin account: 1 bien-vieillir quiz attempt (3/21) and user_seen_questions rows from UI play.",
-  "test_credentials": "admin@generaquiz.fr / pF44gVBfLdushm3NZ6dN (works; httpOnly access_token and refresh_token cookies are set; CORS uses an explicit origin with credentials)",
+  "test_credentials": "admin@generaquiz.fr / <ADMIN_PASSWORD> (works; httpOnly access_token and refresh_token cookies are set; CORS uses an explicit origin with credentials)",
   "retest_needed": false,
   "should_main_agent_self_test": true,
   "context_for_next_testing_agent": "No topup, rerun, auto-seed or Mistral regen was triggered. rebalance-all was safe to run because the DB has 0 untagged non-flagged questions. In preview, bien-vieillir has only 3 questions per palier, so Parcours start is disabled in the UI and returns 409 from the API."

@@ -7,7 +7,7 @@
   "critical_code_review_comments": [],
   "updated_files": [],
   "success_rate": {"backend": "100%", "frontend": "100%"},
-  "test_credentials": "admin@generaquiz.fr / Admin2026! (verified working)",
+  "test_credentials": "admin@generaquiz.fr / <ancien mot de passe admin> (verified working)",
   "seed_data_creation": "None - used existing admin seed",
   "retest_needed": false,
   "main_agent_can_self_test": true,
