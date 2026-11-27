@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Check, Gift, ChevronRight, Users } from "lucide-react";
+import { Check, Gift, ChevronRight, Users, Sparkles } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { PLANS, GIFTS, fmt, isChristmasPromo, packageFor } from "@/config/pricing";
@@ -12,17 +12,19 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useGiftOffers } from "@/lib/gifts";
 
 /**
- * Pricing — Nouvelle grille tarifaire GénéraQuiz.
+ * Pricing — grille tarifaire normale de GénéraQuiz.
  *
  * 3 plans B2C (Découverte / Solo / Famille) + section "Offrir"
  * (cadeaux) + Livre imprimé + Offre Pro. Toutes les valeurs viennent de
- * /config/pricing.js.
+ * /config/pricing.js. La super promo de Noël a sa propre page (/offre-noel),
+ * annoncée ici par un bandeau tant qu'elle est en cours.
  */
 
 export default function Pricing() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [period, setPeriod] = useState(searchParams.get("periode") === "monthly" ? "monthly" : "yearly");
-  const promo = isChristmasPromo();
+  const promo = false; // tarifs normaux ; le tarif de Noël est sur /offre-noel
+  const christmas = isChristmasPromo();
   const [recapPkg, setRecapPkg] = useState(null);
   const closeRecap = useCallback(() => setRecapPkg(null), []);
   const { user, loading } = useAuth();
@@ -66,6 +68,8 @@ export default function Pricing() {
           <PromoHeader promo={promo} />
         </div>
 
+        {christmas && <ChristmasBanner />}
+
         <PeriodToggle period={period} setPeriod={setPeriod} promo={promo} />
 
         {/* PLANS */}
@@ -75,11 +79,6 @@ export default function Pricing() {
           ))}
         </div>
 
-        {promo && (
-          <p className="text-base text-navy font-bold text-center mb-2" data-testid="pricing-annual-note">
-            Promo annuelle : les 12 mois commencent à la première connexion. Idéal à offrir pour Noël 🎁
-          </p>
-        )}
         <p className="text-sm text-navy text-center mb-14" data-testid="pricing-legal">
           Prix TTC. {period === "yearly"
             ? `Abonnement annuel débité en une fois, renouvelé automatiquement chaque année à ${PLANS.filter((p) => p.annuel).map((p) => `${fmt(p.annuel, { integer: true })} (${p.nom})`).join(" ou ")}, rappel par e-mail 30 jours avant.`
@@ -122,7 +121,21 @@ export default function Pricing() {
   );
 }
 
-function PlanCard({ plan, period, promo, onChoose }) {
+export function ChristmasBanner() {
+  return (
+    <Link
+      to="/offre-noel"
+      data-testid="pricing-christmas-link"
+      className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4 max-w-3xl mx-auto mb-8 bg-bordeaux text-cream rounded-3xl px-5 py-4 text-center hover:bg-navy-dark transition-colors"
+    >
+      <Sparkles className="w-5 h-5 text-mustard shrink-0" />
+      <span className="font-bold">🎄 Super promo de Noël : l&apos;abonnement annuel Solo à 49 € et Famille à 79 € pour 12 mois, jusqu&apos;au 31 décembre 2026.</span>
+      <span className="inline-flex items-center gap-1 font-extrabold text-mustard whitespace-nowrap">Voir l&apos;offre <ChevronRight className="w-4 h-4" /></span>
+    </Link>
+  );
+}
+
+export function PlanCard({ plan, period, promo, onChoose }) {
   const packageId = packageFor(plan, period, promo);
   const featured = Boolean(plan.badge);
 

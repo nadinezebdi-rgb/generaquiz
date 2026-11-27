@@ -34,7 +34,7 @@ from core import (
     logger, rate_limit, record_audit,
 )
 from gift_card_pdf import build_gift_pdf
-from routers.family import family_subscription_fields
+from routers.family import NOEL_MAX_PROCHES, family_subscription_fields
 
 router = APIRouter(tags=["gifts"])
 
@@ -879,11 +879,11 @@ async def gift_redeem(body: GiftRedeem, user: dict = Depends(get_current_user)) 
         await db.users.update_one({"_id": user_id}, {"$set": {
             "plan": "premium", "plan_tier": tier,
             "plan_period": current.get("plan_period") if keep_lifetime else "yearly",
-            "plan_expires_at": expires_value, **family_subscription_fields(current, tier)}}, session=session)
+            "plan_expires_at": expires_value, **family_subscription_fields(current, tier, NOEL_MAX_PROCHES)}}, session=session)
         await db.gift_codes.update_one({"_id": g["_id"]}, {"$set": {
             "plan_expires_at": expires, "activation_order_id": str(g.get("order_id") or "")}},
             session=session)
-        return g, tier, expires, family_subscription_fields(current, tier).get("family_max_proches")
+        return g, tier, expires, family_subscription_fields(current, tier, NOEL_MAX_PROCHES).get("family_max_proches")
 
     try:
         try:

@@ -32,7 +32,8 @@ export default function Landing() {
   const [testimonials, setTestimonials] = useState([]);
   const giftOffers = useGiftOffers();
   const [period, setPeriod] = useState("yearly");
-  const promo = isChristmasPromo();
+  const promo = false; // tarifs normaux sur la landing ; la promo de Noël a sa page /offre-noel
+  const christmas = isChristmasPromo();
   const christmasFamily = giftOffers?.offers?.find((offer) => offer.id === "famille");
 
   useEffect(() => {
@@ -276,9 +277,10 @@ export default function Landing() {
             {PLANS.map((p) => <LandingPlanCard key={p.id} plan={p} period={period} promo={promo} />)}
           </div>
 
-          {promo && (
+          {christmas && (
             <p className="text-center text-base font-bold text-navy mb-6" data-testid="landing-promo-note">
-              Promo annuelle : les 12 mois commencent à la première connexion. Idéal à offrir pour Noël 🎁
+              🎄 Super promo de Noël : Solo à 49 € et Famille à 79 € pour 12 mois, jusqu&apos;au 31 décembre 2026.{" "}
+              <Link to="/offre-noel" className="text-terracotta underline" data-testid="landing-noel-link">Voir l&apos;offre de Noël</Link>
             </p>
           )}
 
@@ -288,7 +290,7 @@ export default function Landing() {
               data-testid="landing-see-all-pricing"
               className="inline-flex items-center gap-2 bg-navy text-cream font-bold px-6 py-3 rounded-full hover:bg-navy-dark transition text-center"
             >
-              {promo ? "Offrir GénéraQuiz pour Noël, voir tous les tarifs et le livre imprimé" : "Voir tous les tarifs, cadeaux & livre imprimé"} <ArrowRight className="w-4 h-4 shrink-0" />
+              Voir tous les tarifs, cadeaux & livre imprimé <ArrowRight className="w-4 h-4 shrink-0" />
             </Link>
           </div>
 

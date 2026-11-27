@@ -48,7 +48,7 @@ class TestSummary:
         assert d["period"] == "monthly"
         assert amt in d["summary"] and "Sans engagement" in d["summary"]
 
-    @pytest.mark.parametrize("pid", ["solo_yearly", "famille_v2_yearly", "heritage_yearly", "gift_solo", "nope"])
+    @pytest.mark.parametrize("pid", ["heritage_yearly", "gift_solo", "nope"])
     def test_blocked_packages(self, pid):
         r = requests.get(f"{BASE_URL}/api/pricing/summary/{pid}")
         assert r.status_code == 400
@@ -66,12 +66,8 @@ class TestCheckout:
         assert r.status_code == 400
         assert "accepter" in r.json()["detail"]
 
-    def test_normal_yearly_blocked(self, user_session):
-        r = user_session.post(f"{BASE_URL}/api/checkout/session",
-                              json={"package_id": "solo_yearly", "origin_url": BASE_URL, "accept_terms": True})
-        assert r.status_code == 400
-
-    @pytest.mark.parametrize("pid", ["solo_yearly_noel", "famille_v2_yearly_noel", "solo_monthly", "famille_v2_monthly"])
+    @pytest.mark.parametrize("pid", ["solo_yearly_noel", "famille_v2_yearly_noel", "solo_yearly", "famille_v2_yearly",
+                                     "solo_monthly", "famille_v2_monthly"])
     def test_with_terms_returns_url(self, user_session, pid):
         r = user_session.post(f"{BASE_URL}/api/checkout/session",
                               json={"package_id": pid, "origin_url": BASE_URL, "accept_terms": True})

@@ -215,7 +215,7 @@ export default function Offrir() {
           <section>
             <h2 className="font-display text-2xl md:text-3xl font-extrabold text-navy mb-2">Qui a accès à quoi ?</h2>
             <p className="text-navy/70 mb-4">1 abonnement complet pour le bénéficiaire + 3 accès aux jeux en famille inclus pendant un an.</p>
-            <FamilyAccessTable />
+            <FamilyAccessTable proches={3} />
           </section>
         )}
         {!(data?.promo?.closed && offer === "noel") && selected && (

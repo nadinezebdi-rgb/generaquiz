@@ -96,15 +96,16 @@ PACKAGES = {
     "solo_yearly_noel": {"amount": 49.00, "renew_amount": 69.00, "currency": "eur",
                         "label": "Super promo de Noël Solo", "tier": "solo", "period": "yearly", "promo": True,
                         "description": "49 € pour 12 mois, puis 69 €/an"},
-    # -- Famille : bénéficiaire complet + 3 proches dans l'espace famille --
+    # -- Famille : bénéficiaire complet + 2 invités (Noël compris) --
     "famille_v2_monthly": {"amount": 9.90, "renew_amount": 9.90, "currency": "eur", "label": "Famille — Mensuel",
-                        "tier": "famille_v2", "period": "monthly",
-                        "description": "Tout Solo + 3 proches invités aux quiz, défis et classements familiaux"},
+                        "tier": "famille_v2", "period": "monthly", "max_proches": 2,
+                        "description": "Tout Solo + 2 invités aux quiz, défis et classements familiaux"},
     "famille_v2_yearly":  {"amount": 99.00, "renew_amount": 99.00, "currency": "eur", "label": "Famille — Annuel",
-                        "tier": "famille_v2", "period": "yearly",
+                        "tier": "famille_v2", "period": "yearly", "max_proches": 2,
                         "description": "12 mois — 2 mois offerts par rapport au mensuel"},
     "famille_v2_yearly_noel": {"amount": 79.00, "renew_amount": 99.00, "currency": "eur",
                         "label": "Super promo de Noël Famille", "tier": "famille_v2", "period": "yearly", "promo": True,
+                        "max_proches": 2,
                         "description": "79 € pour 12 mois, puis 99 €/an"},
     # -- Héritage : plus vendu (abonnés existants conservés) --
     "heritage_yearly": {"amount": 159.00,"currency": "eur", "label": "Héritage — Annuel",

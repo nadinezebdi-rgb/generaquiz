@@ -11,16 +11,21 @@ const Value = ({ value, who }) => {
   );
 };
 
-const NOTE = "Les trois proches jouent gratuitement avec le bénéficiaire dans l'espace familial. Ils paient uniquement s'ils souhaitent leur propre accès complet à GénéraQuiz.";
+const NUMBERS = { 2: "deux", 3: "trois", 4: "quatre" };
 
-export const FamilyAccessTable = () => (
+// `proches` : 2 pour l'offre Famille, 3 pour les cartes cadeau Famille.
+export const FamilyAccessTable = ({ proches = 2 }) => {
+  const who = proches === 2 ? "Les 2 invités" : `Les ${proches} proches`;
+  const note = `Les ${NUMBERS[proches] || proches} ${proches === 2 ? "invités" : "proches"} jouent gratuitement avec le bénéficiaire dans l'espace familial. Ils paient uniquement s'ils souhaitent leur propre accès complet à GénéraQuiz.`;
+  return (
+
   <div className="rounded-2xl border-2 border-cream-dark bg-white overflow-hidden" data-testid="family-access-table">
     <table className="w-full text-left hidden sm:table">
       <thead className="bg-cream">
         <tr className="text-xs uppercase tracking-wider text-navy/70">
           <th className="px-3 py-3 font-bold">Accès</th>
           <th className="px-3 py-3 font-bold">Bénéficiaire</th>
-          <th className="px-3 py-3 font-bold">Les 3 proches</th>
+          <th className="px-3 py-3 font-bold">{who}</th>
         </tr>
       </thead>
       <tbody className="divide-y divide-cream-dark">
@@ -38,10 +43,11 @@ export const FamilyAccessTable = () => (
         <li key={row.label} className="p-4 grid gap-1.5">
           <span className="font-semibold text-navy">{row.label}</span>
           <Value value={row.owner} who="Bénéficiaire" />
-          <Value value={row.proches} who="Les 3 proches" />
+          <Value value={row.proches} who={who} />
         </li>
       ))}
     </ul>
-    <p className="px-3 py-3 text-xs text-navy/70 bg-cream/50">{NOTE}</p>
+    <p className="px-3 py-3 text-xs text-navy/70 bg-cream/50">{note}</p>
   </div>
-);
+  );
+};

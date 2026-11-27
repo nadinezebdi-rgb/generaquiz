@@ -1,4 +1,4 @@
-"""Espace famille : 1 bénéficiaire + 3 proches (4 pour les anciens abonnés).
+"""Espace famille : 1 bénéficiaire + 2 invités (3 pour les cartes cadeau, 4 pour les anciens abonnés).
 
 Les proches jouent gratuitement aux quiz et défis du groupe familial et voient
 le classement ; le catalogue solo et leur propre Livre de Vie restent payants.
@@ -18,7 +18,8 @@ from core import db, logger, FRONTEND_URL, RESEND_API_KEY, SENDER_EMAIL, get_adm
 
 router = APIRouter(prefix="/famille", tags=["famille"])
 
-MAX_PROCHES = 3
+MAX_PROCHES = 2          # offre Famille (normale et Noël) : bénéficiaire + 2 invités
+NOEL_MAX_PROCHES = 3     # anciens abonnés "famille_noel" et cartes cadeau Famille vendues avec 3 proches
 LEGACY_MAX_PROCHES = 4
 NOEL_TIER = "famille_noel"
 OWNER_TIERS = {"famille", "famille_v2", NOEL_TIER, "heritage", "premium"}
@@ -31,16 +32,21 @@ def max_proches(owner: dict) -> int:
 def family_capacity(owner: dict) -> int:
     # Les abonnements antérieurs à cette limite n'ont pas de capacité enregistrée.
     if owner.get("plan_tier") == NOEL_TIER:
-        return MAX_PROCHES
+        return NOEL_MAX_PROCHES
     return owner.get("family_max_proches", LEGACY_MAX_PROCHES)
 
 
-def family_subscription_fields(user: dict, tier: str) -> dict:
+def family_subscription_fields(user: dict, tier: str, capacity: int | None = None) -> dict:
+    """Capacité de l'espace famille. `capacity` vient de l'offre achetée (ex. 3 pour une carte cadeau)."""
     if tier not in OWNER_TIERS:
         return {}
     if user.get("plan_tier") in OWNER_TIERS:
-        return {"family_max_proches": family_capacity(user)}
-    return {"family_max_proches": MAX_PROCHES if tier in {"famille_v2", NOEL_TIER} else LEGACY_MAX_PROCHES}
+        return {"family_max_proches": max(family_capacity(user), capacity or 0)}
+    if capacity:
+        return {"family_max_proches": capacity}
+    if tier == NOEL_TIER:
+        return {"family_max_proches": NOEL_MAX_PROCHES}
+    return {"family_max_proches": MAX_PROCHES if tier == "famille_v2" else LEGACY_MAX_PROCHES}
 
 
 def is_family_owner(u: dict) -> bool:
