@@ -27,7 +27,7 @@ def _load_frontend_env():
 _load_frontend_env()
 BASE = os.environ["REACT_APP_BACKEND_URL"].rstrip("/")
 ADMIN_EMAIL = "admin@quizdantan.fr"
-ADMIN_PWD = "Admin2026!"
+ADMIN_PWD = os.environ["TEST_ADMIN_PASSWORD"]
 
 
 @pytest.fixture(scope="module")

@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="fr">
     <head>
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -25,7 +25,7 @@
         -->
         <title>GénéraQuiz — Le jeu qui rapproche les générations</title>
         <script>window.addEventListener("error",function(e){if(e.error instanceof DOMException&&e.error.name==="DataCloneError"&&e.message&&e.message.includes("PerformanceServerTiming")){e.stopImmediatePropagation();e.preventDefault()}},true);</script>
-        <script src="https://assets.emergent.sh/scripts/emergent-main.js"></script>
+        <script>if(!/(^|\.)generaquiz\.fr$/.test(location.hostname)){var es=document.createElement("script");es.src="https://assets.emergent.sh/scripts/emergent-main.js";document.head.appendChild(es);}</script>
     </head>
     <body>
         <noscript>You need to enable JavaScript to run this app.</noscript>
@@ -102,14 +102,22 @@
                     }),
                     (e.__SV = 1));
             })(document, window.posthog || []);
-            posthog.init("phc_xAvL2Iq4tFmANRE7kzbKwaSqp1HJjN7x48s3vr0CMjs", {
-                api_host: "https://us.i.posthog.com",
-                person_profiles: "identified_only", // or 'always' to create profiles for anonymous users as well,
-                session_recording: {
-                    recordCrossOriginIframes: true,
-                    capturePerformance: false,
-                },
-            });
+            // Mesure d'audience : rien n'est chargé ni déposé avant l'accord du visiteur (bandeau de consentement).
+            window.gqStartAnalytics = function () {
+                if (window.__gqAnalytics) return;
+                window.__gqAnalytics = true;
+                posthog.init("phc_xAvL2Iq4tFmANRE7kzbKwaSqp1HJjN7x48s3vr0CMjs", {
+                    api_host: "https://us.i.posthog.com",
+                    person_profiles: "identified_only",
+                    session_recording: {
+                        maskAllInputs: true,
+                        maskTextSelector: ".ph-mask",
+                        recordCrossOriginIframes: true,
+                        capturePerformance: false,
+                    },
+                });
+            };
+            try { if (localStorage.getItem("gq_consent") === "yes") window.gqStartAnalytics(); } catch (e) {}
         </script>
     </body>
 </html>

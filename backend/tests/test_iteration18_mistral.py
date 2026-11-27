@@ -23,8 +23,8 @@ if not BASE_URL:
                 BASE_URL = line.split("=", 1)[1].strip().strip('"').rstrip("/")
                 break
 
-ADMIN_EMAIL = "admin@generaquiz.fr"
-ADMIN_PASSWORD = "Admin2026!"
+ADMIN_EMAIL = os.environ["TEST_ADMIN_EMAIL"]
+ADMIN_PASSWORD = os.environ["TEST_ADMIN_PASSWORD"]
 
 
 # ---------- fixtures ----------

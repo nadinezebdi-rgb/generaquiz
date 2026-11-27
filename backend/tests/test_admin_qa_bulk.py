@@ -4,8 +4,8 @@ import pytest
 import requests
 
 BASE_URL = os.environ["REACT_APP_BACKEND_URL"].rstrip("/")
-ADMIN_EMAIL = "admin@generaquiz.fr"
-ADMIN_PASSWORD = "pF44gVBfLdushm3NZ6dN"
+ADMIN_EMAIL = os.environ["TEST_ADMIN_EMAIL"]
+ADMIN_PASSWORD = os.environ["TEST_ADMIN_PASSWORD"]
 
 
 @pytest.fixture(scope="module")

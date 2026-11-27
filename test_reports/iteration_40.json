@@ -23,7 +23,7 @@
     "/app/backend/tests/test_iteration40_livre_ai_boucle.py"
   ],
   "success_rate": {"backend": "100%", "frontend": "100%"},
-  "test_credentials": "admin@generaquiz.fr / Admin2026! (from /app/memory/test_credentials.md)",
+  "test_credentials": "admin@generaquiz.fr / [mot de passe retiré] (from /app/memory/test_credentials.md)",
   "seed_data_creation": "Created 2 admin test entries in chapter 'enfance' via /api/livre/entries for AI rewrite tests (one short, one full). Also created 6 quiz->livre entries (one per category mapping test).",
   "retest_needed": false,
   "main_agent_can_self_test": true,

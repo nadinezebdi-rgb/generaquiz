@@ -44,11 +44,18 @@ async def redeem_promo(body: PromoRedeem, user: dict = Depends(get_current_user)
         raise HTTPException(status_code=400, detail="Vous avez déjà utilisé ce code")
     days = int(promo["duration_days"])
     is_lifetime = days >= LIFETIME_DAYS
+    # Réservation atomique : max_uses ne peut pas être dépassé, un compte ne l'utilise qu'une fois.
+    guard = {"_id": promo["_id"], "redeemed_by": {"$ne": user_id_str}, "active": {"$ne": False}}
+    if promo.get("max_uses") is not None:
+        guard["used_count"] = {"$lt": promo["max_uses"]}
+    claimed = await db.promo_codes.update_one(guard, {"$inc": {"used_count": 1}, "$push": {"redeemed_by": user_id_str}})
+    if not claimed.modified_count:
+        raise HTTPException(status_code=410, detail="Ce code n'est plus disponible")
     expires = (datetime.now(timezone.utc) + timedelta(days=days)).isoformat()
+    current = user.get("plan_expires_at") if user.get("plan") == "premium" else None
+    expires = max(expires, current) if current else expires  # un code ne raccourcit jamais un abonnement
     await db.users.update_one({"_id": ObjectId(user_id_str)},
                               {"$set": {"plan": "premium", "plan_expires_at": expires}})
-    await db.promo_codes.update_one({"_id": promo["_id"]},
-                                     {"$inc": {"used_count": 1}, "$push": {"redeemed_by": user_id_str}})
     return {"ok": True, "plan": "premium", "plan_expires_at": expires,
             "is_lifetime": is_lifetime, "duration_days": days, "label": promo.get("label") or ""}
 

@@ -30,8 +30,8 @@ def _load_backend_url():
 BASE = _load_backend_url()
 API = f"{BASE}/api"
 
-ADMIN_EMAIL = "admin@generaquiz.fr"
-ADMIN_PWD = "Admin2026!"
+ADMIN_EMAIL = os.environ["TEST_ADMIN_EMAIL"]
+ADMIN_PWD = os.environ["TEST_ADMIN_PASSWORD"]
 
 
 # ---------- fixtures ----------

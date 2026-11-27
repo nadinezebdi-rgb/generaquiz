@@ -174,8 +174,8 @@ def verify_password(pw: str, hashed: str) -> bool:
         return False
 
 
-def create_access_token(user_id: str, email: str) -> str:
-    return jwt.encode({"sub": user_id, "email": email, "type": "access",
+def create_access_token(user_id: str, email: str, token_version: int = 0) -> str:
+    return jwt.encode({"sub": user_id, "email": email, "type": "access", "tv": token_version,
                        "exp": datetime.now(timezone.utc) + timedelta(days=7)},
                       JWT_SECRET, algorithm=JWT_ALG)
 
@@ -294,6 +294,8 @@ async def get_current_user(request: Request) -> dict:
         user = await db.users.find_one({"_id": ObjectId(payload["sub"])})
         if not user:
             raise HTTPException(status_code=401, detail="Utilisateur introuvable")
+        if payload.get("tv", 0) != user.get("token_version", 0):
+            raise HTTPException(status_code=401, detail="Session expirée")
         return dict(user)
     except jwt.ExpiredSignatureError:
         raise HTTPException(status_code=401, detail="Session expirée")
@@ -346,28 +348,44 @@ async def record_audit(admin: dict, action: str, *,
 
 
 # -------------------- rate limiter (in-memory, IP-based) --------------------
-_rate_buckets: dict[str, list[float]] = {}
+
+
+def client_ip(request: Request) -> str:
+    """IP réelle : en-tête Cloudflare, sinon la dernière entrée ajoutée par notre proxy (non falsifiable)."""
+    cf = request.headers.get("cf-connecting-ip")
+    if cf:
+        return cf.strip()
+    xff = [p.strip() for p in request.headers.get("x-forwarded-for", "").split(",") if p.strip()]
+    return xff[-1] if xff else (request.client.host if request.client else "anon")
+
+
+async def rate_hit(key: str, max_calls: int, window_seconds: int, record: bool = True) -> None:
+    """Limiteur partagé entre processus (stocké dans Mongo, purgé par index TTL)."""
+    now = datetime.now(timezone.utc)
+    since = now - timedelta(seconds=window_seconds)
+    used = await db.rate_limits.count_documents({"key": key, "at": {"$gte": since}})
+    if used >= max_calls:
+        first = await db.rate_limits.find_one({"key": key, "at": {"$gte": since}}, sort=[("at", 1)])
+        first_at = first["at"] if first else now
+        if first_at.tzinfo is None:
+            first_at = first_at.replace(tzinfo=timezone.utc)
+        retry = max(int(window_seconds - (now - first_at).total_seconds()), 1)
+        minutes = (retry + 59) // 60
+        raise HTTPException(status_code=429, headers={"Retry-After": str(retry)},
+                            detail=f"Trop de tentatives. Réessayez dans {minutes} minute{'s' if minutes > 1 else ''}.")
+    if record:
+        await db.rate_limits.insert_one({"key": key, "at": now, "expire_at": now + timedelta(seconds=window_seconds)})
+
+
+async def rate_record(key: str, window_seconds: int) -> None:
+    now = datetime.now(timezone.utc)
+    await db.rate_limits.insert_one({"key": key, "at": now, "expire_at": now + timedelta(seconds=window_seconds)})
 
 
 def rate_limit(prefix: str, max_calls: int, window_seconds: int):
-    """Dependency that throttles by client IP. Raises 429 when over budget."""
+    """Dependency that throttles by real client IP. Raises 429 when over budget."""
     async def _checker(request: Request):
-        ip = request.headers.get("x-forwarded-for", request.client.host if request.client else "anon")
-        ip = ip.split(",")[0].strip()
-        key = f"{prefix}:{ip}"
-        now = time.time()
-        bucket = _rate_buckets.get(key, [])
-        # keep only timestamps inside the window
-        bucket = [t for t in bucket if now - t < window_seconds]
-        if len(bucket) >= max_calls:
-            retry_after = int(window_seconds - (now - bucket[0]))
-            raise HTTPException(
-                status_code=429,
-                detail=f"Trop de tentatives. Réessayez dans {max(retry_after, 1)} s.",
-                headers={"Retry-After": str(max(retry_after, 1))},
-            )
-        bucket.append(now)
-        _rate_buckets[key] = bucket
+        await rate_hit(f"{prefix}:{client_ip(request)}", max_calls, window_seconds)
     return _checker
 
 

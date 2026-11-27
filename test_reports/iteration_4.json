@@ -30,7 +30,7 @@
     "backend": "100% (50/50)",
     "frontend": "100% (landing 8 cards + dashboard 8 cards + both new quiz pages + answer interaction)"
   },
-  "test_credentials": "admin@quizdantan.fr / Admin2026!",
+  "test_credentials": "admin@quizdantan.fr / [mot de passe retiré]",
   "seed_data_creation": "Each pytest run registers ~4 throw-away free users (qa.test.*, qa.reg.*, qa.dup.*) and creates two challenges (chansons 4q + culture-40-ans 10q + cinema 4q for participate-perfect). No cleanup needed; data isolated by timestamped emails.",
   "retest_needed": false,
   "main_agent_can_self_test": true,

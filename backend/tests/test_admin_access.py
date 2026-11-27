@@ -14,8 +14,8 @@ def _read_frontend_env_url():
     return None
 
 BASE = (os.environ.get("REACT_APP_BACKEND_URL") or _read_frontend_env_url()).rstrip("/")
-ADMIN_EMAIL = "admin@generaquiz.fr"
-ADMIN_PWD = "pF44gVBfLdushm3NZ6dN"
+ADMIN_EMAIL = os.environ["TEST_ADMIN_EMAIL"]
+ADMIN_PWD = os.environ["TEST_ADMIN_PASSWORD"]
 
 
 @pytest.fixture(scope="module")

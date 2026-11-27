@@ -29,8 +29,8 @@ ANSWERS = {
     "ch13": "carotte",
 }
 
-ADMIN_EMAIL = "admin@generaquiz.fr"
-ADMIN_PWD = "Admin2026!"
+ADMIN_EMAIL = os.environ["TEST_ADMIN_EMAIL"]
+ADMIN_PWD = os.environ["TEST_ADMIN_PASSWORD"]
 
 
 def _login(email, pwd):

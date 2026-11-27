@@ -15,7 +15,7 @@
   ],
   "updated_files": ["/app/backend/tests/test_admin_qa_bulk.py"],
   "success_rate": {"backend": "89% (8/9, 1 intentional skip on destructive delete)", "frontend": "100%"},
-  "test_credentials": "admin@generaquiz.fr / pF44gVBfLdushm3NZ6dN (from /app/memory/test_credentials.md)",
+  "test_credentials": "admin@generaquiz.fr / [mot de passe retiré] (from /app/memory/test_credentials.md)",
   "seed_data_creation": "None — all bulk-approved test data restored to 'flagged' state via /bulk/flag after each destructive test (chansons category verified back to 41 flagged).",
   "retest_needed": false,
   "main_agent_can_self_test": true,

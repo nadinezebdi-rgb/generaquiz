@@ -26,7 +26,7 @@
     "/app/backend/tests/test_iteration10.py (new)"
   ],
   "success_rate": {"backend": "100% (19/19)", "frontend": "100% (smoke + E2E)"},
-  "test_credentials": "admin@quizdantan.fr / Admin2026! ; promo: FAMILLE2026, DECOUVERTE30",
+  "test_credentials": "admin@quizdantan.fr / [mot de passe retiré] ; promo: FAMILLE2026, DECOUVERTE30",
   "seed_data_creation": "test_iteration10.py creates TEST_<uuid>@example.com users (free + premium upgraded), TEST_<code> promo (deleted), TEST_del_<uuid> user (deleted). All test data prefixed TEST_ for cleanup.",
   "retest_needed": false,
   "main_agent_can_self_test": true,

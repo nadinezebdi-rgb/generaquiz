@@ -26,7 +26,7 @@
     "/app/backend/tests/test_iteration18_mistral.py (new)"
   ],
   "success_rate": {"backend": "100% (8/8)", "frontend": "not tested (per request)"},
-  "test_credentials": "admin@generaquiz.fr / Admin2026! (validated against /app/memory/test_credentials.md). Non-admin throwaway accounts created on-the-fly via /api/auth/register with TEST_ prefix.",
+  "test_credentials": "admin@generaquiz.fr / [mot de passe retiré] (validated against /app/memory/test_credentials.md). Non-admin throwaway accounts created on-the-fly via /api/auth/register with TEST_ prefix.",
   "seed_data_creation": "TestMistralRegenerate.test_rejects_non_admin registers a fresh TEST_mistral_<timestamp>@example.com account to validate the admin guard.",
   "retest_needed": false,
   "should_main_agent_self_test": true,

@@ -5,8 +5,8 @@ import requests
 import pytest
 
 BASE = os.environ["REACT_APP_BACKEND_URL"].rstrip("/") + "/api"
-ADMIN_EMAIL = "admin@generaquiz.fr"
-ADMIN_PASSWORD = "Admin2026!"
+ADMIN_EMAIL = os.environ["TEST_ADMIN_EMAIL"]
+ADMIN_PASSWORD = os.environ["TEST_ADMIN_PASSWORD"]
 NEW_EMAIL = "admin-new@generaquiz.fr"
 OCCUPIED_EMAIL = f"occupied_{int(time.time())}@example.com"
 

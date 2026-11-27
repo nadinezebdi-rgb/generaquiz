@@ -10,17 +10,18 @@ from __future__ import annotations
 import base64
 import io
 import os
+import re
 import secrets
 import uuid
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
 
-from core import db, get_current_user, logger
+from core import db, get_current_user, logger, client_ip, rate_hit, rate_record
 
 
 router = APIRouter(prefix="/livre", tags=["livre"])
@@ -918,8 +919,26 @@ def _gen_invite_code() -> str:
     return "".join(secrets.choice(alphabet) for _ in range(6))
 
 
+COOP_TTL = timedelta(hours=24)
+
+
 async def _find_session(code: str) -> dict | None:
-    return await db.livre_coop_sessions.find_one({"invite_code": code.upper()})
+    sess = await db.livre_coop_sessions.find_one({"invite_code": code.upper()})
+    if sess and sess.get("status") == "active" and \
+            datetime.fromisoformat(sess["created_at"]) < datetime.now(timezone.utc) - COOP_TTL:
+        await db.livre_coop_sessions.update_one({"_id": sess["_id"]}, {"$set": {"status": "expired"}})
+        sess["status"] = "expired"
+    return sess
+
+
+async def _public_session(code: str, request: Request) -> dict | None:
+    """Accès sans compte : les codes inconnus sont comptés pour bloquer les essais au hasard."""
+    key = f"coop-miss:{client_ip(request)}"
+    await rate_hit(key, 15, 900, record=False)
+    sess = await _find_session(code)
+    if not sess:
+        await rate_record(key, 900)
+    return sess
 
 
 @router.post("/coop/create")
@@ -935,6 +954,7 @@ async def coop_create(body: CoopCreate, user: dict = Depends(get_current_user)) 
         "owner_user_id": owner_id,
         "chapter_id": body.chapter_id,
         "status": "active",
+        "created_at": {"$gte": (now - COOP_TTL).isoformat()},
     })
     if existing:
         existing.pop("_id", None)
@@ -992,9 +1012,9 @@ async def coop_close(code: str, user: dict = Depends(get_current_user)) -> dict:
 
 
 @router.post("/coop/join")
-async def coop_join(body: CoopJoin) -> dict:
+async def coop_join(body: CoopJoin, request: Request) -> dict:
     """Un invité rejoint via le code. Ajoute son nom aux participants."""
-    sess = await _find_session(body.code)
+    sess = await _public_session(body.code, request)
     if not sess or sess.get("status") != "active":
         raise HTTPException(status_code=404, detail="Session introuvable ou fermée")
     guest = body.guest_name.strip()
@@ -1011,7 +1031,7 @@ async def coop_join(body: CoopJoin) -> dict:
         )
     else:
         await db.livre_coop_sessions.update_one(
-            {"_id": sess["_id"], "participants.name": {"$regex": f"^{guest}$", "$options": "i"}},
+            {"_id": sess["_id"], "participants.name": {"$regex": f"^{re.escape(guest)}$", "$options": "i"}},
             {"$set": {"participants.$.last_seen": now}},
         )
     sess = await _find_session(body.code)
@@ -1020,13 +1040,13 @@ async def coop_join(body: CoopJoin) -> dict:
 
 
 @router.get("/coop/{code}/state")
-async def coop_state(code: str) -> dict:
+async def coop_state(code: str, request: Request) -> dict:
     """État courant : chapitre, prompts, souvenirs et participants.
 
     Endpoint public (pas d'auth) pour permettre au petit-enfant de suivre en
     temps réel sans compte. Ne renvoie que les entrées du chapitre concerné.
     """
-    sess = await _find_session(code)
+    sess = await _public_session(code, request)
     if not sess:
         raise HTTPException(status_code=404, detail="Session introuvable")
     if sess.get("status") != "active":
@@ -1035,8 +1055,8 @@ async def coop_state(code: str) -> dict:
     if not ch:
         raise HTTPException(status_code=500, detail="Chapitre invalide")
     entries = await db.livre_entries.find(
-        {"user_id": sess["owner_user_id"], "chapter_id": sess["chapter_id"]},
-        {"_id": 0, "audio_b64": 0},  # allège la payload : pas de blob audio en polling
+        {"user_id": sess["owner_user_id"], "chapter_id": sess["chapter_id"], "visibility": "family"},
+        {"_id": 0, "audio_b64": 0},  # souvenirs privés jamais exposés ; pas de blob audio en polling
     ).sort("created_at", 1).to_list(500)
     return {
         "session_id": sess["id"],
@@ -1054,25 +1074,26 @@ async def coop_state(code: str) -> dict:
 
 
 @router.post("/coop/{code}/heartbeat")
-async def coop_heartbeat(code: str, body: CoopHeartbeat) -> dict:
+async def coop_heartbeat(code: str, body: CoopHeartbeat, request: Request) -> dict:
     """Met à jour last_seen pour un participant (garde la présence à jour)."""
-    sess = await _find_session(code)
+    sess = await _public_session(code, request)
     if not sess or sess.get("status") != "active":
         raise HTTPException(status_code=404, detail="Session introuvable")
     now = datetime.now(timezone.utc).isoformat()
     await db.livre_coop_sessions.update_one(
-        {"_id": sess["_id"], "participants.name": {"$regex": f"^{body.guest_name.strip()}$", "$options": "i"}},
+        {"_id": sess["_id"], "participants.name": {"$regex": f"^{re.escape(body.guest_name.strip())}$", "$options": "i"}},
         {"$set": {"participants.$.last_seen": now}},
     )
     return {"ok": True}
 
 
 @router.post("/coop/{code}/entry")
-async def coop_entry(code: str, body: CoopEntry) -> dict:
+async def coop_entry(code: str, body: CoopEntry, request: Request) -> dict:
     """L'invité (petit-enfant) écrit un souvenir. Crée une entrée `delegated`
     dans le Livre du propriétaire, attribuée au prénom de l'invité.
     """
-    sess = await _find_session(code)
+    await rate_hit(f"coop-entry:{client_ip(request)}", 30, 3600)
+    sess = await _public_session(code, request)
     if not sess or sess.get("status") != "active":
         raise HTTPException(status_code=404, detail="Session introuvable ou fermée")
     chapter_id = sess["chapter_id"]
@@ -1108,7 +1129,7 @@ async def coop_entry(code: str, body: CoopEntry) -> dict:
     entry.pop("_id", None)
     # Update last_seen de l'invité
     await db.livre_coop_sessions.update_one(
-        {"_id": sess["_id"], "participants.name": {"$regex": f"^{body.guest_name.strip()}$", "$options": "i"}},
+        {"_id": sess["_id"], "participants.name": {"$regex": f"^{re.escape(body.guest_name.strip())}$", "$options": "i"}},
         {"$set": {"participants.$.last_seen": now}},
     )
     return {"ok": True, "entry": entry}

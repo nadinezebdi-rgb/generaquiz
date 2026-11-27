@@ -21,7 +21,7 @@
   ],
   "updated_files": ["/app/backend/tests/test_account.py"],
   "success_rate": {"backend": "100% (82/82 — 12 new account tests + 54 existing + 16 promo)", "frontend": "100% (full register→forgot→reset→login→change-pw→delete flow completed end-to-end with all data-testid present and reactive)"},
-  "test_credentials": "admin@quizdantan.fr / Admin2026!  (test users registered per-run with timestamped emails qa.acct.* / qa.ui.*)",
+  "test_credentials": "admin@quizdantan.fr / [mot de passe retiré]  (test users registered per-run with timestamped emails qa.acct.* / qa.ui.*)",
   "seed_data_creation": "Test run creates ~3-4 disposable users (qa.acct.*, qa.idx.*, qa.ui.*) and a handful of password_reset_tokens records (auto-cleaned by 1h TTL). One user is deleted via /api/auth/account in the UI test. No persistent pollution.",
   "retest_needed": false,
   "main_agent_can_self_test": true,

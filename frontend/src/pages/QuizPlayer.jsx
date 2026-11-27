@@ -8,9 +8,10 @@ import { ArrowLeft, ChevronRight, RotateCcw, Volume2, Crown, Check, X } from "lu
 import ScoreCard from "@/components/ScoreCard";
 import ReportButton from "@/components/ReportButton";
 import QuizMemoryBridge from "@/components/QuizMemoryBridge";
+import { toast } from "sonner";
 
-// Fisher-Yates shuffle helper that returns the new options + the new correct index.
-function shuffleOptions(options, correctIndex) {
+// Mélange les options ; la bonne réponse n'est connue qu'après correction par le serveur.
+function shuffleOptions(options) {
   const indexes = options.map((_, i) => i);
   for (let i = indexes.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
@@ -18,7 +19,6 @@ function shuffleOptions(options, correctIndex) {
   }
   return {
     options: indexes.map((i) => options[i]),
-    newCorrectIdx: indexes.indexOf(correctIndex),
     // mapping[displayedIdx] = originalIdx — useful when answers must be submitted with original index
     mapping: indexes,
   };
@@ -37,6 +37,9 @@ export default function QuizPlayer() {
   // Each entry: {question_id, answer_index} using the ORIGINAL question index
   // (mapped back from the shuffled display order).
   const [answers, setAnswers] = useState([]);
+  const [fb, setFb] = useState(null); // {correctIdx (affiché), correct, explanation}
+  const [saveState, setSaveState] = useState("idle"); // idle | saving | saved | error
+  const [saveError, setSaveError] = useState("");
   const startTime = useRef(Date.now());
 
   // États du mode défi famille : plusieurs joueurs peuvent se relayer sur une même question.
@@ -63,7 +66,7 @@ export default function QuizPlayer() {
   const currentQ = data?.questions?.[idx];
   const shuffled = useMemo(() => {
     if (!currentQ) return null;
-    return shuffleOptions(currentQ.options, currentQ.correct_index);
+    return shuffleOptions(currentQ.options);
   }, [currentQ?.id, idx]);
 
   if (err)
@@ -87,6 +90,21 @@ export default function QuizPlayer() {
   }
 
   const { category, questions, is_premium, pool } = data;
+  if (data.daily_limit_reached) {
+    return (
+      <div className="min-h-screen paper-bg">
+        <Navbar variant="app" />
+        <main className="max-w-xl mx-auto px-4 py-16 text-center" data-testid="quiz-daily-limit">
+          <h1 className="font-display text-3xl font-extrabold text-navy mb-3">Vos 5 questions du jour sont jouées</h1>
+          <p className="text-navy text-lg mb-6">Revenez demain pour 5 nouvelles questions, ou passez Premium pour jouer sans limite.</p>
+          <div className="flex flex-wrap gap-3 justify-center">
+            <Link to="/app/pricing" data-testid="quiz-daily-limit-upgrade" className="bg-terracotta text-white font-bold px-6 py-3 rounded-full hover:bg-terracotta-dark transition-colors">Passer Premium</Link>
+            <Link to="/app/dashboard" className="bg-navy text-cream font-bold px-6 py-3 rounded-full hover:bg-navy-dark transition-colors">Retour au tableau de bord</Link>
+          </div>
+        </main>
+      </div>
+    );
+  }
   if (!questions.length) {
     return (
       <div className="min-h-screen paper-bg">
@@ -153,42 +171,52 @@ export default function QuizPlayer() {
     startTime.current = Date.now();
   };
 
-  const onSelect = (i) => {
-    if (selected !== null) return;
+  const onSelect = async (i) => {
+    if (selected !== null || !shuffled) return;
     setSelected(i);
-    if (shuffled) {
-      if (i === shuffled.newCorrectIdx) {
+    const originalIdx = shuffled.mapping[i];
+    try {
+      const { data: r } = await api.post(`/categories/${categoryId}/answer`, { question_id: currentQ.id, choice: originalIdx });
+      setFb({ correct: r.correct, correctIdx: shuffled.mapping.indexOf(r.correct_index), explanation: r.explanation });
+      if (r.correct) {
         setScore((s) => s + 1);
         if (familyMode && currentMember) {
           // Le point revient au membre qui a effectivement trouvé la bonne réponse.
-          setScoreByMember((prev) => ({
-            ...prev,
-            [currentMember]: (prev[currentMember] ?? 0) + 1,
-          }));
-          setQuestionResponders((prev) => ({
-            ...prev,
-            [q.id ?? idx]: currentMember,
-          }));
+          setScoreByMember((prev) => ({ ...prev, [currentMember]: (prev[currentMember] ?? 0) + 1 }));
+          setQuestionResponders((prev) => ({ ...prev, [q.id ?? idx]: currentMember }));
         }
       }
-      // Record this answer using the ORIGINAL option index for server verification
-      const originalIdx = shuffled.mapping[i];
       setAnswers((prev) => [...prev, { question_id: currentQ.id, answer_index: originalIdx }]);
+    } catch (e) {
+      setSelected(null);
+      toast.error("La réponse n'a pas pu être vérifiée. Vérifiez votre connexion et touchez à nouveau votre choix.");
+    }
+  };
+
+  const saveAttempt = async (list = answers) => {
+    if (!list.length) { setSaveState("saved"); return; }
+    setSaveState("saving"); setSaveError("");
+    try {
+      const r = await api.post("/attempts", {
+        category_id: categoryId, answers: list,
+        duration_seconds: Math.round((Date.now() - startTime.current) / 1000),
+      });
+      setSaveState("saved");
+      showBadgeToasts(r.data?.awarded_badges);
+    } catch (e) {
+      setSaveState("error");
+      setSaveError(e.response?.data?.detail || "Votre score n'a pas pu être enregistré (connexion instable ?).");
     }
   };
 
   const onNext = () => {
     if (idx + 1 >= total) {
-      const dur = Math.round((Date.now() - startTime.current) / 1000);
-      api.post("/attempts", {
-        category_id: categoryId,
-        answers,
-        duration_seconds: dur,
-      }).then((r) => showBadgeToasts(r.data?.awarded_badges)).catch(() => {});
+      saveAttempt();
       setFinished(true);
     } else {
       setIdx((v) => v + 1);
       setSelected(null);
+      setFb(null);
       setPassCount(0);
       if (familyMode && members.length > 0) {
         setResponderIdx((v) => (v + 1) % members.length);
@@ -210,8 +238,8 @@ export default function QuizPlayer() {
   };
 
   const restart = () => {
-    setIdx(0); setSelected(null); setScore(0); setFinished(false);
-    setAnswers([]);
+    setIdx(0); setSelected(null); setFb(null); setScore(0); setFinished(false);
+    setAnswers([]); setSaveState("idle");
     setResponderIdx(0); setPassCount(0); setQuestionResponders({});
     setScoreByMember(members.reduce((acc, name) => ({ ...acc, [name]: 0 }), {}));
     startTime.current = Date.now();
@@ -407,8 +435,10 @@ export default function QuizPlayer() {
                 {shuffled && shuffled.options.map((opt, i) => {
                   let cls = "bg-white border-2 border-cream-dark text-navy hover:border-terracotta hover:bg-terracotta/5";
                   let icon = null;
-                  if (selected !== null) {
-                    if (i === shuffled.newCorrectIdx) {
+                  if (selected !== null && !fb) {
+                    cls = i === selected ? "bg-cream border-2 border-navy text-navy" : "bg-cream border-2 border-cream-dark text-navy/50";
+                  } else if (fb) {
+                    if (i === fb.correctIdx) {
                       cls = "bg-[#3D9970]/15 border-2 border-[#3D9970] text-navy";
                       icon = <Check className="w-6 h-6 text-[#3D9970]" strokeWidth={3} />;
                     } else if (i === selected) {
@@ -451,22 +481,22 @@ export default function QuizPlayer() {
               )}
 
               <AnimatePresence>
-                {selected !== null && shuffled && (
+                {fb && (
                   <motion.div
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0 }}
                     className={`rounded-2xl p-5 mb-6 border-2 ${
-                      selected === shuffled.newCorrectIdx
+                      fb.correct
                         ? "bg-[#3D9970]/10 border-[#3D9970]/40"
                         : "bg-[#D9534F]/10 border-[#D9534F]/40"
                     }`}
                     data-testid="quiz-feedback"
                   >
                     <p className="font-display text-2xl font-bold text-navy mb-2">
-                      {selected === shuffled.newCorrectIdx ? "✅ Bonne réponse !" : "❌ Presque !"}
+                      {fb.correct ? "✅ Bonne réponse !" : "❌ Presque !"}
                     </p>
-                    <p className="text-navy/80 text-lg leading-relaxed">{q.explanation}</p>
+                    <p className="text-navy/80 text-lg leading-relaxed">{fb.explanation}</p>
                     {q.discussion_prompt && (
                       <div className="mt-4 bg-cream border-l-4 border-terracotta p-3 rounded-r-lg" data-testid="quiz-discussion-prompt">
                         <p className="text-sm font-bold text-terracotta uppercase tracking-wider mb-1">🗣️ Question à raconter en groupe</p>
@@ -479,7 +509,7 @@ export default function QuizPlayer() {
                 )}
               </AnimatePresence>
 
-              {selected !== null && (
+              {fb && (
                 <div className="flex justify-between items-center gap-3">
                   <ReportButton questionId={q.id} />
                   <button
@@ -524,6 +554,17 @@ export default function QuizPlayer() {
                 </div>
               )}
 
+              {saveState === "error" && (
+                <div role="alert" data-testid="quiz-save-error" className="bg-[#D9534F]/10 border-2 border-[#D9534F]/40 rounded-2xl p-5 my-5 text-navy">
+                  <p className="font-bold mb-3">{saveError}</p>
+                  <button onClick={() => saveAttempt()} data-testid="quiz-save-retry"
+                    className="inline-flex items-center gap-2 bg-navy text-cream font-bold px-6 py-3 rounded-full hover:bg-navy-dark transition-colors">
+                    <RotateCcw className="w-5 h-5" /> Réessayer d&apos;enregistrer mon score
+                  </button>
+                </div>
+              )}
+              {saveState === "saving" && <p role="status" className="text-navy my-3" data-testid="quiz-save-pending">Enregistrement du score…</p>}
+
               <p className="text-lg text-navy/60 mb-8">
                 {score === total
                   ? "Vous êtes une mémoire vivante !"
@@ -534,7 +575,7 @@ export default function QuizPlayer() {
               {!is_premium && total < 10 && (
                 <div className="bg-mustard/30 border-2 border-mustard-dark rounded-2xl p-5 mb-6">
                   <p className="text-navy font-medium mb-3">
-                    Vous jouez avec la formule Découverte (5 questions par quiz).
+                    Vous jouez avec la formule Découverte (5 questions par jour).
                     Passez en <strong>Premium</strong> pour 30 questions et toutes les activités.
                   </p>
                   <Link

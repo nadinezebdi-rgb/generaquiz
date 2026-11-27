@@ -2,7 +2,8 @@ import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { api, formatError } from "@/lib/api";
-import { Sparkles, UserPlus, Mail, Lock, User, Gift, Check, X, Ticket } from "lucide-react";
+import { Sparkles, UserPlus, Mail, User, Gift, Check, X, Ticket } from "lucide-react";
+import { PasswordField } from "@/components/auth/PasswordField";
 
 export default function Register() {
   const { register } = useAuth();
@@ -111,10 +112,11 @@ export default function Register() {
 
           <form onSubmit={submit} className="space-y-5">
             <div>
-              <label className="block text-sm font-bold text-navy mb-2">Votre prénom</label>
+              <label htmlFor="name" className="block text-sm font-bold text-navy mb-2">Votre prénom</label>
               <div className="relative">
                 <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-navy/40 pointer-events-none" />
                 <input
+                  id="name" name="name" autoComplete="given-name"
                   data-testid="register-name"
                   type="text"
                   required
@@ -122,47 +124,35 @@ export default function Register() {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="Marie"
-                  className="w-full pl-12 pr-4 py-4 text-lg rounded-2xl border-2 border-cream-dark focus:border-navy bg-white min-h-[56px]"
+                  className="placeholder:text-navy/70 w-full pl-12 pr-4 py-4 text-lg rounded-2xl border-2 border-cream-dark focus:border-navy bg-white min-h-[56px]"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-bold text-navy mb-2">Email</label>
+              <label htmlFor="email" className="block text-sm font-bold text-navy mb-2">Email</label>
               <div className="relative">
                 <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-navy/40 pointer-events-none" />
                 <input
+                  id="email" name="email" autoComplete="email"
                   data-testid="register-email"
                   type="email"
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="vous@exemple.fr"
-                  className="w-full pl-12 pr-4 py-4 text-lg rounded-2xl border-2 border-cream-dark focus:border-navy bg-white min-h-[56px]"
+                  className="placeholder:text-navy/70 w-full pl-12 pr-4 py-4 text-lg rounded-2xl border-2 border-cream-dark focus:border-navy bg-white min-h-[56px]"
                 />
               </div>
             </div>
 
-            <div>
-              <label className="block text-sm font-bold text-navy mb-2">Mot de passe</label>
-              <div className="relative">
-                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-navy/40 pointer-events-none" />
-                <input
-                  data-testid="register-password"
-                  type="password"
-                  required
-                  minLength={6}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="6 caractères minimum"
-                  className="w-full pl-12 pr-4 py-4 text-lg rounded-2xl border-2 border-cream-dark focus:border-navy bg-white min-h-[56px]"
-                />
-              </div>
-            </div>
+            <PasswordField id="new-password" label="Mot de passe" value={password} onChange={(e) => setPassword(e.target.value)}
+              autoComplete="new-password" testId="register-password" minLength={6} hint="6 caractères minimum." />
 
             <div>
-              <label className="block text-sm font-bold text-navy mb-2">Année de naissance <span className="text-navy/50 font-normal">(facultatif)</span></label>
+              <label htmlFor="birth-year" className="block text-sm font-bold text-navy mb-2">Année de naissance <span className="text-navy font-normal">(facultatif)</span></label>
               <input
+                id="birth-year" name="birth-year" autoComplete="bday-year"
                 data-testid="register-birth-year"
                 type="number"
                 value={birthYear}
@@ -170,9 +160,9 @@ export default function Register() {
                 placeholder="1955"
                 min={1900}
                 max={2025}
-                className="w-full px-4 py-4 text-lg rounded-2xl border-2 border-cream-dark focus:border-navy bg-white min-h-[56px]"
+                className="placeholder:text-navy/70 w-full px-4 py-4 text-lg rounded-2xl border-2 border-cream-dark focus:border-navy bg-white min-h-[56px]"
               />
-              <p className="text-xs text-navy/60 mt-1.5">Sert à proposer des duos « Jeune + Senior » dans le mode coopératif.</p>
+              <p className="text-sm text-navy mt-1.5">Sert à proposer des duos « Jeune + Senior » dans le mode coopératif.</p>
             </div>
 
             {/* ============ Referral code ============ */}
@@ -233,7 +223,7 @@ export default function Register() {
                   type="text"
                   value={promoCode}
                   onChange={(e) => setPromoCode(e.target.value.toUpperCase())}
-                  placeholder="FAMILLE2026"
+                  placeholder="Votre code"
                   maxLength={40}
                   className="w-full px-4 py-4 text-lg rounded-2xl border-2 border-cream-dark focus:border-navy bg-white min-h-[56px] uppercase tracking-wider"
                 />
@@ -264,10 +254,15 @@ export default function Register() {
             )}
 
             {err && (
-              <div data-testid="register-error" className="bg-[#D9534F]/10 border-2 border-[#D9534F]/40 rounded-xl p-4 text-navy font-medium">
+              <div data-testid="register-error" role="alert" className="bg-[#D9534F]/10 border-2 border-[#D9534F]/40 rounded-xl p-4 text-navy font-medium">
                 {err}
               </div>
             )}
+
+            <p className="text-sm text-navy" data-testid="register-legal">
+              En créant un compte, vous acceptez les <Link to="/cgu" className="underline font-semibold">conditions d&apos;utilisation</Link> et
+              notre <Link to="/confidentialite" className="underline font-semibold">politique de confidentialité</Link> (vos souvenirs restent privés par défaut).
+            </p>
 
             <button
               data-testid="register-submit"

@@ -142,7 +142,7 @@ async def _upsert_social_user(
 
 
 def _issue_session(response: Response, user: dict) -> dict:
-    access = create_access_token(str(user["_id"]), user["email"])
+    access = create_access_token(str(user["_id"]), user["email"], user.get("token_version", 0))
     refresh = create_refresh_token(str(user["_id"]))
     set_auth_cookies(response, access, refresh)
     return {"user": user_to_public(user), "access_token": access}

@@ -2,7 +2,8 @@ import { useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { formatError } from "@/lib/api";
-import { Sparkles, LogIn, Mail, Lock } from "lucide-react";
+import { Sparkles, LogIn, Mail } from "lucide-react";
+import { PasswordField } from "@/components/auth/PasswordField";
 
 export default function Login() {
   const { login } = useAuth();
@@ -19,7 +20,8 @@ export default function Login() {
     setLoading(true);
     try {
       await login(email, password);
-      const to = location.state?.from || "/app/dashboard";
+      const next = new URLSearchParams(location.search).get("next");
+      const to = location.state?.from || (next && next.startsWith("/") && !next.startsWith("//") ? next : "/app/dashboard");
       navigate(to);
     } catch (e2) {
       setErr(formatError(e2.response?.data?.detail) || e2.message);
@@ -41,42 +43,35 @@ export default function Login() {
         <div className="bg-white border-2 border-cream-dark rounded-3xl p-8 shadow-soft">
           <h1 className="font-display text-3xl font-extrabold text-navy mb-2 text-center">Bon retour !</h1>
           <p className="text-navy/70 text-center mb-7">Connectez-vous à votre compte</p>
+          {new URLSearchParams(location.search).get("session") === "expiree" && (
+            <p role="status" data-testid="login-session-expired" className="bg-mustard/30 border-2 border-mustard rounded-xl p-4 text-navy font-medium mb-5">
+              Votre session a expiré. Reconnectez-vous pour reprendre là où vous en étiez.
+            </p>
+          )}
 
           <form onSubmit={submit} className="space-y-5">
             <div>
-              <label className="block text-sm font-bold text-navy mb-2">Email</label>
+              <label htmlFor="email" className="block text-sm font-bold text-navy mb-2">Email</label>
               <div className="relative">
-                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-navy/40 pointer-events-none" />
+                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-navy/50 pointer-events-none" aria-hidden="true" />
                 <input
+                  id="email" name="email" autoComplete="email"
                   data-testid="login-email"
                   type="email"
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="vous@exemple.fr"
-                  className="w-full pl-12 pr-4 py-4 text-lg rounded-2xl border-2 border-cream-dark focus:border-navy bg-white min-h-[56px]"
+                  className="placeholder:text-navy/70 w-full pl-12 pr-4 py-4 text-lg rounded-2xl border-2 border-cream-dark focus:border-navy bg-white min-h-[56px]"
                 />
               </div>
             </div>
 
-            <div>
-              <label className="block text-sm font-bold text-navy mb-2">Mot de passe</label>
-              <div className="relative">
-                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-navy/40 pointer-events-none" />
-                <input
-                  data-testid="login-password"
-                  type="password"
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
-                  className="w-full pl-12 pr-4 py-4 text-lg rounded-2xl border-2 border-cream-dark focus:border-navy bg-white min-h-[56px]"
-                />
-              </div>
-            </div>
+            <PasswordField id="password" label="Mot de passe" value={password} onChange={(e) => setPassword(e.target.value)}
+              autoComplete="current-password" testId="login-password" />
 
             {err && (
-              <div data-testid="login-error" className="bg-[#D9534F]/10 border-2 border-[#D9534F]/40 rounded-xl p-4 text-navy font-medium">
+              <div data-testid="login-error" role="alert" className="bg-[#D9534F]/10 border-2 border-[#D9534F]/40 rounded-xl p-4 text-navy font-medium">
                 {err}
               </div>
             )}

@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { openConsentSettings } from "@/components/ConsentBanner";
 import { Heart } from "lucide-react";
 import Logo from "@/components/Logo";
 
@@ -36,6 +37,7 @@ export default function Footer() {
             <li><Link to="/cgu" data-testid="footer-cgu" className="hover:text-mustard">Conditions d&apos;utilisation</Link></li>
             <li><Link to="/cgv" data-testid="footer-cgv" className="hover:text-mustard">Conditions de vente</Link></li>
             <li><Link to="/confidentialite" data-testid="footer-confidentialite" className="hover:text-mustard">Confidentialité (RGPD)</Link></li>
+            <li><button type="button" onClick={openConsentSettings} data-testid="footer-cookies" className="hover:text-mustard text-left">Gérer les cookies</button></li>
             <li><Link to="/contact" data-testid="footer-contact" className="hover:text-mustard font-semibold">Nous écrire</Link></li>
             <li><a href="mailto:contact.generaquiz@gmail.com" data-testid="footer-email" className="hover:text-mustard">contact.generaquiz@gmail.com</a></li>
           </ul>

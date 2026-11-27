@@ -9,6 +9,7 @@ Modular structure:
 - routers/promo.py: promo codes (user redeem + admin CRUD)
 """
 from datetime import datetime, timezone, timedelta
+from bson import ObjectId
 import asyncio
 import re
 
@@ -196,6 +197,24 @@ async def _safe_index(coll, keys, **kw):
         logger.error(f"[index] {coll.name} {keys} non créé : {e}")
 
 
+async def revoke_famille2026():
+    """Audit sécurité : le code public FAMILLE2026 (Premium à vie) est désactivé et son Premium retiré, une seule fois."""
+    marker = "revoke_famille2026"
+    if await db.migrations.find_one({"id": marker}):
+        return
+    await db.promo_codes.update_one({"code": "FAMILLE2026"}, {"$set": {"active": False, "max_uses": 0}})
+    promo = await db.promo_codes.find_one({"code": "FAMILLE2026"}) or {}
+    ids = [ObjectId(i) for i in promo.get("redeemed_by", []) if ObjectId.is_valid(i)]
+    lifetime_floor = (datetime.now(timezone.utc) + timedelta(days=365 * 20)).isoformat()
+    revoked = await db.users.update_many(
+        {"_id": {"$in": ids}, "role": {"$nin": ["admin", "superadmin"]}, "plan_auto_renew": {"$ne": True},
+         "plan_expires_at": {"$gte": lifetime_floor}},
+        {"$set": {"plan": "free", "plan_expires_at": None, "plan_revoked_reason": "FAMILLE2026"}})
+    await db.migrations.insert_one({"id": marker, "at": datetime.now(timezone.utc).isoformat(),
+                                    "redeemed": len(ids), "revoked": revoked.modified_count})
+    logger.warning(f"[securite] FAMILLE2026 désactivé : {len(ids)} utilisation(s), {revoked.modified_count} Premium retiré(s)")
+
+
 CURATED_DIR = ROOT_DIR / "data" / "curated_questions"
 
 
@@ -213,6 +232,8 @@ async def sync_curated_questions():
 async def startup():
     # Indexes
     await _safe_index(db.users, "email", unique=True)
+    await _safe_index(db.rate_limits, [("key", 1), ("at", 1)])
+    await _safe_index(db.rate_limits, "expire_at", expireAfterSeconds=0)
     await _safe_index(db.users, "apple_sub", sparse=True)
     await _safe_index(db.users, "google_sub", sparse=True)
     await _safe_index(db.categories, "id", unique=True)
@@ -442,9 +463,6 @@ async def startup():
     default_promos = [
         {"code": "DECOUVERTE30", "label": "Essai 30 jours — 50 utilisations",
          "duration_days": 30, "max_uses": 50, "expires_at": None, "active": True},
-        # FAMILLE2026 : code cadeau — débloque Premium à vie, usage illimité
-        {"code": "FAMILLE2026", "label": "Cadeau Famille — accès Premium à vie",
-         "duration_days": 36500, "max_uses": None, "expires_at": None, "active": True},
     ]
     for promo in default_promos:
         existing = await db.promo_codes.find_one({"code": promo["code"]})
@@ -453,14 +471,8 @@ async def startup():
                                              "created_at": datetime.now(timezone.utc).isoformat(),
                                              "created_by": "system"})
             logger.info(f"Promo seedé : {promo['code']}")
-        elif not existing.get("active"):
-            # Réactive un code désactivé auparavant, sans perdre l'historique used_count
-            await db.promo_codes.update_one(
-                {"code": promo["code"]},
-                {"$set": {"active": True, "duration_days": promo["duration_days"],
-                          "max_uses": promo["max_uses"], "label": promo["label"]}}
-            )
-            logger.info(f"Promo réactivé : {promo['code']}")
+
+    await revoke_famille2026()
 
     # Seed 5 word-search grids on first boot (idempotent).
     from wordsearch_mistral import seed_grids_if_empty

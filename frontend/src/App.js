@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate, Link, useLocation } from "react-router-dom";
 import { Toaster } from "sonner";
+import { ConsentBanner } from "@/components/ConsentBanner";
 import "@/App.css";
 
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
@@ -149,6 +150,7 @@ export default function App() {
       <SeniorModeProvider>
         <BrowserRouter>
         <Toaster richColors position="top-right" />
+        <ConsentBanner />
         <VisitorProgressSync />
         <Routes>
           <Route path="/" element={<Landing />} />
@@ -169,7 +171,7 @@ export default function App() {
           <Route path="/conseils-bien-vieillir" element={<ConseilsArchive />} />
           <Route path="/conseils-bien-vieillir/:dateKey" element={<ConseilsArchive />} />
           <Route path="/decouvrir/:categoryId" element={<ThemeShowcase />} />
-          <Route path="/livre/coop/:code" element={<LivreCoop />} />
+          <Route path="/livre/coop/:code" element={<div className="ph-mask"><LivreCoop /></div>} />
           <Route
             path="/app/atelier"
             element={
@@ -190,7 +192,7 @@ export default function App() {
             path="/app/livre"
             element={
               <ProtectedRoute>
-                <MonLivre />
+                <div className="ph-mask"><MonLivre /></div>
               </ProtectedRoute>
             }
           />

@@ -14,7 +14,7 @@ load_dotenv("/app/backend/.env")
 BASE_URL = os.environ.get("REACT_APP_BACKEND_URL").rstrip("/")
 API = f"{BASE_URL}/api"
 db = MongoClient(os.environ["MONGO_URL"])[os.environ["DB_NAME"]]
-ADMIN = {"email": "admin@generaquiz.fr", "password": "pF44gVBfLdushm3NZ6dN"}
+ADMIN = {"email": os.environ["TEST_ADMIN_EMAIL"], "password": os.environ["TEST_ADMIN_PASSWORD"]}
 
 CREATED_USERS, CREATED_ACTIVITY = [], []
 

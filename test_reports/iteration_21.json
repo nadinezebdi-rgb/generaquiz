@@ -24,7 +24,7 @@
     "/app/backend/tests/test_iteration21_leagues.py (new)"
   ],
   "success_rate": { "backend": "100% (10/10)", "frontend": "100% (all data-testids + flows verified)" },
-  "test_credentials": "admin@generaquiz.fr / Admin2026!. Throwaway TEST_lg_* and TEST_ss_* users created at runtime (patched directly in MongoDB to set streak_current/streak_last_date/credits for streak-saver eligibility test).",
+  "test_credentials": "admin@generaquiz.fr / [mot de passe retiré]. Throwaway TEST_lg_* and TEST_ss_* users created at runtime (patched directly in MongoDB to set streak_current/streak_last_date/credits for streak-saver eligibility test).",
   "seed_data_creation": "test_lg_<ts>@example.com (full league flow user), test_ss_<ts>@example.com (streak saver eligibility user, patched in DB: streak_current=3, streak_last_date=day_before_yesterday, credits=50→40 after save).",
   "retest_needed": false,
   "should_main_agent_self_test": true,

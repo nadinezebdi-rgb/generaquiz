@@ -17,8 +17,8 @@ def _load_backend_url():
     raise RuntimeError("REACT_APP_BACKEND_URL not found")
 
 BASE_URL = _load_backend_url()
-ADMIN_EMAIL = "admin@generaquiz.fr"
-ADMIN_PASSWORD = "Admin2026!"
+ADMIN_EMAIL = os.environ["TEST_ADMIN_EMAIL"]
+ADMIN_PASSWORD = os.environ["TEST_ADMIN_PASSWORD"]
 
 
 @pytest.fixture(scope="module")

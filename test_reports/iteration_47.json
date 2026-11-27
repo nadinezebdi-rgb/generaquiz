@@ -30,7 +30,7 @@
   ],
   "updated_files": ["/app/backend/tests/test_iteration47_tip_quiz_mini_quiz.py"],
   "success_rate": {"backend": "100% (18/18)", "frontend": "100% of requested flows; 1 low-priority UX bug"},
-  "test_credentials": "admin@generaquiz.fr / pF44gVBfLdushm3NZ6dN (works)",
+  "test_credentials": "admin@generaquiz.fr / [mot de passe retiré] (works)",
   "seed_data_creation": "None. No QA jobs, regeneration, emails or tip generation triggered.",
   "retest_needed": false,
   "should_main_agent_self_test": true,

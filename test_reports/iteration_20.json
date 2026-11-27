@@ -18,7 +18,7 @@
   ],
   "updated_files": ["/app/backend/tests/test_iteration20_coop.py (new)"],
   "success_rate": {"backend": "100% (14/14)", "frontend": "100% (7/7 flows)"},
-  "test_credentials": "admin@generaquiz.fr / Admin2026!. Ad-hoc TEST_coop_* and test_ui_* users created at runtime.",
+  "test_credentials": "admin@generaquiz.fr / [mot de passe retiré]. Ad-hoc TEST_coop_* and test_ui_* users created at runtime.",
   "seed_data_creation": "5 register-only throwaway users (birth_year matrix), 4 user_a coop challenges (TEST_Aventuriers, TEST_Get, TEST_Flow, TEST_List_0/1), 1 test_ui_*@example.com user with full 4-question coop challenge TEST_UI_Team completed.",
   "retest_needed": false,
   "should_main_agent_self_test": true,

@@ -19,6 +19,10 @@ from badges import check_after_attempt
 
 router = APIRouter(tags=["quiz"])
 
+FREE_DAILY_QUESTIONS = 5
+ISSUED_WINDOW = timedelta(hours=6)
+HIDDEN_FIELDS = {"_id": 0, "correct_index": 0, "explanation": 0}  # corrigé côté serveur, via /answer
+
 
 @router.get("/categories")
 async def list_categories():
@@ -104,12 +108,22 @@ async def get_questions(category_id: str, user: dict = Depends(get_current_user)
 
     Les questions renvoyées sont ensuite tracées dans `user_seen_questions`.
     """
-    limit = 30 if is_premium_active(user) else 5
     cat = await db.categories.find_one({"id": category_id}, {"_id": 0})
     if not cat:
         raise HTTPException(status_code=404, detail="Catégorie introuvable")
 
     user_id = str(user["_id"])
+    limit = 30
+    if not is_premium_active(user):
+        # Formule Découverte : 5 questions par jour (toutes catégories), pas par appel.
+        from zoneinfo import ZoneInfo
+        day_start = datetime.now(ZoneInfo("Europe/Paris")).replace(hour=0, minute=0, second=0, microsecond=0)
+        used_today = await db.user_seen_questions.count_documents(
+            {"user_id": user_id, "seen_at": {"$gte": day_start.astimezone(timezone.utc).isoformat()}})
+        limit = max(0, FREE_DAILY_QUESTIONS - used_today)
+        if not limit:
+            return {"category": cat, "questions": [], "is_premium": False, "daily_limit_reached": True,
+                    "pool": None}
 
     # 1) Questions déjà vues dans les 30 derniers jours
     from datetime import timedelta
@@ -140,7 +154,7 @@ async def get_questions(category_id: str, user: dict = Depends(get_current_user)
     pipeline = [
         {"$match": base_match},
         {"$sample": {"size": limit}},
-        {"$project": {"_id": 0}},
+        {"$project": HIDDEN_FIELDS},
     ]
     qs = await db.questions.aggregate(pipeline).to_list(limit)
 
@@ -157,7 +171,7 @@ async def get_questions(category_id: str, user: dict = Depends(get_current_user)
                 "quality": {"$ne": "flagged"},
             }},
             {"$sample": {"size": needed}},
-            {"$project": {"_id": 0}},
+            {"$project": HIDDEN_FIELDS},
         ]).to_list(needed)
         qs.extend(fallback)
 
@@ -201,10 +215,37 @@ async def get_questions(category_id: str, user: dict = Depends(get_current_user)
     }
 
 
+class QuizAnswer(BaseModel):
+    question_id: str
+    choice: int = Field(ge=0, le=9)
+
+
+@router.post("/categories/{category_id}/answer")
+async def check_answer(category_id: str, body: QuizAnswer, user: dict = Depends(get_current_user)):
+    """Correction d'une question, uniquement si elle a été tirée pour ce joueur (la réponse n'est jamais envoyée avant)."""
+    since = (datetime.now(timezone.utc) - ISSUED_WINDOW).isoformat()
+    if not await db.user_seen_questions.find_one({"user_id": str(user["_id"]), "question_id": body.question_id,
+                                                  "category_id": category_id, "seen_at": {"$gte": since}}):
+        raise HTTPException(status_code=404, detail="Question introuvable")
+    q = await db.questions.find_one({"id": body.question_id, "category_id": category_id},
+                                    {"_id": 0, "correct_index": 1, "explanation": 1})
+    if not q:
+        raise HTTPException(status_code=404, detail="Question introuvable")
+    return {"correct": body.choice == q["correct_index"], "correct_index": q["correct_index"],
+            "explanation": q.get("explanation", "")}
+
+
 @router.post("/attempts")
 async def save_attempt(body: AttemptCreate, user: dict = Depends(get_current_user)):
     # ---- Server-authoritative scoring -------------------------------------
     question_ids = [a.question_id for a in body.answers]
+    if len(set(question_ids)) != len(question_ids):
+        raise HTTPException(status_code=400, detail="Une question ne peut compter qu'une fois.")
+    issued = await db.user_seen_questions.count_documents({
+        "user_id": str(user["_id"]), "question_id": {"$in": question_ids},
+        "seen_at": {"$gte": (datetime.now(timezone.utc) - ISSUED_WINDOW).isoformat()}})
+    if issued != len(question_ids):
+        raise HTTPException(status_code=400, detail="Partie expirée : relancez un quiz pour enregistrer votre score.")
     docs = await db.questions.find(
         {"id": {"$in": question_ids}, "category_id": body.category_id},
         {"_id": 0, "id": 1, "correct_index": 1},

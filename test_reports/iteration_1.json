@@ -31,7 +31,7 @@
     "/app/test_reports/pytest/pytest_results.xml (generated)"
   ],
   "success_rate": {"backend": "100% (25/25)", "frontend": "100% (all critical flows passing)"},
-  "test_credentials": "Admin: admin@quizdantan.fr / Admin2026! (premium, lifetime). Free users registered dynamically per test run with timestamped emails.",
+  "test_credentials": "Admin: admin@quizdantan.fr / [mot de passe retiré] (premium, lifetime). Free users registered dynamically per test run with timestamped emails.",
   "seed_data_creation": "Backend auto-seeds 6 categories + 24 questions on startup. 6 mascot PNGs already present in /app/backend/static/mascots/. No manual seeding needed.",
   "retest_needed": false,
   "main_agent_can_self_test": true,
