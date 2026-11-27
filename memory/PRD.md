@@ -504,7 +504,7 @@ Source data: French senior quiz platform (6 categories, 8 activities, sample que
 - ✅ 3 tailles (`sm`/`md`/`lg`), 2 modes (`dark` pour fond sombre du footer), tagline optionnelle, link/no-link
 - ✅ Application globale : Navbar, Footer, toutes pages auth (Login/Register/Forgot/Reset), email Resend
 - ✅ HTML : `<title>GénéraQuiz — Le jeu qui rapproche les générations</title>`, meta description mise à jour
-- ✅ Admin email : `admin@quizdantan.fr` → `admin@generaquiz.fr` (nouveau admin auto-créé au démarrage, mot de passe inchangé `Admin2026!`)
+- ✅ Admin email : `admin@quizdantan.fr` → `admin@generaquiz.fr` (nouveau admin auto-créé au démarrage, mot de passe inchangé `<ancien mot de passe admin>`)
 - ✅ Footer : `contact@generaquiz.fr`, mention `generaquiz.fr`
 - ✅ Domaine Resend : prêt à recevoir `generaquiz.fr` une fois les DNS configurés
 
@@ -1764,7 +1764,7 @@ GénéraQuiz devient une plateforme intergénérationnelle : JOUER → SE SOUVEN
 ## 2026-08-19 — Sécurité admin + copy + nouveaux tarifs (Livre imprimé, Offre Pro)
 
 ### 🚨 P0 — Rotation du mot de passe admin
-- L'ancien mot de passe `Admin2026!` était visible dans l'historique du chat Emergent (signalé par l'utilisateur).
+- L'ancien mot de passe `<ancien mot de passe admin>` était visible dans l'historique du chat Emergent (signalé par l'utilisateur).
 - Nouveau mot de passe généré via `secrets.choice(alphanum+special)` sur 20 caractères, stocké **uniquement** dans `/app/backend/.env` et `/app/memory/test_credentials.md` (fichier non servi publiquement).
 - Ancien mot de passe : HTTP 401 ✅ · Nouveau : HTTP 200 ✅
 
@@ -1838,7 +1838,7 @@ Nouveau composant `PrintedBookPricing.jsx` injecté sous la reassurance-strip :
 - Retrait des valeurs par défaut hardcodées : `ADMIN_EMAIL` et `ADMIN_PASSWORD` n'ont **plus de fallback** dans `core.py`. Si absents, le seed est **skip complet** avec un warning log.
 - Backfill idempotent du rôle admin : à chaque startup, si un compte existe avec `ADMIN_EMAIL` mais `role != "admin"`, le rôle est **forcé à "admin"** (idem plan_tier + plan). Résout le cas où un utilisateur s'était inscrit avec l'email admin avant le seed.
 - Vérifié : `admin@generaquiz.fr` login HTTP 200, role=admin dans `/auth/me`.
-- Note historique : l'ancienne valeur par défaut `Admin2026!` a été présente dans le code source jusqu'à ce commit. Si le repo est publié, elle reste dans l'historique Git.
+- Note historique : l'ancienne valeur par défaut `<ancien mot de passe admin>` a été présente dans le code source jusqu'à ce commit. Si le repo est publié, elle reste dans l'historique Git.
 
 ### Fichiers touchés
 - **Modifiés** : `core.py` (retrait défauts admin), `server.py` (seed skip + backfill rôle), `routers/quiz.py` (anti-répétition + exclusion flagged/signalés + pool), `frontend/src/pages/QuizPlayer.jsx` (affichage pool).

@@ -29,6 +29,20 @@ def test_after_promo_blocks_noel_and_allows_normal(monkeypatch):
     assert sub.check_package_sellable("solo_monthly")["amount"] == 6.9
 
 
+def test_during_promo_both_noel_and_normal_sellable(monkeypatch):
+    monkeypatch.setattr(sub, "promo_active", lambda now=None: True)
+    assert sub.check_package_sellable("solo_yearly")["amount"] == 69
+    assert sub.check_package_sellable("famille_v2_yearly")["amount"] == 99
+    assert sub.check_package_sellable("solo_yearly_noel")["amount"] == 49
+    assert sub.check_package_sellable("famille_v2_yearly_noel")["amount"] == 79
+
+
+def test_famille_capacity_per_offer():
+    assert sub.PACKAGES["famille_v2_yearly"]["max_proches"] == 2
+    assert sub.PACKAGES["famille_v2_monthly"]["max_proches"] == 2
+    assert sub.PACKAGES["famille_v2_yearly_noel"]["max_proches"] == 2
+
+
 def test_checkout_kwargs_promo(monkeypatch):
     captured = {}
 

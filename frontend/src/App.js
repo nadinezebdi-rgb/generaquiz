@@ -12,6 +12,7 @@ import Register from "@/pages/Register";
 import Dashboard from "@/pages/Dashboard";
 import QuizPlayer from "@/pages/QuizPlayer";
 import Pricing from "@/pages/Pricing";
+import OffreNoel from "@/pages/OffreNoel";
 import Success from "@/pages/Success";
 import Challenges from "@/pages/Challenges";
 import ChallengeNew from "@/pages/ChallengeNew";
@@ -279,6 +280,7 @@ export default function App() {
             }
           />
           <Route path="/app/pricing" element={<Pricing />} />
+          <Route path="/offre-noel" element={<OffreNoel />} />
           <Route
             path="/app/success"
             element={

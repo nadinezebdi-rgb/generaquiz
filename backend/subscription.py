@@ -31,10 +31,9 @@ def check_package_sellable(package_id: str) -> dict:
     pkg = PACKAGES.get(package_id)
     if not pkg or pkg.get("legacy") or pkg.get("tier") == "gift":
         raise HTTPException(status_code=400, detail="Forfait invalide")
-    if pkg["period"] == "yearly" and bool(pkg.get("promo")) != promo_active():
-        raise HTTPException(status_code=400, detail=(
-            "La super promo de Noël est terminée depuis le 31 décembre 2026." if pkg.get("promo")
-            else "Pendant la super promo de Noël, l'abonnement annuel est proposé au tarif de Noël."))
+    # Les tarifs normaux sont toujours vendus ; le tarif de Noël seulement jusqu'au 31 décembre 2026.
+    if pkg.get("promo") and not promo_active():
+        raise HTTPException(status_code=400, detail="La super promo de Noël est terminée depuis le 31 décembre 2026.")
     return pkg
 
 
@@ -128,7 +127,7 @@ async def activate_from_session(session_id: str) -> None:
         "plan_auto_renew": True, "plan_cancel_at_period_end": False, "plan_renewal_amount": pkg["renew_amount"],
         "first_login_at": user.get("first_login_at") or start.isoformat(),
         "stripe_subscription_id": sub_id, "stripe_customer_id": customer_id,
-        **family_subscription_fields(user, pkg["tier"]),
+        **family_subscription_fields(user, pkg["tier"], pkg.get("max_proches")),
     }})
     await send_confirmation_email(user, pkg, start, renews_at)
     if pkg["period"] == "yearly":
