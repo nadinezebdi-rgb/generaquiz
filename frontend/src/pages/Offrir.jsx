@@ -30,8 +30,8 @@ function Hero({ promo, selected }) {
             {selected?.id === "solo"
                 ? "Offre Solo — une année complète de quiz et de souvenirs. Une carte à imprimer, un code à glisser sous le sapin."
               : noel
-                ? "Offre Noël — possibilité de jouer avec 3 membres au quiz pendant un an. Une carte personnalisée à imprimer."
-                : "Offre Famille — 1 bénéficiaire + 3 proches pour partager une année de jeux. Une carte à imprimer, un code à offrir."}
+                ? "Offre Noël — 1 bénéficiaire + 2 proches pour jouer au quiz pendant un an. Une carte personnalisée à imprimer."
+                : "Offre Famille — 1 bénéficiaire + 2 proches pour partager une année de jeux. Une carte à imprimer, un code à offrir."}
           </p>
           {famille && (
             <div className="flex items-baseline gap-3" data-testid="offrir-hero-price">
@@ -214,8 +214,8 @@ export default function Offrir() {
         {offer === "famille" && !isChristmas && (
           <section>
             <h2 className="font-display text-2xl md:text-3xl font-extrabold text-navy mb-2">Qui a accès à quoi ?</h2>
-            <p className="text-navy/70 mb-4">1 abonnement complet pour le bénéficiaire + 3 accès aux jeux en famille inclus pendant un an.</p>
-            <FamilyAccessTable proches={3} />
+            <p className="text-navy/70 mb-4">1 abonnement complet pour le bénéficiaire + 2 accès aux jeux en famille inclus pendant un an.</p>
+            <FamilyAccessTable />
           </section>
         )}
         {!(data?.promo?.closed && offer === "noel") && selected && (

@@ -13,7 +13,7 @@ const Value = ({ value, who }) => {
 
 const NUMBERS = { 2: "deux", 3: "trois", 4: "quatre" };
 
-// `proches` : 2 pour l'offre Famille, 3 pour les cartes cadeau Famille.
+// `proches` : nombre d'invités (2 pour l'offre Famille et les cartes cadeau).
 export const FamilyAccessTable = ({ proches = 2 }) => {
   const who = proches === 2 ? "Les 2 invités" : `Les ${proches} proches`;
   const note = `Les ${NUMBERS[proches] || proches} ${proches === 2 ? "invités" : "proches"} jouent gratuitement avec le bénéficiaire dans l'espace familial. Ils paient uniquement s'ils souhaitent leur propre accès complet à GénéraQuiz.`;

@@ -34,7 +34,7 @@ from core import (
     logger, rate_limit, record_audit,
 )
 from gift_card_pdf import build_gift_pdf
-from routers.family import NOEL_MAX_PROCHES, family_subscription_fields
+from routers.family import MAX_PROCHES, NOEL_MAX_PROCHES, family_subscription_fields
 
 router = APIRouter(tags=["gifts"])
 
@@ -354,6 +354,8 @@ async def fulfill_gift_transaction(tx: dict) -> dict:
         "theme": d.get("theme", "classic"), "recipient_name": d.get("recipient_name"),
         "buyer_name": d.get("buyer_name"), "buyer_email": d.get("buyer_email"),
         "message": d.get("message"), "source": "stripe", "session_id": tx["session_id"],
+        # Commandes passées avant le passage à 2 proches : 3 proches, comme promis à l'achat.
+        "max_proches": d.get("max_proches", NOEL_MAX_PROCHES),
     })
 
 
@@ -446,7 +448,7 @@ async def gift_checkout(body: GiftCheckout, request: Request) -> dict:
                  "delivery_method": body.delivery_method,
                  "recipient_email": str(body.recipient_email).lower() if body.recipient_email else None,
                  "delivery_at": delivery_at,
-                 "is_christmas": is_christmas},
+                 "is_christmas": is_christmas, "max_proches": MAX_PROCHES},
         "payment_status": "initiated", "status": "creating", "gift_delivery_status": "awaiting_payment",
         "created_at": now,
     }
@@ -879,11 +881,11 @@ async def gift_redeem(body: GiftRedeem, user: dict = Depends(get_current_user)) 
         await db.users.update_one({"_id": user_id}, {"$set": {
             "plan": "premium", "plan_tier": tier,
             "plan_period": current.get("plan_period") if keep_lifetime else "yearly",
-            "plan_expires_at": expires_value, **family_subscription_fields(current, tier, NOEL_MAX_PROCHES)}}, session=session)
+            "plan_expires_at": expires_value, **family_subscription_fields(current, tier, g.get("max_proches", NOEL_MAX_PROCHES))}}, session=session)
         await db.gift_codes.update_one({"_id": g["_id"]}, {"$set": {
             "plan_expires_at": expires, "activation_order_id": str(g.get("order_id") or "")}},
             session=session)
-        return g, tier, expires, family_subscription_fields(current, tier, NOEL_MAX_PROCHES).get("family_max_proches")
+        return g, tier, expires, family_subscription_fields(current, tier, g.get("max_proches", NOEL_MAX_PROCHES)).get("family_max_proches")
 
     try:
         try:
@@ -945,7 +947,7 @@ async def admin_create_gift(body: AdminGiftCreate, admin: dict = Depends(get_adm
     g = await _insert_gift({"offer": body.offer, "tier": OFFERS[body.offer]["tier"], "amount": 0,
                             "theme": body.theme, "recipient_name": _clean(body.recipient_name),
                             "buyer_name": _clean(body.buyer_name), "message": _clean(body.message),
-                            "source": "admin", "session_id": f"admin-{ObjectId()}",
+                            "source": "admin", "session_id": f"admin-{ObjectId()}", "max_proches": MAX_PROCHES,
                             "created_by": str(admin["_id"])})
     await record_audit(admin, action="gift.create", target_type="gift", target_label=f"…{g['code'][-4:]}",
                        meta={"offer": body.offer})

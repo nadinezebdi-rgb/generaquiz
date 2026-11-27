@@ -58,7 +58,7 @@ export default function Landing() {
           <div className="christmas-marquee-track inline-flex min-w-max items-center whitespace-nowrap font-display text-lg font-bold sm:text-xl" aria-hidden="true">
             {[0, 1].map((copy) => (
               <span key={copy} className="px-6 sm:px-10">
-                ✦ Offre de Noël · {fmt(christmasFamily?.price || 69, { integer: true })} · Possibilité de jouer avec 3 membres au quiz pendant 1 an · Carte personnalisée femme ou homme · Jusqu&apos;au 24 décembre · Découvrir <span aria-hidden="true">→</span>
+                ✦ Offre de Noël · {fmt(christmasFamily?.price || 69, { integer: true })} · 1 bénéficiaire + 2 proches pour jouer au quiz pendant 1 an · Carte personnalisée femme ou homme · Jusqu&apos;au 24 décembre · Découvrir <span aria-hidden="true">→</span>
               </span>
             ))}
           </div>

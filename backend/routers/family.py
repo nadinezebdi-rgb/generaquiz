@@ -1,4 +1,4 @@
-"""Espace famille : 1 bénéficiaire + 2 invités (3 pour les cartes cadeau, 4 pour les anciens abonnés).
+"""Espace famille : 1 bénéficiaire + 2 invités (3 pour les anciennes cartes cadeau, 4 pour les anciens abonnés).
 
 Les proches jouent gratuitement aux quiz et défis du groupe familial et voient
 le classement ; le catalogue solo et leur propre Livre de Vie restent payants.
@@ -19,7 +19,7 @@ from core import db, logger, FRONTEND_URL, RESEND_API_KEY, SENDER_EMAIL, get_adm
 router = APIRouter(prefix="/famille", tags=["famille"])
 
 MAX_PROCHES = 2          # offre Famille (normale et Noël) : bénéficiaire + 2 invités
-NOEL_MAX_PROCHES = 3     # anciens abonnés "famille_noel" et cartes cadeau Famille vendues avec 3 proches
+NOEL_MAX_PROCHES = 3     # anciens abonnés "famille_noel" et cartes cadeau Famille vendues avant le 27/11/2026
 LEGACY_MAX_PROCHES = 4
 NOEL_TIER = "famille_noel"
 OWNER_TIERS = {"famille", "famille_v2", NOEL_TIER, "heritage", "premium"}
