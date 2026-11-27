@@ -26,10 +26,9 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     const id = api.interceptors.response.use(undefined, (error) => {
       const url = error.config?.url || "";
-      if (error.response?.status === 401 && user && !url.startsWith("/auth/")) {
-        setUser(false);
+      if (error.response?.status === 401 && user && !url.startsWith("/auth/") && !window.location.pathname.startsWith("/login")) {
         const next = encodeURIComponent(window.location.pathname + window.location.search);
-        window.location.assign(`/login?session=expiree&next=${next}`);
+        window.location.assign(`/login?session=expiree&next=${next}`); // rechargement complet : l'état repart de zéro
       }
       return Promise.reject(error);
     });

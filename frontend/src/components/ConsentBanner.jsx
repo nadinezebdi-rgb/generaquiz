@@ -17,6 +17,12 @@ export function ConsentBanner() {
     return () => window.removeEventListener("gq-consent-open", show);
   }, []);
 
+  // Laisse la place au bandeau : le bas de page (bouton d'inscription…) reste accessible au défilement.
+  useEffect(() => {
+    document.body.style.paddingBottom = open ? "220px" : "";
+    return () => { document.body.style.paddingBottom = ""; };
+  }, [open]);
+
   const choose = (yes) => {
     try { localStorage.setItem(KEY, yes ? "yes" : "no"); } catch { /* navigation privée */ }
     if (yes) window.gqStartAnalytics?.();

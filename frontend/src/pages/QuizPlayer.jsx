@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef, useMemo } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { api, BACKEND_URL } from "@/lib/api";
+import { api, BACKEND_URL, formatError } from "@/lib/api";
 import { showBadgeToasts } from "@/lib/badgeToast";
 import Navbar from "@/components/Navbar";
 import { ArrowLeft, ChevronRight, RotateCcw, Volume2, Crown, Check, X } from "lucide-react";
@@ -52,6 +52,7 @@ export default function QuizPlayer() {
   const [newMember, setNewMember] = useState("");
   const [questionResponders, setQuestionResponders] = useState({}); // {questionId: prénom du bon répondant}
 
+  const [loadKey, setLoadKey] = useState(0); // « Rejouer » tire une nouvelle partie
   useEffect(() => {
     let ignore = false;
     api
@@ -59,7 +60,7 @@ export default function QuizPlayer() {
       .then((r) => { if (!ignore) setData(r.data); })
       .catch((e) => { if (!ignore) setErr(e.response?.data?.detail || "Erreur de chargement"); });
     return () => { ignore = true; };
-  }, [categoryId]);
+  }, [categoryId, loadKey]);
 
   // Always-called hook: shuffle options for the current question.
   // Computed before any conditional return to respect Rules of Hooks.
@@ -176,7 +177,7 @@ export default function QuizPlayer() {
     setSelected(i);
     const originalIdx = shuffled.mapping[i];
     try {
-      const { data: r } = await api.post(`/categories/${categoryId}/answer`, { question_id: currentQ.id, choice: originalIdx });
+      const { data: r } = await api.post(`/categories/${categoryId}/answer`, { session_id: data.session_id, question_id: currentQ.id, choice: originalIdx });
       setFb({ correct: r.correct, correctIdx: shuffled.mapping.indexOf(r.correct_index), explanation: r.explanation });
       if (r.correct) {
         setScore((s) => s + 1);
@@ -189,7 +190,7 @@ export default function QuizPlayer() {
       setAnswers((prev) => [...prev, { question_id: currentQ.id, answer_index: originalIdx }]);
     } catch (e) {
       setSelected(null);
-      toast.error("La réponse n'a pas pu être vérifiée. Vérifiez votre connexion et touchez à nouveau votre choix.");
+      toast.error(formatError(e.response?.data?.detail) || "La réponse n'a pas pu être vérifiée. Vérifiez votre connexion et touchez à nouveau votre choix.");
     }
   };
 
@@ -198,12 +199,13 @@ export default function QuizPlayer() {
     setSaveState("saving"); setSaveError("");
     try {
       const r = await api.post("/attempts", {
-        category_id: categoryId, answers: list,
+        category_id: categoryId, session_id: data.session_id, answers: list,
         duration_seconds: Math.round((Date.now() - startTime.current) / 1000),
       });
       setSaveState("saved");
       showBadgeToasts(r.data?.awarded_badges);
     } catch (e) {
+      if (e.response?.status === 409) { setSaveState("saved"); return; } // déjà enregistré lors d'un essai précédent
       setSaveState("error");
       setSaveError(e.response?.data?.detail || "Votre score n'a pas pu être enregistré (connexion instable ?).");
     }
@@ -238,6 +240,7 @@ export default function QuizPlayer() {
   };
 
   const restart = () => {
+    setData(null); setLoadKey((k) => k + 1);
     setIdx(0); setSelected(null); setFb(null); setScore(0); setFinished(false);
     setAnswers([]); setSaveState("idle");
     setResponderIdx(0); setPassCount(0); setQuestionResponders({});

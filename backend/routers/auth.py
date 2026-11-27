@@ -198,11 +198,11 @@ async def forgot_password(body: ForgotPasswordRequest):
 
 @router.post("/reset-password")
 async def reset_password(body: ResetPasswordRequest):
-    record = await db.password_reset_tokens.find_one({"token": body.token})
+    # Consommation atomique : deux envois simultanés ne peuvent pas utiliser le même lien.
+    record = await db.password_reset_tokens.find_one_and_update(
+        {"token": body.token, "used": {"$ne": True}}, {"$set": {"used": True}})
     if not record:
-        raise HTTPException(status_code=400, detail="Lien invalide ou expiré")
-    if record.get("used"):
-        raise HTTPException(status_code=400, detail="Lien déjà utilisé")
+        raise HTTPException(status_code=400, detail="Lien invalide, expiré ou déjà utilisé")
     expires = record.get("expires_at")
     if isinstance(expires, datetime):
         if expires.tzinfo is None:

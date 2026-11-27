@@ -6,6 +6,7 @@ and recomputes the score. Client-declared scores are IGNORED — this
 plugs the cheating vector where the browser console could send
 `{score:999,total:999}` to auto-win in the leagues.
 """
+import uuid
 from datetime import datetime, timedelta, timezone
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -118,9 +119,7 @@ async def get_questions(category_id: str, user: dict = Depends(get_current_user)
         # Formule Découverte : 5 questions par jour (toutes catégories), pas par appel.
         from zoneinfo import ZoneInfo
         day_start = datetime.now(ZoneInfo("Europe/Paris")).replace(hour=0, minute=0, second=0, microsecond=0)
-        used_today = await db.user_seen_questions.count_documents(
-            {"user_id": user_id, "seen_at": {"$gte": day_start.astimezone(timezone.utc).isoformat()}})
-        limit = max(0, FREE_DAILY_QUESTIONS - used_today)
+        limit = max(0, FREE_DAILY_QUESTIONS - await answered_today(user_id))
         if not limit:
             return {"category": cat, "questions": [], "is_premium": False, "daily_limit_reached": True,
                     "pool": None}
@@ -202,9 +201,16 @@ async def get_questions(category_id: str, user: dict = Depends(get_current_user)
     }) if seen_ids else 0
     remaining = max(0, playable_total - seen_playable)
 
+    session_id = str(uuid.uuid4())
+    await db.quiz_sessions.insert_one({
+        "id": session_id, "user_id": user_id, "category_id": category_id,
+        "question_ids": [q["id"] for q in qs], "answers": {}, "answered_count": 0, "consumed": False,
+        "created_at": datetime.now(timezone.utc).isoformat()})
+
     return {
         "category": cat,
         "questions": qs,
+        "session_id": session_id,
         "is_premium": is_premium_active(user),
         "pool": {
             "total": playable_total,
@@ -216,36 +222,69 @@ async def get_questions(category_id: str, user: dict = Depends(get_current_user)
 
 
 class QuizAnswer(BaseModel):
+    session_id: str
     question_id: str
     choice: int = Field(ge=0, le=9)
 
 
+async def answered_today(user_id: str) -> int:
+    """Questions réellement répondues aujourd'hui (heure de Paris) — base de la limite Découverte."""
+    from zoneinfo import ZoneInfo
+    day_start = datetime.now(ZoneInfo("Europe/Paris")).replace(hour=0, minute=0, second=0, microsecond=0)
+    rows = await db.quiz_sessions.aggregate([
+        {"$match": {"user_id": user_id, "created_at": {"$gte": day_start.astimezone(timezone.utc).isoformat()}}},
+        {"$group": {"_id": None, "n": {"$sum": "$answered_count"}}}]).to_list(1)
+    return rows[0]["n"] if rows else 0
+
+
+async def _open_session(session_id: str, user_id: str, category_id: str) -> dict:
+    sess = await db.quiz_sessions.find_one({
+        "id": session_id, "user_id": user_id, "category_id": category_id, "consumed": False,
+        "created_at": {"$gte": (datetime.now(timezone.utc) - ISSUED_WINDOW).isoformat()}})
+    if not sess:
+        if await db.quiz_sessions.find_one({"id": session_id, "user_id": user_id, "consumed": True}):
+            raise HTTPException(status_code=409, detail="Ce score est déjà enregistré.")
+        raise HTTPException(status_code=400, detail="Partie expirée : relancez un quiz.")
+    return sess
+
+
 @router.post("/categories/{category_id}/answer")
 async def check_answer(category_id: str, body: QuizAnswer, user: dict = Depends(get_current_user)):
-    """Correction d'une question, uniquement si elle a été tirée pour ce joueur (la réponse n'est jamais envoyée avant)."""
-    since = (datetime.now(timezone.utc) - ISSUED_WINDOW).isoformat()
-    if not await db.user_seen_questions.find_one({"user_id": str(user["_id"]), "question_id": body.question_id,
-                                                  "category_id": category_id, "seen_at": {"$gte": since}}):
+    """Correction d'une question de la partie : seul le premier choix compte, et c'est lui qui sera noté."""
+    user_id = str(user["_id"])
+    sess = await _open_session(body.session_id, user_id, category_id)
+    if body.question_id not in sess["question_ids"]:
         raise HTTPException(status_code=404, detail="Question introuvable")
+    if body.question_id not in sess["answers"]:
+        if not is_premium_active(user) and await answered_today(user_id) >= FREE_DAILY_QUESTIONS:
+            raise HTTPException(status_code=403, detail="Vos 5 questions du jour sont jouées. Revenez demain !")
+        await db.quiz_sessions.update_one(
+            {"id": body.session_id, f"answers.{body.question_id}": {"$exists": False}},
+            {"$set": {f"answers.{body.question_id}": body.choice}, "$inc": {"answered_count": 1}})
+        sess = await db.quiz_sessions.find_one({"id": body.session_id})
     q = await db.questions.find_one({"id": body.question_id, "category_id": category_id},
                                     {"_id": 0, "correct_index": 1, "explanation": 1})
     if not q:
         raise HTTPException(status_code=404, detail="Question introuvable")
-    return {"correct": body.choice == q["correct_index"], "correct_index": q["correct_index"],
+    choice = sess["answers"][body.question_id]
+    return {"correct": choice == q["correct_index"], "correct_index": q["correct_index"],
             "explanation": q.get("explanation", "")}
 
 
 @router.post("/attempts")
 async def save_attempt(body: AttemptCreate, user: dict = Depends(get_current_user)):
-    # ---- Server-authoritative scoring -------------------------------------
+    # ---- Score calculé sur les réponses enregistrées par /answer, partie utilisable une seule fois ----
     question_ids = [a.question_id for a in body.answers]
     if len(set(question_ids)) != len(question_ids):
         raise HTTPException(status_code=400, detail="Une question ne peut compter qu'une fois.")
-    issued = await db.user_seen_questions.count_documents({
-        "user_id": str(user["_id"]), "question_id": {"$in": question_ids},
-        "seen_at": {"$gte": (datetime.now(timezone.utc) - ISSUED_WINDOW).isoformat()}})
-    if issued != len(question_ids):
+    if not body.session_id:
         raise HTTPException(status_code=400, detail="Partie expirée : relancez un quiz pour enregistrer votre score.")
+    sess = await _open_session(body.session_id, str(user["_id"]), body.category_id)
+    if any(qid not in sess["answers"] for qid in question_ids):
+        raise HTTPException(status_code=400, detail="Une ou plusieurs questions n'ont pas été jouées dans cette partie.")
+    if not (await db.quiz_sessions.update_one({"id": sess["id"], "consumed": False},
+                                              {"$set": {"consumed": True}})).modified_count:
+        raise HTTPException(status_code=409, detail="Ce score est déjà enregistré.")
     docs = await db.questions.find(
         {"id": {"$in": question_ids}, "category_id": body.category_id},
         {"_id": 0, "id": 1, "correct_index": 1},
@@ -257,7 +296,7 @@ async def save_attempt(body: AttemptCreate, user: dict = Depends(get_current_use
             status_code=400,
             detail="Une ou plusieurs questions n'appartiennent pas à la catégorie.",
         )
-    score = sum(1 for a in body.answers if correct_map.get(a.question_id) == a.answer_index)
+    score = sum(1 for qid in question_ids if correct_map.get(qid) == sess["answers"][qid])
     total = len(body.answers)
 
     await db.attempts.insert_one({

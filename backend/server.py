@@ -233,6 +233,8 @@ async def startup():
     # Indexes
     await _safe_index(db.users, "email", unique=True)
     await _safe_index(db.rate_limits, [("key", 1), ("at", 1)])
+    await _safe_index(db.quiz_sessions, "id", unique=True)
+    await _safe_index(db.quiz_sessions, [("user_id", 1), ("created_at", -1)])
     await _safe_index(db.rate_limits, "expire_at", expireAfterSeconds=0)
     await _safe_index(db.users, "apple_sub", sparse=True)
     await _safe_index(db.users, "google_sub", sparse=True)

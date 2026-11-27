@@ -21,7 +21,7 @@ export default function Login() {
     try {
       await login(email, password);
       const next = new URLSearchParams(location.search).get("next");
-      const to = location.state?.from || (next && next.startsWith("/") && !next.startsWith("//") ? next : "/app/dashboard");
+      const to = location.state?.from || (next && next.startsWith("/") && !next.startsWith("//") && !next.startsWith("/login") ? next : "/app/dashboard");
       navigate(to);
     } catch (e2) {
       setErr(formatError(e2.response?.data?.detail) || e2.message);

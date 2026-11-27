@@ -7,6 +7,7 @@ load_dotenv(ROOT_DIR / ".env")
 
 import os
 import logging
+import ipaddress
 import time
 from datetime import datetime, timezone, timedelta
 from typing import Optional, Annotated, Any, List
@@ -350,13 +351,30 @@ async def record_audit(admin: dict, action: str, *,
 # -------------------- rate limiter (in-memory, IP-based) --------------------
 
 
+_CLOUDFLARE_NETS = [ipaddress.ip_network(n) for n in (
+    "173.245.48.0/20", "103.21.244.0/22", "103.22.200.0/22", "103.31.4.0/22", "141.101.64.0/18",
+    "108.162.192.0/18", "190.93.240.0/20", "188.114.96.0/20", "197.234.240.0/22", "198.41.128.0/17",
+    "162.158.0.0/15", "104.16.0.0/13", "104.24.0.0/14", "172.64.0.0/13", "131.0.72.0/22",
+    "2400:cb00::/32", "2606:4700::/32", "2803:f800::/32", "2405:b500::/32", "2405:8100::/32",
+    "2a06:98c0::/29", "2c0f:f248::/32")]
+
+
+def _is_proxy(ip: str) -> bool:
+    try:
+        addr = ipaddress.ip_address(ip)
+    except ValueError:
+        return False
+    return addr.is_private or any(addr in n for n in _CLOUDFLARE_NETS)
+
+
 def client_ip(request: Request) -> str:
-    """IP réelle : en-tête Cloudflare, sinon la dernière entrée ajoutée par notre proxy (non falsifiable)."""
-    cf = request.headers.get("cf-connecting-ip")
-    if cf:
-        return cf.strip()
-    xff = [p.strip() for p in request.headers.get("x-forwarded-for", "").split(",") if p.strip()]
-    return xff[-1] if xff else (request.client.host if request.client else "anon")
+    """IP réelle : X-Forwarded-For lu de droite à gauche, en sautant notre répartiteur et les relais Cloudflare.
+    Les entrées les plus à gauche (écrites par le client) ne sont jamais utilisées."""
+    hops = [p.strip() for p in request.headers.get("x-forwarded-for", "").split(",") if p.strip()]
+    for ip in reversed(hops[:-1]):  # la dernière entrée est l'adresse du répartiteur de charge
+        if not _is_proxy(ip):
+            return ip
+    return hops[0] if len(hops) == 1 else (request.client.host if request.client else "anon")
 
 
 async def rate_hit(key: str, max_calls: int, window_seconds: int, record: bool = True) -> None:
@@ -438,6 +456,7 @@ class AttemptAnswer(BaseModel):
 
 class AttemptCreate(BaseModel):
     category_id: str
+    session_id: Optional[str] = None
     answers: List[AttemptAnswer] = Field(..., min_length=1, max_length=30)
     duration_seconds: Optional[int] = Field(None, ge=0, le=7200)
 
