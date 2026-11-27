@@ -102,11 +102,16 @@ async def _upsert_social_user(
     if email:
         by_email = await db.users.find_one({"email": email.lower()})
         if by_email:
-            await db.users.update_one(
-                {"_id": by_email["_id"]},
-                {"$set": {provider_field: sub}},
-            )
-            by_email[provider_field] = sub
+            link = {provider_field: sub, "email_verified": True}
+            if not by_email.get("email_verified"):
+                # Anti pré-inscription : un compte jamais confirmé a pu être créé par quelqu'un d'autre avec
+                # cette adresse. Le fournisseur prouve l'e-mail → l'ancien mot de passe et les sessions sont annulés.
+                link["password_hash"] = None
+                await db.users.update_one({"_id": by_email["_id"]}, {"$set": link, "$inc": {"token_version": 1}})
+                logger.warning(f"[social-auth] {provider} relié à un compte non vérifié : mot de passe réinitialisé")
+                return await db.users.find_one({"_id": by_email["_id"]})
+            await db.users.update_one({"_id": by_email["_id"]}, {"$set": link})
+            by_email.update(link)
             return by_email
 
     # Brand-new account — create + grant welcome credits
@@ -126,6 +131,7 @@ async def _upsert_social_user(
         "credits": WELCOME_CREDITS,
         "xp_total": 0,
         "auth_provider": provider,
+        "email_verified": bool(email),
         provider_field: sub,
     }
     result = await db.users.insert_one(doc)

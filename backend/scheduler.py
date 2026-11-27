@@ -64,6 +64,7 @@ def start_scheduler() -> None:
     from morning_report import send_admin_morning_report
     from family_report import send_inactivity_alerts, send_weekly_family_reports
     from subscription import send_renewal_reminders, sync_renewals
+    from evening_riddle import prepare_tonight
     from routers.gifts import close_expired_christmas_checkouts, retry_pending_gift_pdfs
 
     _scheduler = AsyncIOScheduler(timezone="Europe/Paris")
@@ -80,6 +81,7 @@ def start_scheduler() -> None:
     _schedule(_scheduler, send_admin_morning_report, hour=7,  minute=30, job_id="admin_morning_report")
     _schedule(_scheduler, send_morning_emails,       hour=9,  minute=0,  job_id="daily_quiz_email")
     _schedule(_scheduler, send_expiration_emails,    hour=10, minute=0,  job_id="premium_expiration_email_j7")
+    _schedule(_scheduler, prepare_tonight,           hour=16, minute=30, job_id="evening_riddle_prepare")
     _schedule(_scheduler, send_renewal_reminders,    hour=10, minute=15, job_id="subscription_renewal_reminder_j30")
     _schedule(_scheduler, sync_renewals,             hour=6,  minute=0,  job_id="subscription_sync_renewals")
     _schedule(_scheduler, send_inactivity_alerts,    hour=11, minute=0,  job_id="family_inactivity_alert")
@@ -100,9 +102,9 @@ def start_scheduler() -> None:
 
     _scheduler.start()
     logger.info(
-        "[scheduler] démarré — 17 jobs actifs "
+        "[scheduler] démarré — 18 jobs actifs "
         "(conseil du jour 02:30 · quiz 03:00 · wordsearch 03:30 · charades 04:00 · fléchés 04:30 · auto-seed paliers 05:00 · "
-        "rapport admin 07:30 · email quotidien 09:00 · relance J-7 10:00 · rappel renouvellement J-30 10:15 · synchro abonnements 06:00 · alerte inactivité famille 11:00 · rapport famille dim 10:00 · rappel ligues dim 20:00 · rappel défi dim 19:00 · "
+        "rapport admin 07:30 · email quotidien 09:00 · relance J-7 10:00 · rappel renouvellement J-30 10:15 · énigme du soir 16:30 · synchro abonnements 06:00 · alerte inactivité famille 11:00 · rapport famille dim 10:00 · rappel ligues dim 20:00 · rappel défi dim 19:00 · "
         "clôture ligues lun 00:05 · défi hebdo palier lun 00:10, Europe/Paris)"
     )
 

@@ -260,6 +260,7 @@ def user_to_public(u: dict) -> dict:
             "plan_expires_at": plan_expires_at, "created_at": u.get("created_at"),
             "plan_tier": u.get("plan_tier"),          # "club" | "famille" | "premium" | None
             "plan_period": u.get("plan_period"),      # "monthly" | "yearly" | None
+            "email_verified": bool(u.get("email_verified")),
             "plan_renews_at": u.get("plan_renews_at"), "plan_auto_renew": bool(u.get("plan_auto_renew")),
             "plan_cancel_at_period_end": bool(u.get("plan_cancel_at_period_end")),
             "plan_renewal_amount": u.get("plan_renewal_amount"), "plan_package_id": u.get("plan_package_id"),
@@ -439,6 +440,7 @@ class UpdateProfileRequest(BaseModel):
     name: str = Field(min_length=1, max_length=80)
     birth_year: Optional[int] = Field(None, ge=1900, le=2026)
     email: Optional[EmailStr] = None
+    current_password: Optional[str] = None
 
 
 class DailyEmailPrefRequest(BaseModel):

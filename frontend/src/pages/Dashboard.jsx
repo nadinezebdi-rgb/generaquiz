@@ -11,6 +11,8 @@ import StreakSaverModal from "@/components/StreakSaverModal";
 import OnboardingTour from "@/components/OnboardingTour";
 import LivreProgressCard from "@/components/LivreProgressCard";
 import { DailyTipCard } from "@/components/DailyTipCard";
+import { EmailVerifyBanner } from "@/components/EmailVerifyBanner";
+import { EveningRiddleCard } from "@/components/EveningRiddleCard";
 import { mascotSrc } from "@/lib/mascot";
 import { ArrowRight, Crown, Trophy, Target, Zap, Sparkles, Calendar, Flame, BookOpen } from "lucide-react";
 
@@ -80,6 +82,7 @@ export default function Dashboard() {
       <Navbar variant="app" />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        <EmailVerifyBanner user={user} />
         {/* Header */}
         <div className="bg-gradient-to-br from-navy to-navy-dark text-white rounded-[32px] p-8 md:p-12 mb-10 relative overflow-hidden border-4 border-mustard">
           <div className="absolute -top-12 -right-12 w-72 h-72 rounded-full bg-mustard/20 blur-3xl pointer-events-none" />
@@ -128,6 +131,7 @@ export default function Dashboard() {
           </div>
         </div>
 
+        <EveningRiddleCard />
         <DailyTipCard />
 
         {/* Quiz du Jour widget with streak */}

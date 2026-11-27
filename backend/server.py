@@ -29,6 +29,7 @@ from mistral_client import regenerate_all as mistral_regenerate_all
 from routers import auth as auth_router
 from routers import contact as contact_router
 import subscription as subscription_mod
+import evening_riddle as evening_riddle_mod
 from routers import social_auth as social_auth_router
 from routers import quiz as quiz_router
 from routers import payments as payments_router
@@ -127,6 +128,7 @@ async def admin_list_users(user: dict = Depends(get_admin_user)):
 api.include_router(auth_router.router)
 api.include_router(contact_router.router)
 api.include_router(subscription_mod.router)
+api.include_router(evening_riddle_mod.router)
 api.include_router(social_auth_router.router)
 api.include_router(quiz_router.router)
 api.include_router(payments_router.router)
@@ -234,6 +236,9 @@ async def startup():
     await _safe_index(db.users, "email", unique=True)
     await _safe_index(db.rate_limits, [("key", 1), ("at", 1)])
     await _safe_index(db.quiz_sessions, "id", unique=True)
+    await _safe_index(db.email_verify_tokens, "token_hash", unique=True)
+    await _safe_index(db.email_verify_tokens, "expires_at", expireAfterSeconds=0)
+    await _safe_index(db.evening_riddles, "date", unique=True)
     await _safe_index(db.quiz_sessions, [("user_id", 1), ("created_at", -1)])
     await _safe_index(db.rate_limits, "expire_at", expireAfterSeconds=0)
     await _safe_index(db.users, "apple_sub", sparse=True)

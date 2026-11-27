@@ -1,10 +1,13 @@
 """Auth router: register/login/logout/me/forgot/reset/change-password/profile/account.
 Includes Resend email sending and IP-based rate limiting on /forgot-password."""
 import asyncio
+import html
+import hashlib
 import secrets
 from datetime import datetime, timezone, timedelta
 
 import resend
+from pydantic import BaseModel, Field
 from bson import ObjectId
 from fastapi import APIRouter, Depends, HTTPException, Request, Response
 from pymongo.errors import DuplicateKeyError
@@ -123,6 +126,7 @@ async def register(body: RegisterRequest, request: Request, response: Response):
            "referred_by_user_id": referred_by_user_id,
            "referral_count": 0,
            "birth_year": body.birth_year,
+           "email_verified": False,
            "country_code": _infer_country_code(request)}
     try:
         result = await db.users.insert_one(doc)
@@ -139,6 +143,7 @@ async def register(body: RegisterRequest, request: Request, response: Response):
         "reason": "welcome_bonus",
         "created_at": datetime.now(timezone.utc).isoformat(),
     })
+    await send_verification_email(doc)
     access = create_access_token(str(result.inserted_id), email)
     refresh = create_refresh_token(str(result.inserted_id))
     set_auth_cookies(response, access, refresh)
@@ -210,8 +215,8 @@ async def reset_password(body: ResetPasswordRequest):
         if expires < datetime.now(timezone.utc):
             raise HTTPException(status_code=400, detail="Lien expiré")
     await db.users.update_one({"_id": ObjectId(record["user_id"])},
-                              {"$set": {"password_hash": hash_password(body.new_password)},
-                               "$inc": {"token_version": 1}})  # déconnecte tous les appareils
+                              {"$set": {"password_hash": hash_password(body.new_password), "email_verified": True},
+                               "$inc": {"token_version": 1}})  # déconnecte tous les appareils ; le lien prouve l'e-mail
     await db.password_reset_tokens.update_one({"_id": record["_id"]},
                                               {"$set": {"used": True, "used_at": datetime.now(timezone.utc)}})
     return {"ok": True, "message": "Mot de passe réinitialisé. Vous pouvez vous connecter."}
@@ -238,6 +243,10 @@ async def update_profile(body: UpdateProfileRequest, user: dict = Depends(get_cu
         new_email = body.email.strip().lower()
         current_email = (user.get("email") or "").strip().lower()
         if new_email != current_email:
+            if not user.get("password_hash"):
+                raise HTTPException(status_code=400, detail="Définissez d'abord un mot de passe (Mot de passe oublié) pour changer d'adresse e-mail.")
+            if not body.current_password or not verify_password(body.current_password, user["password_hash"]):
+                raise HTTPException(status_code=403, detail="Mot de passe actuel requis pour changer d'adresse e-mail.")
             # Uniqueness check — case-insensitive
             clash = await db.users.find_one(
                 {"email": new_email,
@@ -249,9 +258,68 @@ async def update_profile(body: UpdateProfileRequest, user: dict = Depends(get_cu
                     status_code=409, detail="Cette adresse e-mail est déjà utilisée par un autre compte."
                 )
             update["email"] = new_email
+            update["email_verified"] = False
     await db.users.update_one({"_id": ObjectId(str(user["_id"]))}, {"$set": update})
     fresh = await db.users.find_one({"_id": ObjectId(str(user["_id"]))})
+    if update.get("email_verified") is False:
+        await send_verification_email(fresh)
     return user_to_public(fresh)
+
+
+# ------------------------------------------------------------ vérification de l'adresse e-mail
+VERIFY_TTL = timedelta(hours=48)
+
+
+async def send_verification_email(user: dict) -> bool:
+    token = secrets.token_urlsafe(32)
+    await db.email_verify_tokens.insert_one({
+        "token_hash": hashlib.sha256(token.encode()).hexdigest(), "user_id": str(user["_id"]),
+        "email": user["email"], "expires_at": datetime.now(timezone.utc) + VERIFY_TTL, "used": False})
+    link = f"{FRONTEND_URL}/verifier-email?token={token}"
+    if not RESEND_API_KEY:
+        logger.warning("RESEND_API_KEY absent — e-mail de vérification non envoyé")
+        return False
+    name = html.escape(user.get("name") or "")
+    body = (f"<div style='font-family:Arial,sans-serif;color:#1A2530;max-width:560px;font-size:16px;line-height:1.5'>"
+            f"<h2 style='font-family:Georgia,serif;color:#1E3A5F'>Confirmez votre adresse e-mail</h2>"
+            f"<p>Bonjour {name},</p><p>Un simple clic suffit pour confirmer que cette adresse est bien la vôtre :</p>"
+            f"<p><a href='{link}' style='background:#E07A5F;color:#fff;padding:12px 24px;border-radius:999px;"
+            f"text-decoration:none;font-weight:bold'>Confirmer mon adresse</a></p>"
+            f"<p style='font-size:14px'>Le lien est valable 48 heures. Si vous n'avez pas créé de compte GénéraQuiz, ignorez cet e-mail.</p></div>")
+    try:
+        await asyncio.to_thread(resend.Emails.send, {"from": SENDER_EMAIL, "to": [user["email"]],
+                                                    "subject": "Confirmez votre adresse e-mail — GénéraQuiz", "html": body})
+        return True
+    except Exception as e:
+        logger.warning(f"[verify-email] envoi impossible : {e}")
+        return False
+
+
+class VerifyEmailRequest(BaseModel):
+    token: str = Field(min_length=20, max_length=200)
+
+
+@router.post("/verify-email")
+async def verify_email(body: VerifyEmailRequest):
+    rec = await db.email_verify_tokens.find_one_and_update(
+        {"token_hash": hashlib.sha256(body.token.encode()).hexdigest(), "used": False,
+         "expires_at": {"$gte": datetime.now(timezone.utc)}},
+        {"$set": {"used": True}})
+    if not rec:
+        raise HTTPException(status_code=400, detail="Lien invalide ou expiré. Demandez un nouveau lien depuis votre compte.")
+    done = await db.users.update_one({"_id": ObjectId(rec["user_id"]), "email": rec["email"]},
+                                     {"$set": {"email_verified": True}})
+    if not done.matched_count:
+        raise HTTPException(status_code=400, detail="Ce lien correspond à une ancienne adresse e-mail.")
+    return {"ok": True}
+
+
+@router.post("/resend-verification")
+async def resend_verification(user: dict = Depends(get_current_user)):
+    if user.get("email_verified"):
+        return {"ok": True, "already_verified": True}
+    await rate_hit(f"verify-mail:{user['_id']}", 3, 3600)
+    return {"ok": await send_verification_email(user)}
 
 
 @router.patch("/preferences/daily-email")
