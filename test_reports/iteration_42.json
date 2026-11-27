@@ -15,7 +15,7 @@
   ],
   "updated_files": ["/app/backend/tests/test_admin_qa_regen.py"],
   "success_rate": {"backend": "90% (9/10, 1 skipped)", "frontend": "100%"},
-  "test_credentials": "admin@generaquiz.fr / pF44gVBfLdushm3NZ6dN (from /app/memory/test_credentials.md)",
+  "test_credentials": "admin@generaquiz.fr / <ADMIN_PASSWORD> (from /app/memory/test_credentials.md)",
   "seed_data_creation": "None (test creates real background jobs for cinema and annees-50-60 via subprocess; they consume Emergent LLM credits over ~10min each; can be observed via /admin/qa/jobs).",
   "retest_needed": false,
   "main_agent_can_self_test": true,

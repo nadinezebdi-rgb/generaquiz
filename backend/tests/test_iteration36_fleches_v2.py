@@ -9,7 +9,7 @@ BASE = os.environ.get("REACT_APP_BACKEND_URL", "https://caricature-saas.preview.
 API = f"{BASE}/api"
 
 ADMIN_EMAIL = "admin@generaquiz.fr"
-ADMIN_PW = "Admin2026!"
+ADMIN_PW = os.environ.get("ADMIN_PASSWORD", "")
 
 
 @pytest.fixture(scope="module")

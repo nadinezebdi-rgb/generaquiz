@@ -1,15 +1,16 @@
 # Test Credentials for GénéraQuiz SaaS
 
 ## Admin Account (post-rebrand)
-- **Email**: `admin@generaquiz.fr`
-- **Password**: `pF44gVBfLdushm3NZ6dN`   ← nouveau, rotation faite le 2026-08-19 après un signalement de fuite dans l'historique du chat Emergent. L'ancien `Admin2026!` ne fonctionne plus.
+- **Email** : variable d'environnement `ADMIN_EMAIL` (`admin@generaquiz.fr`)
+- **Password** : variable d'environnement `ADMIN_PASSWORD`. Ne jamais écrire le mot de passe dans ce fichier ni dans les tests : le dépôt GitHub est public.
 - **Role**: `admin`
 - **Plan**: `premium` (lifetime)
 
-⚠️ Ce fichier n'est PAS servi par le backend static — il vit dans /app/memory/ et n'est utilisé que par les agents internes.
+Les tests lisent `ADMIN_PASSWORD` (et `FAMILY_PROMO_CODE`) dans l'environnement :
+`ADMIN_PASSWORD=... REACT_APP_BACKEND_URL=... pytest backend/tests`
 
 ## Promo codes (seedés au démarrage)
-- `FAMILLE2026` — à vie, utilisations illimitées
+- Code cadeau « Premium à vie » : son nom vient de la variable `FAMILY_PROMO_CODE` (aucun code à vie sans elle). L'ancien code publié dans le dépôt est désactivé automatiquement au démarrage.
 - `DECOUVERTE30` — 30 jours, max 50 utilisations
 
 ## Test User

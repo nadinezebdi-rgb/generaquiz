@@ -31,7 +31,7 @@
   ],
   "updated_files": ["/app/backend/tests/test_iteration52_category_universes.py"],
   "success_rate": {"backend": "100%", "frontend": "95% (1 pre-existing Confort+ mobile clipping issue)"},
-  "test_credentials": "admin@generaquiz.fr / pF44gVBfLdushm3NZ6dN (from /app/memory/test_credentials.md); bcrypt $2b$, httpOnly cookies, and CORS with an explicit origin plus credentials were verified",
+  "test_credentials": "admin@generaquiz.fr / <ADMIN_PASSWORD> (from /app/memory/test_credentials.md); bcrypt $2b$, httpOnly cookies, and CORS with an explicit origin plus credentials were verified",
   "seed_data_creation": "None. No questions or progression data created or modified (the quizzes were started but not submitted).",
   "retest_needed": false,
   "should_main_agent_self_test": true,

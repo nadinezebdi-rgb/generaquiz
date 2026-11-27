@@ -18,7 +18,7 @@
   ],
   "updated_files": ["/app/backend/tests/backend_test.py"],
   "success_rate": {"backend": "100% (54/54)", "frontend": "100% (Landing 8 cards + premium quiz shows 20 questions + 4/4 distinct first questions across 4 successive visits = randomization confirmed)"},
-  "test_credentials": "admin@quizdantan.fr / Admin2026!",
+  "test_credentials": "admin@quizdantan.fr / <ancien mot de passe admin>",
   "seed_data_creation": "Each pytest run still registers ~4 throw-away free users (qa.test.*, qa.reg.*, qa.dup.*) and creates several challenges (chansons 4q, culture-40-ans 10q, cinema 4q, plus 3 chansons 10q for snapshot-randomization test). No cleanup needed; data isolated by timestamped emails.",
   "retest_needed": false,
   "main_agent_can_self_test": true,

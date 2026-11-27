@@ -233,7 +233,7 @@ export default function Register() {
                   type="text"
                   value={promoCode}
                   onChange={(e) => setPromoCode(e.target.value.toUpperCase())}
-                  placeholder="FAMILLE2026"
+                  placeholder="Votre code cadeau"
                   maxLength={40}
                   className="w-full px-4 py-4 text-lg rounded-2xl border-2 border-cream-dark focus:border-navy bg-white min-h-[56px] uppercase tracking-wider"
                 />

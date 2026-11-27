@@ -7,7 +7,7 @@
     "/app/test_reports/pytest/admin_access.xml"
   ],
   "action_items": [
-    "Original user report ('cannot access /app/admin') is not reproducible in current state. Likely causes: (a) user tried old password Admin2026! (rotated), (b) stale session cookie without admin role — a re-login fixes it, or (c) user typed /app/admin without logging in first and was sent to /login. Consider a small UX note on login page for admins after password rotation."
+    "Original user report ('cannot access /app/admin') is not reproducible in current state. Likely causes: (a) user tried old password <ancien mot de passe admin> (rotated), (b) stale session cookie without admin role — a re-login fixes it, or (c) user typed /app/admin without logging in first and was sent to /login. Consider a small UX note on login page for admins after password rotation."
   ],
   "critical_code_review_comments": [
     "AdminRoute logic in /app/frontend/src/App.js is correct: loading state handled, unauthenticated -> /login, non-admin -> /app/dashboard.",
@@ -15,7 +15,7 @@
   ],
   "updated_files": ["/app/backend/tests/test_admin_access.py"],
   "success_rate": {"backend": "100%", "frontend": "100%"},
-  "test_credentials": "admin@generaquiz.fr / pF44gVBfLdushm3NZ6dN (verified working)",
+  "test_credentials": "admin@generaquiz.fr / <ADMIN_PASSWORD> (verified working)",
   "seed_data_creation": "Registered one throwaway user (regtest_*@example.com) for the non-admin redirect test.",
   "retest_needed": false,
   "should_main_agent_self_test": true,

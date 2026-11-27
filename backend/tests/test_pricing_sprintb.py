@@ -14,7 +14,7 @@ if not BASE_URL:
 API = f"{BASE_URL}/api"
 
 ADMIN_EMAIL = "admin@generaquiz.fr"
-ADMIN_PASSWORD = "Admin2026!"
+ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "")
 
 EXPECTED = {
     "club_monthly": (4.99, "club", "monthly"),

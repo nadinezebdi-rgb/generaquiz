@@ -24,7 +24,7 @@ if not BASE_URL:
                 break
 
 ADMIN_EMAIL = "admin@generaquiz.fr"
-ADMIN_PASSWORD = "Admin2026!"
+ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "")
 
 
 # ---------- fixtures ----------

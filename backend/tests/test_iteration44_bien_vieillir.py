@@ -4,7 +4,7 @@ import pytest
 import requests
 
 BASE_URL = os.environ.get("REACT_APP_BACKEND_URL").rstrip("/")
-ADMIN = {"email": "admin@generaquiz.fr", "password": "pF44gVBfLdushm3NZ6dN"}
+ADMIN = {"email": "admin@generaquiz.fr", "password": os.environ.get("ADMIN_PASSWORD", "")}
 
 
 @pytest.fixture(scope="module")

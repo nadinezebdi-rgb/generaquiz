@@ -18,7 +18,7 @@ def _load_backend_url():
 
 BASE_URL = _load_backend_url()
 ADMIN_EMAIL = "admin@generaquiz.fr"
-ADMIN_PASSWORD = "Admin2026!"
+ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "")
 
 
 @pytest.fixture(scope="module")

@@ -16,7 +16,7 @@ _mongo = MongoClient(MONGO_URL)
 _db = _mongo[DB_NAME]
 
 ADMIN_EMAIL = "admin@generaquiz.fr"
-ADMIN_PASSWORD = "Admin2026!"
+ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "")
 
 
 def _register_unique():

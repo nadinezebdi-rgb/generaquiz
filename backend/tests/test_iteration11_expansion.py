@@ -31,7 +31,8 @@ BASE = _load_backend_url()
 API = f"{BASE}/api"
 
 ADMIN_EMAIL = "admin@generaquiz.fr"
-ADMIN_PWD = "Admin2026!"
+ADMIN_PWD = os.environ.get("ADMIN_PASSWORD", "")
+FAMILY_PROMO_CODE = os.environ.get("FAMILY_PROMO_CODE", "").upper()  # code cadeau « à vie », jamais en dur
 
 
 # ---------- fixtures ----------
@@ -193,14 +194,14 @@ class TestPromo:
             r = admin_session.get(f"{API}/promo/list")
         assert r.status_code == 200, f"{r.status_code} {r.text}"
         codes = [p["code"] for p in r.json()]
-        assert "FAMILLE2026" in codes
+        assert FAMILY_PROMO_CODE in codes
         assert "DECOUVERTE30" in codes
 
     def test_redeem_promo_upgrades_user_to_premium(self):
         s = requests.Session()
         email = f"TEST_{uuid.uuid4().hex[:10]}@example.com"
         s.post(f"{API}/auth/register", json={"email": email, "password": "Strong2026!", "name": "PromoTest"})
-        r = s.post(f"{API}/promo/redeem", json={"code": "FAMILLE2026"})
+        r = s.post(f"{API}/promo/redeem", json={"code": FAMILY_PROMO_CODE})
         assert r.status_code == 200, r.text
         me = s.get(f"{API}/auth/me").json()
         assert me.get("plan") == "premium"

@@ -18,7 +18,7 @@
   ],
   "updated_files": [],
   "success_rate": {"backend": "N/A (not tested per request)", "frontend": "100%"},
-  "test_credentials": "admin@generaquiz.fr / Admin2026! — worked",
+  "test_credentials": "admin@generaquiz.fr / <ancien mot de passe admin> — worked",
   "seed_data_creation": "None",
   "retest_needed": false,
   "should_main_agent_self_test": false,

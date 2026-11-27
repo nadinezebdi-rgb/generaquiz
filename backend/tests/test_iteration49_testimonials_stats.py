@@ -6,7 +6,7 @@ import pytest
 import requests
 
 BASE_URL = os.environ.get("REACT_APP_BACKEND_URL").rstrip("/")
-ADMIN = {"email": "admin@generaquiz.fr", "password": "pF44gVBfLdushm3NZ6dN"}
+ADMIN = {"email": "admin@generaquiz.fr", "password": os.environ.get("ADMIN_PASSWORD", "")}
 DEFAULTS = {"players_today": 20, "games_today": 50, "countries_active": 3, "streak_record": 7}
 PUBLIC_KEYS = {"id", "text", "first_name", "age_role", "location", "profile"}
 

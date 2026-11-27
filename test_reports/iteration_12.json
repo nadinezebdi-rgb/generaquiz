@@ -22,7 +22,7 @@
   ],
   "updated_files": ["/app/backend/tests/test_daily_quiz.py (new)"],
   "success_rate": { "backend": "100% (13/13)", "frontend": "100% (anon flow + admin flow + navbar/landing/dashboard CTAs)" },
-  "test_credentials": "admin@generaquiz.fr / Admin2026! ; nouveau user TEST_daily_<uuid>@example.com / TestPass2026! créé par le test.",
+  "test_credentials": "admin@generaquiz.fr / <ancien mot de passe admin> ; nouveau user TEST_daily_<uuid>@example.com / TestPass2026! créé par le test.",
   "seed_data_creation": "Un user TEST_daily_<uuid>@example.com est créé par test_new_user_with_higher_score_takes_rank_1 et soumet 5/5/30s. Collection daily_attempts vidée AVANT le run via pymongo. À nettoyer si besoin : delete_many sur daily_attempts + users TEST_daily_*.",
   "retest_needed": false,
   "main_agent_can_self_test": true,

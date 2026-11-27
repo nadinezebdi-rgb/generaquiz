@@ -21,9 +21,9 @@
   ],
   "updated_files": ["/app/backend/tests/test_email_update.py"],
   "success_rate": {"backend": "100% (6/6)", "frontend": "~85% (core flow works; error UX minor gap)"},
-  "test_credentials": "admin@generaquiz.fr / Admin2026!",
+  "test_credentials": "admin@generaquiz.fr / <ancien mot de passe admin>",
   "seed_data_creation": "Test transiently registers occupied_{ts}@example.com to prove 409; cleaned up after run. Admin email was reverted to admin@generaquiz.fr and verified via re-login.",
   "retest_needed": false,
   "should_main_agent_self_test": true,
-  "context_for_next_testing_agent": "Bug 'email not editable on Mon compte' is fixed and verified end-to-end. Two minor UX polish items left (see action_items). Admin credentials still admin@generaquiz.fr / Admin2026! — verified working after test."
+  "context_for_next_testing_agent": "Bug 'email not editable on Mon compte' is fixed and verified end-to-end. Two minor UX polish items left (see action_items). Admin credentials still admin@generaquiz.fr / <ancien mot de passe admin> — verified working after test."
 }

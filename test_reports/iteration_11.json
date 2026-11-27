@@ -25,7 +25,7 @@
     "/app/backend/tests/test_iteration11_expansion.py (new)"
   ],
   "success_rate": {"backend": "100% (12/12)", "frontend": "100% (landing + login + dashboard + quiz 30Q E2E)"},
-  "test_credentials": "admin@generaquiz.fr / Admin2026! ; promos: FAMILLE2026, DECOUVERTE30 ; TEST_<uuid>@example.com users créés dynamiquement (free + premium-via-promo)",
+  "test_credentials": "admin@generaquiz.fr / <ancien mot de passe admin> ; promos: FAMILLE2026, DECOUVERTE30 ; TEST_<uuid>@example.com users créés dynamiquement (free + premium-via-promo)",
   "seed_data_creation": "test_iteration11_expansion.py crée des users TEST_<uuid>@example.com (préfixe TEST_ pour cleanup futur). Aucune donnée seed altérée.",
   "retest_needed": false,
   "main_agent_can_self_test": true,

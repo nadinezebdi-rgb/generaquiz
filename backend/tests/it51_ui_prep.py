@@ -8,7 +8,7 @@ from pymongo import MongoClient
 
 B = os.environ["REACT_APP_BACKEND_URL"].rstrip("/")
 DB = MongoClient("mongodb://localhost:27017")["test_database"]
-adm = requests.post(f"{B}/api/auth/login", json={"email": "admin@generaquiz.fr", "password": "pF44gVBfLdushm3NZ6dN"}).json()
+adm = requests.post(f"{B}/api/auth/login", json={"email": "admin@generaquiz.fr", "password": os.environ.get("ADMIN_PASSWORD", "")}).json()
 H = {"Authorization": f"Bearer {adm['access_token']}"}
 
 
