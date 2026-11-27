@@ -73,7 +73,7 @@ export const GIFTS = [
   {
     id: "famille",
     nom: "Carte cadeau Famille",
-    description: "1 bénéficiaire + 3 proches pour partager une année de jeux.",
+    description: "1 bénéficiaire + 2 proches pour partager une année de jeux.",
     highlight: true,
   },
   {

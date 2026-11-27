@@ -19,10 +19,10 @@ CHRISTMAS_RED = HexColor("#B52B3A")
 OFFER_TEXT = {
     "famille": {
         "title": "Offre Famille",
-        "tagline": "1 bénéficiaire + 3 proches pour partager une année de jeux",
+        "tagline": "1 bénéficiaire + {n} proches pour partager une année de jeux",
         "lines": [
             "Le bénéficiaire : tout GénéraQuiz pendant 1 an, Livre de Vie et son PDF compris",
-            "3 proches invités : quiz et défis du groupe familial, toute l'année",
+            "{n} proches invités : quiz et défis du groupe familial, toute l'année",
             "Classement familial et résultats partagés pour tous",
         ],
     },
@@ -63,6 +63,8 @@ def build_gift_pdf(gift: dict, activate_url: str) -> bytes:
     c.setTitle(f"Carte cadeau GénéraQuiz — {gift['code']}")
     noel = gift.get("theme") == "noel" or str(gift.get("theme", "")).startswith("noel_")
     offer = OFFER_TEXT["solo"] if noel or gift["offer"] == "noel" else OFFER_TEXT[gift["offer"]]
+    n = gift.get("max_proches", 3)  # cartes vendues avant le passage à 2 proches : 3
+    offer = {**offer, "tagline": offer["tagline"].format(n=n), "lines": [line.format(n=n) for line in offer["lines"]]}
 
     c.setFillColor(NAVY)
     c.rect(0, 0, w, h, stroke=0, fill=1)
