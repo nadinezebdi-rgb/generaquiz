@@ -16,8 +16,8 @@ def family(monkeypatch):
 
 
 @pytest.mark.parametrize("user,tier,expected", [
-    ({}, "famille_v2", 3),
-    ({"plan_tier": "solo"}, "famille_v2", 3),
+    ({}, "famille_v2", 2),
+    ({"plan_tier": "solo"}, "famille_v2", 2),
     ({"plan_tier": "famille_v2"}, "famille_v2", 4),
     ({"plan_tier": "famille"}, "famille_v2", 4),
     ({"plan_tier": "famille_v2", "family_max_proches": 3}, "famille_v2", 3),
@@ -26,6 +26,13 @@ def family(monkeypatch):
 def test_subscription_capacity(family, user, tier, expected):
     assert family.family_subscription_fields(user, tier) == {"family_max_proches": expected}
     assert family.family_subscription_fields(user, "solo") == {}
+
+
+@pytest.mark.parametrize("user,expected", [({}, 3), ({"plan_tier": "solo"}, 3), ({"plan_tier": "famille_v2"}, 4),
+                                           ({"plan_tier": "famille_v2", "family_max_proches": 2}, 3)])
+def test_gift_card_capacity(family, user, expected):
+    # Cartes cadeau Famille (vendues avec 3 proches).
+    assert family.family_subscription_fields(user, "famille_v2", 3) == {"family_max_proches": expected}
 
 
 def _cursor(rows):
@@ -125,7 +132,7 @@ def test_paid_subscription_records_capacity(checkout_modules, monkeypatch, via_w
     else:
         asyncio.run(payments.get_checkout_status("session-test", request, subscriber))
     fields = users.update_one.call_args.args[1]["$set"]
-    assert fields["family_max_proches"] == (4 if legacy else 3)
+    assert fields["family_max_proches"] == (4 if legacy else 2)
     assert fields["plan_tier"] == "famille_v2"
 
 

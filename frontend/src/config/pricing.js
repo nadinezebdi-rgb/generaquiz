@@ -51,13 +51,13 @@ export const PLANS = [
     mensuel: 9.9,
     annuel: 99,
     annuelNoel: 79,
-    acces: "Accès complet + espace famille",
+    acces: "Bénéficiaire + 2 invités",
     badge: "Pour jouer ensemble",
     stripeIds: { monthly: "famille_v2_monthly", yearly: "famille_v2_yearly", yearlyNoel: "famille_v2_yearly_noel" },
     features: [
-      "Jusqu'à 4 personnes : 1 bénéficiaire + 3 proches",
+      "3 personnes : 1 bénéficiaire + 2 invités",
       "Tout Solo pour le bénéficiaire principal",
-      "3 proches invités dans l'espace famille, sans supplément",
+      "2 invités dans l'espace famille, sans supplément",
       "Quiz, défis et classements familiaux sans limite de parties",
       "Pendant toute la durée de l'abonnement",
       "Chaque proche peut prendre Solo pour son propre catalogue et Livre de Vie",
@@ -177,11 +177,11 @@ export function packageFor(plan, period, promo) {
 }
 
 /** Comparaison autorisée uniquement avec le mensuel réellement vendu (jamais avec 69 € / 99 €). */
-function monthsOffered(plan, annual) {
+function monthsOffered(plan, annual, word = "offerts") {
   const saving = Math.round((plan.mensuel * 12 - annual) * 100) / 100;
   const months = saving / plan.mensuel;
   const whole = Math.floor(months);
-  return { saving, label: `${months - whole > 0.1 ? "Plus de " : ""}${whole} mois offerts` };
+  return { saving, label: `${months - whole > 0.1 ? "Plus de " : ""}${whole} mois ${word}` };
 }
 
 /** Bloc prix d'une carte : pastille, prix principal, économie, renouvellement. */
@@ -197,8 +197,8 @@ export function offerPresentation(plan, period, promo) {
       renewal: `puis ${fmt(plan.annuel, { integer: true })}/an · résiliable à tout moment`,
     };
   }
-  const { saving, label } = monthsOffered(plan, plan.annuel);
-  return { main: fmt(plan.annuel, { integer: true }), unit: "/an", savings: `${label} par rapport au mensuel (${fmt(saving)} d'économie)` };
+  const { saving, label } = monthsOffered(plan, plan.annuel, "d'économie");
+  return { main: fmt(plan.annuel, { integer: true }), unit: "/an", savings: `${label} par rapport au mensuel (${fmt(saving)} économisés)` };
 }
 
 /** Un seul prix affiché selon la période choisie. */
@@ -213,5 +213,5 @@ export function annualDiscountBadge(promo = false) {
   if (promo) return "🎄 SUPER PROMO DE NOËL : jusqu'à 4 mois offerts sur l'abonnement annuel, jusqu'au 31 décembre 2026";
   const paid = PLANS.filter((p) => p.mensuel > 0);
   const months = Math.min(...paid.map((p) => Math.round(12 - p.annuel / p.mensuel)));
-  return `${months} mois offerts avec l'abonnement annuel`;
+  return `${months} mois d'économie avec l'abonnement annuel`;
 }

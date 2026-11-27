@@ -20,7 +20,7 @@ export function PeriodToggle({ period, setPeriod, promo, testPrefix = "pricing" 
           className={btn("yearly")} data-testid={`${testPrefix}-toggle-yearly`}>
           Annuel
           <span className="bg-terracotta text-white text-[10px] uppercase tracking-wide px-1.5 sm:px-2 py-0.5 rounded-full whitespace-nowrap">
-            {promo ? "🎄 Super promo Noël" : "2 mois offerts"}
+            {promo ? "🎄 Super promo Noël" : "2 mois d'économie"}
           </span>
         </button>
       </div>
