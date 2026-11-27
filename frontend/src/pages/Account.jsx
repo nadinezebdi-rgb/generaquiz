@@ -6,7 +6,7 @@ import { api, formatError } from "@/lib/api";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import {
-  User, Mail, Crown, Calendar, Lock, Loader2, Check, LogOut, Trash2, Save, ArrowRight, Bell, Flame, Gift, Copy, Award, Ticket,
+  User, Mail, Crown, Calendar, Lock, Loader2, Check, LogOut, Trash2, Save, ArrowRight, Bell, Flame, Gift, Copy, Award, Ticket, Moon,
 } from "lucide-react";
 
 const GIFT_CODE_RE = /^GQ-?[A-Z0-9]{4}-?[A-Z0-9]{4}$/;
@@ -450,6 +450,7 @@ export default function Account() {
               <span className={`inline-block h-6 w-6 transform rounded-full bg-white shadow transition-transform ${emailOptin ? "translate-x-7" : "translate-x-1"}`} />
             </button>
           </div>
+          <RiddleEmailPref user={user} refresh={refresh} />
           {prefMsg && <p className="text-sm text-[#3D9970] font-medium mt-3" data-testid="account-pref-msg">{prefMsg}</p>}
         </div>
 
@@ -646,5 +647,36 @@ function CancelSubscription() {
       className="mt-5 inline-flex items-center gap-2 border-2 border-cream/60 text-cream font-bold px-5 py-2.5 rounded-full hover:bg-cream/10 transition-colors disabled:opacity-60">
       {busy && <Loader2 className="w-4 h-4 animate-spin" />} Résilier mon abonnement
     </button>
+  );
+}
+
+function RiddleEmailPref({ user, refresh }) {
+  const [on, setOn] = useState(Boolean(user?.riddle_email_optin));
+  const [busy, setBusy] = useState(false);
+  const toggle = async () => {
+    setBusy(true);
+    try {
+      await api.put("/enigme/email-pref", { enabled: !on });
+      setOn(!on);
+      toast.success(!on ? "Vous recevrez l'énigme du soir chaque jour à 18 h" : "Énigme du soir par e-mail désactivée");
+      refresh?.();
+    } catch (e) { toast.error(formatError(e.response?.data?.detail)); }
+    finally { setBusy(false); }
+  };
+  return (
+    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-t-2 border-cream-dark pt-5 mt-5">
+      <div className="flex items-start gap-3 flex-1">
+        <Moon className="w-6 h-6 text-navy mt-0.5 shrink-0" aria-hidden="true" />
+        <div>
+          <div className="font-bold text-navy">Énigme du soir par e-mail</div>
+          <p className="text-sm text-navy">Chaque jour à 18 h, une devinette à résoudre en famille au dîner. La réponse est cachée derrière un lien.</p>
+        </div>
+      </div>
+      <button type="button" role="switch" aria-checked={on} aria-label="Énigme du soir par e-mail" disabled={busy} onClick={toggle}
+        data-testid="account-riddle-email-toggle"
+        className={`relative inline-flex h-8 w-14 shrink-0 items-center rounded-full transition-colors ${on ? "bg-terracotta" : "bg-cream-dark"} ${busy ? "opacity-60" : ""}`}>
+        <span className={`inline-block h-6 w-6 transform rounded-full bg-white shadow transition-transform ${on ? "translate-x-7" : "translate-x-1"}`} />
+      </button>
+    </div>
   );
 }

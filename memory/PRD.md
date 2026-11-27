@@ -1997,3 +1997,6 @@ Les routes `/bulk/*` étaient interceptées par `/{qid}/approve|flag|apply-corre
 - Inscription : email_verified=False + lien (jeton haché sha256, 48 h, `email_verify_tokens`, TTL). Page /verifier-email, bandeau « Confirmez votre adresse » + renvoi (3/h). Changement d'e-mail = mot de passe actuel obligatoire + nouvelle vérification. Reset de mot de passe = adresse vérifiée.
 - Google/Apple sur un compte explicitement NON vérifié : mot de passe effacé + sessions révoquées (anti pré-inscription). Comptes antérieurs (champ absent) considérés vérifiés : ni bandeau ni effacement.
 - Énigme du soir : `evening_riddle.py` (Claude, 1 par jour, `evening_riddles` date unique, préparée à 16:30, sinon à la demande), GET /api/enigme/today, carte sur le tableau de bord (indice, réponse, question à partager, masquer).
+
+## 2026-11-27 — Énigme du soir par e-mail
+- Opt-in `users.riddle_email_optin` (Mon compte, désactivé par défaut) via PUT /api/enigme/email-pref. Job `evening_riddle_email` 18:00 Paris (marqueur riddle_email_sent_for = date). E-mail : énigme + indice + bouton « Voir la réponse » → page publique GET /api/enigme/{date}/reponse (jamais pour une date future) ; désinscription en un clic GET /api/enigme/desinscription?u=&s= (HMAC).

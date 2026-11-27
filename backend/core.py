@@ -268,6 +268,7 @@ def user_to_public(u: dict) -> dict:
             "streak_best": int(u.get("streak_best") or 0),
             "streak_last_date": u.get("streak_last_date"),
             "daily_email_optin": u.get("daily_email_optin", True),
+            "riddle_email_optin": bool(u.get("riddle_email_optin")),
             "credits": int(u.get("credits") or 0),
             "xp_total": int(u.get("xp_total") or 0),
             "level": level_info["level"],
