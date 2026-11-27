@@ -215,8 +215,11 @@ async def reset_password(body: ResetPasswordRequest):
         if expires < datetime.now(timezone.utc):
             raise HTTPException(status_code=400, detail="Lien expiré")
     await db.users.update_one({"_id": ObjectId(record["user_id"])},
-                              {"$set": {"password_hash": hash_password(body.new_password), "email_verified": True},
-                               "$inc": {"token_version": 1}})  # déconnecte tous les appareils ; le lien prouve l'e-mail
+                              {"$set": {"password_hash": hash_password(body.new_password)},
+                               "$inc": {"token_version": 1}})  # déconnecte tous les appareils
+    if record.get("email"):  # le lien prouve l'adresse à laquelle il a été envoyé
+        await db.users.update_one({"_id": ObjectId(record["user_id"]), "email": record["email"]},
+                                  {"$set": {"email_verified": True}})
     await db.password_reset_tokens.update_one({"_id": record["_id"]},
                                               {"$set": {"used": True, "used_at": datetime.now(timezone.utc)}})
     return {"ok": True, "message": "Mot de passe réinitialisé. Vous pouvez vous connecter."}
@@ -319,7 +322,9 @@ async def resend_verification(user: dict = Depends(get_current_user)):
     if user.get("email_verified"):
         return {"ok": True, "already_verified": True}
     await rate_hit(f"verify-mail:{user['_id']}", 3, 3600)
-    return {"ok": await send_verification_email(user)}
+    if not await send_verification_email(user):
+        raise HTTPException(status_code=502, detail="L'e-mail n'a pas pu partir. Réessayez dans quelques minutes.")
+    return {"ok": True}
 
 
 @router.patch("/preferences/daily-email")

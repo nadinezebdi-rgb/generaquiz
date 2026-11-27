@@ -260,7 +260,7 @@ def user_to_public(u: dict) -> dict:
             "plan_expires_at": plan_expires_at, "created_at": u.get("created_at"),
             "plan_tier": u.get("plan_tier"),          # "club" | "famille" | "premium" | None
             "plan_period": u.get("plan_period"),      # "monthly" | "yearly" | None
-            "email_verified": bool(u.get("email_verified")),
+            "email_verified": u.get("email_verified") is not False,  # comptes antérieurs à la vérification : non bloqués
             "plan_renews_at": u.get("plan_renews_at"), "plan_auto_renew": bool(u.get("plan_auto_renew")),
             "plan_cancel_at_period_end": bool(u.get("plan_cancel_at_period_end")),
             "plan_renewal_amount": u.get("plan_renewal_amount"), "plan_package_id": u.get("plan_package_id"),

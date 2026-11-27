@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Moon, Lightbulb, Eye, MessageCircleHeart } from "lucide-react";
+import { Moon, Lightbulb, Eye, EyeOff, MessageCircleHeart } from "lucide-react";
 import { api } from "@/lib/api";
 
 export function EveningRiddleCard() {
@@ -35,6 +35,11 @@ export function EveningRiddleCard() {
             {!hint && !answer && (
               <button type="button" onClick={() => setHint(true)} className={`${btn} bg-mustard text-navy hover:bg-mustard/90`} data-testid="evening-riddle-hint-btn">
                 <Lightbulb className="w-5 h-5" /> Un indice
+              </button>
+            )}
+            {answer && (
+              <button type="button" onClick={() => { setAnswer(false); setHint(false); }} className={`${btn} border-2 border-cream/70 hover:bg-cream/10`} data-testid="evening-riddle-hide-btn">
+                <EyeOff className="w-5 h-5" /> Masquer la réponse
               </button>
             )}
             {!answer && (

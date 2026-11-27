@@ -13,7 +13,9 @@ export default function VerifyEmail() {
   useEffect(() => {
     if (done.current) return; // StrictMode : le lien ne sert qu'une fois
     done.current = true;
-    api.post("/auth/verify-email", { token: params.get("token") || "" })
+    const token = params.get("token") || "";
+    if (token.length < 20) { setState({ status: "error", msg: "Ce lien est incomplet. Ouvrez-le directement depuis l'e-mail reçu, ou demandez un nouveau lien depuis votre tableau de bord." }); return; }
+    api.post("/auth/verify-email", { token })
       .then(() => { setState({ status: "ok" }); refresh?.(); })
       .catch((e) => setState({ status: "error", msg: formatError(e.response?.data?.detail) || "Lien invalide." }));
   }, [params, refresh]);

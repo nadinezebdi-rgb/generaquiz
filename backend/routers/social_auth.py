@@ -103,7 +103,7 @@ async def _upsert_social_user(
         by_email = await db.users.find_one({"email": email.lower()})
         if by_email:
             link = {provider_field: sub, "email_verified": True}
-            if not by_email.get("email_verified"):
+            if by_email.get("email_verified") is False:  # compte créé depuis la vérification et jamais confirmé
                 # Anti pré-inscription : un compte jamais confirmé a pu être créé par quelqu'un d'autre avec
                 # cette adresse. Le fournisseur prouve l'e-mail → l'ancien mot de passe et les sessions sont annulés.
                 link["password_hash"] = None

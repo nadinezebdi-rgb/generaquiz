@@ -1992,3 +1992,8 @@ Les routes `/bulk/*` étaient interceptées par `/{qid}/approve|flag|apply-corre
 
 ## 2026-11-27 — Mistral remplacé par Claude (clé universelle Emergent)
 - `backend/ai_client.py` : ai_complete() → anthropic/claude-sonnet-5-5 (send_message, tâches de fond). Utilisé par mistral_client.py (questions nocturnes 03:00), wordsearch_mistral.py, charades_mistral.py, fleches_mistral.py (noms de fichiers/endpoints historiques conservés). Plus aucun appel à MISTRAL_API_KEY / mistralai. Testé : mots mêlés, charades, définitions de mots fléchés, lot de questions.
+
+## 2026-11-27 — Vérification d'e-mail + Énigme du soir (testé iteration_59)
+- Inscription : email_verified=False + lien (jeton haché sha256, 48 h, `email_verify_tokens`, TTL). Page /verifier-email, bandeau « Confirmez votre adresse » + renvoi (3/h). Changement d'e-mail = mot de passe actuel obligatoire + nouvelle vérification. Reset de mot de passe = adresse vérifiée.
+- Google/Apple sur un compte explicitement NON vérifié : mot de passe effacé + sessions révoquées (anti pré-inscription). Comptes antérieurs (champ absent) considérés vérifiés : ni bandeau ni effacement.
+- Énigme du soir : `evening_riddle.py` (Claude, 1 par jour, `evening_riddles` date unique, préparée à 16:30, sinon à la demande), GET /api/enigme/today, carte sur le tableau de bord (indice, réponse, question à partager, masquer).
