@@ -16,14 +16,14 @@ import uuid
 from datetime import datetime, timezone
 from typing import Optional
 
-from mistralai import Mistral
+from ai_client import AI_LABEL, ai_available, ai_complete
 from pydantic import BaseModel
 
 from core import db, logger
 from seed_data import CATEGORIES
 from qa_pipeline import UNTAGGED_OR, category_rules
 
-MISTRAL_MODEL = os.environ.get("MISTRAL_MODEL", "mistral-small-latest")
+MISTRAL_MODEL = AI_LABEL  # nom historique conservé : la génération passe désormais par Claude
 QUESTIONS_PER_CATEGORY = 100
 BATCH_SIZE = 25  # Mistral handles ~25 well-structured items per call comfortably
 MIN_REPLACE_RATIO = 0.8  # garde-fou : on ne remplace le pool que si ≥ 80 % de la cible
@@ -44,11 +44,8 @@ class Question(BaseModel):
     explanation: str
 
 
-def _client() -> Optional[Mistral]:
-    api_key = os.environ.get("MISTRAL_API_KEY")
-    if not api_key:
-        return None
-    return Mistral(api_key=api_key)
+def _client() -> bool | None:
+    return True if ai_available() else None
 
 
 def _build_prompt(category: dict, n: int, batch_idx: int) -> str:
@@ -113,19 +110,9 @@ def _extract_json(text: str):
     return json.loads(text[start:end + 1])
 
 
-async def _generate_one_batch(client: Mistral, category: dict, n: int, batch_idx: int) -> list[dict]:
+async def _generate_one_batch(client, category: dict, n: int, batch_idx: int) -> list[dict]:
     prompt = _build_prompt(category, n, batch_idx)
-    # mistralai SDK is sync — run in thread to keep event loop free
-    def _call():
-        return client.chat.complete(
-            model=MISTRAL_MODEL,
-            messages=[{"role": "user", "content": prompt}],
-            response_format={"type": "json_object"},
-            temperature=0.6,
-            max_tokens=8000,
-        )
-    resp = await asyncio.to_thread(_call)
-    content = resp.choices[0].message.content
+    content = await ai_complete(prompt, max_tokens=8000, tag=f"quiz-{category['id']}")
     items = _extract_json(content)
     return [i for i in items if isinstance(i, dict)]
 
@@ -148,7 +135,7 @@ async def regenerate_category(category: dict, target: int = QUESTIONS_PER_CATEGO
     """
     client = _client()
     if client is None:
-        logger.warning("[mistral] MISTRAL_API_KEY manquant — régénération sautée")
+        logger.warning("[mistral] EMERGENT_LLM_KEY manquant — régénération sautée")
         return 0
 
     all_q: list[dict] = []
@@ -281,20 +268,11 @@ async def ping() -> dict:
     admins can spot a category that wasn't refreshed.
     """
     started = datetime.now(timezone.utc)
-    api_key = os.environ.get("MISTRAL_API_KEY")
-    if not api_key:
-        return {
-            "ok": False,
-            "error": "MISTRAL_API_KEY non configurée",
-            "model": MISTRAL_MODEL,
-        }
-
-    def _ping_call():
-        c = Mistral(api_key=api_key)
-        return c.models.list()
+    if not ai_available():
+        return {"ok": False, "error": "EMERGENT_LLM_KEY non configurée", "model": MISTRAL_MODEL}
 
     try:
-        await asyncio.to_thread(_ping_call)
+        await ai_complete("Réponds simplement {\"ok\": true}", max_tokens=20, tag="ping")
         latency_ms = int((datetime.now(timezone.utc) - started).total_seconds() * 1000)
         ok = True
         error: str | None = None

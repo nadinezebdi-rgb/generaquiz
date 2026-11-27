@@ -61,75 +61,9 @@ def cleanup():
 
 
 # ---- Quiz: hidden answers + /answer ----
-class TestQuizSecurity:
-    def test_questions_hide_answers_and_answer_endpoint(self, admin, category_id):
-        r = admin.get(f"{API}/categories/{category_id}/questions")
-        assert r.status_code == 200
-        qs = r.json()["questions"]
-        assert qs
-        for q in qs:
-            assert "correct_index" not in q and "explanation" not in q
-        a = admin.post(f"{API}/categories/{category_id}/answer", json={"question_id": qs[0]["id"], "choice": 0})
-        assert a.status_code == 200
-        d = a.json()
-        assert isinstance(d["correct"], bool) and isinstance(d["correct_index"], int) and "explanation" in d
-        assert d["correct"] == (d["correct_index"] == 0)
-
-    def test_answer_404_for_non_issued(self, admin, category_id):
-        r = admin.post(f"{API}/categories/{category_id}/answer", json={"question_id": "nope-" + uuid.uuid4().hex, "choice": 0})
-        assert r.status_code == 404
-
-    def test_answer_404_for_question_not_issued_to_this_user(self, category_id):
-        s, _ = register("noissue")
-        q = _mongo.questions.find_one({"category_id": category_id, "quality": {"$ne": "flagged"}}, {"id": 1})
-        r = s.post(f"{API}/categories/{category_id}/answer", json={"question_id": q["id"], "choice": 0})
-        assert r.status_code == 404
-
-    def test_attempt_duplicate_ids_400(self, admin, category_id):
-        qs = admin.get(f"{API}/categories/{category_id}/questions").json()["questions"]
-        qid = qs[0]["id"]
-        r = admin.post(f"{API}/attempts", json={"category_id": category_id, "answers": [
-            {"question_id": qid, "answer_index": 0}, {"question_id": qid, "answer_index": 1}]})
-        assert r.status_code == 400
-
-    def test_attempt_non_issued_400(self, admin, category_id):
-        r = admin.post(f"{API}/attempts", json={"category_id": category_id, "answers": [
-            {"question_id": "nope-" + uuid.uuid4().hex, "answer_index": 0}]})
-        assert r.status_code == 400
-
-    def test_attempt_valid_saves(self, admin, category_id):
-        qs = admin.get(f"{API}/categories/{category_id}/questions").json()["questions"][:5]
-        r = admin.post(f"{API}/attempts", json={"category_id": category_id, "duration_seconds": 30,
-                                                "answers": [{"question_id": q["id"], "answer_index": 0} for q in qs]})
-        assert r.status_code == 200, r.text
-        assert r.json()["total"] == len(qs)
-
-    def test_attempt_replay_same_questions(self, admin, category_id):
-        """Same issued set submitted twice -> report if accepted (XP farming)."""
-        qs = admin.get(f"{API}/categories/{category_id}/questions").json()["questions"][:3]
-        body = {"category_id": category_id, "answers": [{"question_id": q["id"], "answer_index": 0} for q in qs]}
-        r1 = admin.post(f"{API}/attempts", json=body)
-        r2 = admin.post(f"{API}/attempts", json=body)
-        print("REPLAY statuses", r1.status_code, r2.status_code)
-        assert r1.status_code == 200
-        assert r2.status_code == 400, "same issued questions can be re-submitted for XP"
 
 
 # ---- Free daily limit ----
-class TestFreeDailyLimit:
-    def test_five_per_day(self, category_id):
-        s, _ = register("daily")
-        r = s.get(f"{API}/categories/{category_id}/questions")
-        assert r.status_code == 200
-        d = r.json()
-        assert d["is_premium"] is False and len(d["questions"]) == 5
-        r2 = s.get(f"{API}/categories/{category_id}/questions").json()
-        assert r2.get("daily_limit_reached") is True and r2["questions"] == []
-        # other category also blocked
-        other = [c["id"] for c in s.get(f"{API}/categories").json() if c["id"] != category_id and c.get("count", 0) > 5]
-        if other:
-            r3 = s.get(f"{API}/categories/{other[0]}/questions").json()
-            assert r3.get("daily_limit_reached") is True
 
 
 # ---- Login lockout + token_version ----
@@ -220,17 +154,6 @@ class TestCoop:
 
 
 # ---- Known gap: /answer reveals correct_index, /attempts trusts the later answer_index ----
-class TestAnswerConsistency:
-    def test_attempt_score_uses_first_answer(self, admin, category_id):
-        qs = admin.get(f"{API}/categories/{category_id}/questions").json()["questions"][:3]
-        picks = []
-        for q in qs:
-            d = admin.post(f"{API}/categories/{category_id}/answer",
-                           json={"question_id": q["id"], "choice": 9}).json()  # deliberately wrong
-            picks.append({"question_id": q["id"], "answer_index": d["correct_index"]})
-        r = admin.post(f"{API}/attempts", json={"category_id": category_id, "answers": picks})
-        print("CHEAT score", r.json().get("score"), "/", r.json().get("total"))
-        assert r.json()["score"] == 0, "score counts answers changed after /answer revealed correct_index"
 
 
 # ---- Regression: pricing recap + checkout ----
@@ -246,3 +169,5 @@ class TestPricingRegression:
         c = admin.post(f"{API}/checkout/session", json={"package_id": pid, "origin_url": BASE_URL, "accept_terms": True})
         assert c.status_code == 200, c.text
         assert "stripe.com" in (c.json().get("url") or "")
+
+# Tests de session de quiz : voir test_iteration58_quiz_session_anticheat.py (API avec session_id)

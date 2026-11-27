@@ -18,13 +18,13 @@ import random
 import re
 from datetime import datetime, timezone
 
-from mistralai import Mistral
+from ai_client import AI_LABEL, ai_available, ai_complete
 
 from core import db, logger
 from wordsearch_data import build_grid, build_all_seed_grids
 
 
-MISTRAL_MODEL = os.environ.get("MISTRAL_MODEL", "mistral-small-latest")
+MISTRAL_MODEL = AI_LABEL  # génération via Claude (clé universelle Emergent)
 MAX_GRIDS = 40   # keep the collection bounded — old grids beyond this get pruned
 
 
@@ -76,26 +76,18 @@ Réponds STRICTEMENT en JSON valide, sans aucun texte avant ou après :
 
 
 async def _mistral_generate_theme() -> dict | None:
-    api_key = os.environ.get("MISTRAL_API_KEY")
-    if not api_key:
-        logger.warning("[wordsearch] MISTRAL_API_KEY manquant — génération sautée")
+    if not ai_available():
+        logger.warning("[wordsearch] EMERGENT_LLM_KEY manquant — génération sautée")
         return None
     family = _pick_theme_family()
     prompt = PROMPT_TEMPLATE.format(family=family["family"], hint=family["hint"])
-    client = Mistral(api_key=api_key)
     try:
-        resp = await asyncio.to_thread(
-            client.chat.complete,
-            model=MISTRAL_MODEL,
-            messages=[{"role": "user", "content": prompt}],
-            temperature=0.9,
-        )
-        raw = resp.choices[0].message.content
-        match = re.search(r"\{.*\}", raw, re.DOTALL)
-        if not match:
-            logger.warning("[wordsearch] pas de JSON dans la réponse Mistral: %s", raw[:200])
+        raw = await ai_complete(prompt, max_tokens=2000, tag="wordsearch")
+        start = raw.find("{")
+        if start < 0:
+            logger.warning("[wordsearch] pas de JSON dans la réponse de l'IA: %s", raw[:200])
             return None
-        payload = json.loads(match.group(0))
+        payload, _ = json.JSONDecoder().raw_decode(raw[start:])  # premier objet JSON, texte éventuel ignoré
         if not payload.get("theme") or not isinstance(payload.get("words"), list):
             return None
         payload["family"] = family["family"]

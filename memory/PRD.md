@@ -1977,3 +1977,18 @@ Les routes `/bulk/*` étaient interceptées par `/{qid}/approve|flag|apply-corre
 - Back : `subscription.py` — Checkout mode=subscription (promo = ligne unique 49/79 € + annuel 69/99 € avec trial_end +12 mois), blocage serveur après la date limite, accept_terms obligatoire, activation idempotente + e-mails (confirmation, activation 12 mois, rappel J-30), synchro renouvellements 06:00, rappel J-30 10:15. users: plan_renews_at, plan_auto_renew, plan_cancel_at_period_end, stripe_subscription_id, first_login_at.
 - Aperçu : la clé Stripe de test partagée ne gère que les sessions Checkout → résiliation et synchro SIMULÉES en aperçu ; réelles en production (clé live).
 - Cartes cadeaux (/offrir) inchangées. 12 mois démarrent à l'achat (choix utilisateur).
+
+## 2026-11-27 — Audit sécurité : urgences + 1er lot (testé iteration_57/58)
+- Mots de passe retirés de tests/test_reports/memory ; tests lisent TEST_ADMIN_EMAIL/TEST_ADMIN_PASSWORD (backend/.env, compte aperçu qa-admin@generaquiz.fr). admin@generaquiz.fr : mot de passe changé par le propriétaire.
+- FAMILLE2026 retiré du seed, migration unique `revoke_famille2026` (désactive + retire le Premium à vie des non-admins sans abonnement).
+- PostHog uniquement après consentement (ConsentBanner, localStorage gq_consent, footer « Gérer les cookies »), maskAllInputs + .ph-mask sur le Livre ; emergent-main.js non chargé sur generaquiz.fr ; lang=fr.
+- Coop : entrées family seulement, sessions 24 h, 15 codes inconnus / 15 min / IP.
+- Limiteur Mongo (`rate_limits`, TTL) par IP réelle (client_ip : XFF de droite à gauche hors répartiteur/Cloudflare) : login 30/15 min + 8 échecs/compte, register 5/h.
+- token_version dans le JWT (reset / changement de mot de passe déconnectent les autres appareils), lien de reset plus journalisé, reset atomique.
+- Quiz : `quiz_sessions` (session_id, options mélangées côté serveur, 1er choix seul retenu, score serveur, sauvegarde unique 409), Découverte = 5 questions RÉPONDUES / jour.
+- Promo : réservation atomique, ne raccourcit jamais un abonnement. Regex échappées.
+- UX : formulaires connexion/inscription accessibles (labels, autocomplete, afficher le mot de passe, role=alert, CGU/confidentialité), erreur d'enregistrement du score + Réessayer, intercepteur 401 → /login?session=expiree&next=.
+- Reste (P1/P2) : 6 vérification e-mail + liaison Google, 10 crédits/XP défis & pub, 11 dépendances, 12 échappement e-mail invitation famille, 14 audit promote EHPAD, 16 CSP/X-Frame + origin_url, 17 suppression de compte complète, 18 médias base64 → GridFS ; U4 tailles de texte, U5 alert/confirm, U8 clavier/animations ; barre de navigation qui déborde à 1920 px quand connecté.
+
+## 2026-11-27 — Mistral remplacé par Claude (clé universelle Emergent)
+- `backend/ai_client.py` : ai_complete() → anthropic/claude-sonnet-5-5 (send_message, tâches de fond). Utilisé par mistral_client.py (questions nocturnes 03:00), wordsearch_mistral.py, charades_mistral.py, fleches_mistral.py (noms de fichiers/endpoints historiques conservés). Plus aucun appel à MISTRAL_API_KEY / mistralai. Testé : mots mêlés, charades, définitions de mots fléchés, lot de questions.

@@ -23,12 +23,12 @@ import random
 import re
 from datetime import datetime, timezone
 
-from mistralai import Mistral
+from ai_client import AI_LABEL, ai_available, ai_complete
 
 from core import db, logger
 
 
-MISTRAL_MODEL = os.environ.get("MISTRAL_MODEL", "mistral-small-latest")
+MISTRAL_MODEL = AI_LABEL  # génération via Claude (clé universelle Emergent)
 MAX_GENERATED = 30
 
 # =============================================================================
@@ -319,10 +319,8 @@ async def _mistral_reclue(words: tuple[str, ...]) -> tuple[list[str], list[str]]
     minimum les cas où H_i == V_i, où un mot apparaît dans sa clue, ou où
     Mistral rend un tableau shufflé de la mauvaise taille).
     """
-    api_key = os.environ.get("MISTRAL_API_KEY")
-    if not api_key:
+    if not ai_available():
         return None
-    client = Mistral(api_key=api_key)
     n = len(words)
     indexed_words = "\n".join([f"  #{k+1} : {w}" for k, w in enumerate(words)])
     example_object = ",\n".join([
@@ -333,17 +331,11 @@ async def _mistral_reclue(words: tuple[str, ...]) -> tuple[list[str], list[str]]
 
     for attempt in range(3):
         try:
-            resp = await asyncio.to_thread(
-                client.chat.complete,
-                model=MISTRAL_MODEL,
-                messages=[{"role": "user", "content": prompt}],
-                temperature=0.7 + 0.1 * attempt,  # varie légèrement à chaque retry
-            )
-            raw = resp.choices[0].message.content
-            match = re.search(r"\{.*\}", raw, re.DOTALL)
-            if not match:
+            raw = await ai_complete(prompt, max_tokens=3000, tag=f"fleches-{attempt}")
+            start = raw.find("{")
+            if start < 0:
                 continue
-            data = json.loads(match.group(0))
+            data, _ = json.JSONDecoder().raw_decode(raw[start:])
             entries = data.get("words") or {}
             if not isinstance(entries, dict) or len(entries) != n:
                 continue

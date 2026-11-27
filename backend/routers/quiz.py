@@ -6,6 +6,7 @@ and recomputes the score. Client-declared scores are IGNORED — this
 plugs the cheating vector where the browser console could send
 `{score:999,total:999}` to auto-win in the leagues.
 """
+import random
 import uuid
 from datetime import datetime, timedelta, timezone
 
@@ -201,9 +202,15 @@ async def get_questions(category_id: str, user: dict = Depends(get_current_user)
     }) if seen_ids else 0
     remaining = max(0, playable_total - seen_playable)
 
+    # Ordre des réponses mélangé côté serveur pour chaque partie (la position ne trahit jamais la bonne réponse).
+    perms = {}
+    for q in qs:
+        perm = random.sample(range(len(q["options"])), len(q["options"]))
+        q["options"] = [q["options"][i] for i in perm]
+        perms[q["id"]] = perm
     session_id = str(uuid.uuid4())
     await db.quiz_sessions.insert_one({
-        "id": session_id, "user_id": user_id, "category_id": category_id,
+        "id": session_id, "user_id": user_id, "category_id": category_id, "perms": perms,
         "question_ids": [q["id"] for q in qs], "answers": {}, "answered_count": 0, "consumed": False,
         "created_at": datetime.now(timezone.utc).isoformat()})
 
@@ -255,19 +262,22 @@ async def check_answer(category_id: str, body: QuizAnswer, user: dict = Depends(
     sess = await _open_session(body.session_id, user_id, category_id)
     if body.question_id not in sess["question_ids"]:
         raise HTTPException(status_code=404, detail="Question introuvable")
+    perm = sess["perms"][body.question_id]
+    if body.choice >= len(perm):
+        raise HTTPException(status_code=400, detail="Choix invalide")
     if body.question_id not in sess["answers"]:
         if not is_premium_active(user) and await answered_today(user_id) >= FREE_DAILY_QUESTIONS:
             raise HTTPException(status_code=403, detail="Vos 5 questions du jour sont jouées. Revenez demain !")
         await db.quiz_sessions.update_one(
             {"id": body.session_id, f"answers.{body.question_id}": {"$exists": False}},
-            {"$set": {f"answers.{body.question_id}": body.choice}, "$inc": {"answered_count": 1}})
+            {"$set": {f"answers.{body.question_id}": perm[body.choice]}, "$inc": {"answered_count": 1}})
         sess = await db.quiz_sessions.find_one({"id": body.session_id})
     q = await db.questions.find_one({"id": body.question_id, "category_id": category_id},
                                     {"_id": 0, "correct_index": 1, "explanation": 1})
     if not q:
         raise HTTPException(status_code=404, detail="Question introuvable")
-    choice = sess["answers"][body.question_id]
-    return {"correct": choice == q["correct_index"], "correct_index": q["correct_index"],
+    choice = sess["answers"][body.question_id]  # index d'origine
+    return {"correct": choice == q["correct_index"], "correct_index": perm.index(q["correct_index"]),
             "explanation": q.get("explanation", "")}
 
 
@@ -280,8 +290,8 @@ async def save_attempt(body: AttemptCreate, user: dict = Depends(get_current_use
     if not body.session_id:
         raise HTTPException(status_code=400, detail="Partie expirée : relancez un quiz pour enregistrer votre score.")
     sess = await _open_session(body.session_id, str(user["_id"]), body.category_id)
-    if any(qid not in sess["answers"] for qid in question_ids):
-        raise HTTPException(status_code=400, detail="Une ou plusieurs questions n'ont pas été jouées dans cette partie.")
+    if set(question_ids) != set(sess["answers"]):
+        raise HTTPException(status_code=400, detail="Le score doit reprendre toutes les questions jouées dans cette partie.")
     if not (await db.quiz_sessions.update_one({"id": sess["id"], "consumed": False},
                                               {"$set": {"consumed": True}})).modified_count:
         raise HTTPException(status_code=409, detail="Ce score est déjà enregistré.")

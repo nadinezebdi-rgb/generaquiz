@@ -190,6 +190,7 @@ export default function QuizPlayer() {
       setAnswers((prev) => [...prev, { question_id: currentQ.id, answer_index: originalIdx }]);
     } catch (e) {
       setSelected(null);
+      if (e.response?.status === 403) { setData((d) => ({ ...d, daily_limit_reached: true })); return; }
       toast.error(formatError(e.response?.data?.detail) || "La réponse n'a pas pu être vérifiée. Vérifiez votre connexion et touchez à nouveau votre choix.");
     }
   };

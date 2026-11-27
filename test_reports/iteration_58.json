@@ -1,0 +1,43 @@
+{
+  "summary": "Retest after iteration_57. Everything you asked us to fix passes. Backend: 14/14 new pytest tests pass (test_iteration58_quiz_session_anticheat.py). Quiz sessions: GET returns session_id, /answer needs it, only the first choice is kept, the score comes from the stored choices (the client's answer_index is ignored), a second save gets 409, saving the same game 4 times at once gives one 200 and three 409, unknown, missing or expired (>6h) sessions get 400, another user's session gets 400. Free limit now counts answered questions: 3 fetches still give 5 questions, 5 parallel /answer calls across 2 sessions accept exactly 5, a 6th new question gets 403, 2 answers leave 3 questions. client_ip uses the egress IP and ignores a spoofed 'X-Forwarded-For: 9.9.9.9, 8.8.8.8'. Reset token: 5 parallel uses give one 200 and four 400. Contact and packages work. Frontend (Playwright): free user registers on mobile 390px with the consent banner open (body padding 220px, submit button above the banner, clickable without force). Quiz shows 5 questions after the StrictMode double fetch and a reload; answering 5 saves; Rejouer then shows quiz-daily-limit. Premium admin: a game of 30 questions, forced 503 on save shows quiz-save-error, Réessayer saves (200). Rejouer starts a fresh game and that save also works. When a save reaches the server but the response is lost (502), Réessayer gets 409 and the game counts as saved (no error left). 401 interceptor: in-app navigation to /app/famille after cookies are cleared goes to /login?session=expiree&next=%2Fapp%2Ffamille, and logging in lands on /app/famille. next=/login and next=//evil.com both go to /app/dashboard. Family mode (2 players, pass, answer), /app/pricing and /contact all work. 2 new holes: a player can save only part of the answered questions to inflate accuracy, and options come in database order where 68% of correct answers are option 0.",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {"endpoint": "POST /api/attempts", "issue": "A player can save only some of the questions answered in a session. Reproduced: 6 answered, 3 right; saving only the 3 right ids stores 3/3 (100%) instead of 3/6. This inflates accuracy_pct, mastery and 'perfect score' type badges (XP is not affected). Fix: total = sess.answered_count (or len(sess.answers)), score over every stored answer, ignore the payload's subset; or reject when set(question_ids) != set(sess.answers)."},
+      {"endpoint": "GET /api/categories/{id}/questions", "issue": "Options come back in database order and correct_index is heavily skewed: 1368 of 2005 questions (68%) have correct_index=0. Someone scripting the API who always picks choice 0 gets about 68% right with no knowledge. The frontend shuffles, but the API does not. Fix: shuffle options on the server for each session and store the mapping in quiz_sessions (or rebalance correct_index in the data)."},
+      {"endpoint": "POST /api/categories/{id}/answer", "issue": "Free limit check and write are not atomic: answered_today() is read before the update. A 10-way parallel test held at exactly 5, but a tight race could let through 6 or 7. Low impact. Fix: a per-user-per-day counter doc with conditional $inc ($lt 5)."},
+      {"endpoint": "answered_today()", "issue": "Counts answered_count of sessions CREATED since Paris midnight. A session opened at 23:58 and answered after midnight counts toward yesterday, so a free user can get up to 10 answers around midnight. Edge case."}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [
+      {"flow": "Family mode save", "issue": "Questions where every player passed are never sent to /answer. They are left out of answers, so the saved total is lower than the number of questions (e.g. 28/28 instead of 28/30). Not new; flagging because the attempt total is now based on answered questions.", "affected_selectors": ["[data-testid='quiz-family-pass']"]},
+      {"flow": "Free quiz with a second tab", "issue": "If /answer returns 403 (daily limit used up in another tab) the player gets a toast, the choice resets, and the quiz has no exit or limit screen. Suggest showing quiz-daily-limit when /answer returns 403.", "affected_selectors": ["[data-testid^='quiz-option-']"]}
+    ],
+    "design_issues": [
+      {"screen": "/app/pricing (logged in, 1920px)", "issues": ["The navbar shows marketing and app links together (Quiz du Jour, Catégories, Essai gratuit, Tarifs, Offrir, Bien vieillir, Mes quiz, Jeux, Ligues, Niv, Crédits, Mon compte, Admin, Quitter). It overflows: the 'Quitter' button and 'Confort +' are cut off on the right edge."]}
+    ]
+  },
+  "test_report_links": ["/app/backend/tests/test_iteration58_quiz_session_anticheat.py", "/app/test_reports/pytest/iteration58.xml"],
+  "action_items": [
+    "POST /attempts: compute score and total from every stored session answer (or reject a payload that is a subset), so players cannot inflate accuracy by leaving out wrong answers",
+    "Shuffle options per session on the server (store the mapping) or rebalance correct_index (68% are 0)",
+    "Update or retire /app/backend/tests/test_iteration57_security_audit.py. 7 of its tests fail only because they use the old /answer and /attempts contract without session_id; the other 8 (auth, token_version, promo, coop, pricing) still pass",
+    "Optional: make the free-limit check atomic; handle 403 from /answer in QuizPlayer by showing the daily-limit screen",
+    "Fix the navbar overflow on /app/pricing for logged-in users at desktop width"
+  ],
+  "critical_code_review_comments": [
+    "quiz.py get_questions: unused local day_start (line 121) and re-import of timedelta inside the function",
+    "quiz.py check_answer: after the update_one there is a re-read but no check of modified_count. It is fine because the first choice wins, but the 403 check before it is a TOCTOU",
+    "save_attempt: total=len(body.answers) trusts the client's subset (see backend minor #1)",
+    "reset_password: the token is marked used before the expiry check. Fine for security, but the second update_one is redundant apart from used_at",
+    "QuizPlayer.jsx is 662 lines, close to the 700-line split threshold"
+  ],
+  "updated_files": ["/app/backend/tests/test_iteration58_quiz_session_anticheat.py"],
+  "success_rate": {"backend": "100% (14/14 new tests); 2 new medium anti-cheat gaps found by probing", "frontend": "100% of the requested flows"},
+  "seed_data_creation": "No seed data. Test users created and removed: pytest users through DELETE /api/auth/account; the UI users test_ui58_8d1168, test_ui58b_6e423f and test_ui58c_04a176 (@example.com) deleted by _id together with their quiz_sessions, attempts, user_seen_questions, league_scores and user_badges. rate_limits cleared; the TEST contact message was deleted. The QA admin (qa-admin) gained a few quiz attempts and some XP from test games; that is test-admin data only.",
+  "retest_needed": true,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Run: export $(grep -E 'MONGO_URL|DB_NAME|TEST_ADMIN' /app/backend/.env | tr -d '\"' | xargs); export REACT_APP_BACKEND_URL=...; pytest tests/test_iteration58_quiz_session_anticheat.py -p no:xdist. The browser tool has no env vars: read the admin password inside the script from /app/backend/.env with a regex and never print it. Quiz options animate in, so wait for '[data-testid=quiz-option-0]:not([disabled])' to be visible. To test the 401 redirect on /app/famille, clear cookies then call history.pushState('/app/famille') plus a popstate event (the qa-admin family page only calls GET /famille on mount). When intercepting POST /api/attempts, filter by method because the dashboard calls GET /attempts. Category ids: cinema, chansons, objets-antan, histoire-france, annees-50-60."
+}
