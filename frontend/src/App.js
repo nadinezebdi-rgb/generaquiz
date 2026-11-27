@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate, Link, useLocation } from "react-router-dom";
 import { Toaster } from "sonner";
+import { ConsentBanner } from "@/components/ConsentBanner";
 import "@/App.css";
 
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
@@ -32,6 +33,7 @@ import ResetPassword from "@/pages/ResetPassword";
 import DailyQuiz from "@/pages/DailyQuiz";
 import CGU from "@/pages/legal/CGU";
 import Contact from "@/pages/Contact";
+import VerifyEmail from "@/pages/VerifyEmail";
 import CGV from "@/pages/legal/CGV";
 import Confidentialite from "@/pages/legal/Confidentialite";
 import AdminReports from "@/pages/AdminReports";
@@ -150,6 +152,7 @@ export default function App() {
       <SeniorModeProvider>
         <BrowserRouter>
         <Toaster richColors position="top-right" />
+        <ConsentBanner />
         <VisitorProgressSync />
         <Routes>
           <Route path="/" element={<Landing />} />
@@ -160,6 +163,7 @@ export default function App() {
           <Route path="/quiz-du-jour" element={<DailyQuiz />} />
           <Route path="/cgu" element={<CGU />} />
           <Route path="/contact" element={<Contact />} />
+          <Route path="/verifier-email" element={<VerifyEmail />} />
           <Route path="/cgv" element={<CGV />} />
           <Route path="/confidentialite" element={<Confidentialite />} />
           <Route path="/ehpad" element={<Ehpad />} />
@@ -170,7 +174,7 @@ export default function App() {
           <Route path="/conseils-bien-vieillir" element={<ConseilsArchive />} />
           <Route path="/conseils-bien-vieillir/:dateKey" element={<ConseilsArchive />} />
           <Route path="/decouvrir/:categoryId" element={<ThemeShowcase />} />
-          <Route path="/livre/coop/:code" element={<LivreCoop />} />
+          <Route path="/livre/coop/:code" element={<div className="ph-mask"><LivreCoop /></div>} />
           <Route
             path="/app/atelier"
             element={
@@ -191,7 +195,7 @@ export default function App() {
             path="/app/livre"
             element={
               <ProtectedRoute>
-                <MonLivre />
+                <div className="ph-mask"><MonLivre /></div>
               </ProtectedRoute>
             }
           />

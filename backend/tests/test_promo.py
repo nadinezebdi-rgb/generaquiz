@@ -9,8 +9,7 @@ BASE_URL = os.environ.get("REACT_APP_BACKEND_URL").rstrip("/")
 API = f"{BASE_URL}/api"
 
 ADMIN_EMAIL = "admin@quizdantan.fr"
-ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "")
-FAMILY_PROMO_CODE = os.environ.get("FAMILY_PROMO_CODE", "").upper()  # code cadeau « à vie », jamais en dur
+ADMIN_PASSWORD = os.environ["TEST_ADMIN_PASSWORD"]
 
 
 # --------------------------- Fixtures ---------------------------
@@ -111,7 +110,7 @@ class TestAdminPromoCRUD:
         assert isinstance(rows, list)
         # Expect seeded codes
         codes = [p["code"] for p in rows]
-        assert FAMILY_PROMO_CODE in codes
+        assert "FAMILLE2026" in codes
         # Check sort desc by created_at
         created = [p.get("created_at") for p in rows if p.get("created_at")]
         assert created == sorted(created, reverse=True)
@@ -143,7 +142,7 @@ class TestAdminPromoCRUD:
 # --------------------------- Redeem ---------------------------
 class TestPromoRedeem:
     def test_redeem_unauth(self):
-        r = requests.post(f"{API}/promo/redeem", json={"code": FAMILY_PROMO_CODE}, timeout=15)
+        r = requests.post(f"{API}/promo/redeem", json={"code": "FAMILLE2026"}, timeout=15)
         assert r.status_code == 401
 
     def test_redeem_invalid_code_404(self, free_user_session):
@@ -164,9 +163,9 @@ class TestPromoRedeem:
         assert me.json()["plan"] == "premium"
 
     def test_redeem_same_code_twice_400(self, free_user_session):
-        r1 = free_user_session.post(f"{API}/promo/redeem", json={"code": FAMILY_PROMO_CODE}, timeout=15)
+        r1 = free_user_session.post(f"{API}/promo/redeem", json={"code": "FAMILLE2026"}, timeout=15)
         assert r1.status_code == 200
-        r2 = free_user_session.post(f"{API}/promo/redeem", json={"code": FAMILY_PROMO_CODE}, timeout=15)
+        r2 = free_user_session.post(f"{API}/promo/redeem", json={"code": "FAMILLE2026"}, timeout=15)
         assert r2.status_code == 400
         assert "déjà" in r2.json().get("detail", "").lower()
 

@@ -26,7 +26,7 @@
     "backend": "95% (20/21, the 1 fail was wrong test URL /api/daily/today — not a real issue)",
     "frontend": "100%"
   },
-  "test_credentials": "admin@generaquiz.fr / <ancien mot de passe admin> (existing); fresh account created inline via /api/auth/register for first-time-badge test",
+  "test_credentials": "admin@generaquiz.fr / [mot de passe retiré] (existing); fresh account created inline via /api/auth/register for first-time-badge test",
   "seed_data_creation": "None persistent — TEST_atelier_* accounts registered dynamically; atelier_entries auto-created via API",
   "retest_needed": false,
   "should_main_agent_self_test": false,

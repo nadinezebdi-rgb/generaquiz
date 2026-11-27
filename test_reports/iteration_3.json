@@ -36,7 +36,7 @@
     "backend": "100% (16/16)",
     "frontend": "100% (4/4 scenarios: non-admin gating, invalid+valid redeem, premium gating, admin CRUD+toggle+delete)"
   },
-  "test_credentials": "admin@quizdantan.fr / <ancien mot de passe admin>  ; free users registered on the fly each run",
+  "test_credentials": "admin@quizdantan.fr / [mot de passe retiré]  ; free users registered on the fly each run",
   "seed_data_creation": "Each pytest run creates ~5 temporary promo codes (TEST-, DUP, DEACT, MAX, UITEST...) and several throw-away user accounts. Codes are cleaned up via module-level fixture; users intentionally left in DB for traceability (do not affect functionality).",
   "retest_needed": false,
   "main_agent_can_self_test": true,

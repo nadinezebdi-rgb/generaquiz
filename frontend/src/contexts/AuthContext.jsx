@@ -22,6 +22,19 @@ export function AuthProvider({ children }) {
     refresh();
   }, [refresh]);
 
+  // Session expirée (7 jours, ou mot de passe changé sur un autre appareil) : retour à la connexion.
+  useEffect(() => {
+    const id = api.interceptors.response.use(undefined, (error) => {
+      const url = error.config?.url || "";
+      if (error.response?.status === 401 && user && !url.startsWith("/auth/") && !window.location.pathname.startsWith("/login")) {
+        const next = encodeURIComponent(window.location.pathname + window.location.search);
+        window.location.assign(`/login?session=expiree&next=${next}`); // rechargement complet : l'état repart de zéro
+      }
+      return Promise.reject(error);
+    });
+    return () => api.interceptors.response.eject(id);
+  }, [user]);
+
   const login = async (email, password) => {
     const { data } = await api.post("/auth/login", { email, password });
     setUser(data.user);

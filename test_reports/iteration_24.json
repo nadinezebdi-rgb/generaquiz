@@ -22,7 +22,7 @@
     "/app/backend/tests/test_iteration24_coop_combo.py (new)"
   ],
   "success_rate": {"backend": "100% (12/12)", "frontend": "100% (all data-testids + flows verified)"},
-  "test_credentials": "admin@generaquiz.fr / <ancien mot de passe admin>",
+  "test_credentials": "admin@generaquiz.fr / [mot de passe retiré]",
   "seed_data_creation": "Ephemeral coop challenges created during tests, all prefixed TEST_ or UI_ for identification. Reused user-provided completed token LW3cdWjTqBI (97% Complicité, best_combo=7) for the CoopShareCard tier-≥95% (Fusion Temporelle Parfaite) verification.",
   "retest_needed": false,
   "main_agent_can_self_test": true,

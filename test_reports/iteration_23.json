@@ -15,7 +15,7 @@
   ],
   "updated_files": [],
   "success_rate": {"backend": "N/A (skipped)", "frontend": "100%"},
-  "test_credentials": "admin@generaquiz.fr / <ancien mot de passe admin>",
+  "test_credentials": "admin@generaquiz.fr / [mot de passe retiré]",
   "seed_data_creation": "None — used pre-inserted first_quiz badge on admin user as per handoff note.",
   "retest_needed": false,
   "main_agent_can_self_test": true,

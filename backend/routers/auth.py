@@ -1,10 +1,13 @@
 """Auth router: register/login/logout/me/forgot/reset/change-password/profile/account.
 Includes Resend email sending and IP-based rate limiting on /forgot-password."""
 import asyncio
+import html
+import hashlib
 import secrets
 from datetime import datetime, timezone, timedelta
 
 import resend
+from pydantic import BaseModel, Field
 from bson import ObjectId
 from fastapi import APIRouter, Depends, HTTPException, Request, Response
 from pymongo.errors import DuplicateKeyError
@@ -12,7 +15,7 @@ from pymongo.errors import DuplicateKeyError
 from core import (
     db, logger, FRONTEND_URL, RESEND_API_KEY, SENDER_EMAIL, WELCOME_CREDITS,
     hash_password, verify_password, create_access_token, create_refresh_token,
-    set_auth_cookies, clear_auth_cookies, user_to_public, get_current_user, rate_limit,
+    set_auth_cookies, clear_auth_cookies, user_to_public, get_current_user, rate_limit, rate_hit, rate_record,
     RegisterRequest, LoginRequest, ForgotPasswordRequest, ResetPasswordRequest,
     ChangePasswordRequest, UpdateProfileRequest, DailyEmailPrefRequest,
 )
@@ -97,7 +100,7 @@ async def _send_reset_email(to_email: str, reset_link: str) -> bool:
         return False
 
 
-@router.post("/register")
+@router.post("/register", dependencies=[Depends(rate_limit("register", max_calls=5, window_seconds=3600))])
 async def register(body: RegisterRequest, request: Request, response: Response):
     email = body.email.lower().strip()
     if await db.users.find_one({"email": email}):
@@ -123,6 +126,7 @@ async def register(body: RegisterRequest, request: Request, response: Response):
            "referred_by_user_id": referred_by_user_id,
            "referral_count": 0,
            "birth_year": body.birth_year,
+           "email_verified": False,
            "country_code": _infer_country_code(request)}
     try:
         result = await db.users.insert_one(doc)
@@ -139,21 +143,29 @@ async def register(body: RegisterRequest, request: Request, response: Response):
         "reason": "welcome_bonus",
         "created_at": datetime.now(timezone.utc).isoformat(),
     })
+    await send_verification_email(doc)
     access = create_access_token(str(result.inserted_id), email)
     refresh = create_refresh_token(str(result.inserted_id))
     set_auth_cookies(response, access, refresh)
     return {"user": user_to_public(doc), "access_token": access}
 
 
-@router.post("/login")
-async def login(body: LoginRequest, response: Response):
+LOGIN_WINDOW = 900
+
+
+@router.post("/login", dependencies=[Depends(rate_limit("login", max_calls=30, window_seconds=LOGIN_WINDOW))])
+async def login(body: LoginRequest, request: Request, response: Response):
     email = body.email.lower().strip()
+    fail_key = f"login-fail:{email}"
+    await rate_hit(fail_key, 8, LOGIN_WINDOW, record=False)  # 8 échecs / 15 min par compte
     user = await db.users.find_one({"email": email})
-    if not user or not verify_password(body.password, user["password_hash"]):
+    if not user or not user.get("password_hash") or not verify_password(body.password, user["password_hash"]):
+        await rate_record(fail_key, LOGIN_WINDOW)
         raise HTTPException(status_code=401, detail="Email ou mot de passe incorrect")
+    await db.rate_limits.delete_many({"key": fail_key})
     if not user.get("first_login_at"):
         await db.users.update_one({"_id": user["_id"]}, {"$set": {"first_login_at": datetime.now(timezone.utc).isoformat()}})
-    access = create_access_token(str(user["_id"]), email)
+    access = create_access_token(str(user["_id"]), email, user.get("token_version", 0))
     refresh = create_refresh_token(str(user["_id"]))
     set_auth_cookies(response, access, refresh)
     return {"user": user_to_public(user), "access_token": access}
@@ -184,7 +196,6 @@ async def forgot_password(body: ForgotPasswordRequest):
                                                 "email": email, "expires_at": expires_at,
                                                 "used": False, "created_at": datetime.now(timezone.utc)})
     reset_link = f"{FRONTEND_URL}/reset-password?token={token}"
-    logger.info(f"[RESET] {email} -> {reset_link}")
     sent = await _send_reset_email(email, reset_link)
     generic["email_sent"] = sent
     return generic
@@ -192,11 +203,11 @@ async def forgot_password(body: ForgotPasswordRequest):
 
 @router.post("/reset-password")
 async def reset_password(body: ResetPasswordRequest):
-    record = await db.password_reset_tokens.find_one({"token": body.token})
+    # Consommation atomique : deux envois simultanés ne peuvent pas utiliser le même lien.
+    record = await db.password_reset_tokens.find_one_and_update(
+        {"token": body.token, "used": {"$ne": True}}, {"$set": {"used": True}})
     if not record:
-        raise HTTPException(status_code=400, detail="Lien invalide ou expiré")
-    if record.get("used"):
-        raise HTTPException(status_code=400, detail="Lien déjà utilisé")
+        raise HTTPException(status_code=400, detail="Lien invalide, expiré ou déjà utilisé")
     expires = record.get("expires_at")
     if isinstance(expires, datetime):
         if expires.tzinfo is None:
@@ -204,19 +215,26 @@ async def reset_password(body: ResetPasswordRequest):
         if expires < datetime.now(timezone.utc):
             raise HTTPException(status_code=400, detail="Lien expiré")
     await db.users.update_one({"_id": ObjectId(record["user_id"])},
-                              {"$set": {"password_hash": hash_password(body.new_password)}})
+                              {"$set": {"password_hash": hash_password(body.new_password)},
+                               "$inc": {"token_version": 1}})  # déconnecte tous les appareils
+    if record.get("email"):  # le lien prouve l'adresse à laquelle il a été envoyé
+        await db.users.update_one({"_id": ObjectId(record["user_id"]), "email": record["email"]},
+                                  {"$set": {"email_verified": True}})
     await db.password_reset_tokens.update_one({"_id": record["_id"]},
                                               {"$set": {"used": True, "used_at": datetime.now(timezone.utc)}})
     return {"ok": True, "message": "Mot de passe réinitialisé. Vous pouvez vous connecter."}
 
 
 @router.post("/change-password")
-async def change_password(body: ChangePasswordRequest, user: dict = Depends(get_current_user)):
-    if not verify_password(body.current_password, user["password_hash"]):
+async def change_password(body: ChangePasswordRequest, response: Response, user: dict = Depends(get_current_user)):
+    if not user.get("password_hash") or not verify_password(body.current_password, user["password_hash"]):
         raise HTTPException(status_code=400, detail="Mot de passe actuel incorrect")
+    tv = user.get("token_version", 0) + 1  # les autres appareils sont déconnectés, celui-ci reste connecté
     await db.users.update_one({"_id": ObjectId(str(user["_id"]))},
-                              {"$set": {"password_hash": hash_password(body.new_password)}})
-    return {"ok": True, "message": "Mot de passe mis à jour"}
+                              {"$set": {"password_hash": hash_password(body.new_password), "token_version": tv}})
+    access = create_access_token(str(user["_id"]), user["email"], tv)
+    set_auth_cookies(response, access, create_refresh_token(str(user["_id"])))
+    return {"ok": True, "message": "Mot de passe mis à jour", "access_token": access}
 
 
 @router.patch("/profile")
@@ -228,9 +246,13 @@ async def update_profile(body: UpdateProfileRequest, user: dict = Depends(get_cu
         new_email = body.email.strip().lower()
         current_email = (user.get("email") or "").strip().lower()
         if new_email != current_email:
+            if not user.get("password_hash"):
+                raise HTTPException(status_code=400, detail="Définissez d'abord un mot de passe (Mot de passe oublié) pour changer d'adresse e-mail.")
+            if not body.current_password or not verify_password(body.current_password, user["password_hash"]):
+                raise HTTPException(status_code=403, detail="Mot de passe actuel requis pour changer d'adresse e-mail.")
             # Uniqueness check — case-insensitive
             clash = await db.users.find_one(
-                {"email": {"$regex": f"^{new_email}$", "$options": "i"},
+                {"email": new_email,
                  "_id": {"$ne": ObjectId(str(user["_id"]))}},
                 {"_id": 1},
             )
@@ -239,9 +261,70 @@ async def update_profile(body: UpdateProfileRequest, user: dict = Depends(get_cu
                     status_code=409, detail="Cette adresse e-mail est déjà utilisée par un autre compte."
                 )
             update["email"] = new_email
+            update["email_verified"] = False
     await db.users.update_one({"_id": ObjectId(str(user["_id"]))}, {"$set": update})
     fresh = await db.users.find_one({"_id": ObjectId(str(user["_id"]))})
+    if update.get("email_verified") is False:
+        await send_verification_email(fresh)
     return user_to_public(fresh)
+
+
+# ------------------------------------------------------------ vérification de l'adresse e-mail
+VERIFY_TTL = timedelta(hours=48)
+
+
+async def send_verification_email(user: dict) -> bool:
+    token = secrets.token_urlsafe(32)
+    await db.email_verify_tokens.insert_one({
+        "token_hash": hashlib.sha256(token.encode()).hexdigest(), "user_id": str(user["_id"]),
+        "email": user["email"], "expires_at": datetime.now(timezone.utc) + VERIFY_TTL, "used": False})
+    link = f"{FRONTEND_URL}/verifier-email?token={token}"
+    if not RESEND_API_KEY:
+        logger.warning("RESEND_API_KEY absent — e-mail de vérification non envoyé")
+        return False
+    name = html.escape(user.get("name") or "")
+    body = (f"<div style='font-family:Arial,sans-serif;color:#1A2530;max-width:560px;font-size:16px;line-height:1.5'>"
+            f"<h2 style='font-family:Georgia,serif;color:#1E3A5F'>Confirmez votre adresse e-mail</h2>"
+            f"<p>Bonjour {name},</p><p>Un simple clic suffit pour confirmer que cette adresse est bien la vôtre :</p>"
+            f"<p><a href='{link}' style='background:#E07A5F;color:#fff;padding:12px 24px;border-radius:999px;"
+            f"text-decoration:none;font-weight:bold'>Confirmer mon adresse</a></p>"
+            f"<p style='font-size:14px'>Le lien est valable 48 heures. Si vous n'avez pas créé de compte GénéraQuiz, ignorez cet e-mail.</p></div>")
+    try:
+        await asyncio.to_thread(resend.Emails.send, {"from": SENDER_EMAIL, "to": [user["email"]],
+                                                    "subject": "Confirmez votre adresse e-mail — GénéraQuiz", "html": body})
+        return True
+    except Exception as e:
+        logger.warning(f"[verify-email] envoi impossible : {e}")
+        return False
+
+
+class VerifyEmailRequest(BaseModel):
+    token: str = Field(min_length=20, max_length=200)
+
+
+@router.post("/verify-email")
+async def verify_email(body: VerifyEmailRequest):
+    rec = await db.email_verify_tokens.find_one_and_update(
+        {"token_hash": hashlib.sha256(body.token.encode()).hexdigest(), "used": False,
+         "expires_at": {"$gte": datetime.now(timezone.utc)}},
+        {"$set": {"used": True}})
+    if not rec:
+        raise HTTPException(status_code=400, detail="Lien invalide ou expiré. Demandez un nouveau lien depuis votre compte.")
+    done = await db.users.update_one({"_id": ObjectId(rec["user_id"]), "email": rec["email"]},
+                                     {"$set": {"email_verified": True}})
+    if not done.matched_count:
+        raise HTTPException(status_code=400, detail="Ce lien correspond à une ancienne adresse e-mail.")
+    return {"ok": True}
+
+
+@router.post("/resend-verification")
+async def resend_verification(user: dict = Depends(get_current_user)):
+    if user.get("email_verified"):
+        return {"ok": True, "already_verified": True}
+    await rate_hit(f"verify-mail:{user['_id']}", 3, 3600)
+    if not await send_verification_email(user):
+        raise HTTPException(status_code=502, detail="L'e-mail n'a pas pu partir. Réessayez dans quelques minutes.")
+    return {"ok": True}
 
 
 @router.patch("/preferences/daily-email")

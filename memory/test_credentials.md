@@ -1,31 +1,30 @@
 # Test Credentials for GénéraQuiz SaaS
 
-## Admin Account (post-rebrand)
-- **Email** : variable d'environnement `ADMIN_EMAIL` (`admin@generaquiz.fr`)
-- **Password** : variable d'environnement `ADMIN_PASSWORD`. Ne jamais écrire le mot de passe dans ce fichier ni dans les tests : le dépôt GitHub est public.
-- **Role**: `admin`
-- **Plan**: `premium` (lifetime)
+⚠️ Aucun mot de passe en clair dans ce fichier (dépôt GitHub). Les identifiants de test sont dans `backend/.env` (non versionné).
 
-Les tests lisent `ADMIN_PASSWORD` (et `FAMILY_PROMO_CODE`) dans l'environnement :
-`ADMIN_PASSWORD=... REACT_APP_BACKEND_URL=... pytest backend/tests`
+## Admin de test (aperçu uniquement, n'existe pas en production)
+- Email : variable `TEST_ADMIN_EMAIL` dans `/app/backend/.env` (qa-admin@generaquiz.fr)
+- Mot de passe : variable `TEST_ADMIN_PASSWORD` dans `/app/backend/.env`
+- Rôle : superadmin, Premium jusqu'en 2099
+- Les tests pytest lisent `os.environ["TEST_ADMIN_EMAIL"]` / `os.environ["TEST_ADMIN_PASSWORD"]` : `export $(grep TEST_ADMIN /app/backend/.env | xargs)` avant de lancer.
 
-## Promo codes (seedés au démarrage)
-- Code cadeau « Premium à vie » : son nom vient de la variable `FAMILY_PROMO_CODE` (aucun code à vie sans elle). L'ancien code publié dans le dépôt est désactivé automatiquement au démarrage.
+## Compte propriétaire
+- admin@generaquiz.fr : mot de passe géré par le propriétaire uniquement, jamais écrit ici.
+
+## Codes promo
 - `DECOUVERTE30` — 30 jours, max 50 utilisations
+- `FAMILLE2026` — DÉSACTIVÉ (audit sécurité 2026-11), Premium retiré aux comptes non admin qui l'avaient utilisé
 
 ## Test User
-Register a new account via `/register` for free-plan testing.
+Créer un compte via `/register` pour tester la formule gratuite (5 questions / jour).
 
-## Endpoints (préfixe /api)
-- Auth: `/auth/{register,login,logout,me,forgot-password,reset-password,change-password,profile,account}`
-- Quiz: `/categories`, `/categories/{id}/questions`, `/attempts`, `/stats`
-- Stripe: `/packages`, `/checkout/session`, `/checkout/status/{id}`, `/webhook/stripe` (carte test 4242 4242 4242 4242)
-- Défi famille: `/challenges` (POST premium), `/challenges/mine`, `/challenges/{token}` (public), `/challenges/{token}/participate` (public)
-- Promo: `/promo/redeem` (auth), `/admin/promo` (admin CRUD — rôle admin requis)
-- Livre coop: `/livre/coop/{create,join,{code}/state,{code}/entry,{code}/heartbeat,{code}/close}`
-- Livre AI: `/livre/entries/{id}/{rewrite,accept-rewrite}`
-- Livre from-quiz: `/livre/from-quiz`
-- Static mascots: `/api/static/mascots/{category-id}.png`
+## Limites
+- `/auth/login` : 30 / 15 min par IP + 8 échecs / 15 min par compte
+- `/auth/register` : 5 / heure par IP
+- `/auth/forgot-password` : 3 / 15 min par IP
+- `/contact` : 5 / heure par IP
+- Livre coop public : 15 codes inconnus / 15 min par IP ; sessions expirées après 24 h
+- Les limites sont stockées dans Mongo (`rate_limits`) : `db.rate_limits.delete_many({})` pour réinitialiser pendant les tests.
 
-## Rate limit
-- `/auth/forgot-password` : max 3 appels / 15 min par IP (HTTP 429 au-delà)
+## Stripe
+Carte test 4242 4242 4242 4242, date future, CVC 123.

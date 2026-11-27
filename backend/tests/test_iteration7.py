@@ -10,7 +10,7 @@ else:
     BASE_URL_API = BASE_URL
 
 ADMIN_EMAIL = "admin@quizdantan.fr"
-ADMIN_PW = os.environ.get("ADMIN_PASSWORD", "")
+ADMIN_PW = os.environ["TEST_ADMIN_PASSWORD"]
 
 
 @pytest.fixture(scope="module")

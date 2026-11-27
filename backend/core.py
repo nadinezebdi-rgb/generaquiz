@@ -7,6 +7,7 @@ load_dotenv(ROOT_DIR / ".env")
 
 import os
 import logging
+import ipaddress
 import time
 from datetime import datetime, timezone, timedelta
 from typing import Optional, Annotated, Any, List
@@ -175,8 +176,8 @@ def verify_password(pw: str, hashed: str) -> bool:
         return False
 
 
-def create_access_token(user_id: str, email: str) -> str:
-    return jwt.encode({"sub": user_id, "email": email, "type": "access",
+def create_access_token(user_id: str, email: str, token_version: int = 0) -> str:
+    return jwt.encode({"sub": user_id, "email": email, "type": "access", "tv": token_version,
                        "exp": datetime.now(timezone.utc) + timedelta(days=7)},
                       JWT_SECRET, algorithm=JWT_ALG)
 
@@ -260,6 +261,7 @@ def user_to_public(u: dict) -> dict:
             "plan_expires_at": plan_expires_at, "created_at": u.get("created_at"),
             "plan_tier": u.get("plan_tier"),          # "club" | "famille" | "premium" | None
             "plan_period": u.get("plan_period"),      # "monthly" | "yearly" | None
+            "email_verified": u.get("email_verified") is not False,  # comptes antérieurs à la vérification : non bloqués
             "plan_renews_at": u.get("plan_renews_at"), "plan_auto_renew": bool(u.get("plan_auto_renew")),
             "plan_cancel_at_period_end": bool(u.get("plan_cancel_at_period_end")),
             "plan_renewal_amount": u.get("plan_renewal_amount"), "plan_package_id": u.get("plan_package_id"),
@@ -267,6 +269,7 @@ def user_to_public(u: dict) -> dict:
             "streak_best": int(u.get("streak_best") or 0),
             "streak_last_date": u.get("streak_last_date"),
             "daily_email_optin": u.get("daily_email_optin", True),
+            "riddle_email_optin": bool(u.get("riddle_email_optin")),
             "credits": int(u.get("credits") or 0),
             "xp_total": int(u.get("xp_total") or 0),
             "level": level_info["level"],
@@ -295,6 +298,8 @@ async def get_current_user(request: Request) -> dict:
         user = await db.users.find_one({"_id": ObjectId(payload["sub"])})
         if not user:
             raise HTTPException(status_code=401, detail="Utilisateur introuvable")
+        if payload.get("tv", 0) != user.get("token_version", 0):
+            raise HTTPException(status_code=401, detail="Session expirée")
         return dict(user)
     except jwt.ExpiredSignatureError:
         raise HTTPException(status_code=401, detail="Session expirée")
@@ -347,28 +352,61 @@ async def record_audit(admin: dict, action: str, *,
 
 
 # -------------------- rate limiter (in-memory, IP-based) --------------------
-_rate_buckets: dict[str, list[float]] = {}
+
+
+_CLOUDFLARE_NETS = [ipaddress.ip_network(n) for n in (
+    "173.245.48.0/20", "103.21.244.0/22", "103.22.200.0/22", "103.31.4.0/22", "141.101.64.0/18",
+    "108.162.192.0/18", "190.93.240.0/20", "188.114.96.0/20", "197.234.240.0/22", "198.41.128.0/17",
+    "162.158.0.0/15", "104.16.0.0/13", "104.24.0.0/14", "172.64.0.0/13", "131.0.72.0/22",
+    "2400:cb00::/32", "2606:4700::/32", "2803:f800::/32", "2405:b500::/32", "2405:8100::/32",
+    "2a06:98c0::/29", "2c0f:f248::/32")]
+
+
+def _is_proxy(ip: str) -> bool:
+    try:
+        addr = ipaddress.ip_address(ip)
+    except ValueError:
+        return False
+    return addr.is_private or any(addr in n for n in _CLOUDFLARE_NETS)
+
+
+def client_ip(request: Request) -> str:
+    """IP réelle : X-Forwarded-For lu de droite à gauche, en sautant notre répartiteur et les relais Cloudflare.
+    Les entrées les plus à gauche (écrites par le client) ne sont jamais utilisées."""
+    hops = [p.strip() for p in request.headers.get("x-forwarded-for", "").split(",") if p.strip()]
+    for ip in reversed(hops[:-1]):  # la dernière entrée est l'adresse du répartiteur de charge
+        if not _is_proxy(ip):
+            return ip
+    return hops[0] if len(hops) == 1 else (request.client.host if request.client else "anon")
+
+
+async def rate_hit(key: str, max_calls: int, window_seconds: int, record: bool = True) -> None:
+    """Limiteur partagé entre processus (stocké dans Mongo, purgé par index TTL)."""
+    now = datetime.now(timezone.utc)
+    since = now - timedelta(seconds=window_seconds)
+    used = await db.rate_limits.count_documents({"key": key, "at": {"$gte": since}})
+    if used >= max_calls:
+        first = await db.rate_limits.find_one({"key": key, "at": {"$gte": since}}, sort=[("at", 1)])
+        first_at = first["at"] if first else now
+        if first_at.tzinfo is None:
+            first_at = first_at.replace(tzinfo=timezone.utc)
+        retry = max(int(window_seconds - (now - first_at).total_seconds()), 1)
+        minutes = (retry + 59) // 60
+        raise HTTPException(status_code=429, headers={"Retry-After": str(retry)},
+                            detail=f"Trop de tentatives. Réessayez dans {minutes} minute{'s' if minutes > 1 else ''}.")
+    if record:
+        await db.rate_limits.insert_one({"key": key, "at": now, "expire_at": now + timedelta(seconds=window_seconds)})
+
+
+async def rate_record(key: str, window_seconds: int) -> None:
+    now = datetime.now(timezone.utc)
+    await db.rate_limits.insert_one({"key": key, "at": now, "expire_at": now + timedelta(seconds=window_seconds)})
 
 
 def rate_limit(prefix: str, max_calls: int, window_seconds: int):
-    """Dependency that throttles by client IP. Raises 429 when over budget."""
+    """Dependency that throttles by real client IP. Raises 429 when over budget."""
     async def _checker(request: Request):
-        ip = request.headers.get("x-forwarded-for", request.client.host if request.client else "anon")
-        ip = ip.split(",")[0].strip()
-        key = f"{prefix}:{ip}"
-        now = time.time()
-        bucket = _rate_buckets.get(key, [])
-        # keep only timestamps inside the window
-        bucket = [t for t in bucket if now - t < window_seconds]
-        if len(bucket) >= max_calls:
-            retry_after = int(window_seconds - (now - bucket[0]))
-            raise HTTPException(
-                status_code=429,
-                detail=f"Trop de tentatives. Réessayez dans {max(retry_after, 1)} s.",
-                headers={"Retry-After": str(max(retry_after, 1))},
-            )
-        bucket.append(now)
-        _rate_buckets[key] = bucket
+        await rate_hit(f"{prefix}:{client_ip(request)}", max_calls, window_seconds)
     return _checker
 
 
@@ -404,6 +442,7 @@ class UpdateProfileRequest(BaseModel):
     name: str = Field(min_length=1, max_length=80)
     birth_year: Optional[int] = Field(None, ge=1900, le=2026)
     email: Optional[EmailStr] = None
+    current_password: Optional[str] = None
 
 
 class DailyEmailPrefRequest(BaseModel):
@@ -421,6 +460,7 @@ class AttemptAnswer(BaseModel):
 
 class AttemptCreate(BaseModel):
     category_id: str
+    session_id: Optional[str] = None
     answers: List[AttemptAnswer] = Field(..., min_length=1, max_length=30)
     duration_seconds: Optional[int] = Field(None, ge=0, le=7200)
 

@@ -8,7 +8,7 @@ import pytest
 import requests
 
 BASE_URL = os.environ.get("REACT_APP_BACKEND_URL").rstrip("/")
-ADMIN = {"email": "admin@generaquiz.fr", "password": os.environ.get("ADMIN_PASSWORD", "")}
+ADMIN = {"email": os.environ["TEST_ADMIN_EMAIL"], "password": os.environ["TEST_ADMIN_PASSWORD"]}
 DEFAULT_PROMO = {"enabled": False, "title": "Carte cadeau de Noël", "starts_on": "2026-12-01",
                  "ends_on": "2026-12-24", "famille_regular_price": 79, "famille_promo_price": 69}
 

@@ -1,0 +1,45 @@
+{
+  "summary": "Iteration 59: email verification (register/verify/resend/profile email change/reset), social pre-registration takeover protection (direct _upsert_social_user call), Énigme du soir (API + dashboard card desktop/mobile). Backend 10/10 pytest pass; frontend flows all pass (register -> banner -> resend toast; /verifier-email success -> banner gone, me.email_verified true; reuse -> error; riddle card hint/answer desktop + 390px, no horizontal overflow). One high-priority product/data issue: 188 of 189 existing users have no email_verified field, so they are treated as unverified.",
+  "backend_issues": {
+    "critical": [
+      {"endpoint": "routers/social_auth.py _upsert_social_user + EmailVerifyBanner (legacy data)", "issue": "188/189 existing users (all created before this feature) have NO email_verified field. Consequences: (a) every existing real user now sees the 'Confirmez votre adresse' banner; (b) the first time any legacy user signs in with Google/Apple using the same email, their password is wiped (password_hash=None) and all sessions revoked, so they can no longer log in with email+password and must use 'Mot de passe oublié'. No migration/grandfathering exists. Decide: one-shot migration (e.g. set email_verified=True for users with first_login_at or quiz activity before the release date, or for auth_provider!='email') or at least use email_verified is False (explicit) instead of falsy in the takeover check.", "priority": "HIGH"}
+    ],
+    "minor": [
+      {"endpoint": "POST /api/auth/reset-password", "issue": "Sets email_verified=True on the user's CURRENT email even if the reset token was issued for a previous address (record.email != user.email after a profile email change). Filter the update on {'email': record['email']} like verify-email does, or only set verified when emails match."},
+      {"endpoint": "POST /api/auth/resend-verification", "issue": "Returns 200 {ok:false} when Resend send fails; frontend toast shows 'Lien envoyé à …' anyway (EmailVerifyBanner ignores res.data.ok)."},
+      {"endpoint": "PATCH /api/auth/profile (email change)", "issue": "Email change does not notify the old address and does not bump token_version; consider sending an alert to the previous email (account-takeover hygiene)."},
+      {"endpoint": "POST /api/auth/apple", "issue": "Apple path does not check payload email_verified (Google path does). Apple usually sets it true, but for symmetry check it before linking by email."},
+      {"endpoint": "_upsert_social_user", "issue": "Linking by email overwrites an existing different google_sub/apple_sub silently."}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "VerifyEmail.jsx", "issue": "/verifier-email without token (or short token) shows raw English Pydantic message 'String should have at least 20 characters'. Short-circuit client-side when token missing/short and show the French message.", "selector": "[data-testid='verify-email-error']", "priority": "LOW"}
+    ],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "Dashboard evening-riddle-card", "issues": ["Once 'Voir la réponse' is clicked there is no way to hide the answer again (spoiler for others at the table) — optional 'Masquer' button."]}
+    ]
+  },
+  "test_report_links": ["/app/backend/tests/test_iteration59_email_verify_enigme.py", "/app/test_reports/pytest/pytest_it59.xml"],
+  "action_items": [
+    "HIGH: handle the 188 legacy users without email_verified (migration/grandfathering) before shipping; otherwise all see the banner and a Google/Apple sign-in wipes their password",
+    "reset-password: only set email_verified when token email == current user email",
+    "EmailVerifyBanner: show error/info toast when resend returns ok:false",
+    "VerifyEmail page: French message when token missing/too short",
+    "Do NOT run old tests/test_email_update.py as is (it changes the admin email without current_password; now 403, update it to send current_password)"
+  ],
+  "critical_code_review_comments": [
+    "Token stored only as sha256 hash, single-use via atomic find_one_and_update, 48h TTL index, bound to email — good",
+    "Takeover protection logic correct: unverified -> password_hash None + token_version+1 (attacker session and password both revoked, verified by test); verified -> linked, password kept",
+    "evening_riddle: asyncio.Lock is per-process only; unique date index protects DB but a concurrent insert in another worker would raise DuplicateKeyError -> 503 once. Catch DuplicateKeyError and re-read.",
+    "password_reset_tokens are still stored in plaintext (unlike verify tokens) — consider hashing for consistency"
+  ],
+  "updated_files": ["/app/backend/tests/test_iteration59_email_verify_enigme.py"],
+  "success_rate": {"backend": "100% (10/10)", "frontend": "100% of tested flows"},
+  "seed_data_creation": "TEST users created via register (pytest + 1 UI user test_ui59_*), all deleted by id with their tokens/ledger entries. Users count back to 189. Verification tokens planted directly in DB for tested users only (plaintext not retrievable). Riddle for 2026-11-27 already existed; no new date generated.",
+  "retest_needed": true,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Use tests/test_iteration59_email_verify_enigme.py (source backend/.env + frontend/.env). It only clears rate_limits keys ^(register|login|verify-mail). Onboarding tour skip: data-testid onboarding-tour-skip. Cookie consent banner overlays bottom of page but does not block clicks tested.",
+  "rca of the issue": "Legacy-user issue: feature reads user.get('email_verified') as falsy for documents created before the field existed; no backfill in server startup/migrations."
+}

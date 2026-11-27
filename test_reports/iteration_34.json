@@ -27,7 +27,7 @@
     "/app/backend/tests/test_mots_meles_charades.py"
   ],
   "success_rate": {"backend": "100% (9/9)", "frontend": "100%"},
-  "test_credentials": "admin@generaquiz.fr / <ancien mot de passe admin> ; fresh accounts via /api/auth/register (test.mm*.<uuid>@example.com)",
+  "test_credentials": "admin@generaquiz.fr / [mot de passe retiré] ; fresh accounts via /api/auth/register (test.mm*.<uuid>@example.com)",
   "seed_data_creation": "Tests register ~3 fresh users (test.mm.*, test.mm2.*, test.mm3.*) that only touch users, charade_attempts, wordsearch_progress, league_scores. Seed grids untouched.",
   "retest_needed": false,
   "main_agent_can_self_test": true,

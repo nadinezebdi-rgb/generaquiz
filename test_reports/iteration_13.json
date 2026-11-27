@@ -25,7 +25,7 @@
     "/app/backend/tests/test_iteration13_streaks.py (new)"
   ],
   "success_rate": {"backend": "100% (11/11)", "frontend": "100% (3/3 flows)"},
-  "test_credentials": "Admin: admin@generaquiz.fr / <ancien mot de passe admin> ; new test users created lowercased via /api/auth/register",
+  "test_credentials": "Admin: admin@generaquiz.fr / [mot de passe retiré] ; new test users created lowercased via /api/auth/register",
   "seed_data_creation": "Test users registered with email prefix 'test_streak_*' / 'test_ui_*'. Cleaned up via DELETE /api/auth/account. Admin daily_attempt seeded to verify skipped>=1 in trigger endpoint.",
   "retest_needed": false,
   "main_agent_can_self_test": true,

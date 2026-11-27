@@ -40,7 +40,7 @@
   ],
   "updated_files": ["/app/backend/tests/test_iteration50_gifts_family.py", "/app/backend/tests/it50_ui_prep.py"],
   "success_rate": {"backend": "100% (11/11)", "frontend": "~90% (1 integration bug, 1 input-format bug)"},
-  "test_credentials": "admin@generaquiz.fr / <ADMIN_PASSWORD> (from /app/memory/test_credentials.md). TEST_ users created via register: test_it50ui_{act,owner,proche,nofam}_*@example.com / Test1234!",
+  "test_credentials": "admin@generaquiz.fr / [mot de passe retiré] (from /app/memory/test_credentials.md). TEST_ users created via register: test_it50ui_{act,owner,proche,nofam}_*@example.com / Test1234!",
   "seed_data_creation": "Created TEST_ users and ~9 admin gift codes (recipient TEST_Mamie / TEST_UI_Recip); un-redeemed ones cancelled. Promo was temporarily enabled then reset to defaults (enabled:false, 2026-12-01..2026-12-24, 79/69) - verified.",
   "retest_needed": true,
   "should_main_agent_self_test": true,

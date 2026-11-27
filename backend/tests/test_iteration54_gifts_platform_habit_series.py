@@ -9,7 +9,7 @@ import requests
 from pymongo import MongoClient
 
 BASE_URL = os.environ.get("REACT_APP_BACKEND_URL").rstrip("/")
-ADMIN = {"email": "admin@generaquiz.fr", "password": os.environ.get("ADMIN_PASSWORD", "")}
+ADMIN = {"email": os.environ["TEST_ADMIN_EMAIL"], "password": os.environ["TEST_ADMIN_PASSWORD"]}
 HABITS = ["marche", "equilibre", "memoire", "lien", "sortie", "sommeil"]
 OLD_IDS = None
 

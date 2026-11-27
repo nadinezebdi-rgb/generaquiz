@@ -7,8 +7,8 @@ import requests
 from bson import ObjectId
 
 BASE_URL = os.environ["REACT_APP_BACKEND_URL"].rstrip("/")
-ADMIN_EMAIL = "admin@generaquiz.fr"
-ADMIN_PASS = os.environ.get("ADMIN_PASSWORD", "")
+ADMIN_EMAIL = os.environ["TEST_ADMIN_EMAIL"]
+ADMIN_PASS = os.environ["TEST_ADMIN_PASSWORD"]
 PARIS = ZoneInfo("Europe/Paris")
 
 

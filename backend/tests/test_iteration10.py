@@ -27,8 +27,7 @@ def _load_frontend_env():
 _load_frontend_env()
 BASE = os.environ["REACT_APP_BACKEND_URL"].rstrip("/")
 ADMIN_EMAIL = "admin@quizdantan.fr"
-ADMIN_PWD = os.environ.get("ADMIN_PASSWORD", "")
-FAMILY_PROMO_CODE = os.environ.get("FAMILY_PROMO_CODE", "").upper()  # code cadeau « à vie », jamais en dur
+ADMIN_PWD = os.environ["TEST_ADMIN_PASSWORD"]
 
 
 @pytest.fixture(scope="module")
@@ -184,7 +183,7 @@ def test_promo_admin_list_contains_seeded(admin_session):
     r = admin_session.get(f"{BASE}/api/admin/promo")
     assert r.status_code == 200
     codes = [p["code"] for p in r.json()]
-    assert FAMILY_PROMO_CODE in codes
+    assert "FAMILLE2026" in codes
     assert "DECOUVERTE30" in codes
 
 
@@ -202,7 +201,7 @@ def test_promo_admin_crud(admin_session):
 
 
 def test_promo_redeem(fresh_user):
-    r = fresh_user["sess"].post(f"{BASE}/api/promo/redeem", json={"code": FAMILY_PROMO_CODE})
+    r = fresh_user["sess"].post(f"{BASE}/api/promo/redeem", json={"code": "FAMILLE2026"})
     assert r.status_code == 200, r.text
     # verify plan upgraded
     me = fresh_user["sess"].get(f"{BASE}/api/auth/me").json()

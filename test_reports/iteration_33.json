@@ -16,7 +16,7 @@
     "/app/backend/tests/test_charades.py"
   ],
   "success_rate": {"backend": "100% (13/13)", "frontend": "100%"},
-  "test_credentials": "admin@generaquiz.fr / <ancien mot de passe admin> ; fresh accounts registered via /api/auth/register with example.com emails (test.local rejected by validator).",
+  "test_credentials": "admin@generaquiz.fr / [mot de passe retiré] ; fresh accounts registered via /api/auth/register with example.com emails (test.local rejected by validator).",
   "seed_data_creation": "Tests create ~5 fresh test.charades.<uuid>@example.com users; they only touch charade_attempts, user_badges, users.xp_total, and league_scores. No cleanup implemented since backend has no user-delete endpoint exposed.",
   "retest_needed": false,
   "main_agent_can_self_test": true,

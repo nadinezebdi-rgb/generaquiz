@@ -25,7 +25,7 @@
   ],
   "updated_files": ["/app/backend/tests/test_iteration7.py"],
   "success_rate": {"backend": "100% (11/11 new + previous 82/82 unaffected)", "frontend": "100% (shuffle, stability, 30-question pool, Pricing copy all verified)"},
-  "test_credentials": "admin@quizdantan.fr / <ancien mot de passe admin>",
+  "test_credentials": "admin@quizdantan.fr / [mot de passe retiré]",
   "seed_data_creation": "One disposable free user qa.iter7.{ts}@test.fr created for the 5-question regression check.",
   "retest_needed": false,
   "main_agent_can_self_test": true,

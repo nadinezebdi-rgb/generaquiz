@@ -9,8 +9,8 @@ Modular structure:
 - routers/promo.py: promo codes (user redeem + admin CRUD)
 """
 from datetime import datetime, timezone, timedelta
+from bson import ObjectId
 import asyncio
-import os
 import re
 
 from fastapi import APIRouter, Depends, FastAPI
@@ -29,6 +29,7 @@ from mistral_client import regenerate_all as mistral_regenerate_all
 from routers import auth as auth_router
 from routers import contact as contact_router
 import subscription as subscription_mod
+import evening_riddle as evening_riddle_mod
 from routers import social_auth as social_auth_router
 from routers import quiz as quiz_router
 from routers import payments as payments_router
@@ -127,6 +128,7 @@ async def admin_list_users(user: dict = Depends(get_admin_user)):
 api.include_router(auth_router.router)
 api.include_router(contact_router.router)
 api.include_router(subscription_mod.router)
+api.include_router(evening_riddle_mod.router)
 api.include_router(social_auth_router.router)
 api.include_router(quiz_router.router)
 api.include_router(payments_router.router)
@@ -197,6 +199,24 @@ async def _safe_index(coll, keys, **kw):
         logger.error(f"[index] {coll.name} {keys} non créé : {e}")
 
 
+async def revoke_famille2026():
+    """Audit sécurité : le code public FAMILLE2026 (Premium à vie) est désactivé et son Premium retiré, une seule fois."""
+    marker = "revoke_famille2026"
+    if await db.migrations.find_one({"id": marker}):
+        return
+    await db.promo_codes.update_one({"code": "FAMILLE2026"}, {"$set": {"active": False, "max_uses": 0}})
+    promo = await db.promo_codes.find_one({"code": "FAMILLE2026"}) or {}
+    ids = [ObjectId(i) for i in promo.get("redeemed_by", []) if ObjectId.is_valid(i)]
+    lifetime_floor = (datetime.now(timezone.utc) + timedelta(days=365 * 20)).isoformat()
+    revoked = await db.users.update_many(
+        {"_id": {"$in": ids}, "role": {"$nin": ["admin", "superadmin"]}, "plan_auto_renew": {"$ne": True},
+         "plan_expires_at": {"$gte": lifetime_floor}},
+        {"$set": {"plan": "free", "plan_expires_at": None, "plan_revoked_reason": "FAMILLE2026"}})
+    await db.migrations.insert_one({"id": marker, "at": datetime.now(timezone.utc).isoformat(),
+                                    "redeemed": len(ids), "revoked": revoked.modified_count})
+    logger.warning(f"[securite] FAMILLE2026 désactivé : {len(ids)} utilisation(s), {revoked.modified_count} Premium retiré(s)")
+
+
 CURATED_DIR = ROOT_DIR / "data" / "curated_questions"
 
 
@@ -214,6 +234,13 @@ async def sync_curated_questions():
 async def startup():
     # Indexes
     await _safe_index(db.users, "email", unique=True)
+    await _safe_index(db.rate_limits, [("key", 1), ("at", 1)])
+    await _safe_index(db.quiz_sessions, "id", unique=True)
+    await _safe_index(db.email_verify_tokens, "token_hash", unique=True)
+    await _safe_index(db.email_verify_tokens, "expires_at", expireAfterSeconds=0)
+    await _safe_index(db.evening_riddles, "date", unique=True)
+    await _safe_index(db.quiz_sessions, [("user_id", 1), ("created_at", -1)])
+    await _safe_index(db.rate_limits, "expire_at", expireAfterSeconds=0)
     await _safe_index(db.users, "apple_sub", sparse=True)
     await _safe_index(db.users, "google_sub", sparse=True)
     await _safe_index(db.categories, "id", unique=True)
@@ -440,19 +467,10 @@ async def startup():
         logger.info(f"Codes parrainage rétroactifs : {backfill_count} utilisateurs")
 
     # Seed default promo codes (idempotent)
-    # Le code cadeau « Premium à vie » n'est plus écrit dans le code source (dépôt
-    # public) : son nom vient de la variable d'environnement FAMILY_PROMO_CODE.
-    # Sans cette variable, aucun code « à vie » n'est créé.
     default_promos = [
         {"code": "DECOUVERTE30", "label": "Essai 30 jours — 50 utilisations",
          "duration_days": 30, "max_uses": 50, "expires_at": None, "active": True},
     ]
-    family_code = (os.environ.get("FAMILY_PROMO_CODE") or "").strip().upper()
-    if family_code:
-        default_promos.append(
-            {"code": family_code, "label": "Cadeau Famille — accès Premium à vie",
-             "duration_days": 36500, "max_uses": None, "expires_at": None, "active": True}
-        )
     for promo in default_promos:
         existing = await db.promo_codes.find_one({"code": promo["code"]})
         if not existing:
@@ -460,18 +478,8 @@ async def startup():
                                              "created_at": datetime.now(timezone.utc).isoformat(),
                                              "created_by": "system"})
             logger.info(f"Promo seedé : {promo['code']}")
-        # Un code désactivé depuis l'admin reste désactivé : plus de réactivation
-        # automatique au démarrage.
 
-    # Ancien code « à vie » publié dans le dépôt public : désactivé au démarrage.
-    # Les comptes qui l'ont déjà utilisé gardent leur Premium.
-    leaked = [c for c in ("FAMILLE2026",) if c != family_code]
-    if leaked:
-        res = await db.promo_codes.update_many(
-            {"code": {"$in": leaked}, "active": True}, {"$set": {"active": False}}
-        )
-        if res.modified_count:
-            logger.info(f"Promo désactivé (code exposé publiquement) : {leaked}")
+    await revoke_famille2026()
 
     # Seed 5 word-search grids on first boot (idempotent).
     from wordsearch_mistral import seed_grids_if_empty

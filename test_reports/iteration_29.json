@@ -11,7 +11,7 @@
   ],
   "updated_files": ["/app/backend/tests/test_sprint_e_analytics.py"],
   "success_rate": {"backend": "100%", "frontend": "100%"},
-  "test_credentials": "admin@generaquiz.fr / <ancien mot de passe admin> ; regular test user registered dynamically",
+  "test_credentials": "admin@generaquiz.fr / [mot de passe retiré] ; regular test user registered dynamically",
   "seed_data_creation": "None (aggregates run on existing production seed data)",
   "retest_needed": false,
   "main_agent_can_self_test": true,

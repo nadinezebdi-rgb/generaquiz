@@ -1,0 +1,52 @@
+{
+  "summary": "Tested the security and UX audit batch (backend plus frontend). Backend: 13 of 15 tests in the new test_iteration57_security_audit.py pass. These cover hidden correct_index and explanation, /answer returning 404 for questions not issued to the user, /attempts rejecting duplicate and non-issued ids, the 5-per-day limit for free users through the API, the lockout on the 9th failed login (429, French message), token_version on change-password, coop state showing only family entries and returning 429 after 15 unknown codes, FAMILLE2026 returning 404 on redeem, and the pricing summary and checkout (Stripe URL). The 2 failures are real anti-cheat gaps, listed under critical. Frontend: login and register accessibility, show-password toggles, role=alert error, legal links, the consent banner (no PostHog request before consent, Refuser persists across reload, footer-cookies reopens it, Accepter sets __gqAnalytics=true and loads PostHog), html lang=fr, Premium quiz end to end (feedback and explanation come from the server, score counts), and the save-error and Réessayer flow (500 intercepted, then retry returns 200 and the error disappears) all work. Family mode starts and gives feedback. The /app/famille, /app/pricing and /contact pages load. Two frontend bugs block features: (1) a brand-new free user sees quiz-daily-limit on the very FIRST quiz; (2) a session that expires during in-app navigation redirects to /login?session=expiree&next=%2Flogin, so after logging in again the user stays on /login.",
+  "backend_issues": {
+    "critical": [
+      {"endpoint": "POST /api/categories/{id}/answer + POST /api/attempts", "issue": "Players can cheat on scores. /answer reveals correct_index, and /attempts then scores whatever answer_index the client sends, so a client can answer wrong, read the correct index, and submit it. Reproduced: 3 answers sent as wrong (choice 9) still produced score 3/3. Fix: store the first choice per (user, question) when /answer is called and score /attempts from those stored choices, ignoring the client's answer_index.", "priority": "HIGH"},
+      {"endpoint": "POST /api/attempts", "issue": "The same set of issued questions can be submitted again and again within the 6 h window. Both submissions returned 200, so XP and the league score grow each time (XP farming). Fix: mark issued questions as consumed once an attempt is saved, or store an attempt_id or nonce at issue time.", "priority": "HIGH"},
+      {"endpoint": "GET /api/categories/{id}/questions (free user)", "issue": "Every call to this endpoint uses up the daily quota, even if the user plays nothing. The frontend calls it twice (see the frontend bug), and any refresh or reopening of the quiz page also burns the 5 questions without answering any. Fix: make the call idempotent for free users by returning the questions already issued today and not yet answered, instead of daily_limit_reached, or count answered questions (/answer) rather than issued ones.", "priority": "CRITICAL"}
+    ],
+    "minor": [
+      {"endpoint": "core.client_ip", "issue": "In preview, the rate-limit key comes out as login:136.110.244.150 while the test machine's real egress IP is 34.170.12.145. The last X-Forwarded-For hop is therefore a proxy or load-balancer IP, not the client, so every visitor shares one bucket (30 logins per 15 min and 5 sign-ups per hour site-wide). Spoofing CF-Connecting-IP returns 403 at the edge, which is good. Check what client_ip resolves to in production. If it is not CF-Connecting-IP, take the XFF entry a fixed number of trusted hops from the right instead of the last one."},
+      {"endpoint": "GET /api/categories/{id}/questions", "issue": "Two parallel calls for a free user can race: both count used_today=0 before either writes. Minor once the double-fetch is fixed."},
+      {"endpoint": "POST /api/auth/reset-password", "issue": "The token is looked up and then marked used in two separate steps (not atomic). A concurrent double submit could use it twice. Use find_one_and_update({token, used:false})."},
+      {"endpoint": "POST /api/auth/forgot-password", "issue": "The email_sent field differs between existing and unknown emails (true vs false), so the endpoint reveals whether an account exists."},
+      {"endpoint": "GET /api/packages", "issue": "Lists legacy packages (premium_*, club_*, famille_monthly/yearly). A checkout on them returns 400 'Forfait invalide'."},
+      {"endpoint": "livre._find_session", "issue": "datetime.fromisoformat(sess['created_at']) raises a KeyError (500) for a legacy session that has no created_at."}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "QuizPlayer (free user)", "issue": "A brand-new free user who opens the first quiz immediately sees 'Vos 5 questions du jour sont jouées'. RCA: the useEffect that GETs /questions runs twice (React.StrictMode in index.js; the same happens on any remount or refresh). The first response (5 questions) is discarded by the ignore flag and the second returns daily_limit_reached. The DB showed user_seen_questions=5 for a user who had answered nothing. The fix is mainly on the backend (idempotent issuance, see critical); optionally also de-duplicate the fetch.", "selector": "[data-testid=quiz-daily-limit]", "priority": "CRITICAL"},
+      {"component": "AuthContext 401 interceptor", "issue": "Reproduced on /app/famille after clearing the cookies: the URL becomes /login?session=expiree&next=%2Flogin. The message shows, but after logging in again navigate('/login') keeps the user on the login form. Opening /login?session=expiree&next=/app/famille directly works correctly. Likely cause: ProtectedRoute or setUser(false) has already moved the SPA to /login before window.location.pathname is read. Fix: read next before calling setUser, skip the redirect when the path is already /login, and in Login ignore a next that starts with /login.", "selector": "[data-testid=login-session-expired]", "priority": "HIGH"}
+    ],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "Register (1920x1080)", "issues": ["While the consent banner is open it covers the register-submit button and the page cannot scroll it clear, so the user has to choose on cookies before signing up. Add bottom padding or a spacer to the page while the banner is shown."]}
+    ]
+  },
+  "test_report_links": ["/app/backend/tests/test_iteration57_security_audit.py", "/app/test_reports/pytest/pytest_iter57.xml"],
+  "action_items": [
+    "Make free-user question issuance idempotent: return today's issued but unanswered questions, or count answered questions, so the limit is not burned by StrictMode, a refresh or a remount.",
+    "Score /attempts from the choices stored at /answer time, not from the client's answer_index (answer-revealing cheat).",
+    "Block replay of /attempts for an already-scored set of issued questions.",
+    "Fix the 401 interceptor and Login so that next is never /login.",
+    "Check client_ip in production. In preview every client maps to one proxy IP, so all users share the same rate-limit bucket.",
+    "Minor: atomic reset token, packages list exposing legacy ids, consent banner covering the register submit."
+  ],
+  "critical_code_review_comments": [
+    "quiz.py get_questions: quota is decremented on issue rather than on play, and the endpoint is non-idempotent GET with side effects.",
+    "quiz.py check_answer can be called repeatedly per question, and the result is not persisted.",
+    "quiz.py save_attempt: the issued check does not filter by category_id. It is safe only because of the later category check.",
+    "AuthContext interceptor calls setUser(false) before computing next.",
+    "Old tests test_promo.py and test_pricing_sprintb.py are stale (hardcoded admin@quizdantan.fr, old package ids) and fail. They need updating or removing."
+  ],
+  "updated_files": ["/app/backend/tests/test_iteration57_security_audit.py"],
+  "success_rate": {"backend": "87% (13/15)", "frontend": "80% (2 blocking bugs out of ~10 flows)"},
+  "test_credentials": "TEST_ADMIN_EMAIL/TEST_ADMIN_PASSWORD read from /app/backend/.env. No passwords are written in files.",
+  "seed_data_creation": "Temporary TEST_ users (deleted via DELETE /auth/account; the UI user was removed by id via Mongo), 2 TEST_ livre entries (deleted by id), a coop session (deleted if newly created). rate_limits cleared at the end. The test admin's xp_total and attempts grew from the quiz runs.",
+  "retest_needed": true,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Run: export $(grep -E 'TEST_ADMIN|MONGO_URL|DB_NAME' backend/.env | tr -d '\"' | xargs); REACT_APP_BACKEND_URL from frontend/.env; pytest tests/test_iteration57_security_audit.py -p no:xdist. Clear db.rate_limits before running. Rate-limit key IP in preview is a shared proxy IP. For UI tests click consent-refuse first, because the banner intercepts clicks. New users see an onboarding modal on the dashboard ('Passer la visite').",
+  "rca of the issue": "Free daily limit on the first quiz: StrictMode double effect leads to 2 GET /questions calls; the first issues 5 questions (seen_at today) and its result is discarded; the second sees used_today=5 and returns daily_limit_reached. Session expiry: the redirect is built from window.location.pathname after the SPA has already navigated to /login, so next=/login."
+}

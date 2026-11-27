@@ -43,7 +43,7 @@ export default function AdminReports() {
     setBusyId(qid);
     try {
       await api.post(`/admin/reports/${qid}/resolve`, { action });
-      toast.success(action === "delete" ? "Question supprimée — Mistral régénérera ce soir" : "Signalement écarté");
+      toast.success(action === "delete" ? "Question supprimée — l'IA en régénérera une ce soir" : "Signalement écarté");
       await load();
     } catch (e) {
       toast.error(formatError(e.response?.data?.detail) || "Erreur");
@@ -71,7 +71,7 @@ export default function AdminReports() {
           Questions signalées
         </h1>
         <p className="text-lg text-navy/70 mb-6">
-          Revue des signalements faits par les joueurs. Supprimer une question libère un emplacement que Mistral remplira au prochain cycle nocturne (03:00 Paris).
+          Revue des signalements faits par les joueurs. Supprimer une question libère un emplacement que l&apos;IA remplira au prochain cycle nocturne (03:00 Paris).
         </p>
 
         <div className="flex gap-2 mb-6">
@@ -113,7 +113,7 @@ export default function AdminReports() {
                         {it.category_id}
                       </span>
                       {it.question_id.startsWith("m_") && (
-                        <span className="bg-mustard/30 text-navy font-semibold text-xs px-3 py-1 rounded-full">🤖 Mistral</span>
+                        <span className="bg-mustard/30 text-navy font-semibold text-xs px-3 py-1 rounded-full">🤖 IA</span>
                       )}
                       {!it.question && (
                         <span className="bg-red-100 text-red-800 font-semibold text-xs px-3 py-1 rounded-full">Déjà supprimée</span>

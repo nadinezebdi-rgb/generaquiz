@@ -26,13 +26,13 @@ import os
 import re
 from datetime import datetime, timezone
 
-from mistralai import Mistral
+from ai_client import AI_LABEL, ai_available, ai_complete
 
 from core import db, logger
 from charades_data import CHARADES, normalize
 
 
-MISTRAL_MODEL = os.environ.get("MISTRAL_MODEL", "mistral-small-latest")
+MISTRAL_MODEL = AI_LABEL  # génération via Claude (clé universelle Emergent)
 
 BATCH_SIZE = 5           # ask for 5 candidates, keep the ones that pass QA
 MAX_MISTRAL_CHARADES = 60  # keep the extension bounded
@@ -86,20 +86,12 @@ def _validate_candidate(c: dict, existing_answers: set[str]) -> tuple[bool, str]
 
 
 async def _mistral_batch(pack: str, n: int = BATCH_SIZE) -> list[dict]:
-    api_key = os.environ.get("MISTRAL_API_KEY")
-    if not api_key:
-        logger.warning("[charades-gen] MISTRAL_API_KEY manquant — sauté")
+    if not ai_available():
+        logger.warning("[charades-gen] EMERGENT_LLM_KEY manquant — sauté")
         return []
     prompt = PROMPT.format(pack=pack, n=n)
-    client = Mistral(api_key=api_key)
     try:
-        resp = await asyncio.to_thread(
-            client.chat.complete,
-            model=MISTRAL_MODEL,
-            messages=[{"role": "user", "content": prompt}],
-            temperature=0.9,
-        )
-        raw = resp.choices[0].message.content
+        raw = await ai_complete(prompt, max_tokens=4000, tag="charades")
         match = re.search(r"\[.*\]", raw, re.DOTALL)
         if not match:
             logger.warning("[charades-gen] pas de JSON dans la réponse: %s", raw[:200])

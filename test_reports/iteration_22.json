@@ -26,7 +26,7 @@
     "/app/backend/tests/test_iteration22_secure_progression.py (new)"
   ],
   "success_rate": { "backend": "100% (15/15)", "frontend": "100% (all required data-testids + counts verified)" },
-  "test_credentials": "admin@generaquiz.fr / <ancien mot de passe admin> (used for UI). Runtime TEST_prog_* / TEST_prog2_* / TEST_lvl_* users created per pytest run.",
+  "test_credentials": "admin@generaquiz.fr / [mot de passe retiré] (used for UI). Runtime TEST_prog_* / TEST_prog2_* / TEST_lvl_* users created per pytest run.",
   "seed_data_creation": "Throwaway TEST_ users created per test class; no cleanup performed (small volume, TEST_ prefix per convention).",
   "retest_needed": false,
   "should_main_agent_self_test": true,
